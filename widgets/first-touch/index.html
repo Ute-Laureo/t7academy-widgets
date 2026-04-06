@@ -151,7 +151,7 @@
 }
 </style>
 </head>
-<body>
+<body style="margin:0;padding:0;background:transparent">
 <div class="gm-wrap">
 <div class="cr" id="gm-cr-UID_PLACEHOLDER">
   <div class="cr-badge">7️⃣</div>
@@ -280,11 +280,22 @@ var drills=[
   {title:'Mitnahme Sohle',eye:'Challenge 05',meta:'Fortgeschritten \u00b7 Ballmitnahme',vid:'1129453204',hash:'01fa59ea55',xp:10,next:'Alle 5 First Touch Skills gemeistert!'}
 ];
 
-/* XP earned per attempt based on rating (cumulative, never deducted) */
+/* ── AUTO-RESIZE: sends height to parent iframe ── */
+function notifyHeight(){
+  var h=document.body.scrollHeight;
+  try{window.parent.postMessage({t7Height:h},'*');}catch(e){}
+}
+var _resizeTimer=null;
+function scheduleResize(){
+  clearTimeout(_resizeTimer);
+  _resizeTimer=setTimeout(notifyHeight,80);
+}
+window.addEventListener('load',notifyHeight);
+new MutationObserver(scheduleResize).observe(document.body,{childList:true,subtree:true,attributes:true});
+window.addEventListener('resize',scheduleResize);
+
 var XP_MULT=[0,.2,.4,.6,.8,1];
 function attemptXP(rating,maxXp){return Math.round((XP_MULT[rating]||0)*maxXp);}
-
-/* Challenge score XP — only awarded at rating 4 or 5, max applies */
 function challengeScoreXP(rating,maxXp){
   if(rating<4)return 0;
   return Math.round((XP_MULT[rating]||0)*maxXp);
@@ -292,9 +303,9 @@ function challengeScoreXP(rating,maxXp){
 
 var state={
   expanded:false,drill:-1,rate:0,
-  ratings:[0,0,0,0,0],   /* best rating per challenge (for unlock logic) */
-  challengeXP:[0,0,0,0,0], /* locked-in challenge score per challenge */
-  cumXP:0,             /* ever-growing cumulative XP */
+  ratings:[0,0,0,0,0],
+  challengeXP:[0,0,0,0,0],
+  cumXP:0,
   completed_at:{},
   storageKey:'t7_ft1_guest',
   mediaStream:null,mediaRecorder:null,chunks:[],recording:false,
@@ -302,21 +313,20 @@ var state={
 };
 
 function el(id){return document.getElementById(id+'-'+_uid);}
-function show(id){el(id).style.display='block';}
-function hide(id){el(id).style.display='none';}
-function flex(id){el(id).style.display='flex';}
+function show(id){el(id).style.display='block';scheduleResize();}
+function hide(id){el(id).style.display='none';scheduleResize();}
+function flex(id){el(id).style.display='flex';scheduleResize();}
 function scrollUp(){var w=document.getElementById('gm-cr-'+_uid);if(w)w.scrollIntoView({behavior:'smooth',block:'nearest'});}
 
 function save(){
   try{localStorage.setItem(state.storageKey,JSON.stringify({
     ratings:state.ratings,challengeXP:state.challengeXP,cumXP:state.cumXP,
-    xp:computeKursXP(), /* legacy compat */
+    xp:computeKursXP(),
     completed_at:state.completed_at
   }));}catch(e){}
 }
 function load(username){
   state.storageKey='t7_ft1_'+(username||'guest').replace(/\s+/g,'_').toLowerCase();
-  /* Wipe any stale data written by old broken widget versions */
   try{
     var uslug=(username||'guest').replace(/\s+/g,'_').toLowerCase();
     ['t7_gm-_'+uslug,'t7_tc1_'+uslug,'t7_gm1_'+uslug,state.storageKey].forEach(function(k){localStorage.removeItem(k);});
@@ -327,35 +337,21 @@ function load(username){
       var d=JSON.parse(raw);
       if(d.ratings)state.ratings=d.ratings;
       if(d.challengeXP)state.challengeXP=d.challengeXP;
-      else{
-        /* migrate: rebuild challengeXP from best ratings */
-        for(var i=0;i<drills.length;i++){
-          state.challengeXP[i]=challengeScoreXP(state.ratings[i]||0,drills[i].xp);
-        }
-      }
+      else{for(var i=0;i<drills.length;i++){state.challengeXP[i]=challengeScoreXP(state.ratings[i]||0,drills[i].xp);}}
       if(typeof d.cumXP==='number')state.cumXP=d.cumXP;
-      else if(typeof d.xp==='number')state.cumXP=d.xp; /* migrate old data */
+      else if(typeof d.xp==='number')state.cumXP=d.xp;
       if(d.completed_at)state.completed_at=d.completed_at;
     }
   }catch(e){}
   updateXP();updateProgress();refreshTrack();
 }
-
-/* Module score = sum of locked-in challenge scores */
-function computeKursXP(){
-  var t=0;for(var i=0;i<state.challengeXP.length;i++)t+=state.challengeXP[i];return t;
-}
-/* Total cumulative XP across all modules from localStorage */
+function computeKursXP(){var t=0;for(var i=0;i<state.challengeXP.length;i++)t+=state.challengeXP[i];return t;}
 function getTotalCumXP(){if(typeof state.sbTotalXP==='number')return state.sbTotalXP;
   var total=0;
   try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('t7_')===0){var raw=localStorage.getItem(k);if(raw){var d=JSON.parse(raw);if(typeof d.cumXP==='number')total+=d.cumXP;else if(typeof d.xp==='number')total+=d.xp;}}}}catch(e){}
   return total;
 }
-
-function updateXP(){
-  el('gm-xp').textContent=computeKursXP()+' XP';
-  el('gm-xp-total').textContent=getTotalCumXP()+' XP';
-}
+function updateXP(){el('gm-xp').textContent=computeKursXP()+' XP';el('gm-xp-total').textContent=getTotalCumXP()+' XP';}
 function updateProgress(){
   var done=state.ratings.filter(function(r){return r>=4;}).length;
   el('gm-prog-fill').style.width=Math.round(done/5*100)+'%';
@@ -366,12 +362,8 @@ function refreshTrack(){
   for(var i=0;i<5;i++){
     var row=el('gm-row-'+i),badge=el('gm-badge-'+i),r=state.ratings[i];
     var locked=(i>0&&(state.ratings[i-1]||0)<4);
-    if(locked){
-      row.classList.add('plocked');row.classList.remove('pdone');
-      badge.className='pbadge b-locked';badge.textContent='\ud83d\udd12 Gesperrt';
-      allDone=false;
-    }else{
-      row.classList.remove('plocked');
+    if(locked){row.classList.add('plocked');row.classList.remove('pdone');badge.className='pbadge b-locked';badge.textContent='\ud83d\udd12 Gesperrt';allDone=false;}
+    else{row.classList.remove('plocked');
       if(r===0){row.classList.remove('pdone');badge.className='pbadge b-new';badge.textContent='Neu';allDone=false;}
       else if(r<=3){row.classList.remove('pdone');badge.className='pbadge b-retry';badge.textContent='\u21a9 Verbessern';allDone=false;}
       else if(r===4){row.classList.add('pdone');badge.className='pbadge b-inprog';badge.textContent='\u2713 Gut';}
@@ -379,13 +371,14 @@ function refreshTrack(){
     }
   }
   el('gm-unlock').style.display=allDone?'none':'flex';
-  updateProgress();
+  updateProgress();scheduleResize();
 }
 function toggleExpand(){
   state.expanded=!state.expanded;
   var cr=el('gm-cr'),panel=el('gm-panel');
   if(state.expanded){cr.classList.add('open');panel.classList.add('open');el('gm-cr-btn').textContent='Schlie\u00dfen \u25b2';}
   else{cr.classList.remove('open');panel.classList.remove('open');el('gm-cr-btn').textContent='Starten \u25bc';goTrack();}
+  scheduleResize();
 }
 function goTrack(){
   el('gm-embed').src='';el('gm-drill').classList.remove('open');
@@ -405,77 +398,51 @@ function goStep(n){
   ['gm-s1','gm-s2','gm-s3','gm-s4'].forEach(function(id,i){el(id).style.display=(i+1===n)?'block':'none';});
   [1,2,3,4].forEach(function(i){var dot=el('gm-d'+i);dot.className='step-dot';if(i<n)dot.classList.add('done-s');else if(i===n)dot.classList.add('curr-s');});
   if(n===4)showOutcome();
+  scheduleResize();
 }
 function showOutcome(){
   var d=drills[state.drill];
   var idx=state.drill;
   var prevRating=state.ratings[idx]||0;
-  var earned=attemptXP(state.rate,d.xp); /* cumulative XP for this attempt */
-
-  /* Always add to cumulative */
+  var earned=attemptXP(state.rate,d.xp);
   state.cumXP+=earned;
-
-  /* Challenge score: update only when reaching 4 or 5 for first time, or improving 4→5 */
   var prevScore=state.challengeXP[idx]||0;
   var newScore=challengeScoreXP(state.rate,d.xp);
   var scoreGain=0;
-  if(newScore>prevScore){
-    scoreGain=newScore-prevScore;
-    state.challengeXP[idx]=newScore;
-  }
-
-  /* Update best rating */
-  if(state.rate>prevRating){
-    state.ratings[idx]=state.rate;
-    if(!state.completed_at[idx])state.completed_at[idx]=Date.now();
-  }
-
-  /* Always sync to Supabase */
+  if(newScore>prevScore){scoreGain=newScore-prevScore;state.challengeXP[idx]=newScore;}
+  if(state.rate>prevRating){state.ratings[idx]=state.rate;if(!state.completed_at[idx])state.completed_at[idx]=Date.now();}
   var _mid=getBMId?getBMId():null;
-  if(_mid&&_mid!=='unbekannt'){
-    sbUpsert(_mid,state.currentPlayerName,'ft1','First Touch',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false);
-  }
-
+  if(_mid&&_mid!=='unbekannt'){sbUpsert(_mid,state.currentPlayerName,'ft1','First Touch',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false);}
   updateXP();save();
-  /* Refresh total XP from Supabase after rating */
   var _mid2=getBMId?getBMId():null;
   if(!_mid2&&typeof getBMEmail==='function')_mid2=getBMEmail();
   if(_mid2&&_mid2!=='unbekannt'){
     setTimeout(function(){
       fetchSBTotalXP(_mid2);
       try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
-      /* Also update outcome total text if still visible */
-      setTimeout(function(){
-        var _cumEl=el('gm-xp-cumul');
-        if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';
-      },500);
+      setTimeout(function(){var _cumEl=el('gm-xp-cumul');if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';},500);
     },1500);
   }
-
-  /* Outcome display */
   var totalCum=getTotalCumXP();
   var box=el('gm-out-box'),icon=el('gm-out-icon'),title=el('gm-out-title'),sub=el('gm-out-sub'),btns=el('gm-out-btns');
   el('gm-xp-earned').textContent='+'+earned+' XP diese Runde';
   el('gm-xp-cumul').textContent='Gesamt: '+totalCum+' XP';
-
   if(state.rate<=3){
-    box.className='outcome out-low';
-    icon.textContent=state.rate<=2?'\ud83d\udcaa':'\ud83e\udd14';
-    title.textContent=state.rate<=2?'Weiter k\u00e4mpfen!':'Ganz gut!';
-    sub.textContent='Noch ein Versuch f\u00fcr Bewertung 4 oder 5!';
+    box.className='outcome out-low';icon.textContent=state.rate<=2?'\ud83d\udcaa':'\ud83e\udd14';
+    title.textContent=state.rate<=2?'Weiter k\u00e4mpfen!':'Ganz gut!';sub.textContent='Noch ein Versuch f\u00fcr Bewertung 4 oder 5!';
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-amber';b1.textContent='\u21a9 Nochmal';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
-  } else if(state.rate===4){
+  }else if(state.rate===4){
     box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
     title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Challenge l\u00e4uft \u2014 noch ein Versuch f\u00fcr Perfektion!';
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-aqua';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
-  } else {
+  }else{
     box.className='outcome out-high';icon.textContent='\ud83c\udfc6';
     title.textContent=d.title+' gemeistert!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Maximale Challenge-Punkte bereits erreicht!';
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-gold';b1.textContent='Weiter \u2192';b1.addEventListener('click',goTrack);btns.appendChild(b1);
   }
-  updateProgress();
+  updateProgress();scheduleResize();
 }
 function selectRate(v){
   state.rate=v;
@@ -521,16 +488,12 @@ function wire(){
   el('gm-cam-stop').addEventListener('click',stopCamera);
   el('gm-retry-cam').addEventListener('click',function(){var pv=el('gm-video-preview');pv.pause();pv.src='';hide('gm-preview-wrap');show('gm-cam-card');flex('gm-skip-row');});
 }
-
 function fetchSBTotalXP(email){
   if(!email||email==='unbekannt')return;
   fetch('https://qajjuhjmrtuomwrbxmpz.supabase.co/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{
     headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4'}
   }).then(function(r){return r.json();}).then(function(rows){
-    if(rows&&rows.length&&typeof rows[0].total_xp==='number'){
-      state.sbTotalXP=rows[0].total_xp;
-      el('gm-xp-total').textContent=state.sbTotalXP+' XP';
-    }
+    if(rows&&rows.length&&typeof rows[0].total_xp==='number'){state.sbTotalXP=rows[0].total_xp;el('gm-xp-total').textContent=state.sbTotalXP+' XP';}
   }).catch(function(){});
 }
 function applyPlayer(name){
@@ -552,36 +515,15 @@ function getBMName(){
   for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi];var bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}
   return null;
 }
-
-/* ── SUPABASE ── */
 var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 function sbDevice(){return /iphone|ipad|ipod|android/i.test(navigator.userAgent)?'mobile':'desktop';}
 function sbUpsert(email,name,mk,ml,idx,rating,xp,ts,skipPlayers,skipAttempts){
   if(!email||email==='unbekannt')return;
   var totalXp=getTotalCumXP();
-  /* 1. Upsert completions — keeps best rating per challenge */
-  fetch(SB_URL+'/rest/v1/completions',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},
-    body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,module_label:ml||'',challenge_idx:idx,rating:rating,xp:xp,total_xp:totalXp,completed_at:ts||Date.now(),platform:'bettermode',device:sbDevice()})
-  }).catch(function(){});
-  /* 2. INSERT into attempts — only on real attempts, never on backfill */
-  if(!skipAttempts){
-    fetch(SB_URL+'/rest/v1/attempts',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,challenge_idx:idx,rating:rating,xp:xp,attempted_at:ts||Date.now()})
-    }).catch(function(){});
-  }
-  /* 3. Update players table snapshot */
-  if(!skipPlayers){
-    fetch(SB_URL+'/rest/v1/players',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify({player_email:email,player_name:name||'',total_xp:totalXp})
-    }).catch(function(){});
-  }
+  fetch(SB_URL+'/rest/v1/completions',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,module_label:ml||'',challenge_idx:idx,rating:rating,xp:xp,total_xp:totalXp,completed_at:ts||Date.now(),platform:'bettermode',device:sbDevice()})}).catch(function(){});
+  if(!skipAttempts){fetch(SB_URL+'/rest/v1/attempts',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,challenge_idx:idx,rating:rating,xp:xp,attempted_at:ts||Date.now()})}).catch(function(){});}
+  if(!skipPlayers){fetch(SB_URL+'/rest/v1/players',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',total_xp:totalXp})}).catch(function(){});}
 }
 function getBMId(){
   var wins=[window];
@@ -590,25 +532,17 @@ function getBMId(){
   for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}
   return null;
 }
-/* Backfill: send stored attempts to Supabase but skip players table */
 function sbBackfill(email,name){
   if(!email||email==='unbekannt')return;
-  /* Backfill only upserts completions — never inserts into attempts */
   for(var i=0;i<drills.length;i++){
-    if(state.ratings[i]>0){
-      var xp=attemptXP(state.ratings[i],drills[i].xp);
-      sbUpsert(email,name,'ft1','First Touch',i,state.ratings[i],xp,state.completed_at[i]||Date.now(),true,true);
-    }
+    if(state.ratings[i]>0){var xp=attemptXP(state.ratings[i],drills[i].xp);sbUpsert(email,name,'ft1','First Touch',i,state.ratings[i],xp,state.completed_at[i]||Date.now(),true,true);}
   }
 }
 function tryInit(){var name=getBMName();if(name){applyPlayer(name);state.playerInited=true;return true;}return false;}
-
-/* Rename placeholder IDs to unique ones for this instance */
 (function(){
   var all=document.querySelectorAll('[id$="-UID_PLACEHOLDER"]');
   all.forEach(function(el){el.id=el.id.replace('-UID_PLACEHOLDER','-'+_uid);});
 })();
-/* Refresh total XP pill when another widget rates a challenge */
 window.addEventListener('t7xpupdate',function(){
   var _em=getBMId?getBMId():null;
   if(!_em&&typeof getBMEmail==='function')_em=getBMEmail();
