@@ -10,11 +10,8 @@
 html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f0;width:100%;margin:0;padding:0;}
 .tl-bg{width:100%;color:#f0f0f0;font-family:'Open Sans',sans-serif;}
 .page{background:#080f1e;border:1.5px solid rgba(0,229,255,.35);border-radius:12px;width:100%;padding:14px 12px 16px;overflow:hidden;}
-
 .section-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,229,255,.6);margin-bottom:7px;display:flex;align-items:center;gap:8px}
 .section-label::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.12)}
-
-/* HERO */
 .hero{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:10px;padding:12px 11px;margin-bottom:10px;}
 .hero-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .hero-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0080FF);color:rgba(0,0,0,.85);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(0,229,255,.3)}
@@ -26,8 +23,6 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
 .stat-num.aqua{color:#00E5FF}
 .stat-num.streak{color:#00E5FF}
 .stat-label{font-size:8px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-
-/* STREAK — aqua themed */
 .streak-bar{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);border-radius:10px;padding:10px 11px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
 .streak-icon{font-size:22px;flex-shrink:0}
 .streak-text{flex:1;min-width:0}
@@ -38,8 +33,6 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
 .streak-day{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.07)}
 .streak-day.on{background:#00E5FF}
 .streak-sessions{font-size:10px;font-weight:800;white-space:nowrap;flex-shrink:0}
-
-/* VS WEEK */
 .vs-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 11px;margin-bottom:10px}
 .vs-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .vs-week-label{font-size:10px;color:rgba(255,255,255,.4);font-weight:600}
@@ -50,8 +43,6 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
 .vs-delta.up{background:rgba(0,200,100,.1);color:#00C864;border:1px solid rgba(0,200,100,.18)}
 .vs-delta.down{background:rgba(255,59,59,.08);color:#FF6B6B;border:1px solid rgba(255,59,59,.15)}
 .vs-delta.same{background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.07)}
-
-/* VERLAUF DROPDOWN */
 .verlauf-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;margin-bottom:0;user-select:none;transition:border-color .15s;}
 .verlauf-toggle:hover{border-color:rgba(0,229,255,.2);}
 .verlauf-toggle.open{border-radius:10px 10px 0 0;border-bottom-color:transparent;margin-bottom:0;}
@@ -60,20 +51,14 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
 .verlauf-toggle.open .verlauf-chevron{transform:rotate(180deg);}
 .verlauf-body{display:none;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-top:none;border-radius:0 0 10px 10px;padding:10px 8px 8px;margin-bottom:0;}
 .verlauf-body.open{display:block;}
-
-/* VIEW TOGGLE inside dropdown */
 .view-toggle{display:flex;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:3px;margin-bottom:8px;gap:3px}
 .vt-btn{flex:1;padding:6px 6px;border-radius:6px;border:none;font-family:'Open Sans',sans-serif;font-weight:700;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.3);background:transparent}
 .vt-btn.active{background:rgba(0,229,255,.12);color:#00E5FF;box-shadow:0 0 0 1px rgba(0,229,255,.2)}
-
-/* TRAIL */
 .trail-empty{text-align:center;padding:16px 10px;color:rgba(255,255,255,.22);font-size:11px;line-height:1.6}
 .trail-scroll{max-height:240px;overflow-y:auto;padding-right:2px;}
 .trail-scroll::-webkit-scrollbar{width:3px;}
 .trail-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.03);border-radius:99px;}
 .trail-scroll::-webkit-scrollbar-thumb{background:rgba(0,229,255,.2);border-radius:99px;}
-
-/* MILESTONES list */
 .m-row{display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.05);}
 .m-row:last-of-type{border-bottom:none;}
 .m-icon{font-size:12px;flex-shrink:0;width:16px;text-align:center;}
@@ -83,8 +68,6 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
 .m-title.fire{color:#F97316;}
 .m-sub{font-size:9px;color:rgba(255,255,255,.3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .m-date{font-size:9px;color:rgba(255,255,255,.2);font-weight:600;flex-shrink:0;white-space:nowrap;}
-
-/* CHALLENGES accordion */
 .mod-row{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 9px;margin-bottom:4px;cursor:pointer;transition:border-color .15s;user-select:none}
 .mod-row:hover{border-color:rgba(0,229,255,.2)}
 .mod-row.open{border-color:rgba(0,229,255,.25)}
@@ -109,7 +92,6 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
 .ch-row.pending .ch-title{color:rgba(255,255,255,.3)}
 .ch-meta{font-size:9px;color:rgba(255,255,255,.25);flex-shrink:0}
 .ch-row.done .ch-meta{color:rgba(0,229,255,.5)}
-
 .loading{text-align:center;padding:24px 10px;color:rgba(255,255,255,.25);font-size:11px}
 @media(max-width:480px){
   .stat-num{font-size:13px}
@@ -122,8 +104,6 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
 <div class="tl-bg"><div class="page">
   <div class="loading" id="tl-loading">Lade Fortschritt&hellip;</div>
   <div id="tl-content" style="display:none">
-
-    <!-- HERO -->
     <div class="hero">
       <div class="hero-top">
         <div class="hero-avatar" id="tl-avatar">?</div>
@@ -132,13 +112,11 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
       <div class="stat-row">
         <div class="stat-card"><div class="stat-num aqua" id="tl-total-xp">0</div><div class="stat-label">Gesamt XP</div></div>
         <div class="stat-card"><div class="stat-num" id="tl-done-count">0</div><div class="stat-label">Freigeschaltet</div></div>
-        <div class="stat-card"><div class="stat-num streak" id="tl-streak-num">0🔥</div><div class="stat-label">Wochen Streak</div></div>
+        <div class="stat-card"><div class="stat-num streak" id="tl-streak-num">0&#9889;</div><div class="stat-label">Wochen Streak</div></div>
       </div>
     </div>
-
-    <!-- STREAK -->
     <div class="streak-bar">
-      <div class="streak-icon">⚡</div>
+      <div class="streak-icon">&#9889;</div>
       <div class="streak-text">
         <div class="streak-val" id="tl-streak-val">0 Wochen in Folge</div>
         <div class="streak-desc" id="tl-streak-desc">Trainiere diese Woche!</div>
@@ -148,8 +126,6 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
         </div>
       </div>
     </div>
-
-    <!-- VS WEEK -->
     <div class="section-label">Diese Woche vs. Letzte Woche</div>
     <div class="vs-card">
       <div class="vs-row"><div class="vs-week-label">Diese Woche</div><div class="vs-xp" id="vs-this">0 XP</div></div>
@@ -158,28 +134,24 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
       <div class="vs-bar-wrap"><div class="vs-bar" id="vs-bar-last" style="width:0%;background:rgba(255,255,255,.18)"></div></div>
       <div id="vs-delta" class="vs-delta same">&mdash; Gleich wie letzte Woche</div>
     </div>
-
-    <!-- VERLAUF DROPDOWN -->
     <div class="verlauf-toggle" id="verlauf-toggle" onclick="window._tlToggleVerlauf()">
-      <span class="verlauf-label">📋 Verlauf</span>
-      <span class="verlauf-chevron" id="verlauf-chevron">▼</span>
+      <span class="verlauf-label">&#128203; Verlauf</span>
+      <span class="verlauf-chevron" id="verlauf-chevron">&#9660;</span>
     </div>
     <div class="verlauf-body" id="verlauf-body">
       <div class="view-toggle">
-        <button class="vt-btn active" id="vt-milestones" onclick="window._tlSetView('milestones')">🏆 Meilensteine</button>
-        <button class="vt-btn" id="vt-challenges" onclick="window._tlSetView('challenges')">⚽ Challenges</button>
+        <button class="vt-btn active" id="vt-milestones" onclick="window._tlSetView('milestones')">&#127942; Meilensteine</button>
+        <button class="vt-btn" id="vt-challenges" onclick="window._tlSetView('challenges')">&#9917; Challenges</button>
       </div>
       <div class="trail-scroll" id="tl-trail-milestones"></div>
       <div class="trail-scroll" id="tl-trail-challenges" style="display:none"></div>
     </div>
-
   </div>
 </div></div>
 <script>
 (function(){
 'use strict';
 
-/* MODULES loaded dynamically from Supabase — fallback hardcoded */
 var MODULES=[];
 var MODULES_FALLBACK=[
   {key:'jong',label:'Jonglierschule',icon:'\ud83e\udd39',color:'jong',challenges:[{idx:0,title:'Sit Downs Jonglieren',xp:10},{idx:1,title:'Sit Downs Fu\u00df Kopf Fu\u00df',xp:10},{idx:2,title:'Freestyle Jonglieren',xp:10},{idx:3,title:'Fu\u00dfball Jonglieren',xp:10}]},
@@ -187,24 +159,12 @@ var MODULES_FALLBACK=[
   {key:'sz2',label:'2-Stern Zertifikat',icon:'\u2b50\u2b50',color:'star',challenges:[{idx:0,title:'Leg Cross',xp:15},{idx:1,title:'Seven',xp:15},{idx:2,title:'La Croqueta',xp:15},{idx:3,title:'No Look',xp:15},{idx:4,title:'Roulette',xp:20}]},
   {key:'sz3',label:'3-Stern Zertifikat',icon:'\u2b50\u2b50\u2b50',color:'star',challenges:[{idx:0,title:'Hop Step-Over',xp:15},{idx:1,title:'Elastico',xp:15},{idx:2,title:'Samba',xp:15},{idx:3,title:'Hocus Pocus',xp:15},{idx:4,title:'Neckstall',xp:20}]},
   {key:'sz4',label:'4-Stern Zertifikat',icon:'\u2b50\u2b50\u2b50\u2b50',color:'star',challenges:[{idx:0,title:'X-Over',xp:15},{idx:1,title:'Cross-Over',xp:15},{idx:2,title:'Heel Flick Turn',xp:15},{idx:3,title:'Dragon Stepover',xp:15},{idx:4,title:'Inside Out Chop',xp:20}]},
-  {key:'ft1',label:'First Touch',icon:'7️⃣',color:'jong',
-   challenges:[
-    {idx:0,title:'Annahme Innenseite (Pass)',xp:10},
-    {idx:1,title:'Annahme Aussenseite',xp:10},
-    {idx:2,title:'Annahme Fuss-Spitze',xp:10},
-    {idx:3,title:'Mitnahme Aussenseite',xp:10},
-    {idx:4,title:'Mitnahme Sohle',xp:10}
-  ]},
-  {key:'gm1',label:'Groundmoves',icon:'7️⃣',color:'jong',
-   challenges:[
-    {idx:0,title:'V',xp:10},
-    {idx:1,title:'Sole Left Right',xp:10},
-    {idx:2,title:'Drag Back',xp:10},
-    {idx:3,title:'Step Over',xp:10},
-    {idx:4,title:'La Croqueta',xp:10}
-  ]},
+  {key:'ft1',label:'First Touch',icon:'7\ufe0f\u20e3',color:'jong',challenges:[{idx:0,title:'Annahme Innenseite (Pass)',xp:10},{idx:1,title:'Annahme Aussenseite',xp:10},{idx:2,title:'Annahme Fuss-Spitze',xp:10},{idx:3,title:'Mitnahme Aussenseite',xp:10},{idx:4,title:'Mitnahme Sohle',xp:10}]},
+  {key:'gm1',label:'Groundmoves',icon:'7\ufe0f\u20e3',color:'jong',challenges:[{idx:0,title:'V',xp:10},{idx:1,title:'Sole Left Right',xp:10},{idx:2,title:'Drag Back',xp:10},{idx:3,title:'Step Over',xp:10},{idx:4,title:'La Croqueta',xp:10}]},
   {key:'fc1',label:'Fun Challenge',icon:'\ud83d\udd25',color:'fun',challenges:[{idx:0,title:'Double Seven',xp:10}]},
-  {key:'br1',label:'Brazilian Dance',icon:'\ud83c\udde7\ud83c\uddf7',color:'jong',challenges:[{idx:0,title:'Thiago',xp:10},{idx:1,title:'Samba',xp:10},{idx:2,title:'Marcelo',xp:10},{idx:3,title:'Rainbow',xp:10},{idx:4,title:'Brazilian Circle',xp:10}]}
+  {key:'br1',label:'Brazilian Dance',icon:'\ud83c\udde7\ud83c\uddf7',color:'jong',challenges:[{idx:0,title:'Thiago',xp:10},{idx:1,title:'Samba',xp:10},{idx:2,title:'Marcelo',xp:10},{idx:3,title:'Rainbow',xp:10},{idx:4,title:'Brazilian Circle',xp:10}]},
+  {key:'fta1',label:'First Touch Air',icon:'7\ufe0f\u20e3',color:'jong',challenges:[{idx:0,title:'Annahme Innenseite',xp:10},{idx:1,title:'Annahme Fuss-Spitze',xp:10},{idx:2,title:'Annahme Aussenseite',xp:10},{idx:3,title:'Annahme Oberschenkel',xp:10},{idx:4,title:'Annahme Brust',xp:10},{idx:5,title:'Annahme Schulter',xp:10}]},
+  {key:'jong2',label:'Ball in der Luft halten',icon:'\u26bd',color:'jong',challenges:[{idx:0,title:'Sitdown Jonglieren',xp:10},{idx:1,title:'Freestyle Jonglieren',xp:10},{idx:2,title:'Jonglieren Aufstehen',xp:10},{idx:3,title:'Jonglieren 11 to 55',xp:10}]}
 ];
 
 var XP_MULT=[0,.2,.4,.6,.8,1];
@@ -247,7 +207,9 @@ function getModuleChallengeScore(mk){var d=state.data[mk];if(!d||!d.challengeXP)
 function isDone(mk,idx){return getRating(mk,idx)>=4;}
 function getDoneCount(){var t=0;MODULES.forEach(function(m){m.challenges.forEach(function(c){if(isDone(m.key,c.idx))t++;});});return t;}
 function getTotalChallenges(){var t=0;MODULES.forEach(function(m){t+=m.challenges.length;});return t;}
-function getDoneModulesCount(){var t=0;MODULES.forEach(function(m){if(m.challenges.every(function(c){return isDone(m.key,c.idx);}))t++;});return t;}
+
+var MOD_ICON_MAP={'jong':'\u26bd','sz1':'\u2b50','sz2':'\u2b50','sz3':'\u2b50','sz4':'\u2b50','sz5':'\u2b50','fc1':'\ud83d\udd25','br1':'\ud83c\udde7\ud83c\uddf7','gm1':'\ud83c\udfc3','ft1':'\ud83d\udc5f','fta1':'\ud83c\udf2c\ufe0f','jong2':'\u26bd'};
+function modIcon(m){return MOD_ICON_MAP[m.key]||(typeof m.icon==='string'?m.icon:'\u26bd');}
 
 function relativeDate(ts){
   if(!ts||ts<=0||ts<1000000000000)return '';
@@ -306,7 +268,6 @@ function getSessionsThisWeek(){
 }
 
 function getWeeklyXP(){
-  /* Use ISO calendar week boundaries (Mon-Sun) to match streak logic */
   var now=new Date();
   var startOfThisWeek=new Date(now);startOfThisWeek.setHours(0,0,0,0);startOfThisWeek.setDate(now.getDate()-((now.getDay()+6)%7));
   var startOfLastWeek=new Date(startOfThisWeek);startOfLastWeek.setDate(startOfLastWeek.getDate()-7);
@@ -337,7 +298,7 @@ function buildEvents(){
   MODULES.forEach(function(m){
     if(m.challenges.every(function(c){return isDone(m.key,c.idx);})){
       var tss=m.challenges.map(function(c){return getCompletedAt(m.key,c.idx)||0;});
-      milestones.push({type:'milestone',ts:Math.max.apply(null,tss)+1,variant:'gold',icon:(({'jong':'⚽','sz1':'⭐','sz2':'⭐','sz3':'⭐','sz4':'⭐','sz5':'⭐','fc1':'🔥','br1':'🇧🇷','gm1':'🏃','ft1':'👟'})[m.key]||m.icon),title:m.label+' freigeschaltet!',sub:'Alle '+m.challenges.length+' Challenges mit 4/5 oder 5/5!'});
+      milestones.push({type:'milestone',ts:Math.max.apply(null,tss)+1,variant:'gold',icon:modIcon(m),title:m.label+' freigeschaltet!',sub:'Alle '+m.challenges.length+' Challenges mit 4/5 oder 5/5!'});
     }
   });
   if(state.data['sz1']&&state.data['sz1'].submitted)milestones.push({type:'milestone',ts:Date.now()-3600000,variant:'gold',icon:'\ud83c\udfc6',title:'1-Stern Zertifikat eingereicht!',sub:'Dein Video ist beim Experten.'});
@@ -355,7 +316,6 @@ function buildEvents(){
   return events.concat(milestones).sort(function(a,b){return b.ts-a.ts;});
 }
 
-/* VERLAUF DROPDOWN */
 var verlaufOpen=false;
 window._tlToggleVerlauf=function(){
   verlaufOpen=!verlaufOpen;
@@ -404,7 +364,7 @@ function renderChallengesView(){
     var modRow=document.createElement('div');modRow.className='mod-row';
     modRow.innerHTML=
       '<div class="mod-header">'+
-        '<div class="mod-icon">'+(({'jong':'⚽','sz1':'⭐','sz2':'⭐','sz3':'⭐','sz4':'⭐','sz5':'⭐','fc1':'🔥','br1':'🇧🇷','gm1':'🏃','ft1':'👟'})[m.key]||m.icon)+'</div>'+
+        '<div class="mod-icon">'+modIcon(m)+'</div>'+
         '<div class="mod-info">'+
           '<div class="mod-name">'+m.label+'</div>'+
           '<div class="mod-count">'+done+'/'+total+' freigeschaltet &middot; '+scoreXP+'/'+maxScoreXP+' XP</div>'+
@@ -423,7 +383,6 @@ function renderChallengesView(){
         }).join('')+
       '</div>';
     modRow.addEventListener('click',function(){modRow.classList.toggle('open');});
-    /* All modules start collapsed */
     wrap.appendChild(modRow);
   });
 }
@@ -491,11 +450,8 @@ function mergeSupabaseData(rows,attemptsRows,name,playerRows){
   state.attemptsRows=attemptsRows||[];
   state.allDays=[];var daySet2={},aRows=attemptsRows||[];
   aRows.forEach(function(row){var ts=row.attempted_at;if(ts){var dt=typeof ts==='number'?new Date(ts):new Date(ts);if(!isNaN(dt.getTime())){var dk=dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate();if(!daySet2[dk]){daySet2[dk]=true;state.allDays.push(dk);}}}});
-  /* Always use players.total_xp from Supabase as authoritative */
   state.sbTotalXP=null;
-  if(playerRows&&playerRows.length&&typeof playerRows[0].total_xp==='number'){
-    state.sbTotalXP=playerRows[0].total_xp;
-  }
+  if(playerRows&&playerRows.length&&typeof playerRows[0].total_xp==='number'){state.sbTotalXP=playerRows[0].total_xp;}
   var cumByModule={};
   aRows.forEach(function(row){var mk=row.module_key;if(!cumByModule[mk])cumByModule[mk]=0;cumByModule[mk]+=(row.xp||0);});
   var byModule={};
@@ -507,14 +463,12 @@ function mergeSupabaseData(rows,attemptsRows,name,playerRows){
     d.cumXP=cumByModule[mk]||0;
     mrows.forEach(function(row){var idx=row.challenge_idx,rating=row.rating||0;if(!d.ratings[idx]||rating>d.ratings[idx]){d.ratings[idx]=rating;if(row.completed_at&&(!d.completed_at[idx]||d.completed_at[idx]<=0))d.completed_at[idx]=row.completed_at;}});
     d.challengeXP=[];m.challenges.forEach(function(c){d.challengeXP[c.idx]=challengeScoreXP(d.ratings[c.idx]||0,c.xp);});
-    /* Only write back to localStorage if this module actually had Supabase data */
     if(mrows.length>0){try{var key=getStorageKey(mk,name),existing={};try{existing=JSON.parse(localStorage.getItem(key)||'{}');}catch(e){}existing.ratings=d.ratings;existing.challengeXP=d.challengeXP;existing.cumXP=d.cumXP;existing.completed_at=d.completed_at;localStorage.setItem(key,JSON.stringify(existing));}catch(e){}}
   });
 }
 
 function init(name){
   state.name=name||'Spieler';state.attemptsRows=[];
-  /* Load modules from Supabase first, fallback to hardcoded */
   sbLoadModules(function(mods){
     MODULES=mods||MODULES_FALLBACK;
     loadAllData(state.name);
@@ -525,24 +479,10 @@ function init(name){
 }
 var playerInited=false;
 function refreshTotalXP(){
-  var email=getBMEmail();
-  if(!email)return;
-  fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-  }).then(function(r){return r.json();}).then(function(rows){
-    if(rows&&rows.length&&typeof rows[0].total_xp==='number'){
-      var xp=rows[0].total_xp;
-      state.sbTotalXP=xp;
-      var el_xp=document.getElementById('tl-total-xp');
-      if(el_xp)el_xp.textContent=xp;
-    }
-  }).catch(function(){});
+  var email=getBMEmail();if(!email)return;
+  fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(rows){if(rows&&rows.length&&typeof rows[0].total_xp==='number'){state.sbTotalXP=rows[0].total_xp;var e=document.getElementById('tl-total-xp');if(e)e.textContent=rows[0].total_xp;}}).catch(function(){});
 }
-/* Refresh total XP when any challenge widget fires an update */
-window.addEventListener('t7xpupdate',function(){
-  if(playerInited)refreshTotalXP();
-});
-
+window.addEventListener('t7xpupdate',function(){if(playerInited)refreshTotalXP();});
 function tryInit(){var name=getBMName();if(name){init(name);playerInited=true;return true;}return false;}
 if(!tryInit()){
   [100,300,600,1000,1600,2500,4000,6000].forEach(function(ms){setTimeout(function(){if(!playerInited)tryInit();},ms);});
