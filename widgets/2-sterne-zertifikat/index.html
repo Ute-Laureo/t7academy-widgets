@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2-Stern Zertifikat</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
+.sz-wrap{color-scheme:dark}
+.sz-wrap,.sz-wrap *{--sz-bg1:#080f1e;--sz-cr-bg:#080f1e;--sz-text:#f0f0f0;--sz-text-muted:rgba(240,240,240,.6);--sz-text-dim:rgba(240,240,240,.38);--sz-border:rgba(255,215,0,.15);--sz-row-bg:#0d1a2e;--sz-row-bg-hover:#112240;--sz-plabel:rgba(255,215,0,.5);--sz-plabel-line:rgba(255,215,0,.1)}
+.sz-wrap*{box-sizing:border-box}
+.sz-wrap{font-family:'Open Sans',sans-serif;font-size:13px;color:var(--sz-text);width:100%;background:transparent}
+.sz-wrap .cr{position:relative;display:flex;align-items:center;gap:10px;background:#080f1e!important;border:1.5px solid rgba(255,215,0,.35);border-radius:12px;padding:12px 14px;cursor:pointer;overflow:hidden;transition:box-shadow .2s,transform .15s;box-shadow:none}
+.sz-wrap .cr.open{border-radius:20px 20px 0 0;border-bottom-color:transparent;margin-bottom:-3px;z-index:2;position:relative;box-shadow:none!important}
+.sz-wrap .cr:hover{box-shadow:0 0 0 1px #FFD700,0 6px 28px rgba(255,215,0,.2);transform:translateY(-1px)}
+.sz-wrap .cr::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.05) 50%,transparent 70%);pointer-events:none}
+.sz-wrap .cr::after{content:'\26BD';position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:52px;opacity:.07;pointer-events:none}
+.sz-wrap .cr .cr-badge{width:44px!important;height:44px!important;background:linear-gradient(135deg,#FFD700,#00E5FF)!important;border-radius:12px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:22px!important;flex-shrink:0!important;box-shadow:0 0 14px rgba(255,215,0,.45)!important;position:relative!important;z-index:1!important}
+.sz-wrap .cr-body{flex:1;min-width:0;position:relative;z-index:1}
+.sz-wrap .cr-title{font-weight:700;font-size:16px;color:var(--sz-text)!important;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sz-wrap .cr-sub{font-size:10px;color:var(--sz-text-muted)!important;margin-top:3px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.sz-wrap .cr-prog{flex:1;max-width:70px;height:5px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.sz-wrap .cr-prog-fill{height:100%;background:linear-gradient(90deg,#FFD700,#00E5FF);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
+.sz-wrap .cr-prog-label{font-size:10px;color:#FFD700;font-weight:700;white-space:nowrap}
+.sz-wrap .cr-player{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:1}
+.sz-wrap .cr-avatar{width:28px!important;height:28px!important;border-radius:50%!important;background:linear-gradient(135deg,#00E5FF,#00C8E8)!important;color:rgba(0,0,0,.85)!important;font-weight:800!important;font-size:10px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 8px rgba(0,229,255,.4)!important;flex-shrink:0!important}
+.sz-wrap .cr .cr-xp{font-weight:800!important;font-size:10px!important;background:rgba(0,229,255,.15)!important;color:#00E5FF!important;padding:3px 9px!important;border-radius:99px!important;border:1px solid rgba(0,229,255,.35)!important;white-space:nowrap!important}
+.sz-wrap .cr .cr-xp-total{font-weight:800!important;font-size:10px!important;background:linear-gradient(135deg,#00E5FF,#00C8E8)!important;color:rgba(0,0,0,.85)!important;padding:3px 9px!important;border-radius:99px!important;box-shadow:0 0 10px rgba(0,229,255,.3)!important;white-space:nowrap!important}
+.sz-wrap .cr .cr-btn{display:inline-flex!important;align-items:center!important;gap:5px!important;padding:8px 14px!important;font-family:'Open Sans',sans-serif!important;font-weight:800!important;font-size:13px!important;background:linear-gradient(135deg,#FFD700,#00E5FF)!important;color:rgba(0,0,0,.85)!important;border:none!important;border-radius:12px!important;cursor:pointer!important;flex-shrink:0!important;box-shadow:0 0 16px rgba(255,215,0,.4)!important;transition:all .15s!important;position:relative!important;z-index:1!important;white-space:nowrap!important}
+.sz-wrap .cr .cr-btn:hover{box-shadow:0 0 24px rgba(255,215,0,.55);transform:scale(1.03)}
+.sz-wrap .cr-chevron{display:none}
+.sz-wrap .sz-panel{display:none;background:var(--sz-bg1)!important;border:1.5px solid rgba(255,215,0,.35);border-top:0!important;border-radius:0 0 12px 12px;overflow:visible;padding-top:0;padding-bottom:16px}
+.sz-wrap .sz-panel.open{display:block;animation:sz-slide .25s ease;border-top:none!important}
+.sz-wrap .sz-panel.open::before{content:'';display:block;height:6px;margin:-6px -1.5px 0;background:var(--sz-cr-bg);border-left:1.5px solid #FFD700;border-right:1.5px solid #FFD700}
+@keyframes sz-slide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.sz-wrap .ph{padding:16px 16px 10px;margin:0;position:relative;overflow:hidden;background:#0d1a2e!important;border:1px solid rgba(255,215,0,.25)!important;border-radius:18px}
+.sz-wrap .ph::after{content:'\2B50';position:absolute;right:-8px;bottom:20px;font-size:80px;opacity:.07;pointer-events:none}
+.sz-wrap .ph-title{font-weight:700;font-size:22px;color:var(--sz-text)!important;margin-bottom:6px;line-height:1;position:relative;z-index:1}
+.sz-wrap .ph-body{font-size:13px;color:var(--sz-text-muted)!important;line-height:1.65;max-width:370px;position:relative;z-index:1}
+.sz-wrap .plist{padding:12px 0 14px;display:flex;flex-direction:column;gap:6px}
+.sz-wrap .plabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sz-plabel);margin-bottom:2px;padding:0 14px;display:flex;align-items:center;gap:8px}
+.sz-wrap .plabel::after{content:'';flex:1;height:1px;background:var(--sz-plabel-line)}
+.sz-wrap .prow{display:flex;align-items:center;gap:11px;background:#0d1a2e!important;border:1px solid rgba(255,255,255,.06)!important;border-radius:14px;padding:11px 13px;margin:0 14px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s,box-shadow .15s;position:relative;overflow:hidden}
+.sz-wrap .prow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;border-radius:8px 0 0 8px;transition:background .15s}
+.sz-wrap .prow:hover:not(.plocked){background:var(--sz-row-bg-hover)!important;border-color:rgba(255,215,0,.5);box-shadow:0 0 0 1px rgba(255,215,0,.25),inset 0 0 20px rgba(255,215,0,.04);transform:translateX(2px)}
+.sz-wrap .prow:hover:not(.plocked)::before{background:linear-gradient(180deg,#00E5FF,#FFD700)}
+.sz-wrap .prow.pdone{border-color:rgba(0,229,255,.3)!important}
+.sz-wrap .prow.pdone::before{background:linear-gradient(180deg,#00E5FF,#FFD700)}
+.sz-wrap .prow.plocked{cursor:not-allowed}
+.sz-wrap .prow.plocked .prow-num,.sz-wrap .prow.plocked .prow-title,.sz-wrap .prow.plocked .prow-meta{opacity:.2}
+.sz-wrap .prow-final{border-color:rgba(255,215,0,.28)!important;background:#0d1a2e!important}
+.sz-wrap .prow-final:hover:not(.plocked){border-color:#FFD700!important}
+.sz-wrap .prow-num{font-weight:800;font-size:20px;font-style:italic;line-height:1;color:rgba(255,255,255,.18);width:28px;text-align:center;flex-shrink:0;transition:color .15s}
+.sz-wrap .prow:hover:not(.plocked) .prow-num{color:#FFD700}
+.sz-wrap .prow.pdone .prow-num{color:#00E5FF!important}
+.sz-wrap .prow-body{flex:1;min-width:0}
+.sz-wrap .prow-title{font-weight:700;font-size:13px;color:var(--sz-text)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sz-wrap .prow-meta{font-size:10px;color:var(--sz-text-dim);margin-top:2px;font-weight:600}
+.sz-wrap .pbadge{font-weight:700;font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:8px;flex-shrink:0;white-space:nowrap}
+.sz-wrap .b-new{background:rgba(0,229,255,.1);color:#00E5FF;border:1px solid rgba(0,229,255,.28)}
+.sz-wrap .b-retry{background:rgba(255,149,0,.1);color:#FF9500;border:1px solid rgba(255,149,0,.25)}
+.sz-wrap .b-inprog{background:rgba(255,215,0,.12)!important;color:#FFD700!important;border:1px solid rgba(255,215,0,.3)!important}
+.sz-wrap .b-done{background:rgba(0,229,255,.1)!important;color:#00E5FF!important;border:1px solid rgba(0,229,255,.28)!important;box-shadow:0 0 8px rgba(0,229,255,.12)!important}
+.sz-wrap .b-locked{background:rgba(255,255,255,.03);color:var(--sz-plabel);border:1px dashed rgba(255,255,255,.1)}
+.sz-wrap .b-submit{background:rgba(255,215,0,.15);color:#FFD700;border:1px solid rgba(255,215,0,.35);box-shadow:0 0 10px rgba(255,215,0,.18)}
+.sz-wrap .drill-screen{display:none;padding:0 14px 18px;margin-top:-1px;background:var(--sz-bg1)!important}
+.sz-wrap .drill-screen.open{display:block}
+.sz-wrap .back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;margin:6px 0 10px;font-family:'Open Sans',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#FFD700;background:#0d1a2e;border:1px solid rgba(255,215,0,.22);border-radius:12px;cursor:pointer;transition:all .15s}
+.sz-wrap .back-btn:hover{background:rgba(255,215,0,.15);box-shadow:0 0 12px rgba(255,215,0,.25)}
+.sz-wrap .steps{display:flex;align-items:center;background:#0d1a2e!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:16px;padding:10px 12px;margin-bottom:16px}
+.sz-wrap .step{display:flex;align-items:center;gap:6px;flex:1}
+.sz-wrap .step-dot{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;color:var(--sz-plabel);flex-shrink:0;transition:all .2s}
+.sz-wrap .step-dot.done-s{background:linear-gradient(135deg,#FFD700,#CCFF00);border-color:#FFD700;color:rgba(0,0,0,.8);box-shadow:0 0 10px rgba(255,215,0,.4)}
+.sz-wrap .step-dot.curr-s{background:#fff;border-color:#fff;color:rgba(0,0,0,.8)}
+.sz-wrap .step-name{font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--sz-plabel)!important}
+.sz-wrap .step-line{flex:1;height:1px;background:var(--sz-plabel-line);margin:0 4px}
+.sz-wrap .drill-eye{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FFD700;margin-bottom:3px}
+.sz-wrap .drill-h{font-weight:700;font-size:16px;color:#fff;margin-bottom:3px;line-height:1.05}
+.sz-wrap .drill-meta{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:16px;font-weight:600}
+.sz-wrap .embed-wrap{position:relative;padding-bottom:56.25%;height:0;border-radius:20px;overflow:hidden;background:#000;margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 0 1px rgba(255,215,0,.12)}
+.sz-wrap .embed-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.sz-wrap .nudge{border-left:3px solid #FFD700;border-radius:0 12px 12px 0;padding:11px 14px;background:#0d1a2e!important;margin-bottom:14px}
+.sz-wrap .nudge-t{font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#FFD700;margin-bottom:3px}
+.sz-wrap .nudge-s{font-size:13px;color:rgba(255,215,0,.75)!important;line-height:1.6}
+.sz-wrap .nudge.aqua{border-left-color:#00E5FF;background:#0d1a2e!important}
+.sz-wrap .nudge.aqua .nudge-t{color:#00E5FF}
+.sz-wrap .nudge.aqua .nudge-s{color:rgba(0,229,255,.75)!important}
+.sz-wrap .try-card{background:#0d1a2e!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:20px;padding:20px 18px;text-align:center;margin-bottom:14px}
+.sz-wrap .try-icon{font-size:22px;margin-bottom:8px}
+.sz-wrap .try-title{font-weight:700;font-size:13px;color:#fff!important;margin-bottom:5px}
+.sz-wrap .try-sub{font-size:13px;color:rgba(255,255,255,.6)!important;line-height:1.6;margin-bottom:14px}
+.sz-wrap video{width:100%;border-radius:20px;background:#000;max-height:260px;display:block;margin-bottom:12px;border:1px solid var(--sz-border)}
+.sz-wrap .btn{display:inline-flex;align-items:center;gap:5px;padding:9px 16px;font-family:'Open Sans',sans-serif;font-weight:700;font-size:13px;border-radius:12px;border:1px solid rgba(255,255,255,.14);cursor:pointer;transition:all .15s;background:#0d1a2e;color:#fff}
+.sz-wrap .btn:hover{background:#2a2a2a}
+.sz-wrap .sz-panel .btn-gold,.sz-wrap .cr .btn-gold{background:linear-gradient(135deg,#FFD700,#00E5FF);color:rgba(0,0,0,.85);border-color:#FFD700;box-shadow:0 0 16px rgba(255,215,0,.3);font-weight:800}
+.sz-wrap .sz-panel .btn-gold:hover{box-shadow:0 0 24px rgba(255,215,0,.4);transform:scale(1.02)}
+.sz-wrap .btn-lime{background:linear-gradient(135deg,#CCFF00,#AAEE00);color:rgba(0,0,0,.85);border-color:#CCFF00;box-shadow:0 0 16px rgba(204,255,0,.4);font-weight:800}
+.sz-wrap .btn-aqua{background:linear-gradient(135deg,#00E5FF,#00C8E8);color:rgba(0,0,0,.85);border-color:#00E5FF;box-shadow:0 0 16px rgba(0,229,255,.4);font-weight:800}
+.sz-wrap .btn-amber{background:rgba(255,149,0,.15);color:#FF9500;border-color:rgba(255,149,0,.25)}
+.sz-wrap .btn-white{background:#fff;color:rgba(0,0,0,.85);border-color:#fff;font-weight:700}
+.sz-wrap .btn-white:hover{opacity:.9}
+.sz-wrap .btn-sm{padding:7px 13px;font-size:13px}
+.sz-wrap .btn-row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.sz-wrap .btn-row-center{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.sz-wrap .rate-intro{font-size:13px;color:rgba(255,255,255,.6)!important;text-align:center;margin-bottom:12px;line-height:1.6}
+.sz-wrap .rate-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.sz-wrap .rate-opt{background:#0d1a2e!important;border:1.5px solid rgba(255,255,255,.1)!important;border-radius:12px;padding:12px 4px;text-align:center;cursor:pointer;transition:all .15s}
+.sz-wrap .rate-opt:hover{border-color:rgba(255,215,0,.4);background:var(--sz-row-bg-hover)!important;transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.sz-wrap .rate-emoji{font-size:22px;margin-bottom:5px}
+.sz-wrap .rate-text{font-weight:600;font-size:10px;letter-spacing:.03em;text-transform:uppercase;color:rgba(255,255,255,.6)!important;line-height:1.3}
+.sz-wrap .rate-opt.sel-1{border-color:#FF3B3B;background:rgba(255,59,59,.18);box-shadow:0 0 12px rgba(255,59,59,.2)} .sz-wrap .rate-opt.sel-1 .rate-text{color:#FF3B3B}
+.sz-wrap .rate-opt.sel-2{border-color:#FF9500;background:rgba(255,149,0,.15);box-shadow:0 0 12px rgba(255,149,0,.2)} .sz-wrap .rate-opt.sel-2 .rate-text{color:#FF9500}
+.sz-wrap .rate-opt.sel-3{border-color:#00E5FF;background:rgba(0,229,255,.12);box-shadow:0 0 14px rgba(0,229,255,.25)} .sz-wrap .rate-opt.sel-3 .rate-text{color:#00E5FF}
+.sz-wrap .rate-opt.sel-4{border-color:#CCFF00;background:rgba(204,255,0,.15);box-shadow:0 0 14px rgba(204,255,0,.25)} .sz-wrap .rate-opt.sel-4 .rate-text{color:#CCFF00}
+.sz-wrap .rate-opt.sel-5{border-color:#FFD700;background:rgba(255,215,0,.15);box-shadow:0 0 18px rgba(255,215,0,.35)} .sz-wrap .rate-opt.sel-5 .rate-text{color:#FFD700}
+.sz-wrap .outcome{border-radius:20px;padding:24px 20px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden}
+.sz-wrap .outcome::before{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.04) 50%,transparent 70%);pointer-events:none}
+.sz-wrap .outcome-icon{font-size:38px;margin-bottom:10px}
+.sz-wrap .outcome-title{font-weight:700;font-size:22px;letter-spacing:-.01em;margin-bottom:7px;line-height:1.05}
+.sz-wrap .outcome-sub{font-size:13px;line-height:1.65;opacity:.9!important}
+.sz-wrap .out-low{background:linear-gradient(135deg,rgba(255,149,0,.12),rgba(255,59,59,.08))!important;border:1px solid rgba(255,149,0,.3)}
+.sz-wrap .out-low .outcome-title{color:#FF9500} .sz-wrap .out-low .outcome-sub{color:rgba(255,149,0,.85)}
+.sz-wrap .out-mid{background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(0,229,255,.04))!important;border:1px solid rgba(0,229,255,.28)}
+.sz-wrap .out-mid .outcome-title{color:#00E5FF} .sz-wrap .out-mid .outcome-sub{color:rgba(0,229,255,.85)}
+.sz-wrap .out-high{background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(204,255,0,.06))!important;border:1px solid rgba(255,215,0,.38);box-shadow:0 0 40px rgba(255,215,0,.12)}
+.sz-wrap .out-high .outcome-title{color:#FFD700;text-shadow:0 0 20px rgba(255,215,0,.45)} .sz-wrap .out-high .outcome-sub{color:rgba(255,215,0,.85)}
+.sz-wrap .xp-pill{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#FFD700,#FFA500);color:rgba(0,0,0,.85);font-weight:700;font-size:13px;padding:5px 16px;border-radius:99px;margin-top:8px;box-shadow:0 0 16px rgba(255,215,0,.3)}
+.sz-wrap .xp-total-pill{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#00E5FF,#0080FF);color:rgba(0,0,0,.85);font-weight:700;font-size:12px;padding:4px 14px;border-radius:99px;margin-top:6px;box-shadow:0 0 10px rgba(0,229,255,.3)}
+.sz-wrap .submit-screen{display:none;padding:0 14px 60px;margin-top:-1px;background:var(--sz-bg1)!important}
+.sz-wrap .submit-screen.open{display:block}
+.sz-wrap .submit-hero{background:#0d1a2e!important;border:1px solid rgba(255,215,0,.2);border-radius:20px;padding:22px 18px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden}
+.sz-wrap .submit-hero::after{content:'\2B50';position:absolute;right:-10px;bottom:-16px;font-size:90px;opacity:.07;pointer-events:none}
+.sz-wrap .sh-eye{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#FFD700;margin-bottom:4px}
+.sz-wrap .sh-title{font-weight:700;font-size:22px;color:var(--sz-text);margin-bottom:6px;line-height:1}
+.sz-wrap .sh-body{font-size:13px;color:var(--sz-text-muted);line-height:1.65}
+.sz-wrap .ss-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sz-plabel);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sz-wrap .ss-label::after{content:'';flex:1;height:1px;background:var(--sz-plabel-line)}
+.sz-wrap .checklist{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.sz-wrap .ci{display:flex;align-items:center;gap:10px;background:#0d1a2e!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:12px;padding:9px 13px}
+.sz-wrap .ci.done{border-color:rgba(0,229,255,.25)!important}
+.sz-wrap .ci-check{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.2)!important;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700}
+.sz-wrap .ci.done .ci-check{background:linear-gradient(135deg,#00E5FF,#00C8E8);border-color:#00E5FF;color:rgba(0,0,0,.8);box-shadow:0 0 8px rgba(0,229,255,.3)}
+.sz-wrap .ci-text{font-size:13px;font-weight:600;color:#fff!important}
+.sz-wrap .ci.done .ci-text{color:#00E5FF!important}
+.sz-wrap .sent-card{display:none;background:#1a1a1a!important;border:1px solid rgba(255,215,0,.25);border-radius:20px;padding:28px 20px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden}
+.sz-wrap .sent-icon{font-size:48px;margin-bottom:10px;filter:drop-shadow(0 0 14px rgba(255,215,0,.55))}
+.sz-wrap .sent-title{font-weight:700;font-size:22px;color:#FFD700;margin-bottom:6px;text-shadow:0 0 20px rgba(255,215,0,.4)}
+.sz-wrap .sent-body{font-size:13px;color:rgba(255,255,255,.65)!important;line-height:1.7}
+@media(max-width:520px){
+  .sz-wrap .cr{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 12px}
+  .sz-wrap .cr::after{display:none}
+  .sz-wrap .cr-badge{flex-shrink:0}
+  .sz-wrap .cr-body{flex:1 1 0;min-width:0}
+  .sz-wrap .cr-title{font-size:14px}
+  .sz-wrap .cr-player{flex:0 0 100%;display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .sz-wrap .cr .cr-xp-total{display:inline-flex!important}
+  .sz-wrap .cr .cr-xp{display:inline-flex!important}
+  .sz-wrap .cr .cr-btn{padding:7px 11px!important;font-size:11px!important}
+  .sz-wrap .step-name{display:none}
+  .sz-wrap .rate-options{gap:4px}
+  .sz-wrap .rate-emoji{font-size:18px}
+  .sz-wrap .rate-text{font-size:8px}
+  .sz-wrap .rate-opt{padding:10px 2px}
+  .sz-wrap .drill-h{font-size:15px}
+  .sz-wrap .btn-row{justify-content:stretch}
+  .sz-wrap .btn-row .btn{flex:1;justify-content:center}
+  .sz-wrap .btn-row-center .btn{flex:1 1 auto;justify-content:center}
+  .sz-wrap .sent-card{display:none!important}
+}
+@media(max-width:380px){
+  .sz-wrap .cr-title{font-size:12px}
+  .sz-wrap .pbadge{display:none}
+  .sz-wrap .cr .cr-xp{padding:2px 6px!important;font-size:9px!important}
+  .sz-wrap .cr .cr-xp-total{padding:2px 6px!important;font-size:9px!important}
+  .sz-wrap .cr .cr-btn{padding:6px 8px!important;font-size:10px!important}
+}
+</style>
+</head>
+<body>
+<div class="sz-wrap">
+<div class="cr" id="sz-cr-UID_PLACEHOLDER">
+  <div class="cr-badge" style="background:linear-gradient(135deg,#FFD700,#00E5FF)!important">&#11088;</div>
+  <div class="cr-body">
+    <div class="cr-title">2 Sterne &#11088;&#11088;</div>
+    <div class="cr-sub">
+      <span>Zertifikat</span>
+      <div class="cr-prog"><div class="cr-prog-fill" id="sz-prog-fill-UID_PLACEHOLDER" style="width:0%"></div></div>
+      <span class="cr-prog-label" id="sz-prog-label-UID_PLACEHOLDER">0 / 5</span>
+    </div>
+  </div>
+  <div class="cr-player">
+    <div class="cr-avatar" id="sz-avatar-UID_PLACEHOLDER">?</div>
+    <span class="cr-xp" id="sz-xp-UID_PLACEHOLDER" title="XP in diesem Modul">0 XP</span>
+    <span class="cr-xp-total" id="sz-xp-total-UID_PLACEHOLDER" title="Gesamt XP">0 XP</span>
+    <button class="cr-btn" id="sz-cr-btn-UID_PLACEHOLDER" style="background:linear-gradient(135deg,#FFD700,#00E5FF)!important;color:rgba(0,0,0,.85)!important">Starten &#9660;</button>
+  </div>
+</div>
+<div class="sz-panel" id="sz-panel-UID_PLACEHOLDER">
+  <div id="sz-track-UID_PLACEHOLDER">
+    <div class="ph">
+      <div class="ph-title">2 Sterne &#11088;&#11088;</div>
+      <div class="ph-body" id="sz-hero-text-UID_PLACEHOLDER">Zeige deine Skills und erhalte dein Zertifikat!</div>
+    </div>
+    <div class="plist">
+      <div class="plabel">2 Sterne &Uuml;bungen</div>
+      <div class="prow" id="sz-row-0-UID_PLACEHOLDER"><div class="prow-num">01</div><div class="prow-body"><div class="prow-title">Leg Cross</div><div class="prow-meta">Technik &middot; Ballkontrolle</div></div><span class="pbadge b-new" id="sz-badge-0-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="sz-row-1-UID_PLACEHOLDER"><div class="prow-num">02</div><div class="prow-body"><div class="prow-title">Seven</div><div class="prow-meta">Technik &middot; Ballf&uuml;hrung</div></div><span class="pbadge b-new" id="sz-badge-1-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="sz-row-2-UID_PLACEHOLDER"><div class="prow-num">03</div><div class="prow-body"><div class="prow-title">La Croqueta</div><div class="prow-meta">Technik &middot; Dribbling</div></div><span class="pbadge b-new" id="sz-badge-2-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="sz-row-3-UID_PLACEHOLDER"><div class="prow-num">04</div><div class="prow-body"><div class="prow-title">No Look</div><div class="prow-meta">Technik &middot; Kreativit&auml;t</div></div><span class="pbadge b-new" id="sz-badge-3-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="sz-row-4-UID_PLACEHOLDER"><div class="prow-num">05</div><div class="prow-body"><div class="prow-title">Roulette</div><div class="prow-meta">Technik &middot; Dribbling</div></div><span class="pbadge b-new" id="sz-badge-4-UID_PLACEHOLDER">Neu</span></div>
+      <div class="plabel" style="margin-top:6px">Zertifikat</div>
+      <div class="prow prow-final plocked" id="sz-row-final-UID_PLACEHOLDER">
+        <div class="prow-num" style="font-size:16px">&#127942;</div>
+        <div class="prow-body"><div class="prow-title">Final-Video beim Experten einreichen</div><div class="prow-meta">Experten-Review &middot; 2 Sterne Zertifikat</div></div>
+        <span class="pbadge b-locked" id="sz-badge-final-UID_PLACEHOLDER">&#128274; Gesperrt</span>
+      </div>
+    </div>
+  </div>
+  <div class="drill-screen" id="sz-drill-UID_PLACEHOLDER">
+    <button class="back-btn" id="sz-back-UID_PLACEHOLDER">&larr; Zur&uuml;ck</button>
+    <div class="steps">
+      <div class="step"><div class="step-dot" id="sz-d1-UID_PLACEHOLDER">1</div><span class="step-name">Video</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="sz-d2-UID_PLACEHOLDER">2</div><span class="step-name">&Uuml;ben</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="sz-d3-UID_PLACEHOLDER">3</div><span class="step-name">Bewerten</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="sz-d4-UID_PLACEHOLDER">4</div><span class="step-name">Ergebnis</span></div>
+    </div>
+    <div class="drill-eye" id="sz-drill-eye-UID_PLACEHOLDER"></div>
+    <div class="drill-h" id="sz-drill-h-UID_PLACEHOLDER"></div>
+    <div class="drill-meta" id="sz-drill-meta-UID_PLACEHOLDER"></div>
+    <div id="sz-step1-UID_PLACEHOLDER">
+      <div class="embed-wrap"><iframe id="sz-embed-UID_PLACEHOLDER" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="nudge"><div class="nudge-t">Schau zuerst das ganze Video</div><div class="nudge-s">Achte auf Fu&szlig;stellung, K&ouml;rperhaltung und den Bewegungsablauf!</div></div>
+      <div class="btn-row"><button class="btn btn-white" id="sz-s1-next-UID_PLACEHOLDER">Angeschaut &mdash; weiter &rarr;</button></div>
+    </div>
+    <div id="sz-step2-UID_PLACEHOLDER" style="display:none">
+      <div class="nudge"><div class="nudge-t">Leg das Handy weg und &uuml;b!</div><div class="nudge-s">Mehrmals versuchen, dann einen Versuch filmen und anschauen.</div></div>
+      <div class="try-card" id="sz-cam-card-UID_PLACEHOLDER">
+        <div class="try-icon">&#128249;</div>
+        <div class="try-title">Filme deinen Versuch</div>
+        <div class="try-sub">Nichts wird gespeichert oder hochgeladen.</div>
+        <button class="btn btn-sm btn-gold" id="sz-cam-open-UID_PLACEHOLDER">Kamera &ouml;ffnen</button>
+        <div id="sz-cam-err-UID_PLACEHOLDER" style="display:none;margin-top:10px;font-size:13px;color:#FF3B3B"></div>
+      </div>
+      <div id="sz-cam-live-UID_PLACEHOLDER" style="display:none;margin-bottom:14px">
+        <video id="sz-cam-stream-UID_PLACEHOLDER" autoplay playsinline muted></video>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button class="btn btn-sm" id="sz-rec-btn-UID_PLACEHOLDER" style="background:#DC2626;color:#fff;border-color:#DC2626">&#9679; Aufnahme starten</button>
+          <button class="btn btn-sm" id="sz-cam-stop-UID_PLACEHOLDER">Abbrechen</button>
+        </div>
+        <div id="sz-rec-timer-UID_PLACEHOLDER" style="text-align:center;font-size:11px;font-weight:800;color:#FF3B3B;margin-top:8px;display:none;letter-spacing:.06em;text-transform:uppercase">&#9210; Aufnahme l&auml;uft&hellip;</div>
+      </div>
+      <div id="sz-preview-wrap-UID_PLACEHOLDER" style="display:none;margin-bottom:14px">
+        <video id="sz-vid-preview-UID_PLACEHOLDER" controls playsinline></video>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" id="sz-retry-cam-UID_PLACEHOLDER">&#128249; Nochmal</button>
+          <button class="btn btn-sm btn-gold" id="sz-s2-next-UID_PLACEHOLDER">Jetzt bewerten &rarr;</button>
+        </div>
+      </div>
+      <div class="btn-row" id="sz-skip-row-UID_PLACEHOLDER"><button class="btn btn-sm" id="sz-skip-UID_PLACEHOLDER">Ohne Aufnahme bewerten &rarr;</button></div>
+    </div>
+    <div id="sz-step3-UID_PLACEHOLDER" style="display:none">
+      <div class="nudge"><div class="nudge-t">Sei ehrlich zu dir selbst</div><div class="nudge-s">Jeder Versuch z&auml;hlt &mdash; zeige dein Bestes!</div></div>
+      <div class="rate-intro">Wie lief dein Versuch?</div>
+      <div class="rate-options">
+        <div class="rate-opt" id="sz-r1-UID_PLACEHOLDER"><div class="rate-emoji">&#128556;</div><div class="rate-text">Auf dem Weg</div></div>
+        <div class="rate-opt" id="sz-r2-UID_PLACEHOLDER"><div class="rate-emoji">&#129300;</div><div class="rate-text">Ganz gut</div></div>
+        <div class="rate-opt" id="sz-r3-UID_PLACEHOLDER"><div class="rate-emoji">&#128578;</div><div class="rate-text">Besser</div></div>
+        <div class="rate-opt" id="sz-r4-UID_PLACEHOLDER"><div class="rate-emoji">&#128516;</div><div class="rate-text">Richtig gut</div></div>
+        <div class="rate-opt" id="sz-r5-UID_PLACEHOLDER"><div class="rate-emoji">&#129321;</div><div class="rate-text">Perfekt!</div></div>
+      </div>
+      <div id="sz-rate-confirm-UID_PLACEHOLDER" style="display:none" class="btn-row">
+        <button class="btn btn-lime" id="sz-s3-next-UID_PLACEHOLDER">Bewertung best&auml;tigen &rarr;</button>
+      </div>
+    </div>
+    <div id="sz-step4-UID_PLACEHOLDER" style="display:none">
+      <div id="sz-out-wrap-UID_PLACEHOLDER">
+        <div class="outcome out-low" id="sz-out-box-UID_PLACEHOLDER">
+          <div class="outcome-icon" id="sz-out-icon-UID_PLACEHOLDER">&#128170;</div>
+          <div class="outcome-title" id="sz-out-title-UID_PLACEHOLDER"></div>
+          <div class="outcome-sub" id="sz-out-sub-UID_PLACEHOLDER"></div>
+          <div><span class="xp-pill" id="sz-xp-earned-UID_PLACEHOLDER"></span></div>
+          <div><span class="xp-total-pill" id="sz-xp-cumul-UID_PLACEHOLDER"></span></div>
+        </div>
+        <div class="btn-row-center" style="margin-top:12px" id="sz-out-btns-UID_PLACEHOLDER"></div>
+      </div>
+    </div>
+  </div>
+  <div class="submit-screen" id="sz-submit-UID_PLACEHOLDER">
+    <button class="back-btn" id="sz-submit-back-UID_PLACEHOLDER">&larr; Zur&uuml;ck</button>
+    <div class="submit-hero">
+      <div class="sh-eye">Experten-Review</div>
+      <div class="sh-title">Dein 2 Sterne Zertifikat</div>
+      <div class="sh-body">Fantastisch! Du hast alle 5 Challenges freigeschaltet. Jetzt Final-Video für das 2 Sterne Zertifikat einreichen!</div>
+    </div>
+    <div class="ss-label">Deine abgeschlossenen Challenges</div>
+    <div class="checklist" id="sz-checklist-UID_PLACEHOLDER"></div>
+    </div>
+    <div id="sz-mob-UID_PLACEHOLDER" style="display:none;margin-top:16px">
+      <div class="nudge aqua" style="margin-bottom:14px">
+        <div class="nudge-t">So geht&#39;s</div>
+        <div class="nudge-s">Nimm ein Video auf &mdash; dann E-Mail &ouml;ffnen und Video anh&auml;ngen. Oder direkt E-Mail &ouml;ffnen und Video aus der Kamerarolle ausw&auml;hlen.</div>
+      </div>
+      <button class="btn btn-gold" id="sz-mob-btn-UID_PLACEHOLDER" style="width:100%;justify-content:center;padding:16px;font-size:15px;border-radius:14px;margin-bottom:10px">&#9993;&#65039; E-Mail an Experten &ouml;ffnen</button>
+      <div id="sz-mob-sent-UID_PLACEHOLDER" style="display:none;flex-direction:column;gap:10px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(204,255,0,.08);border:1px solid rgba(204,255,0,.3);border-radius:14px;padding:13px 14px">
+          <div style="font-size:22px">&#10003;&#65039;</div>
+          <div><div style="font-weight:800;font-size:14px;color:#CCFF00;margin-bottom:2px">E-Mail ge&ouml;ffnet!</div><div style="font-size:12px;color:rgba(255,255,255,.7)">H&auml;nge dein Video an und sende!</div></div>
+        </div>
+      </div>
+      <div id="sz-mob-ios-UID_PLACEHOLDER" style="display:none"></div>
+      <div id="sz-mob-android-UID_PLACEHOLDER" style="display:none"></div>
+    </div>
+    <div id="sz-desk-UID_PLACEHOLDER" style="display:none;margin-top:16px">
+      <div class="ss-label">Final-Video einreichen</div>
+      <div class="nudge aqua" style="margin-bottom:14px">
+        <div class="nudge-t">Zeige alle &Uuml;bungen</div>
+        <div class="nudge-s">Links, rechts &mdash; damit wir deine Fu&szlig;haltung gut sehen!</div>
+      </div>
+      <!-- Option A: Record with camera then save+send -->
+      <div id="sz-final-cam-card-UID_PLACEHOLDER" style="margin-bottom:14px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <button class="btn btn-gold" id="sz-final-open-UID_PLACEHOLDER" style="flex:1;justify-content:center;padding:11px 16px;font-size:13px">&#128249; Kamera &ouml;ffnen &amp; aufnehmen</button>
+          <button class="btn btn-gold" id="sz-direct-send-UID_PLACEHOLDER" style="flex:1;justify-content:center;padding:11px 16px;font-size:13px">&#9993; Direkt E-Mail senden</button>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);text-align:center">Video in der E-Mail als Anhang hinzuf&uuml;gen</div>
+        <div id="sz-final-cam-err-UID_PLACEHOLDER" style="display:none;margin-top:10px;font-size:13px;color:#FF3B3B"></div>
+      </div>
+      <div id="sz-final-cam-UID_PLACEHOLDER" style="display:none;margin-bottom:14px">
+        <video id="sz-final-stream-UID_PLACEHOLDER" autoplay playsinline muted></video>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button class="btn btn-sm" id="sz-final-rec-btn-UID_PLACEHOLDER" style="background:#DC2626;color:#fff;border-color:#DC2626">&#9679; Aufnahme starten</button>
+          <button class="btn btn-sm" id="sz-final-cam-stop-UID_PLACEHOLDER">Abbrechen</button>
+        </div>
+        <div id="sz-final-rec-timer-UID_PLACEHOLDER" style="text-align:center;font-size:11px;font-weight:800;color:#FF3B3B;margin-top:8px;display:none;letter-spacing:.06em;text-transform:uppercase">&#9210; Aufnahme l&auml;uft&hellip;</div>
+      </div>
+      <div id="sz-final-preview-wrap-UID_PLACEHOLDER" style="display:none;margin-bottom:14px">
+        <video id="sz-final-preview-UID_PLACEHOLDER" controls playsinline style="margin-bottom:14px"></video>
+        <div id="sz-step-save-UID_PLACEHOLDER">
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.25);border-radius:14px;padding:12px 14px;margin-bottom:12px"><div style="font-size:16px">1&#65039;&#8419;</div><div><div style="font-weight:700;font-size:13px;color:#00E5FF;text-transform:uppercase;letter-spacing:.04em">Schritt 1 &mdash; Video speichern</div></div></div>
+          <button class="btn btn-aqua" id="sz-download-btn-UID_PLACEHOLDER" style="width:100%;justify-content:center;padding:13px;font-size:13px;border-radius:14px">&#11015; Video speichern</button>
+          <div id="sz-download-ok-UID_PLACEHOLDER" style="display:none;margin-top:8px;background:rgba(204,255,0,.1);border:1px solid rgba(204,255,0,.3);border-radius:12px;padding:10px 14px;align-items:center;gap:8px"><div style="font-size:16px">&#10003;&#65039;</div><div style="font-weight:700;font-size:13px;color:#CCFF00">Gespeichert! Jetzt Schritt 2.</div></div>
+        </div>
+        <div id="sz-step-send-UID_PLACEHOLDER" style="display:none;margin-top:14px">
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.3);border-radius:14px;padding:12px 14px;margin-bottom:12px"><div style="font-size:16px">2&#65039;&#8419;</div><div><div style="font-weight:700;font-size:13px;color:#FFD700;text-transform:uppercase;letter-spacing:.04em">Schritt 2 &mdash; E-Mail senden</div></div></div>
+          <button class="btn btn-gold" id="sz-send-btn-UID_PLACEHOLDER" style="width:100%;justify-content:center;padding:13px;font-size:13px;border-radius:14px">&#9993; E-Mail an Experten &ouml;ffnen</button>
+        </div>
+        <div style="text-align:center;margin-top:14px"><button class="btn btn-sm" id="sz-final-retry-UID_PLACEHOLDER">&#128249; Neu aufnehmen</button></div>
+      </div>
+      <div class="sent-card" id="sz-sent-UID_PLACEHOLDER">
+        <div class="sent-icon">&#127942;</div>
+        <div class="sent-title">E-Mail gesendet!</div>
+        <div class="sent-body">Super gemacht! Dein 2 Sterne Zertifikat ist auf dem Weg. ⭐⭐</div>
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-sm btn-aqua" id="sz-retake-video-UID_PLACEHOLDER">&#128249; Neues Video</button>
+          <button class="btn btn-sm btn-aqua" id="sz-reopen-mail-UID_PLACEHOLDER">&#9993; Mail nochmal</button>
+          <button class="btn btn-sm btn-aqua" id="sz-retry-all-UID_PLACEHOLDER">&#8617; Von vorne</button>
+        </div>
+      </div>
+    </div>
+    <div id="sz-submit-err-UID_PLACEHOLDER" style="display:none;margin-top:10px;font-size:13px;color:#FF3B3B;text-align:center;font-weight:700;background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.2);border-radius:10px;padding:8px 12px"></div>
+  </div>
+</div>
+</div>
+<script>
+(function(){
+'use strict';
+var _uid=(Math.random().toString(36)+'00000').slice(2,7);
+function _pid(base){return base+'-'+_uid;}
+var INSTANCE_KEY='sz2';
+var drills=[
+  {title:'Leg Cross',eye:'Challenge 01',meta:'Technik \u00b7 Ballkontrolle',vid:'1108506666',hash:'3b553e1736',xp:15,next:'Weiter zu Challenge 2!'},
+  {title:'Seven',eye:'Challenge 02',meta:'Technik \u00b7 Ballf\u00fchrung',vid:'1110048992',hash:'34251d5943',xp:15,next:'Weiter zu Challenge 3!'},
+  {title:'La Croqueta',eye:'Challenge 03',meta:'Technik \u00b7 Dribbling',vid:'1110029615',hash:'d558930be0',xp:15,next:'Weiter zu Challenge 4!'},
+  {title:'No Look',eye:'Challenge 04',meta:'Technik \u00b7 Kreativit\u00e4t',vid:'1109282305',hash:'26d2c5dcc7',xp:15,next:'Letzte Challenge!'},
+  {title:'Roulette',eye:'Challenge 05',meta:'Technik \u00b7 Dribbling',vid:'1109282284',hash:'a124376bf0',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
+];
+
+var XP_MULT=[0,.2,.4,.6,.8,1];
+function attemptXP(rating,maxXp){return Math.round((XP_MULT[rating]||0)*maxXp);}
+function challengeScoreXP(rating,maxXp){if(rating<4)return 0;return Math.round((XP_MULT[rating]||0)*maxXp);}
+
+var state={
+  expanded:false,drill:-1,rate:0,
+  ratings:[0,0,0,0,0],
+  challengeXP:[0,0,0,0,0],
+  cumXP:0,
+  completed_at:{},
+  storageKey:'sz_guest',
+  mediaStream:null,mediaRecorder:null,chunks:[],recording:false,
+  finalStream:null,finalRecorder:null,finalChunks:[],finalRecording:false,
+  finalVideoReady:false,finalBlob:null,
+  playerInited:false,submitted:false,onSubmit:false,
+  currentPlayerName:'Spieler',memberId:null,sbTotalXP:null
+};
+function el(id){return document.getElementById(id+'-'+_uid);}
+function show(id){el(id).style.display='block';}
+function hide(id){el(id).style.display='none';}
+function flex(id){el(id).style.display='flex';}
+function scrollUp(){var w=el('sz-cr');if(w)w.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function save(){
+  try{localStorage.setItem(state.storageKey,JSON.stringify({
+    ratings:state.ratings,challengeXP:state.challengeXP,cumXP:state.cumXP,
+    xp:computeKursXP(),completed_at:state.completed_at,submitted:state.submitted,onSubmit:state.onSubmit
+  }));}catch(e){}
+}
+function load(username){
+  state.storageKey='t7_'+INSTANCE_KEY+'_'+(username||'guest').replace(/\s+/g,'_').toLowerCase();
+  /* Wipe old-format keys (no t7_ prefix) from original widget version */
+  try{var _uslug=(username||'guest').replace(/\s+/g,'_').toLowerCase();localStorage.removeItem('sz2_'+_uslug);localStorage.removeItem('sz_'+_uslug);}catch(e){}
+  /* Version wipe: clear stale localStorage data from old widget versions */
+  try{
+    var _vkey=state.storageKey+'_v';
+    if(localStorage.getItem(_vkey)!=='4'){
+      localStorage.removeItem(state.storageKey);
+      localStorage.setItem(_vkey,'4');
+    }
+  }catch(e){}
+  try{
+    var raw=localStorage.getItem(state.storageKey);
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d.ratings)state.ratings=d.ratings;
+      if(d.challengeXP)state.challengeXP=d.challengeXP;
+      else{
+        /* migrate: rebuild challengeXP from best ratings */
+        for(var i=0;i<drills.length;i++){
+          state.challengeXP[i]=challengeScoreXP(state.ratings[i]||0,drills[i].xp);
+        }
+      }
+      if(typeof d.cumXP==='number')state.cumXP=d.cumXP;
+      else if(typeof d.xp==='number')state.cumXP=d.xp;
+      if(d.completed_at)state.completed_at=d.completed_at;
+      if(d.submitted)state.submitted=d.submitted;
+      if(d.onSubmit)state.onSubmit=d.onSubmit;
+    }
+  }catch(e){}
+  updateXP();updateProgress();refreshTrack();
+  if(state.onSubmit&&allDone()&&isMobile()){setTimeout(function(){var cr=el('sz-cr'),panel=el('sz-panel');cr.classList.add('open');panel.classList.add('open');el('sz-cr-btn').textContent='Schlie\u00dfen \u25b2';state.expanded=true;openSubmit();},200);}
+}
+function computeKursXP(){var t=0;for(var i=0;i<state.challengeXP.length;i++)t+=state.challengeXP[i];return t;}
+function getTotalCumXP(){
+  if(typeof state.sbTotalXP==='number')return state.sbTotalXP;
+  var total=0;
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('t7_')===0){var raw=localStorage.getItem(k);if(raw){var d=JSON.parse(raw);if(typeof d.cumXP==='number')total+=d.cumXP;else if(typeof d.xp==='number')total+=d.xp;}}}}catch(e){}
+  return total;
+}
+function updateXP(){el('sz-xp').textContent=computeKursXP()+' XP';el('sz-xp-total').textContent=getTotalCumXP()+' XP';}
+function updateProgress(){var done=state.ratings.filter(function(r){return r>=4;}).length;el('sz-prog-fill').style.width=Math.round(done/5*100)+'%';el('sz-prog-label').textContent=done+' / 5';}
+function allDone(){return state.ratings.filter(function(r){return r>=4;}).length===5;}
+function refreshTrack(){
+  for(var i=0;i<5;i++){
+    var row=el('sz-row-'+i),badge=el('sz-badge-'+i),r=state.ratings[i];
+    row.classList.remove('plocked');
+    if(r===0){row.classList.remove('pdone');badge.className='pbadge b-new';badge.textContent='Neu';badge.style.cssText='background:rgba(0,229,255,.1)!important;color:\x2300E5FF!important;border:1px solid rgba(0,229,255,.28)!important';}
+    else if(r<=3){row.classList.remove('pdone');badge.className='pbadge b-retry';badge.textContent='\u21a9 Verbessern';badge.style.cssText='background:rgba(255,149,0,.12)!important;color:\x23FF9500!important;border:1px solid rgba(255,149,0,.25)!important';}
+    else if(r===4){row.classList.add('pdone');badge.className='pbadge b-inprog';badge.textContent='\u2713 Gut';badge.style.cssText='background:rgba(255,215,0,.12)!important;color:\x23FFD700!important;border:1px solid rgba(255,215,0,.3)!important';}
+    else{row.classList.add('pdone');badge.className='pbadge b-done';badge.textContent='\u2605 Perfekt';badge.style.cssText='background:rgba(0,229,255,.1)!important;color:\x2300E5FF!important;border:1px solid rgba(0,229,255,.28)!important';}
+  }
+  var fr=el('sz-row-final'),fb=el('sz-badge-final');
+  if(allDone()){
+    fr.classList.remove('plocked');
+    if(state.submitted){fb.className='pbadge b-done';fb.textContent='\u2713 Eingereicht';fb.style.cssText='background:rgba(0,229,255,.1)!important;color:\x2300E5FF!important;border:1px solid rgba(0,229,255,.28)!important';}
+    else{fb.className='pbadge b-submit';fb.textContent='\u2b50 Einreichen';fb.style.cssText='background:rgba(255,215,0,.14)!important;color:\x23FFD700!important;border:1px solid rgba(255,215,0,.35)!important';}
+  }else{fr.classList.add('plocked');fb.className='pbadge b-locked';fb.textContent='\ud83d\udd12 Gesperrt';}
+  updateProgress();
+}
+function toggleExpand(){
+  state.expanded=!state.expanded;
+  var cr=el('sz-cr'),panel=el('sz-panel');
+  if(state.expanded){cr.classList.add('open');panel.classList.add('open');el('sz-cr-btn').textContent='Schlie\u00dfen \u25b2';}
+  else{cr.classList.remove('open');panel.classList.remove('open');el('sz-cr-btn').textContent='Starten \u25bc';goTrack();}
+}
+function goTrack(){
+  state.onSubmit=false;save();
+  el('sz-embed').src='';el('sz-drill').classList.remove('open');el('sz-submit').classList.remove('open');
+  show('sz-track');stopCamera();stopFinalCamera();refreshTrack();scrollUp();
+}
+function openDrill(idx){
+  state.drill=idx;state.rate=0;var d=drills[idx];
+  el('sz-drill-eye').textContent=d.eye;el('sz-drill-h').textContent=d.title;el('sz-drill-meta').textContent=d.meta;
+  el('sz-embed').src='https://player.vimeo.com/video/'+d.vid+'?h='+d.hash+'&color=FFD700&title=0&byline=0&portrait=0&dnt=1';
+  [1,2,3,4,5].forEach(function(v){el('sz-r'+v).className='rate-opt';});
+  hide('sz-rate-confirm');resetCamera();hide('sz-track');el('sz-drill').classList.add('open');goStep(1);scrollUp();
+}
+function isMobile(){return /iphone|ipad|ipod|android/i.test(navigator.userAgent);}
+function openSubmit(){
+  if(!allDone())return;
+  state.onSubmit=true;save();
+  hide('sz-track');el('sz-drill').classList.remove('open');el('sz-submit').classList.add('open');
+  /* Render checklist dynamically */
+  (function(){
+    var cl=el('sz-checklist');if(!cl)return;
+    cl.innerHTML=drills.map(function(d,i){
+      var r=state.ratings[i]||0;
+      var done=r>=4;
+      var label=r===5?'★ Perfekt':r===4?'✓ Gut':r===3?'≈ Fast':r>0?'↩ Versucht':'Nicht gemacht';
+      var checkStyle=done?'background:linear-gradient(135deg,#00E5FF,#00C8E8)!important;border-color:#00E5FF!important;color:rgba(0,0,0,.85)!important':'border-color:rgba(255,255,255,.15)!important;color:rgba(255,255,255,.3)!important';
+      var textStyle=done?'color:#00E5FF!important':'color:rgba(255,255,255,.35)!important';
+      return '<div class="ci'+(done?' done':'')+'">'+
+        '<div class="ci-check" style="'+checkStyle+'">'+(done?'&#10003;':r>0?r:'')+'</div>'+
+        '<div class="ci-text" style="'+textStyle+'">Challenge '+(i+1)+': '+d.title+'</div>'+
+        '<div style="font-size:10px;font-weight:700;margin-left:auto;padding-left:8px;color:'+(done?'#00E5FF':'rgba(255,255,255,.25)')+'">'+label+'</div>'+
+      '</div>';
+    }).join('');
+  })();
+  el('sz-mob').style.display='none';el('sz-desk').style.display='none';
+  if(isMobile()){
+    el('sz-mob').style.display='block';
+    el('sz-mob-btn').innerHTML='&#9993;&#65039; E-Mail an Experten \u00f6ffnen';
+    el('sz-mob-sent').style.display=state.submitted?'flex':'none';
+  }else{
+    el('sz-desk').style.display='block';
+    if(state.submitted){hide('sz-final-cam-card');hide('sz-final-cam');hide('sz-final-preview-wrap');show('sz-sent');}
+    else{show('sz-final-cam-card');hide('sz-final-cam');hide('sz-final-preview-wrap');hide('sz-sent');}
+  }
+  scrollUp();
+}
+function handleSend(){state.submitted=true;save();refreshTrack();openMailto();el('sz-mob-sent').style.display='flex';}
+function handleSendDesktop(){openMailto();state.submitted=true;save();hide('sz-final-cam-card');hide('sz-final-cam');hide('sz-final-preview-wrap');show('sz-sent');refreshTrack();}
+function goStep(n){
+  ['sz-step1','sz-step2','sz-step3','sz-step4'].forEach(function(id,i){el(id).style.display=(i+1===n)?'block':'none';});
+  [1,2,3,4].forEach(function(i){var dot=el('sz-d'+i);dot.className='step-dot';if(i<n)dot.classList.add('done-s');else if(i===n)dot.classList.add('curr-s');});
+  if(n===4)showOutcome();
+}
+function showOutcome(){
+  var d=drills[state.drill];
+  var idx=state.drill;
+  var prevRating=state.ratings[idx]||0;
+  var earned=attemptXP(state.rate,d.xp);
+
+  /* Always add to cumulative */
+  state.cumXP+=earned;
+
+  /* Challenge score: only update when reaching 4 or 5 for first time, or 4→5 */
+  var prevScore=state.challengeXP[idx]||0;
+  var newScore=challengeScoreXP(state.rate,d.xp);
+  var scoreGain=0;
+  if(newScore>prevScore){scoreGain=newScore-prevScore;state.challengeXP[idx]=newScore;}
+
+  if(state.rate>prevRating){state.ratings[idx]=state.rate;if(!state.completed_at[idx])state.completed_at[idx]=Date.now();}
+
+  var _e=getBMId();
+  if(_e)sbUpsert(_e,state.currentPlayerName,'sz2','2-Stern Zertifikat',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false);
+
+  updateXP();save();
+  /* Refresh total XP from Supabase after rating */
+  var _mid2=getBMId?getBMId():null;
+  if(!_mid2&&typeof getBMEmail==='function')_mid2=getBMEmail();
+  if(_mid2&&_mid2!=='unbekannt'){
+    setTimeout(function(){
+      fetchSBTotalXP(_mid2);
+      try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+      /* Also update outcome total text if still visible */
+      setTimeout(function(){
+        var _cumEl=el('sz-xp-cumul');
+        if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';
+      },500);
+    },1500);
+  }
+
+  var totalCum=getTotalCumXP();
+  var box=el('sz-out-box'),icon=el('sz-out-icon'),title=el('sz-out-title'),sub=el('sz-out-sub'),btns=el('sz-out-btns');
+  el('sz-xp-earned').textContent='+'+earned+' XP diese Runde';
+  el('sz-xp-cumul').textContent='Gesamt: '+totalCum+' XP';
+
+  if(state.rate<=3){
+    box.className='outcome out-low';icon.textContent=state.rate<=2?'\ud83d\udcaa':'\ud83e\udd14';
+    title.textContent=state.rate<=2?'Weiter k\u00e4mpfen!':'Ganz gut!';
+    sub.textContent='Noch ein Versuch f\u00fcr Bewertung 4 oder 5!';
+    btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-amber';b1.textContent='\u21a9 Nochmal';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
+  } else if(state.rate===4){
+    box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
+    title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
+    sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Noch ein Versuch f\u00fcr Perfektion!';
+    btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-aqua';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
+  } else {
+    box.className='outcome out-high';icon.textContent='\u2b50';
+    title.textContent=d.title+' gemeistert!';
+    sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Maximale Challenge-Punkte bereits erreicht!';
+    btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-gold';b1.textContent='Weiter \u2192';b1.addEventListener('click',function(){if(allDone()){goTrack();setTimeout(openSubmit,300);}else goTrack();});btns.appendChild(b1);
+  }
+  updateProgress();
+}
+function selectRate(v){state.rate=v;[1,2,3,4,5].forEach(function(i){el('sz-r'+i).className='rate-opt';});el('sz-r'+v).classList.add('sel-'+v);show('sz-rate-confirm');}
+function startCamera(){navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true}).then(function(stream){state.mediaStream=stream;el('sz-cam-stream').srcObject=stream;hide('sz-cam-card');show('sz-cam-live');hide('sz-preview-wrap');flex('sz-skip-row');hide('sz-cam-err');}).catch(function(err){var msg='Kamera nicht verf\u00fcgbar.';if(err.name==='NotAllowedError')msg='Kamera-Zugriff verweigert.';if(err.name==='NotFoundError')msg='Keine Kamera gefunden.';el('sz-cam-err').textContent=msg;show('sz-cam-err');});}
+function toggleRecord(){
+  if(!state.recording){state.chunks=[];var opts=MediaRecorder.isTypeSupported('video/webm')?{mimeType:'video/webm'}:{};state.mediaRecorder=new MediaRecorder(state.mediaStream,opts);state.mediaRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)state.chunks.push(e.data);};state.mediaRecorder.onstop=function(){var blob=new Blob(state.chunks,{type:state.mediaRecorder.mimeType||'video/webm'});var pv=el('sz-vid-preview');pv.src=URL.createObjectURL(blob);pv.load();stopCamera();show('sz-preview-wrap');hide('sz-skip-row');};state.mediaRecorder.start();state.recording=true;var rb=el('sz-rec-btn');rb.textContent='\u25a0 Stoppen';rb.style.background='\x23111';rb.style.borderColor='\x23111';show('sz-rec-timer');}else{state.mediaRecorder.stop();state.recording=false;}
+}
+function stopCamera(){if(state.mediaStream){state.mediaStream.getTracks().forEach(function(t){t.stop();});state.mediaStream=null;}var lv=el('sz-cam-stream');if(lv)lv.srcObject=null;hide('sz-cam-live');var rb=el('sz-rec-btn');if(rb){rb.textContent='\u25cf Aufnahme starten';rb.style.background='\x23DC2626';rb.style.borderColor='\x23DC2626';}hide('sz-rec-timer');state.recording=false;}
+function resetCamera(){stopCamera();var pv=el('sz-vid-preview');if(pv){pv.pause();pv.src='';}show('sz-cam-card');hide('sz-cam-live');hide('sz-preview-wrap');flex('sz-skip-row');hide('sz-cam-err');}
+function startFinalCamera(){hide('sz-final-cam-card');navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true}).then(function(stream){state.finalStream=stream;el('sz-final-stream').srcObject=stream;show('sz-final-cam');}).catch(function(err){show('sz-final-cam-card');var msg=err.name==='NotAllowedError'?'Kamera-Zugriff verweigert.':'Kamera nicht verf\u00fcgbar.';el('sz-final-cam-err').textContent=msg;show('sz-final-cam-err');});}
+function toggleFinalRecord(){
+  if(!state.finalRecording){state.finalChunks=[];var opts=MediaRecorder.isTypeSupported('video/webm')?{mimeType:'video/webm'}:{};state.finalRecorder=new MediaRecorder(state.finalStream,opts);state.finalRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)state.finalChunks.push(e.data);};state.finalRecorder.onstop=function(){var blob=new Blob(state.finalChunks,{type:state.finalRecorder.mimeType||'video/webm'});state.finalBlob=blob;var ext=blob.type&&blob.type.indexOf('mp4')>-1?'mp4':'webm';var pv=el('sz-final-preview');pv.src=URL.createObjectURL(blob);pv.load();stopFinalCamera();hide('sz-final-cam-card');show('sz-final-preview-wrap');state.finalVideoReady=true;};hide('sz-final-cam-card');state.finalRecorder.start();state.finalRecording=true;var rb=el('sz-final-rec-btn');rb.textContent='\u25a0 Stoppen';rb.style.background='\x23111';rb.style.borderColor='\x23111';show('sz-final-rec-timer');}else{state.finalRecorder.stop();state.finalRecording=false;}
+}
+function stopFinalCamera(){if(state.finalStream){state.finalStream.getTracks().forEach(function(t){t.stop();});state.finalStream=null;}var lv=el('sz-final-stream');if(lv)lv.srcObject=null;hide('sz-final-cam');var rb=el('sz-final-rec-btn');if(rb){rb.textContent='\u25cf Aufnahme starten';rb.style.background='\x23DC2626';rb.style.borderColor='\x23DC2626';}hide('sz-final-rec-timer');state.finalRecording=false;}
+function autoDownload(blob,filename){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},3000);}
+function buildMailto(){
+  var names=['Leg Cross','Seven','La Croqueta','No Look','Roulette'];
+  var pn=state.currentPlayerName||'Spieler';
+  var rows=state.ratings.map(function(r,i){var lbl=r>=5?'Gemeistert':r>=4?'Gemeistert':r>0?'In Arbeit':'Nicht gemacht';return (i+1)+'. '+names[i]+': '+lbl+(r>0?' ('+r+'/5)':'')+'\n';}).join('');
+  var subj=encodeURIComponent('\ud83c\udfc6 Final-Video von '+pn+' \u2013 1-Stern Zertifikat');
+  var mid=getBMId()||state.memberId||'unbekannt';
+  var _state=JSON.stringify({orderBy:{column:'createdAt',reverse:true},query:mid,filterBy:[]});
+  var _b64=btoa(unescape(encodeURIComponent(_state)));
+  var adminUrl='https://teco7.bettermode.io/manage/people/members?state='+_b64;
+  var body='Hallo,\n\nIch habe alle Skills geschafft. Anbei mein Video f\u00fcr das 2 Sterne Zertifikat.\n\nViele Gr\u00fc\u00dfe,\n'+pn+'\n\n---\nSpieler: '+pn+'\nE-Mail: '+mid+'\nAdmin-Suche: '+adminUrl+'\nKurs XP: '+computeKursXP()+' XP\nGesamt XP: '+getTotalCumXP()+' XP\n\nChallenge-Ergebnisse:\n'+rows;
+  return 'mailto:expert@t7academy.com?subject='+subj+'&body='+encodeURIComponent(body);
+}
+function openMailto(){window.location.href=buildMailto();}
+function resetProgress(){state.ratings=[0,0,0,0,0];state.challengeXP=[0,0,0,0,0];state.cumXP=0;state.submitted=false;state.completed_at={};state.finalVideoReady=false;state.finalBlob=null;state.finalChunks=[];save();refreshTrack();goTrack();updateXP();}
+function wire(){
+  el('sz-cr').addEventListener('click',toggleExpand);el('sz-cr-btn').addEventListener('click',function(e){e.stopPropagation();toggleExpand();});
+  [0,1,2,3,4].forEach(function(i){el('sz-row-'+i).addEventListener('click',function(){openDrill(i);});});
+  el('sz-row-final').addEventListener('click',function(){if(allDone())openSubmit();});
+  el('sz-back').addEventListener('click',goTrack);el('sz-submit-back').addEventListener('click',goTrack);
+  el('sz-s1-next').addEventListener('click',function(){goStep(2);});el('sz-s2-next').addEventListener('click',function(){goStep(3);});el('sz-s3-next').addEventListener('click',function(){goStep(4);});el('sz-skip').addEventListener('click',function(){goStep(3);});
+  [1,2,3,4,5].forEach(function(v){el('sz-r'+v).addEventListener('click',function(){selectRate(v);});});
+  el('sz-cam-open').addEventListener('click',startCamera);el('sz-rec-btn').addEventListener('click',toggleRecord);el('sz-cam-stop').addEventListener('click',stopCamera);
+  el('sz-retry-cam').addEventListener('click',function(){var pv=el('sz-vid-preview');pv.pause();pv.src='';hide('sz-preview-wrap');show('sz-cam-card');flex('sz-skip-row');});
+  el('sz-final-open').addEventListener('click',startFinalCamera);el('sz-final-rec-btn').addEventListener('click',toggleFinalRecord);
+  el('sz-direct-send').addEventListener('click',function(){openMailto();state.submitted=true;save();hide('sz-final-cam-card');hide('sz-final-cam');hide('sz-final-preview-wrap');show('sz-sent');refreshTrack();});
+  el('sz-final-cam-stop').addEventListener('click',function(){stopFinalCamera();show('sz-final-cam-card');});
+  el('sz-final-retry').addEventListener('click',function(){var pv=el('sz-final-preview');pv.pause();pv.src='';hide('sz-final-preview-wrap');state.finalVideoReady=false;state.finalBlob=null;state.finalChunks=[];show('sz-final-cam-card');});
+  el('sz-download-btn').addEventListener('click',function(){if(!state.finalBlob)return;var ext=state.finalBlob.type&&state.finalBlob.type.indexOf('mp4')>-1?'mp4':'webm';autoDownload(state.finalBlob,'final-video-'+(state.currentPlayerName||'spieler').replace(/\s+/g,'-').toLowerCase()+'.'+ext);el('sz-download-ok').style.display='flex';setTimeout(function(){show('sz-step-send');},800);});
+  el('sz-send-btn').addEventListener('click',handleSendDesktop);el('sz-mob-btn').addEventListener('click',handleSend);
+  el('sz-retake-video').addEventListener('click',function(){state.submitted=false;save();hide('sz-sent');if(isMobile()){el('sz-mob').style.display='block';el('sz-desk').style.display='none';el('sz-mob-btn').innerHTML='&#9993;&#65039; E-Mail an Experten \u00f6ffnen';el('sz-mob-sent').style.display='none';}else{el('sz-mob').style.display='none';el('sz-desk').style.display='block';stopFinalCamera();var pv=el('sz-final-preview');if(pv){pv.pause();pv.src='';}hide('sz-final-cam');hide('sz-final-preview-wrap');show('sz-final-cam-card');state.finalVideoReady=false;state.finalBlob=null;state.finalChunks=[];el('sz-download-ok').style.display='none';hide('sz-step-send');}});
+  el('sz-reopen-mail').addEventListener('click',openMailto);el('sz-retry-all').addEventListener('click',resetProgress);
+}
+
+function fetchSBTotalXP(email){
+  if(!email||email==='unbekannt')return;
+  fetch('https://qajjuhjmrtuomwrbxmpz.supabase.co/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{
+    headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4'}
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(rows&&rows.length&&typeof rows[0].total_xp==='number'){
+      state.sbTotalXP=rows[0].total_xp;
+      el('sz-xp-total').textContent=state.sbTotalXP+' XP';
+    }
+  }).catch(function(){});
+}
+function applyPlayer(name){
+  var parts=name.trim().split(/\s+/);
+  var initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():name.slice(0,2).toUpperCase();
+  el('sz-avatar').textContent=initials;state.currentPlayerName=parts[0]||name;state.memberId=getBMId();
+  load(name);
+  var _e=getBMId()||state.memberId||null;if(_e){fetchSBTotalXP(_e);sbBackfill(_e,parts[0]||name);}
+  var ht=el('sz-hero-text');if(ht)ht.textContent='Hey '+parts[0]+'! Zeige deine Skills und erhalte dein Zertifikat!';
+}
+function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi];var bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
+function getBMId(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi];var bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;if(bp.user_id)return bp.user_id;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
+
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+function sbDevice(){return /iphone|ipad|ipod|android/i.test(navigator.userAgent)?'mobile':'desktop';}
+function sbUpsert(email,name,mk,ml,idx,rating,xp,ts,skipPlayers,skipAttempts){
+  if(!email||email==='unbekannt')return;
+  var totalXp=getTotalCumXP();
+  /* 1. Upsert completions — keeps best rating per challenge */
+  fetch(SB_URL+'/rest/v1/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},
+    body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,module_label:ml||'',challenge_idx:idx,rating:rating,xp:xp,total_xp:totalXp,completed_at:ts||Date.now(),platform:'bettermode',device:sbDevice()})
+  }).catch(function(){});
+  /* 2. INSERT into attempts — only on real attempts, never on backfill */
+  if(!skipAttempts){
+    fetch(SB_URL+'/rest/v1/attempts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+      body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,challenge_idx:idx,rating:rating,xp:xp,attempted_at:ts||Date.now()})
+    }).catch(function(){});
+  }
+  /* 3. Update players table snapshot */
+  if(!skipPlayers){
+    fetch(SB_URL+'/rest/v1/players',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({player_email:email,player_name:name||'',total_xp:totalXp})
+    }).catch(function(){});
+  }
+}
+function sbBackfill(email,name){
+  if(!email||email==='unbekannt')return;
+  /* Backfill only upserts completions — never inserts into attempts */
+  for(var i=0;i<drills.length;i++){if(state.ratings[i]>0){var xp=attemptXP(state.ratings[i],drills[i].xp);sbUpsert(email,name,'sz2','2-Stern Zertifikat',i,state.ratings[i],xp,state.completed_at[i]||Date.now(),true,true);}}
+}
+function tryInit(){var name=getBMName();if(name){applyPlayer(name);state.playerInited=true;return true;}return false;}
+try{
+/* Rename placeholder IDs to unique ones for this instance */
+(function(){
+  var all=document.querySelectorAll('[id$="-UID_PLACEHOLDER"]');
+  all.forEach(function(el){el.id=el.id.replace('-UID_PLACEHOLDER','-'+_uid);});
+})();
+/* Refresh total XP pill when another widget rates a challenge */
+window.addEventListener('t7xpupdate',function(){
+  var _em=getBMId?getBMId():null;
+  if(!_em&&typeof getBMEmail==='function')_em=getBMEmail();
+  if(_em&&_em!=='unbekannt')fetchSBTotalXP(_em);
+});
+wire();}catch(e){setTimeout(function(){try{wire();}catch(e2){}},500);}
+applyPlayer('Spieler');
+if(!tryInit()){[100,300,600,1000,1600,2500,4000,6000,8000,10000,15000].forEach(function(ms){setTimeout(function(){if(!state.playerInited)tryInit();},ms);});try{var obs=new MutationObserver(function(){if(!state.playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}}
+})();
+</script>
+</body>
+</html>
