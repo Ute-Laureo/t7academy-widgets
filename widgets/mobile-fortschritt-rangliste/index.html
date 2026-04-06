@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T7 Mobile Sheet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Open Sans',sans-serif;background:transparent}
+
+/* Only show on mobile */
+@media(min-width:768px){
+  #t7-fab,#t7-sheet-overlay{display:none!important}
+}
+
+/* FAB Button */
+#t7-fab{
+  position:fixed;bottom:24px;right:16px;z-index:9999;
+  display:flex;align-items:center;gap:7px;
+  background:linear-gradient(135deg,#00E5FF,#0080FF);
+  color:rgba(0,0,0,.85);font-family:'Open Sans',sans-serif;
+  font-weight:800;font-size:13px;
+  padding:10px 16px;border-radius:99px;border:none;cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,229,255,.5),0 2px 8px rgba(0,0,0,.3);
+  transition:transform .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+#t7-fab:active{transform:scale(0.95)}
+#t7-fab-icon{font-size:15px}
+#t7-fab-xp{font-weight:800}
+#t7-fab-streak{font-weight:800;opacity:.85}
+#t7-fab-sep{opacity:.5;margin:0 1px}
+
+/* Overlay */
+#t7-sheet-overlay{
+  position:fixed;inset:0;z-index:9998;
+  background:rgba(0,0,0,.55);
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+}
+#t7-sheet-overlay.open{opacity:1;pointer-events:all}
+
+/* Bottom Sheet */
+#t7-sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:#080f1e;
+  border-radius:20px 20px 0 0;
+  border-top:1.5px solid rgba(0,229,255,.35);
+  max-height:82vh;display:flex;flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.32,.72,0,1);
+}
+#t7-sheet.open{transform:translateY(0)}
+
+/* Drag handle */
+.sheet-handle{
+  width:40px;height:4px;background:rgba(255,255,255,.2);
+  border-radius:99px;margin:12px auto 0;flex-shrink:0;
+}
+
+/* Sheet header */
+.sheet-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px 0;flex-shrink:0;
+}
+.sheet-title{
+  font-weight:800;font-size:15px;color:#fff;letter-spacing:-.01em;
+}
+.sheet-close{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:none;cursor:pointer;
+  color:rgba(255,255,255,.7);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Tabs */
+.sheet-tabs{
+  display:flex;gap:6px;padding:10px 16px;flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sheet-tab{
+  flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);
+  font-family:'Open Sans',sans-serif;font-weight:700;font-size:12px;
+  cursor:pointer;text-align:center;transition:all .15s;
+}
+.sheet-tab.active{
+  background:rgba(0,229,255,.15);color:#00E5FF;
+  border-color:rgba(0,229,255,.4);
+}
+
+/* Sheet content */
+.sheet-content{
+  flex:1;overflow-y:auto;padding:14px 16px 24px;
+  -webkit-overflow-scrolling:touch;
+  min-height:300px;
+}
+
+/* ── FORTSCHRITT STYLES ── */
+.stat-row{display:flex;gap:8px;margin-bottom:12px}
+.stat-card{
+  flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:10px;text-align:center;
+}
+.stat-num{font-weight:800;font-size:20px;color:#fff;line-height:1}
+.stat-num.aqua{color:#00E5FF}
+.stat-num.streak{color:#00E5FF}
+.stat-label{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:600}
+
+.streak-bar{
+  background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);
+  border-radius:10px;padding:10px 11px;margin-bottom:12px;
+}
+.streak-val{font-weight:800;font-size:12px;color:#00E5FF}
+.streak-desc{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
+.streak-bottom{display:flex;align-items:center;gap:8px;margin-top:7px}
+.streak-days{display:flex;gap:3px;flex:1}
+.streak-day{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.07)}
+.streak-day.on{background:#00E5FF}
+.streak-sessions{font-size:10px;font-weight:800;color:rgba(255,255,255,.5);white-space:nowrap}
+
+.week-compare{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:12px;margin-bottom:12px;
+}
+.wc-title{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px}
+.wc-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.wc-label{font-size:11px;color:rgba(255,255,255,.5)}
+.wc-val{font-size:12px;font-weight:800;color:#fff}
+.wc-bar-wrap{flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:99px;margin:0 8px}
+.wc-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#00E5FF,#0080FF)}
+.wc-diff{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:800;margin-top:4px}
+.wc-diff.up{background:rgba(0,229,255,.12);color:#00E5FF}
+.wc-diff.down{background:rgba(255,59,59,.12);color:#FF3B3B}
+.wc-diff.same{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)}
+
+.mod-section{margin-bottom:4px}
+.mod-title{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.mod-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+.mod-row{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;padding:8px 10px;margin-bottom:6px;
+}
+.mod-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#00E5FF,#0080FF);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.mod-body{flex:1;min-width:0}
+.mod-name{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod-prog-wrap{display:flex;align-items:center;gap:6px;margin-top:3px}
+.mod-prog{flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.mod-prog-fill{height:100%;background:linear-gradient(90deg,#00E5FF,#0080FF);border-radius:99px;transition:width .5s}
+.mod-prog-label{font-size:9px;color:rgba(255,255,255,.4);font-weight:600;white-space:nowrap}
+.mod-xp{font-size:11px;font-weight:800;color:#00E5FF;flex-shrink:0}
+
+/* ── RANGLISTE STYLES ── */
+.rl-tabs{display:flex;gap:6px;margin-bottom:12px}
+.rl-tab{flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-family:'Open Sans',sans-serif;font-weight:700;font-size:11px;cursor:pointer;text-align:center;transition:all .15s}
+.rl-tab.active{background:rgba(0,229,255,.12);color:#00E5FF;border-color:rgba(0,229,255,.35)}
+
+.rank-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:12px;margin-bottom:6px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  transition:border-color .15s;
+}
+.rank-item.me{background:rgba(0,229,255,.08);border-color:rgba(0,229,255,.3)}
+.rank-pos{font-weight:800;font-size:14px;color:rgba(255,255,255,.3);width:20px;text-align:center;flex-shrink:0}
+.rank-pos.gold{color:#FFD700}
+.rank-pos.silver{color:#C0C8D0}
+.rank-pos.bronze{color:#CD7F32}
+.rank-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0080FF);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:rgba(0,0,0,.8);flex-shrink:0}
+.rank-avatar.me-av{box-shadow:0 0 0 2px #00E5FF}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-bar-wrap{height:3px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:4px;overflow:hidden}
+.rank-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#00E5FF,#0080FF)}
+.rank-bar.streak-bar-r{background:linear-gradient(90deg,#FF9500,#FF3B3B)}
+.rank-right{text-align:right;flex-shrink:0}
+.rank-primary{font-size:13px;font-weight:800;color:#00E5FF}
+.rank-secondary{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px}
+
+.loading-msg{text-align:center;padding:24px;color:rgba(255,255,255,.4);font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- FAB Button -->
+<button id="t7-fab" onclick="openSheet()">
+  <span id="t7-fab-icon">⚡</span>
+  <span id="t7-fab-xp">0 XP</span>
+  <span id="t7-fab-sep"> | </span>
+  <span id="t7-fab-streak">0 Wochen</span>
+</button>
+
+<!-- Overlay -->
+<div id="t7-sheet-overlay" onclick="closeSheet()"></div>
+
+<!-- Bottom Sheet -->
+<div id="t7-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="sheet-title">Mein Fortschritt</div>
+    <button class="sheet-close" onclick="closeSheet()">✕</button>
+  </div>
+  <div class="sheet-tabs">
+    <button class="sheet-tab active" id="tab-fort" onclick="switchTab('fort')">📊 Fortschritt</button>
+    <button class="sheet-tab" id="tab-rang" onclick="switchTab('rang')">🏆 Rangliste</button>
+  </div>
+  <div class="sheet-content" id="sheet-content">
+    <div class="loading-msg">Lade...</div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+var LIMIT=20;
+
+var state={
+  name:'Spieler',email:null,
+  totalXP:0,streak:0,weekXP:0,lastWeekXP:0,
+  modules:[],data:{},
+  players:[],weeksByName:{},
+  playerInited:false,
+  activeTab:'fort',
+  sheetOpen:false,
+  fortLoaded:false,
+  rangLoaded:false
+};
+
+/* ── BM helpers ── */
+function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
+function getBMEmail(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
+
+/* ── Supabase ── */
+function sbHeaders(){return{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};}
+
+function loadPlayerData(email,cb){
+  var pP=fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var aP=fetch(SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(email)+'&select=attempted_at,xp,module_key&order=attempted_at.asc',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var cP=fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&select=module_key,challenge_idx,rating,xp',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var mP=fetch(SB_URL+'/rest/v1/modules?select=*&order=sort_order.asc',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  Promise.all([pP,aP,cP,mP]).then(function(res){cb(res[0],res[1],res[2],res[3]);});
+}
+
+function loadRangData(cb){
+  var pP=fetch(SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var aP=fetch(SB_URL+'/rest/v1/attempts?select=player_name,attempted_at&limit=10000',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  Promise.all([pP,aP]).then(function(res){cb(res[0],res[1]);});
+}
+
+/* ── Week helpers ── */
+function getWeekKey(d){var y=d.getFullYear(),w=Math.floor((d-new Date(y,0,1))/604800000);return y+'-W'+w;}
+function calcStreak(attempts){
+  var weeks={};
+  attempts.forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts){var wk=getWeekKey(new Date(ts));weeks[wk]=true;}});
+  var now=new Date(),streak=0;
+  for(var i=0;i<52;i++){var d=new Date(now-i*7*86400000);var wk=getWeekKey(d);if(weeks[wk])streak++;else if(i>0)break;}
+  return streak;
+}
+function calcWeekXP(attempts,weeksAgo){
+  var now=new Date(),target=getWeekKey(new Date(now-(weeksAgo||0)*7*86400000));
+  var xp=0;
+  attempts.forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts&&getWeekKey(new Date(ts))===target)xp+=(a.xp||0);});
+  return xp;
+}
+
+/* ── Process data ── */
+function processPlayerData(playerRows,attRows,compRows,modRows){
+  state.totalXP=(playerRows&&playerRows.length)?playerRows[0].total_xp||0:0;
+  state.streak=calcStreak(attRows);
+  state.weekXP=calcWeekXP(attRows,0);
+  state.lastWeekXP=calcWeekXP(attRows,1);
+
+  var MODULES_FALLBACK=[
+    {key:'jong',label:'Jonglierschule',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10}]},
+    {key:'sz1',label:'1 Stern Zertifikat',icon:'⭐',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz2',label:'2 Sterne Zertifikat',icon:'⭐',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz3',label:'3 Sterne Zertifikat',icon:'⭐',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz4',label:'4 Sterne Zertifikat',icon:'⭐',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz5',label:'5 Sterne Zertifikat',icon:'⭐',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'fc1',label:'Fun Challenge',icon:'🔥',challenges:[{idx:0,xp:10}]},
+    {key:'br1',label:'Brazilian Dance',icon:'🇧🇷',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+    {key:'gm1',label:'Groundmoves',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+    {key:'ft1',label:'First Touch',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+    {key:'fta1',label:'First Touch Air',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10},{idx:5,xp:10}]}
+  ];
+  state.modules=(modRows&&modRows.length)?modRows:MODULES_FALLBACK;
+
+  /* Build last attempt timestamp per module from attempts */
+  var lastAttemptByModule={};
+  attRows.forEach(function(a){
+    var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;
+    if(ts&&a.module_key){
+      if(!lastAttemptByModule[a.module_key]||ts>lastAttemptByModule[a.module_key])
+        lastAttemptByModule[a.module_key]=ts;
+    }
+  });
+
+  state.data={};
+  state.modules.forEach(function(m){
+    var mrows=compRows.filter(function(r){return r.module_key===m.key;});
+    var ratings=[];
+    mrows.forEach(function(r){if(r.rating>=(ratings[r.challenge_idx]||0))ratings[r.challenge_idx]=r.rating;});
+    var done=ratings.filter(function(r){return r>=4;}).length;
+    var total=m.challenges?m.challenges.length:0;
+    var kursXP=0;
+    if(m.challenges)m.challenges.forEach(function(c){var r=ratings[c.idx]||0;if(r>=4)kursXP+=Math.round((r/5)*c.xp);});
+    state.data[m.key]={ratings:ratings,done:done,total:total,kursXP:kursXP,lastAttempt:lastAttemptByModule[m.key]||0};
+  });
+}
+
+function processRangData(players,attempts){
+  state.players=players||[];
+  var weeksByName={};
+  attempts.forEach(function(a){
+    var name=a.player_name||'?';
+    var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;
+    if(!ts)return;
+    var wk=getWeekKey(new Date(ts));
+    if(!weeksByName[name])weeksByName[name]={};
+    weeksByName[name][wk]=true;
+  });
+  state.weeksByName=weeksByName;
+}
+
+function getPlayerStreak(name){
+  var weeks=state.weeksByName[name]||{};
+  var now=new Date(),streak=0;
+  for(var i=0;i<52;i++){var wk=getWeekKey(new Date(now-i*7*86400000));if(weeks[wk])streak++;else if(i>0)break;}
+  return streak;
+}
+
+/* ── FAB update ── */
+function updateFAB(){
+  document.getElementById('t7-fab-xp').textContent=state.totalXP+' XP';
+  document.getElementById('t7-fab-streak').textContent=state.streak+' Wochen';
+}
+
+/* ── Render Fortschritt ── */
+function renderFort(){
+  var thisW=state.weekXP,lastW=state.lastWeekXP,maxW=Math.max(thisW,lastW,1);
+  var diff=thisW-lastW;
+  var diffHtml='';
+  if(diff>0)diffHtml='<span class="wc-diff up">▲ '+diff+' XP mehr</span>';
+  else if(diff<0)diffHtml='<span class="wc-diff down">▼ '+Math.abs(diff)+' XP weniger</span>';
+  else diffHtml='<span class="wc-diff same">Gleich wie letzte Woche</span>';
+
+  var streakDays='';
+  for(var i=0;i<3;i++){streakDays+='<div class="streak-day'+(i<state.streak?' on':'')+'"></div>';}
+
+  var modRows='';
+  var sortedMods=state.modules.slice().sort(function(a,b){
+    var da=state.data[a.key]||{lastAttempt:0};
+    var db=state.data[b.key]||{lastAttempt:0};
+    return (db.lastAttempt||0)-(da.lastAttempt||0);
+  }).slice(0,5);
+  sortedMods.forEach(function(m){
+    var d=state.data[m.key]||{done:0,total:0,kursXP:0};
+    if(!d.total)return;
+    var pct=Math.round(d.done/d.total*100);
+    var _iconMap={'jong':'⚽','sz1':'⭐','sz2':'⭐','sz3':'⭐','sz4':'⭐','sz5':'⭐','fc1':'🔥','br1':'🇧🇷','gm1':'🏃','ft1':'👟','fta1':'🌬️'};
+    var icon=_iconMap[m.key]||(typeof m.icon==='string'?m.icon:'⚽');
+    modRows+='<div class="mod-row">'+
+      '<div class="mod-icon">'+icon+'</div>'+
+      '<div class="mod-body">'+
+        '<div class="mod-name">'+m.label+'</div>'+
+        '<div class="mod-prog-wrap">'+
+          '<div class="mod-prog"><div class="mod-prog-fill" style="width:'+pct+'%"></div></div>'+
+          '<span class="mod-prog-label">'+d.done+'/'+d.total+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="mod-xp">'+d.kursXP+' XP</div>'+
+    '</div>';
+  });
+
+  var totalDone=0,totalAll=0;
+  Object.values(state.data).forEach(function(d){totalDone+=d.done||0;totalAll+=d.total||0;});
+
+  return '<div class="stat-row">'+
+    '<div class="stat-card"><div class="stat-num aqua" id="fs-total-xp">'+state.totalXP+'</div><div class="stat-label">Gesamt XP</div></div>'+
+    '<div class="stat-card"><div class="stat-num">'+totalDone+' / '+totalAll+'</div><div class="stat-label">Freigeschaltet</div></div>'+
+    '<div class="stat-card"><div class="stat-num streak">'+state.streak+'🔥</div><div class="stat-label">Wochen Streak</div></div>'+
+  '</div>'+
+  '<div class="streak-bar">'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+      '<span style="font-size:18px">⚡</span>'+
+      '<div style="flex:1">'+
+        '<div class="streak-val">'+state.streak+' Wochen in Folge</div>'+
+        '<div class="streak-desc" id="fs-streak-desc">'+(state.streak>0?'Weiter so!':'Trainiere diese Woche!')+'</div>'+
+        '<div class="streak-bottom">'+
+          '<div class="streak-days">'+streakDays+'</div>'+
+          '<div class="streak-sessions">0 / 3x diese Woche</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+  '</div>'+
+  '<div class="week-compare">'+
+    '<div class="wc-title">Diese Woche vs. Letzte Woche</div>'+
+    '<div class="wc-row">'+
+      '<span class="wc-label">Diese Woche</span>'+
+      '<div class="wc-bar-wrap"><div class="wc-bar" style="width:'+Math.round(thisW/maxW*100)+'%"></div></div>'+
+      '<span class="wc-val">'+thisW+' XP</span>'+
+    '</div>'+
+    '<div class="wc-row">'+
+      '<span class="wc-label">Letzte Woche</span>'+
+      '<div class="wc-bar-wrap"><div class="wc-bar" style="width:'+Math.round(lastW/maxW*100)+'%;opacity:.5"></div></div>'+
+      '<span class="wc-val" style="opacity:.6">'+lastW+' XP</span>'+
+    '</div>'+
+    diffHtml+
+  '</div>'+
+  '<div class="mod-section">'+
+    '<div class="mod-title">Challenges</div>'+
+    modRows+
+  '</div>';
+}
+
+/* ── Render Rangliste ── */
+function renderRang(mode){
+  mode=mode||'streak';
+  var isStreak=(mode==='streak');
+  var items=state.players.slice();
+  items=items.map(function(p){return{name:p.player_name,xp:p.total_xp||0,streak:getPlayerStreak(p.player_name)};});
+  if(isStreak){items.sort(function(a,b){return b.streak-a.streak;});}
+  else{items.sort(function(a,b){return b.xp-a.xp;});}
+  var maxVal=1;
+  items.forEach(function(p){var v=isStreak?p.streak:p.xp;if(v>maxVal)maxVal=v;});
+
+  var tabs='<div class="rl-tabs">'+
+    '<button class="rl-tab'+(isStreak?' active':'')+'" onclick="reRenderRang(\'streak\')">🔥 Wochen Streak</button>'+
+    '<button class="rl-tab'+(isStreak?'':' active')+'" onclick="reRenderRang(\'xp\')">⚡ XP Rangliste</button>'+
+  '</div>';
+
+  var rows='';
+  items.forEach(function(p,i){
+    var name=p.name||'?';
+    var initials=name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    var isMe=(state.name&&name.split(' ')[0]===state.name.split(' ')[0]);
+    var val=isStreak?p.streak:p.xp;
+    var pct=Math.round(val/maxVal*100);
+    var pos=i+1;
+    var posClass=pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+    var medal=pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos;
+    rows+='<div class="rank-item'+(isMe?' me':'')+'">'+
+      '<div class="rank-pos '+posClass+'">'+medal+'</div>'+
+      '<div class="rank-avatar'+(isMe?' me-av':'')+'">'+initials+'</div>'+
+      '<div class="rank-info">'+
+        '<div class="rank-name">'+name+'</div>'+
+        '<div class="rank-bar-wrap"><div class="rank-bar'+(isStreak?' streak-bar-r':'')+'" style="width:'+pct+'%"></div></div>'+
+      '</div>'+
+      '<div class="rank-right">'+
+        '<div class="rank-primary">'+val+(isStreak?' Wo':' XP')+'</div>'+
+        '<div class="rank-secondary">'+(isStreak?p.xp+' XP':p.streak+' Wo')+'</div>'+
+      '</div>'+
+    '</div>';
+  });
+
+  return tabs+'<div id="rang-list">'+rows+'</div>';
+}
+
+window.reRenderRang=function(mode){
+  document.getElementById('sheet-content').innerHTML=renderRang(mode);
+};
+
+/* ── Sheet open/close ── */
+window.openSheet=function(){
+  state.sheetOpen=true;
+  document.getElementById('t7-sheet').classList.add('open');
+  document.getElementById('t7-sheet-overlay').classList.add('open');
+  if(state.activeTab==='fort'&&!state.fortLoaded){
+    document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';
+    if(state.email)loadAndRenderFort();
+  }
+  if(state.activeTab==='rang'&&!state.rangLoaded){
+    document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';
+    loadAndRenderRang();
+  }
+};
+window.closeSheet=function(){
+  state.sheetOpen=false;
+  document.getElementById('t7-sheet').classList.remove('open');
+  document.getElementById('t7-sheet-overlay').classList.remove('open');
+};
+window.switchTab=function(tab){
+  state.activeTab=tab;
+  document.getElementById('tab-fort').className='sheet-tab'+(tab==='fort'?' active':'');
+  document.getElementById('tab-rang').className='sheet-tab'+(tab==='rang'?' active':'');
+  document.getElementById('sheet-title').textContent=tab==='fort'?'Mein Fortschritt':'Rangliste';
+  if(tab==='fort'){
+    if(state.fortLoaded){document.getElementById('sheet-content').innerHTML=renderFort();}
+    else{document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';if(state.email)loadAndRenderFort();}
+  }else{
+    if(state.rangLoaded){document.getElementById('sheet-content').innerHTML=renderRang('streak');}
+    else{document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';loadAndRenderRang();}
+  }
+};
+
+function loadAndRenderFort(){
+  loadPlayerData(state.email,function(pRows,aRows,cRows,mRows){
+    processPlayerData(pRows,aRows,cRows,mRows);
+    state.fortLoaded=true;
+    updateFAB();
+    if(state.sheetOpen&&state.activeTab==='fort')document.getElementById('sheet-content').innerHTML=renderFort();
+  });
+}
+function loadAndRenderRang(){
+  loadRangData(function(players,attempts){
+    processRangData(players,attempts);
+    state.rangLoaded=true;
+    if(state.sheetOpen&&state.activeTab==='rang')document.getElementById('sheet-content').innerHTML=renderRang('streak');
+  });
+}
+
+/* ── Init ── */
+function init(name,email){
+  state.name=name;state.email=email;
+  var parts=name.split(' ');
+  document.getElementById('sheet-title').textContent='Hey '+parts[0]+'!';
+  loadPlayerData(email,function(pRows,aRows,cRows,mRows){
+    processPlayerData(pRows,aRows,cRows,mRows);
+    state.fortLoaded=true;
+    updateFAB();
+  });
+}
+
+function tryInit(){
+  var name=getBMName(),email=getBMEmail();
+  if(name&&email){init(name,email);state.playerInited=true;return true;}
+  return false;
+}
+
+window.addEventListener('t7xpupdate',function(){
+  if(!state.email)return;
+  state.fortLoaded=false;
+  state.rangLoaded=false;
+  loadPlayerData(state.email,function(pRows,aRows,cRows,mRows){
+    processPlayerData(pRows,aRows,cRows,mRows);
+    state.fortLoaded=true;
+    updateFAB();
+    if(state.sheetOpen&&state.activeTab==='fort')document.getElementById('sheet-content').innerHTML=renderFort();
+  });
+  if(state.sheetOpen&&state.activeTab==='rang'){loadAndRenderRang();}
+});
+
+if(!tryInit()){
+  [100,300,600,1000,1600,2500,4000].forEach(function(ms){setTimeout(function(){if(!state.playerInited)tryInit();},ms);});
+  try{var obs=new MutationObserver(function(){if(!state.playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}
+}
+
+/* Touch drag to close */
+var touchStart=0;
+document.getElementById('t7-sheet').addEventListener('touchstart',function(e){touchStart=e.touches[0].clientY;},{passive:true});
+document.getElementById('t7-sheet').addEventListener('touchend',function(e){
+  var diff=e.changedTouches[0].clientY-touchStart;
+  if(diff>80)closeSheet();
+},{passive:true});
+
+})();
+</script>
+</body>
+</html>
