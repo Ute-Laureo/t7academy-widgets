@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ginga Style</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
+.br-wrap{color-scheme:dark}
+.br-wrap,.br-wrap *{
+  --br-green:#009C3B;--br-yellow:#FFDF00;--br-blue:#002776;
+  --br-green-dim:rgba(0,156,59,.35);--br-yellow-dim:rgba(255,223,0,.35);
+  --br-bg:#080f1e;--br-row-bg:#0d1a2e;--br-row-hover:#0d200a;
+  --br-text:#f0f0f0;--br-text-muted:rgba(240,240,240,.6);--br-text-dim:rgba(240,240,240,.38);
+  --br-plabel:rgba(0,156,59,.6);--br-plabel-line:rgba(0,156,59,.12);
+}
+.br-wrap *{box-sizing:border-box}
+.br-wrap{font-family:'Open Sans',sans-serif;font-size:13px;color:var(--br-text);width:100%;background:transparent}
+.br-wrap .cr{position:relative;display:flex;align-items:center;gap:10px;background:#080f1e!important;border:1.5px solid var(--br-green-dim);border-radius:12px;padding:12px 14px;cursor:pointer;overflow:hidden;transition:box-shadow .2s,transform .15s;flex-wrap:wrap}
+.br-wrap .cr.open{border-radius:12px 12px 0 0;border-bottom-color:transparent;margin-bottom:-3px;z-index:2}
+.br-wrap .cr:hover{box-shadow:0 0 0 1px var(--br-green),0 6px 28px rgba(0,156,59,.2);transform:translateY(-1px)}
+.br-wrap .cr::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.04) 50%,transparent 70%);pointer-events:none}
+.br-wrap .cr-badge{width:44px!important;height:44px!important;background:linear-gradient(135deg,var(--br-green) 0%,var(--br-yellow) 100%)!important;border-radius:12px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:24px!important;flex-shrink:0!important;box-shadow:0 0 14px rgba(0,156,59,.4)!important;position:relative!important;z-index:1!important}
+.br-wrap .cr-body{flex:1;min-width:0;position:relative;z-index:1}
+.br-wrap .cr-title{font-weight:700;font-size:16px;color:var(--br-text)!important;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.br-wrap .cr-sub{font-size:10px;color:var(--br-text-muted)!important;margin-top:3px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.br-wrap .cr-prog{flex:1;max-width:70px;height:5px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.br-wrap .cr-prog-fill{height:100%;background:var(--br-yellow);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
+.br-wrap .cr-prog-label{font-size:10px;color:var(--br-yellow);font-weight:700;white-space:nowrap}
+.br-wrap .cr-player{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:1}
+.br-wrap .cr-avatar{width:28px!important;height:28px!important;border-radius:50%!important;background:#00E5FF!important;color:rgba(0,0,0,.85)!important;font-weight:800!important;font-size:10px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 8px rgba(0,229,255,.4)!important;flex-shrink:0!important}
+.br-wrap .cr .cr-xp{font-weight:800!important;font-size:10px!important;background:rgba(0,229,255,.15)!important;color:#00E5FF!important;padding:3px 9px!important;border-radius:99px!important;border:1px solid rgba(0,229,255,.45)!important;white-space:nowrap!important}
+.br-wrap .cr .cr-xp-total{font-weight:800!important;font-size:10px!important;background:#00E5FF!important;color:rgba(0,0,0,.85)!important;padding:3px 9px!important;border-radius:99px!important;box-shadow:0 0 10px rgba(0,229,255,.3)!important;white-space:nowrap!important}
+.br-wrap .cr .cr-btn{display:inline-flex!important;align-items:center!important;gap:5px!important;padding:8px 14px!important;font-family:'Open Sans',sans-serif!important;font-weight:800!important;font-size:13px!important;background:linear-gradient(135deg,var(--br-green) 0%,var(--br-yellow) 100%)!important;color:rgba(0,0,0,.85)!important;border:none!important;border-radius:12px!important;cursor:pointer!important;flex-shrink:0!important;box-shadow:0 0 16px rgba(0,156,59,.35)!important;transition:all .15s!important;white-space:nowrap!important}
+.br-wrap .cr .cr-btn:hover{box-shadow:0 0 24px rgba(0,156,59,.55);transform:scale(1.03)}
+.br-wrap .br-panel{display:none;background:var(--br-bg)!important;border:1.5px solid var(--br-green-dim);border-top:0!important;border-radius:0 0 12px 12px;overflow:visible;padding-top:0;padding-bottom:16px}
+.br-wrap .br-panel.open{display:block;animation:br-slide .25s ease}
+.br-wrap .br-panel.open::before{content:'';display:block;height:6px;margin:-6px -1.5px 0;background:var(--br-bg);border-left:1.5px solid var(--br-green-dim);border-right:1.5px solid var(--br-green-dim)}
+@keyframes br-slide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.br-wrap .ph{padding:16px 16px 10px;margin:0;position:relative;overflow:hidden;background:#0a1a0a!important;border:1px solid rgba(0,156,59,.25)!important;border-radius:12px}
+.br-wrap .ph-eye{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--br-yellow);margin-bottom:4px}
+.br-wrap .ph-title{font-weight:800;font-size:22px;color:#fff!important;margin-bottom:6px;line-height:1}
+.br-wrap .ph-body{font-size:13px;color:var(--br-text-muted)!important;line-height:1.65}
+.br-wrap .plist{padding:12px 0 14px;display:flex;flex-direction:column;gap:6px}
+.br-wrap .plabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--br-plabel);margin-bottom:2px;padding:0 14px;display:flex;align-items:center;gap:8px}
+.br-wrap .plabel::after{content:'';flex:1;height:1px;background:var(--br-plabel-line)}
+.br-wrap .prow{display:flex;align-items:center;gap:11px;background:#0d1a2e!important;border:1px solid rgba(255,255,255,.06)!important;border-radius:12px;padding:11px 13px;margin:0 14px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.br-wrap .prow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;border-radius:8px 0 0 8px;transition:background .15s}
+.br-wrap .prow:hover{background:#0a1a0a!important;border-color:rgba(0,156,59,.4);transform:translateX(2px)}
+.br-wrap .prow:hover::before{background:var(--br-yellow)}
+.br-wrap .prow.pdone{border-color:rgba(0,156,59,.3)!important}
+.br-wrap .prow.pdone::before{background:var(--br-green)}
+.br-wrap .prow-num{font-weight:800;font-size:20px;font-style:italic;line-height:1;color:rgba(255,255,255,.18);width:28px;text-align:center;flex-shrink:0}
+.br-wrap .prow:hover .prow-num{color:var(--br-yellow)}
+.br-wrap .prow.pdone .prow-num{color:var(--br-green)!important}
+.br-wrap .prow-body{flex:1;min-width:0}
+.br-wrap .prow-title{font-weight:700;font-size:13px;color:var(--br-text)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.br-wrap .prow-meta{font-size:10px;color:var(--br-text-dim);margin-top:2px;font-weight:600}
+.br-wrap .pbadge{font-weight:700;font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:8px;flex-shrink:0;white-space:nowrap}
+.br-wrap .b-new{background:rgba(0,156,59,.1);color:var(--br-green);border:1px solid rgba(0,156,59,.28)}
+.br-wrap .b-retry{background:rgba(255,149,0,.1);color:#FF9500;border:1px solid rgba(255,149,0,.25)}
+.br-wrap .b-inprog{background:rgba(255,223,0,.12);color:#cca800;border:1px solid rgba(255,223,0,.3)}
+.br-wrap .b-done{background:rgba(0,156,59,.1);color:var(--br-green);border:1px solid rgba(0,156,59,.3);box-shadow:0 0 8px rgba(0,156,59,.12)}
+.br-wrap .drill-screen{display:none;padding:0 14px 18px;background:var(--br-bg)!important}
+.br-wrap .drill-screen.open{display:block}
+.br-wrap .back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;margin:6px 0 10px;font-family:'Open Sans',sans-serif;font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--br-green);background:#0a1a0a;border:1px solid rgba(0,156,59,.3);border-radius:12px;cursor:pointer;transition:all .15s}
+.br-wrap .back-btn:hover{background:rgba(0,156,59,.1)}
+.br-wrap .steps{display:flex;align-items:center;background:#0a1a0a!important;border:1px solid rgba(0,156,59,.15)!important;border-radius:12px;padding:10px 12px;margin-bottom:16px}
+.br-wrap .step{display:flex;align-items:center;gap:6px;flex:1}
+.br-wrap .step-dot{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;color:rgba(0,156,59,.5);flex-shrink:0;transition:all .2s}
+.br-wrap .step-dot.done-s{background:var(--br-green);border-color:var(--br-green);color:#fff;box-shadow:0 0 10px rgba(0,156,59,.4)}
+.br-wrap .step-dot.curr-s{background:#fff;border-color:#fff;color:rgba(0,0,0,.8)}
+.br-wrap .step-name{font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:rgba(0,156,59,.6)!important}
+.br-wrap .step-line{flex:1;height:1px;background:rgba(0,156,59,.12);margin:0 4px}
+.br-wrap .drill-eye{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--br-yellow);margin-bottom:3px}
+.br-wrap .drill-h{font-weight:700;font-size:16px;color:#fff;margin-bottom:3px;line-height:1.05}
+.br-wrap .drill-meta{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:16px;font-weight:600}
+.br-wrap .embed-wrap{position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;background:#000;margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,.7),0 0 0 1px rgba(0,156,59,.15)}
+.br-wrap .embed-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.br-wrap .nudge{border-left:3px solid var(--br-green);border-radius:0 12px 12px 0;padding:11px 14px;background:#0a1a0a!important;margin-bottom:14px}
+.br-wrap .nudge-t{font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--br-green);margin-bottom:3px}
+.br-wrap .nudge-s{font-size:13px;color:rgba(0,200,80,.75)!important;line-height:1.6}
+.br-wrap .try-card{background:#0a1a0a!important;border:1px solid rgba(0,156,59,.15)!important;border-radius:12px;padding:20px 18px;text-align:center;margin-bottom:14px}
+.br-wrap .try-icon{font-size:22px;margin-bottom:8px}
+.br-wrap .try-title{font-weight:700;font-size:13px;color:#fff!important;margin-bottom:5px}
+.br-wrap .try-sub{font-size:13px;color:rgba(255,255,255,.6)!important;line-height:1.6;margin-bottom:14px}
+.br-wrap video{width:100%;border-radius:12px;background:#000;max-height:260px;display:block;margin-bottom:12px;border:1px solid rgba(0,156,59,.2)}
+.br-wrap .btn{display:inline-flex;align-items:center;gap:5px;padding:9px 16px;font-family:'Open Sans',sans-serif;font-weight:700;font-size:13px;border-radius:12px;border:1px solid rgba(255,255,255,.14);cursor:pointer;transition:all .15s;background:#0d1a2e;color:#fff}
+.br-wrap .btn-green{background:linear-gradient(135deg,var(--br-green),#007a2f);color:#fff;border-color:var(--br-green);box-shadow:0 0 16px rgba(0,156,59,.3);font-weight:800}
+.br-wrap .btn-green:hover{box-shadow:0 0 24px rgba(0,156,59,.5);transform:scale(1.02)}
+.br-wrap .btn-yellow{background:linear-gradient(135deg,var(--br-yellow),#e6c800);color:rgba(0,0,0,.85);border-color:var(--br-yellow);box-shadow:0 0 16px rgba(255,223,0,.3);font-weight:800}
+.br-wrap .btn-yellow:hover{box-shadow:0 0 24px rgba(255,223,0,.5);transform:scale(1.02)}
+.br-wrap .btn-amber{background:rgba(255,149,0,.15);color:#FF9500;border-color:rgba(255,149,0,.25)}
+.br-wrap .btn-white{background:#fff;color:rgba(0,0,0,.85);border-color:#fff;font-weight:700}
+.br-wrap .btn-sm{padding:7px 13px;font-size:13px}
+.br-wrap .btn-row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.br-wrap .btn-row-center{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.br-wrap .rate-intro{font-size:13px;color:rgba(255,255,255,.6)!important;text-align:center;margin-bottom:12px;line-height:1.6}
+.br-wrap .rate-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.br-wrap .rate-opt{background:#0d1a2e!important;border:1.5px solid rgba(255,255,255,.1)!important;border-radius:12px;padding:12px 4px;text-align:center;cursor:pointer;transition:all .15s}
+.br-wrap .rate-opt:hover{border-color:rgba(0,156,59,.5);background:#0a1a0a!important;transform:translateY(-3px)}
+.br-wrap .rate-emoji{font-size:22px;margin-bottom:5px}
+.br-wrap .rate-text{font-weight:600;font-size:10px;letter-spacing:.03em;text-transform:uppercase;color:rgba(255,255,255,.6)!important;line-height:1.3}
+.br-wrap .rate-opt.sel-1{border-color:#8B5CF6;background:rgba(139,92,246,.18);box-shadow:0 0 12px rgba(139,92,246,.2)}
+.br-wrap .rate-opt.sel-2{border-color:#FF9500;background:rgba(255,149,0,.15);box-shadow:0 0 12px rgba(255,149,0,.2)}
+.br-wrap .rate-opt.sel-3{border-color:#00E5FF;background:rgba(0,229,255,.1);box-shadow:0 0 12px rgba(0,229,255,.2)}
+.br-wrap .rate-opt.sel-4{border-color:var(--br-green);background:rgba(0,156,59,.15);box-shadow:0 0 14px rgba(0,156,59,.25)}
+.br-wrap .rate-opt.sel-5{border-color:var(--br-yellow);background:rgba(255,223,0,.12);box-shadow:0 0 18px rgba(255,223,0,.25)}
+.br-wrap .outcome{border-radius:12px;padding:24px 20px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden}
+.br-wrap .out-low{background:linear-gradient(135deg,rgba(255,149,0,.12),rgba(139,92,246,.06))!important;border:1px solid rgba(255,149,0,.3)}
+.br-wrap .out-low .outcome-title{color:#FF9500}.br-wrap .out-low .outcome-sub{color:rgba(255,149,0,.85)}
+.br-wrap .out-mid{background:linear-gradient(135deg,rgba(0,156,59,.1),rgba(0,156,59,.04))!important;border:1px solid rgba(0,156,59,.3)}
+.br-wrap .out-mid .outcome-title{color:var(--br-green)}.br-wrap .out-mid .outcome-sub{color:rgba(0,200,80,.85)}
+.br-wrap .out-high{background:linear-gradient(135deg,rgba(255,223,0,.12),rgba(0,156,59,.08))!important;border:1px solid rgba(255,223,0,.35);box-shadow:0 0 40px rgba(255,223,0,.08)}
+.br-wrap .out-high .outcome-title{color:var(--br-yellow)}.br-wrap .out-high .outcome-sub{color:rgba(255,223,0,.85)}
+.br-wrap .outcome-icon{font-size:38px;margin-bottom:10px}
+.br-wrap .outcome-title{font-weight:700;font-size:22px;letter-spacing:-.01em;margin-bottom:7px;line-height:1.05}
+.br-wrap .outcome-sub{font-size:13px;line-height:1.65;opacity:.9}
+.br-wrap .xp-pill{display:inline-flex;align-items:center;gap:4px;background:var(--br-green);color:#fff;font-weight:700;font-size:13px;padding:5px 16px;border-radius:99px;margin-top:8px;box-shadow:0 0 16px rgba(0,156,59,.3)}
+.br-wrap .xp-total-pill{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,var(--br-yellow),#e6c800);color:rgba(0,0,0,.85);font-weight:700;font-size:12px;padding:4px 14px;border-radius:99px;margin-top:6px;box-shadow:0 0 10px rgba(255,223,0,.3)}
+@media(max-width:520px){
+  .br-wrap .cr{flex-wrap:wrap}
+  .br-wrap .cr-player{flex:0 0 100%;justify-content:space-between}
+  .br-wrap .step-name{display:none}
+  .br-wrap .rate-options{gap:4px}
+  .br-wrap .rate-emoji{font-size:18px}
+  .br-wrap .rate-text{font-size:8px}
+  .br-wrap .rate-opt{padding:10px 2px}
+  .br-wrap .btn-row-center .btn{flex:1 1 auto;justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="br-wrap">
+<div class="cr" id="br-cr-UID_PLACEHOLDER">
+  <div class="cr-badge">🕺</div>
+  <div class="cr-body">
+    <div class="cr-title">Ginga Style</div>
+    <div class="cr-sub">
+      <span>Ginga Style</span>
+      <div class="cr-prog"><div class="cr-prog-fill" id="br-prog-fill-UID_PLACEHOLDER" style="width:0%"></div></div>
+      <span class="cr-prog-label" id="br-prog-label-UID_PLACEHOLDER">0 / 5</span>
+    </div>
+  </div>
+  <div class="cr-player">
+    <div class="cr-avatar" id="br-avatar-UID_PLACEHOLDER">?</div>
+    <span class="cr-xp" id="br-xp-UID_PLACEHOLDER" title="XP in diesem Modul">0 XP</span>
+    <span class="cr-xp-total" id="br-xp-total-UID_PLACEHOLDER" title="Gesamt XP">0 XP</span>
+    <button class="cr-btn" id="br-cr-btn-UID_PLACEHOLDER">Starten &#9660;</button>
+  </div>
+</div>
+<div class="br-panel" id="br-panel-UID_PLACEHOLDER">
+  <div id="br-track-UID_PLACEHOLDER">
+    <div class="ph">
+      <div class="ph-eye">⚽ Ginga Style</div>
+      <div class="ph-title">Ginga Style</div>
+      <div class="ph-body" id="br-hero-text-UID_PLACEHOLDER">5 Ginga Styles &mdash; von leicht bis schwer. Jeder Versuch bringt Punkte!</div>
+    </div>
+    <div class="plist">
+      <div class="plabel">Challenges</div>
+      <div class="prow" id="br-row-0-UID_PLACEHOLDER"><div class="prow-num">01</div><div class="prow-body"><div class="prow-title">Sole Role</div><div class="prow-meta">🔥🔥 Mittel &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-0-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="br-row-1-UID_PLACEHOLDER"><div class="prow-num">02</div><div class="prow-body"><div class="prow-title">Step Over</div><div class="prow-meta">🔥🔥 Mittel &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-1-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="br-row-2-UID_PLACEHOLDER"><div class="prow-num">03</div><div class="prow-body"><div class="prow-title">Drag Back</div><div class="prow-meta">🔥🔥 Mittel &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-2-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="br-row-3-UID_PLACEHOLDER"><div class="prow-num">04</div><div class="prow-body"><div class="prow-title">Reverse Elastico</div><div class="prow-meta">🔥🔥 Mittel &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-3-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="br-row-4-UID_PLACEHOLDER"><div class="prow-num">05</div><div class="prow-body"><div class="prow-title">Double Seven</div><div class="prow-meta">🔥🔥 Mittel &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-4-UID_PLACEHOLDER">Neu</span></div>
+    </div>
+  </div>
+  <div class="drill-screen" id="br-drill-UID_PLACEHOLDER">
+    <button class="back-btn" id="br-back-UID_PLACEHOLDER">&larr; Zur&uuml;ck</button>
+    <div class="steps">
+      <div class="step"><div class="step-dot" id="br-d1-UID_PLACEHOLDER">1</div><span class="step-name">Video</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="br-d2-UID_PLACEHOLDER">2</div><span class="step-name">&Uuml;ben</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="br-d3-UID_PLACEHOLDER">3</div><span class="step-name">Bewerten</span></div>
+      <div class="step-line"></div>
+      <div class="step"><div class="step-dot" id="br-d4-UID_PLACEHOLDER">4</div><span class="step-name">Ergebnis</span></div>
+    </div>
+    <div class="drill-eye" id="br-drill-eye-UID_PLACEHOLDER"></div>
+    <div class="drill-h" id="br-drill-h-UID_PLACEHOLDER"></div>
+    <div class="drill-meta" id="br-drill-meta-UID_PLACEHOLDER"></div>
+    <div id="br-s1-UID_PLACEHOLDER">
+      <div class="embed-wrap"><iframe id="br-embed-UID_PLACEHOLDER" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="nudge"><div class="nudge-t">Schau zuerst das ganze Video</div><div class="nudge-s">Achte auf Fu&szlig;stellung und Bewegungsablauf!</div></div>
+      <div class="btn-row"><button class="btn btn-white" id="br-s1-next-UID_PLACEHOLDER">Angeschaut &mdash; weiter &rarr;</button></div>
+    </div>
+    <div id="br-s2-UID_PLACEHOLDER" style="display:none">
+      <div class="nudge"><div class="nudge-t">Leg das Handy weg und &uuml;b!</div><div class="nudge-s">Mehrmals versuchen, dann filmen und anschauen.</div></div>
+      <div class="try-card" id="br-cam-card-UID_PLACEHOLDER">
+        <div class="try-icon">&#128249;</div>
+        <div class="try-title">Filme deinen Versuch</div>
+        <div class="try-sub">Nichts wird gespeichert oder hochgeladen.</div>
+        <button class="btn btn-sm btn-green" id="br-cam-open-UID_PLACEHOLDER">Kamera &ouml;ffnen</button>
+        <div id="br-cam-err-UID_PLACEHOLDER" style="display:none;margin-top:10px;font-size:13px;color:#009C3B"></div>
+      </div>
+      <div id="br-cam-live-UID_PLACEHOLDER" style="display:none;margin-bottom:14px">
+        <video id="br-camera-stream-UID_PLACEHOLDER" autoplay playsinline muted></video>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button class="btn btn-sm" id="br-rec-btn-UID_PLACEHOLDER" style="background:#DC2626;color:#fff;border-color:#DC2626">&#9679; Aufnahme starten</button>
+          <button class="btn btn-sm" id="br-cam-stop-UID_PLACEHOLDER">Abbrechen</button>
+        </div>
+        <div id="br-rec-timer-UID_PLACEHOLDER" style="text-align:center;font-size:11px;font-weight:800;color:#009C3B;margin-top:8px;display:none;letter-spacing:.06em;text-transform:uppercase">&#9210; Aufnahme l&auml;uft&hellip;</div>
+      </div>
+      <div id="br-preview-wrap-UID_PLACEHOLDER" style="display:none;margin-bottom:14px">
+        <video id="br-video-preview-UID_PLACEHOLDER" controls playsinline></video>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" id="br-retry-cam-UID_PLACEHOLDER">&#128249; Nochmal</button>
+          <button class="btn btn-sm btn-green" id="br-s2-next-UID_PLACEHOLDER">Jetzt bewerten &rarr;</button>
+        </div>
+      </div>
+      <div class="btn-row" id="br-skip-row-UID_PLACEHOLDER"><button class="btn btn-sm" id="br-skip-UID_PLACEHOLDER">Ohne Aufnahme bewerten &rarr;</button></div>
+    </div>
+    <div id="br-s3-UID_PLACEHOLDER" style="display:none">
+      <div class="nudge"><div class="nudge-t">Sei ehrlich zu dir selbst</div><div class="nudge-s">Jeder Versuch z&auml;hlt &mdash; 4 oder 5 schaltet die Challenge frei!</div></div>
+      <div class="rate-intro">Wie lief dein Versuch?</div>
+      <div class="rate-options">
+        <div class="rate-opt" id="br-r1-UID_PLACEHOLDER"><div class="rate-emoji">&#128556;</div><div class="rate-text">Auf dem Weg</div></div>
+        <div class="rate-opt" id="br-r2-UID_PLACEHOLDER"><div class="rate-emoji">&#129300;</div><div class="rate-text">Ganz gut</div></div>
+        <div class="rate-opt" id="br-r3-UID_PLACEHOLDER"><div class="rate-emoji">&#128578;</div><div class="rate-text">Besser</div></div>
+        <div class="rate-opt" id="br-r4-UID_PLACEHOLDER"><div class="rate-emoji">&#128516;</div><div class="rate-text">Richtig gut</div></div>
+        <div class="rate-opt" id="br-r5-UID_PLACEHOLDER"><div class="rate-emoji">&#129321;</div><div class="rate-text">Perfekt!</div></div>
+      </div>
+      <div id="br-rate-confirm-UID_PLACEHOLDER" style="display:none" class="btn-row">
+        <button class="btn btn-yellow" id="br-s3-next-UID_PLACEHOLDER">Bewertung best&auml;tigen &rarr;</button>
+      </div>
+    </div>
+    <div id="br-s4-UID_PLACEHOLDER" style="display:none">
+      <div class="outcome out-low" id="br-out-box-UID_PLACEHOLDER">
+        <div class="outcome-icon" id="br-out-icon-UID_PLACEHOLDER">&#128170;</div>
+        <div class="outcome-title" id="br-out-title-UID_PLACEHOLDER"></div>
+        <div class="outcome-sub" id="br-out-sub-UID_PLACEHOLDER"></div>
+        <div><span class="xp-pill" id="br-xp-earned-UID_PLACEHOLDER"></span></div>
+        <div><span class="xp-total-pill" id="br-xp-cumul-UID_PLACEHOLDER"></span></div>
+      </div>
+      <div class="btn-row-center" style="margin-top:12px" id="br-out-btns-UID_PLACEHOLDER"></div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+(function(){
+'use strict';
+var _uid=(Math.random().toString(36)+'00000').slice(2,7);
+var INSTANCE_KEY='gc1';
+var drills=[
+  {title:'Sole Role',eye:'Ginga Style',meta:'\ud83d\udd25\ud83d\udd25 Mittel \u00b7 10 XP',vid:'1109282215',hash:'08c5487fa2',xp:10,next:'N\u00e4chste Challenge: Step Over'},
+  {title:'Step Over',eye:'Ginga Style',meta:'\ud83d\udd25\ud83d\udd25 Mittel \u00b7 10 XP',vid:'1110029715',hash:'8757b6279f',xp:10,next:'N\u00e4chste Challenge: Drag Back'},
+  {title:'Drag Back',eye:'Ginga Style',meta:'\ud83d\udd25\ud83d\udd25 Mittel \u00b7 10 XP',vid:'1110029532',hash:'c98afbe376',xp:10,next:'N\u00e4chste Challenge: Reverse Elastico'},
+  {title:'Reverse Elastico',eye:'Ginga Style',meta:'\ud83d\udd25\ud83d\udd25 Mittel \u00b7 10 XP',vid:'1096874149',hash:'d47a0fd085',xp:10,next:'N\u00e4chste Challenge: Double Seven'},
+  {title:'Double Seven',eye:'Ginga Style',meta:'\ud83d\udd25\ud83d\udd25 Mittel \u00b7 10 XP',vid:'1130122092',hash:'9e2782b01e',xp:10,next:'Alle 5 Ginga Styles gemeistert! \u26bd'}
+];
+
+var XP_MULT=[0,.2,.4,.6,.8,1];
+function attemptXP(rating,maxXp){return Math.round((XP_MULT[rating]||0)*maxXp);}
+function challengeScoreXP(rating,maxXp){if(rating<4)return 0;return Math.round((XP_MULT[rating]||0)*maxXp);}
+
+var state={
+  expanded:false,drill:-1,rate:0,
+  ratings:[0,0,0,0,0],
+  challengeXP:[0,0,0,0,0],
+  cumXP:0,completed_at:{},
+  storageKey:'t7_gc1_guest',
+  mediaStream:null,mediaRecorder:null,chunks:[],recording:false,
+  playerInited:false,currentPlayerName:'Spieler',sbTotalXP:null
+};
+
+function el(id){return document.getElementById(id+'-'+_uid);}
+function show(id){el(id).style.display='block';}
+function hide(id){el(id).style.display='none';}
+function flex(id){el(id).style.display='flex';}
+function scrollUp(){var w=document.getElementById('br-cr-'+_uid);if(w)w.scrollIntoView({behavior:'smooth',block:'nearest'});}
+
+function save(){
+  try{localStorage.setItem(state.storageKey,JSON.stringify({
+    ratings:state.ratings,challengeXP:state.challengeXP,cumXP:state.cumXP,
+    xp:computeKursXP(),completed_at:state.completed_at
+  }));}catch(e){}
+}
+function load(username){
+  state.storageKey='t7_'+INSTANCE_KEY+'_'+(username||'guest').replace(/\s+/g,'_').toLowerCase();
+  try{
+    var raw=localStorage.getItem(state.storageKey);
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d.ratings)state.ratings=d.ratings;
+      if(d.challengeXP)state.challengeXP=d.challengeXP;
+      else{for(var i=0;i<drills.length;i++)state.challengeXP[i]=challengeScoreXP(state.ratings[i]||0,drills[i].xp);}
+      if(typeof d.cumXP==='number')state.cumXP=d.cumXP;
+      else if(typeof d.xp==='number')state.cumXP=d.xp;
+      if(d.completed_at)state.completed_at=d.completed_at;
+    }
+  }catch(e){}
+  updateXP();updateProgress();refreshTrack();
+}
+function computeKursXP(){var t=0;for(var i=0;i<state.challengeXP.length;i++)t+=state.challengeXP[i]||0;return t;}
+function getTotalCumXP(){if(typeof state.sbTotalXP==='number')return state.sbTotalXP;
+  var total=0;
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('t7_')===0){var raw=localStorage.getItem(k);if(raw){var d=JSON.parse(raw);if(typeof d.cumXP==='number')total+=d.cumXP;else if(typeof d.xp==='number')total+=d.xp;}}}}catch(e){}
+  return total;
+}
+function updateXP(){el('br-xp').textContent=computeKursXP()+' XP';el('br-xp-total').textContent=getTotalCumXP()+' XP';}
+function updateProgress(){
+  var done=state.ratings.filter(function(r){return r>=4;}).length;
+  el('br-prog-fill').style.width=(done/5*100)+'%';
+  el('br-prog-label').textContent=done+' / 5';
+}
+function refreshTrack(){
+  for(var i=0;i<5;i++){
+    var row=el('br-row-'+i),badge=el('br-badge-'+i),r=state.ratings[i]||0;
+    if(r===0){row.classList.remove('pdone');badge.className='pbadge b-new';badge.textContent='Neu';}
+    else if(r<=3){row.classList.remove('pdone');badge.className='pbadge b-retry';badge.textContent='\u21a9 Verbessern';}
+    else if(r===4){row.classList.add('pdone');badge.className='pbadge b-inprog';badge.textContent='\u2713 Gut';}
+    else{row.classList.add('pdone');badge.className='pbadge b-done';badge.textContent='\u2605 Perfekt';}
+  }
+  updateProgress();
+}
+function toggleExpand(){
+  state.expanded=!state.expanded;
+  var cr=el('br-cr'),panel=el('br-panel');
+  if(state.expanded){cr.classList.add('open');panel.classList.add('open');el('br-cr-btn').textContent='Schlie\u00dfen \u25b2';}
+  else{cr.classList.remove('open');panel.classList.remove('open');el('br-cr-btn').textContent='Starten \u25bc';goTrack();}
+}
+function goTrack(){el('br-embed').src='';el('br-drill').classList.remove('open');show('br-track');stopCamera();refreshTrack();scrollUp();}
+function openDrill(idx){
+  state.drill=idx;state.rate=0;var d=drills[idx];
+  el('br-drill-eye').textContent=d.eye;el('br-drill-h').textContent=d.title;el('br-drill-meta').textContent=d.meta;
+  el('br-embed').src='https://player.vimeo.com/video/'+d.vid+'?h='+d.hash+'&color=009C3B&title=0&byline=0&portrait=0&dnt=1';
+  [1,2,3,4,5].forEach(function(v){el('br-r'+v).className='rate-opt';});
+  hide('br-rate-confirm');resetCamera();hide('br-track');el('br-drill').classList.add('open');goStep(1);scrollUp();
+}
+function goStep(n){
+  ['br-s1','br-s2','br-s3','br-s4'].forEach(function(id,i){el(id).style.display=(i+1===n)?'block':'none';});
+  [1,2,3,4].forEach(function(i){var dot=el('br-d'+i);dot.className='step-dot';if(i<n)dot.classList.add('done-s');else if(i===n)dot.classList.add('curr-s');});
+  if(n===4)showOutcome();
+}
+function showOutcome(){
+  var d=drills[state.drill],idx=state.drill;
+  var prevRating=state.ratings[idx]||0;
+  var earned=attemptXP(state.rate,d.xp);
+  state.cumXP+=earned;
+  var prevScore=state.challengeXP[idx]||0;
+  var newScore=challengeScoreXP(state.rate,d.xp);
+  var scoreGain=0;
+  if(newScore>prevScore){scoreGain=newScore-prevScore;state.challengeXP[idx]=newScore;}
+  if(state.rate>prevRating){state.ratings[idx]=state.rate;if(!state.completed_at[idx])state.completed_at[idx]=Date.now();}
+  var _mid=getBMId?getBMId():null;
+  if(_mid&&_mid!=='unbekannt'){sbUpsert(_mid,state.currentPlayerName,'gc1','Ginga Style',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false,false);}
+  updateXP();save();
+  var _mid2=getBMId?getBMId():null;
+  if(!_mid2&&typeof getBMEmail==='function')_mid2=getBMEmail();
+  if(_mid2&&_mid2!=='unbekannt'){
+    setTimeout(function(){
+      fetchSBTotalXP(_mid2);
+      try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+      setTimeout(function(){var _cumEl=el('br-xp-cumul');if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';},500);
+    },1500);
+  }
+  var totalCum=getTotalCumXP();
+  var box=el('br-out-box'),icon=el('br-out-icon'),title=el('br-out-title'),sub=el('br-out-sub'),btns=el('br-out-btns');
+  el('br-xp-earned').textContent='+'+earned+' XP diese Runde';
+  el('br-xp-cumul').textContent='Gesamt: '+totalCum+' XP';
+  btns.innerHTML='';
+  if(state.rate<=3){
+    box.className='outcome out-low';icon.textContent=state.rate<=2?'\ud83d\udcaa':'\ud83e\udd14';
+    title.textContent=state.rate<=2?'Weiter k\u00e4mpfen!':'Ganz gut!';
+    sub.textContent='Noch ein Versuch f\u00fcr Bewertung 4 oder 5!';
+    var b1=document.createElement('button');b1.className='btn btn-amber';b1.textContent='\u21a9 Nochmal';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);
+    var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
+  }else if(state.rate===4){
+    box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
+    title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
+    sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Noch ein Versuch f\u00fcr den Perfekt-Bonus!';
+    var b1=document.createElement('button');b1.className='btn btn-green';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);
+    var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
+  }else{
+    box.className='outcome out-high';icon.textContent='\u26bd';
+    title.textContent='Perfekt!';
+    sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Maximale Challenge-Punkte bereits erreicht!';
+    var b1=document.createElement('button');b1.className='btn btn-yellow';b1.textContent='Weiter \u2192';b1.addEventListener('click',goTrack);btns.appendChild(b1);
+  }
+  updateProgress();
+}
+function selectRate(v){state.rate=v;[1,2,3,4,5].forEach(function(i){el('br-r'+i).className='rate-opt';});el('br-r'+v).classList.add('sel-'+v);show('br-rate-confirm');}
+function startCamera(){navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true}).then(function(stream){state.mediaStream=stream;el('br-camera-stream').srcObject=stream;hide('br-cam-card');show('br-cam-live');hide('br-preview-wrap');flex('br-skip-row');hide('br-cam-err');}).catch(function(err){var msg='Kamera nicht verf\u00fcgbar.';if(err.name==='NotAllowedError')msg='Kamera-Zugriff verweigert.';if(err.name==='NotFoundError')msg='Keine Kamera gefunden.';el('br-cam-err').textContent=msg;show('br-cam-err');});}
+function toggleRecord(){
+  if(!state.recording){state.chunks=[];var opts=MediaRecorder.isTypeSupported('video/webm')?{mimeType:'video/webm'}:{};state.mediaRecorder=new MediaRecorder(state.mediaStream,opts);state.mediaRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)state.chunks.push(e.data);};state.mediaRecorder.onstop=function(){var blob=new Blob(state.chunks,{type:state.mediaRecorder.mimeType||'video/webm'});var pv=el('br-video-preview');pv.src=URL.createObjectURL(blob);pv.load();stopCamera();show('br-preview-wrap');hide('br-skip-row');};state.mediaRecorder.start();state.recording=true;var rb=el('br-rec-btn');rb.textContent='\u25a0 Stoppen';rb.style.background='#111';rb.style.borderColor='#111';show('br-rec-timer');}
+  else{state.mediaRecorder.stop();state.recording=false;}
+}
+function stopCamera(){if(state.mediaStream){state.mediaStream.getTracks().forEach(function(t){t.stop();});state.mediaStream=null;}var lv=el('br-camera-stream');if(lv)lv.srcObject=null;hide('br-cam-live');var rb=el('br-rec-btn');if(rb){rb.textContent='\u25cf Aufnahme starten';rb.style.background='#DC2626';rb.style.borderColor='#DC2626';}hide('br-rec-timer');state.recording=false;}
+function resetCamera(){stopCamera();var pv=el('br-video-preview');if(pv){pv.pause();pv.src='';}show('br-cam-card');hide('br-cam-live');hide('br-preview-wrap');flex('br-skip-row');hide('br-cam-err');}
+function wire(){
+  el('br-cr').addEventListener('click',toggleExpand);
+  el('br-cr-btn').addEventListener('click',function(e){e.stopPropagation();toggleExpand();});
+  for(var i=0;i<5;i++){(function(idx){el('br-row-'+idx).addEventListener('click',function(){openDrill(idx);});})(i);}
+  el('br-back').addEventListener('click',goTrack);
+  el('br-s1-next').addEventListener('click',function(){goStep(2);});
+  el('br-s2-next').addEventListener('click',function(){goStep(3);});
+  el('br-s3-next').addEventListener('click',function(){goStep(4);});
+  el('br-skip').addEventListener('click',function(){goStep(3);});
+  [1,2,3,4,5].forEach(function(v){el('br-r'+v).addEventListener('click',function(){selectRate(v);});});
+  el('br-cam-open').addEventListener('click',startCamera);
+  el('br-rec-btn').addEventListener('click',toggleRecord);
+  el('br-cam-stop').addEventListener('click',stopCamera);
+  el('br-retry-cam').addEventListener('click',function(){var pv=el('br-video-preview');pv.pause();pv.src='';hide('br-preview-wrap');show('br-cam-card');flex('br-skip-row');});
+}
+function fetchSBTotalXP(email){
+  if(!email||email==='unbekannt')return;
+  fetch('https://qajjuhjmrtuomwrbxmpz.supabase.co/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{
+    headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4'}
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(rows&&rows.length&&typeof rows[0].total_xp==='number'){state.sbTotalXP=rows[0].total_xp;el('br-xp-total').textContent=state.sbTotalXP+' XP';}
+  }).catch(function(){});
+}
+function applyPlayer(name){
+  var parts=name.trim().split(/\s+/);
+  var initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():name.slice(0,2).toUpperCase();
+  el('br-avatar').textContent=initials;state.currentPlayerName=parts[0]||name;
+  load(name);
+  var _e=getBMId?getBMId():null;
+  if(_e)fetchSBTotalXP(_e);if(_e)sbBackfill(_e,parts[0]||name);
+  var ht=el('br-hero-text');if(ht)ht.textContent='Hey '+parts[0]+'! Zeige deinen Ginga Style \u2014 jeder Versuch bringt Punkte!';
+}
+function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+function sbDevice(){return /iphone|ipad|ipod|android/i.test(navigator.userAgent)?'mobile':'desktop';}
+function sbUpsert(email,name,mk,ml,idx,rating,xp,ts,skipPlayers,skipAttempts){
+  if(!email||email==='unbekannt')return;
+  var totalXp=getTotalCumXP();
+  fetch(SB_URL+'/rest/v1/completions',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,module_label:ml||'',challenge_idx:idx,rating:rating,xp:xp,total_xp:totalXp,completed_at:ts||Date.now(),platform:'bettermode',device:sbDevice()})}).catch(function(){});
+  if(!skipAttempts){fetch(SB_URL+'/rest/v1/attempts',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,challenge_idx:idx,rating:rating,xp:xp,attempted_at:ts||Date.now()})}).catch(function(){});}
+  if(!skipPlayers){fetch(SB_URL+'/rest/v1/players',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',total_xp:totalXp})}).catch(function(){});}
+}
+function getBMId(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
+function sbBackfill(email,name){
+  if(!email||email==='unbekannt')return;
+  for(var i=0;i<drills.length;i++){if(state.ratings[i]>0){var xp=attemptXP(state.ratings[i],drills[i].xp);sbUpsert(email,name,'gc1','Ginga Style',i,state.ratings[i],xp,state.completed_at[i]||Date.now(),true,true);}}
+}
+function tryInit(){var name=getBMName();if(name){applyPlayer(name);state.playerInited=true;return true;}return false;}
+(function(){
+  var all=document.querySelectorAll('[id$="-UID_PLACEHOLDER"]');
+  all.forEach(function(el){el.id=el.id.replace('-UID_PLACEHOLDER','-'+_uid);});
+})();
+window.addEventListener('t7xpupdate',function(){
+  var _em=getBMId?getBMId():null;
+  if(!_em&&typeof getBMEmail==='function')_em=getBMEmail();
+  if(_em&&_em!=='unbekannt')fetchSBTotalXP(_em);
+});
+wire();applyPlayer('Spieler');
+if(!tryInit()){
+  [100,300,600,1000,1600,2500,4000].forEach(function(ms){setTimeout(function(){if(!state.playerInited)tryInit();},ms);});
+  try{var obs=new MutationObserver(function(){if(!state.playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}
+}
+})();
+</script>
+</body>
+</html>
