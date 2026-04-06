@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rangliste</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f0;width:100%;}
+
+.rl-wrap{
+  background:#080f1e;
+  border:1.5px solid rgba(0,229,255,.2);
+  border-radius:12px;
+  padding:14px 12px 18px;
+  width:100%;
+  overflow:hidden;
+}
+
+/* HEADER */
+.rl-header{text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(0,229,255,.1);}
+.rl-title{font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:#fff;}
+.rl-sub{font-size:9px;color:rgba(0,229,255,.55);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:2px;}
+
+/* TOGGLE */
+.view-toggle{display:flex;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:3px;margin-bottom:10px;gap:3px;}
+.vt-btn{flex:1;padding:7px 6px;border-radius:6px;border:none;font-family:'Open Sans',sans-serif;font-weight:700;font-size:9px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.3);background:transparent;line-height:1.3;}
+.vt-btn.active.streak{background:rgba(0,229,255,.12);color:#00E5FF;box-shadow:0 0 0 1px rgba(0,229,255,.25);}
+.vt-btn.active.xp{background:rgba(0,229,255,.12);color:#00E5FF;box-shadow:0 0 0 1px rgba(0,229,255,.25);}
+
+/* SECTION LABEL */
+.slabel{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,229,255,.45);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.slabel::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.08);}
+
+/* RANK LIST */
+.rank-list{display:flex;flex-direction:column;gap:4px;}
+.rank-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 9px;transition:border-color .15s;}
+.rank-row:hover{border-color:rgba(0,229,255,.2);background:rgba(8,15,30,.95);}
+.rank-num{font-weight:800;font-size:13px;font-style:italic;color:rgba(255,255,255,.18);min-width:18px;text-align:center;flex-shrink:0;}
+.r-avatar{border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;border:1.5px solid rgba(255,255,255,.12);box-shadow:0 0 6px rgba(0,0,0,.3);}
+.rank-info{flex:1;min-width:0;}
+.rank-name{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rank-bar-wrap{height:3px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:4px;overflow:hidden;}
+.rank-bar{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+.rank-bar.streak{background:linear-gradient(90deg,#00E5FF,#0080FF);}
+.rank-bar.xp{background:linear-gradient(90deg,#00E5FF,#0080FF);}
+.rank-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;}
+.rank-primary{font-weight:800;font-size:11px;white-space:nowrap;}
+.rank-primary.streak{color:#00E5FF;}
+.rank-primary.xp{color:#00E5FF;}
+.rank-secondary{font-size:9px;color:rgba(255,255,255,.28);font-weight:600;white-space:nowrap;}
+
+.loading{text-align:center;color:rgba(255,255,255,.2);padding:30px 0;font-size:11px;}
+.error{text-align:center;color:#FF6B6B;padding:20px 0;font-size:11px;}
+.empty{text-align:center;color:rgba(255,255,255,.2);padding:30px 0;font-size:11px;line-height:1.7;}
+
+/* Avatar colour palette */
+</style>
+</head>
+<body>
+<div class="rl-wrap">
+
+  <div class="rl-header">
+    <div class="rl-title">🏆 Rangliste</div>
+    <div class="rl-sub">Top Members</div>
+  </div>
+
+  <div class="view-toggle">
+    <button class="vt-btn active streak" id="vt-streak" onclick="setView('streak')">⚡ Wochen Streak</button>
+    <button class="vt-btn xp" id="vt-xp" onclick="setView('xp')">⚡ XP Rangliste</button>
+  </div>
+
+  <div id="rankList"><div class="loading">Lade&hellip;</div></div>
+
+</div>
+<script>
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+var LIMIT=20;
+
+/* Avatar colour palette — vivid but dark backgrounds */
+var AC=[
+  ['#003d5c','#00E5FF'],['#064e3b','#34d399'],['#3b1e5f','#c4b5fd'],
+  ['#1e3a5f','#93c5fd'],['#7f1d1d','#fca5a5'],['#1c3a2e','#86efac'],
+  ['#4a1d2f','#f9a8d4'],['#1e3a1e','#bbf7d0'],['#2d2000','#fde68a'],
+  ['#1a1a3e','#a5b4fc']
+];
+function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);}
+function acIdx(name){return name?(name.charCodeAt(0)+name.length)%AC.length:0;}
+
+var allPlayers=[];
+var currentView='streak';
+
+function setView(v){
+  currentView=v;
+  document.getElementById('vt-streak').className='vt-btn'+(v==='streak'?' active streak':'  streak');
+  document.getElementById('vt-xp').className='vt-btn'+(v==='xp'?' active xp':'  xp');
+  if(allPlayers.length)render();
+}
+window.setView=setView;
+
+/* Week key helper */
+function getWeekKey(date){
+  var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  var day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);
+  var yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  var week=Math.ceil((((d-yearStart)/86400000)+1)/7);
+  return d.getUTCFullYear()+'-W'+week;
+}
+
+function load(){
+  var playersP=fetch(SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();}).catch(function(){return [];});
+
+  var attemptsP=fetch(SB_URL+'/rest/v1/attempts?select=player_name,attempted_at&limit=10000',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();}).catch(function(){return [];});
+
+  Promise.all([playersP,attemptsP]).then(function(res){
+    var players=res[0]||[];
+    var attempts=res[1]||[];
+
+    var now=new Date();
+    var startOfWeek=new Date(now);startOfWeek.setHours(0,0,0,0);
+    startOfWeek.setDate(now.getDate()-((now.getDay()+6)%7));
+    var thisWeekKey=getWeekKey(now);
+    var lastWeekKey=getWeekKey(new Date(Date.now()-7*86400000));
+
+    var weeksByName={},sessionsByName={};
+    attempts.forEach(function(row){
+      var name=row.player_name||'Unbekannt';
+      var ts=typeof row.attempted_at==='number'?row.attempted_at:parseInt(row.attempted_at)||0;
+      if(!ts)return;
+      var dt=new Date(ts);if(isNaN(dt.getTime()))return;
+      var wk=getWeekKey(dt);
+      if(!weeksByName[name])weeksByName[name]={};
+      weeksByName[name][wk]=true;
+      if(ts>=startOfWeek.getTime()){
+        var dk=dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate();
+        if(!sessionsByName[name])sessionsByName[name]={};
+        sessionsByName[name][dk]=true;
+      }
+    });
+
+    function calcStreak(weekSet){
+      var weeks=Object.keys(weekSet).sort().reverse();
+      if(!weeks.length)return 0;
+      if(weeks[0]!==thisWeekKey&&weeks[0]!==lastWeekKey)return 0;
+      var streak=1;
+      for(var i=1;i<weeks.length;i++){
+        var py=parseInt(weeks[i-1].split('-W')[0]),pw=parseInt(weeks[i-1].split('-W')[1]);
+        var cy=parseInt(weeks[i].split('-W')[0]),cw=parseInt(weeks[i].split('-W')[1]);
+        var isConsec=(py===cy&&pw-cw===1)||(py-cy===1&&pw===1&&cw>=52);
+        if(isConsec)streak++;else break;
+      }
+      return streak;
+    }
+
+    allPlayers=players.map(function(p){
+      var name=p.player_name||'Unbekannt';
+      var streak=calcStreak(weeksByName[name]||{});
+      var sessions=sessionsByName[name]?Object.keys(sessionsByName[name]).length:0;
+      return{player_name:name,total_xp:Number(p.total_xp||0),weekly_streak:streak,sessions_this_week:sessions};
+    });
+
+    if(!allPlayers.length){
+      document.getElementById('podiumWrap').innerHTML='<div class="empty">Noch keine Eintr&auml;ge.</div>';
+      return;
+    }
+    render();
+  }).catch(function(){
+    document.getElementById('podiumWrap').innerHTML='<div class="error">Fehler beim Laden</div>';
+  });
+}
+
+function makeAvatar(name,size,border){
+  var ai=acIdx(name);
+  var borderStyle=border||('1.5px solid '+AC[ai][1]+'55');
+  var shadow='0 0 8px '+AC[ai][1]+'33';
+  return '<div style="width:'+size+'px;height:'+size+'px;font-size:'+Math.round(size*0.34)+'px;border-radius:50%;background:'+AC[ai][0]+';color:'+AC[ai][1]+';display:flex;align-items:center;justify-content:center;font-weight:800;border:'+borderStyle+';box-shadow:'+shadow+';flex-shrink:0;">'+ini(name)+'</div>';
+}
+
+function render(){
+  var isStreak=currentView==='streak';
+
+  var sorted=allPlayers.slice().sort(function(a,b){
+    if(isStreak){
+      if(b.weekly_streak!==a.weekly_streak)return b.weekly_streak-a.weekly_streak;
+      return b.sessions_this_week-a.sessions_this_week;
+    }
+    return b.total_xp-a.total_xp;
+  });
+
+  var maxPrimary=Math.max(1,isStreak?sorted[0].weekly_streak:sorted[0].total_xp)||1;
+  var med=['🥇','🥈','🥉'];
+
+  /* Full ranked list from 1 */
+  var rest=sorted;
+  if(rest.length){
+    var rows=rest.map(function(p,i){
+      var rank=i+1;
+      var name=p.player_name;
+      var ai=acIdx(name);
+      var primaryVal=isStreak?p.weekly_streak+' Woche'+(p.weekly_streak===1?'':'n'):p.total_xp.toLocaleString('de-AT')+' XP';
+      var secondaryVal=isStreak?p.total_xp.toLocaleString('de-AT')+' XP':p.weekly_streak+' Wk \u00b7 '+p.sessions_this_week+'x Wo';
+      var barPct=Math.round(((isStreak?p.weekly_streak:p.total_xp)/maxPrimary)*100);
+      return '<div class="rank-row">'+
+        '<div class="rank-num" style="'+(rank===1?'color:#00E5FF':rank===2?'color:rgba(200,200,220,.7)':rank===3?'color:#FF9500':'')+'">'+(rank<=3?med[rank-1]:rank)+'</div>'+
+        '<div class="r-avatar" style="width:30px;height:30px;font-size:11px;background:'+AC[ai][0]+';color:'+AC[ai][1]+';border:2px solid '+(rank===1?'#00E5FF':rank===2?'rgba(200,200,220,.6)':rank===3?'rgba(255,149,0,.6)':AC[ai][1]+'55')+';box-shadow:0 0 '+(rank<=3?'10':'6')+'px '+(rank===1?'rgba(0,229,255,.35)':rank===2?'rgba(200,200,220,.2)':rank===3?'rgba(255,149,0,.25)':AC[ai][1]+'22')+';">'+ini(name)+'</div>'+
+        '<div class="rank-info">'+
+          '<div class="rank-name">'+name+'</div>'+
+          '<div class="rank-bar-wrap"><div class="rank-bar '+(isStreak?'streak':'xp')+'" style="width:'+barPct+'%"></div></div>'+
+        '</div>'+
+        '<div class="rank-right">'+
+          '<div class="rank-primary '+(isStreak?'xp':'xp')+'">'+primaryVal+'</div>'+
+          '<div class="rank-secondary">'+secondaryVal+'</div>'+
+        '</div>'+
+      '</div>';
+    });
+    document.getElementById('rankList').innerHTML='<div class="rank-list">'+rows.join('')+'</div>';
+  }else{
+    document.getElementById('rankList').innerHTML='<div class="empty">Noch keine Eintr&auml;ge.</div>';
+  }
+}
+
+load();
+/* Refresh leaderboard when any challenge widget rates a challenge */
+window.addEventListener('t7xpupdate',function(){load();});
+</script>
+</body>
+</html>
