@@ -285,7 +285,8 @@ function processPlayerData(playerRows,attRows,compRows,modRows){
     {key:'br1',label:'Brazilian Dance',icon:'🇧🇷',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
     {key:'gm1',label:'Groundmoves',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
     {key:'ft1',label:'First Touch',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
-    {key:'fta1',label:'First Touch Air',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10},{idx:5,xp:10}]}
+    {key:'fta1',label:'First Touch Air',icon:'7️⃣',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10},{idx:5,xp:10}]},
+    {key:'jong2',label:'Ball in der Luft halten',icon:'⚽',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10}]}
   ];
   state.modules=(modRows&&modRows.length)?modRows:MODULES_FALLBACK;
 
@@ -361,7 +362,7 @@ function renderFort(){
     var d=state.data[m.key]||{done:0,total:0,kursXP:0};
     if(!d.total)return;
     var pct=Math.round(d.done/d.total*100);
-    var _iconMap={'jong':'⚽','sz1':'⭐','sz2':'⭐','sz3':'⭐','sz4':'⭐','sz5':'⭐','fc1':'🔥','br1':'🇧🇷','gm1':'🏃','ft1':'👟','fta1':'🌬️'};
+    var _iconMap={'jong':'⚽','sz1':'⭐','sz2':'⭐','sz3':'⭐','sz4':'⭐','sz5':'⭐','fc1':'🔥','br1':'🇧🇷','gm1':'🏃','ft1':'👟','fta1':'🌬️','jong2':'⚽'};
     var icon=_iconMap[m.key]||(typeof m.icon==='string'?m.icon:'⚽');
     modRows+='<div class="mod-row">'+
       '<div class="mod-icon">'+icon+'</div>'+
