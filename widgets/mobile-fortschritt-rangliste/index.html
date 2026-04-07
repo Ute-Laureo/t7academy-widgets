@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T7 Mobile Sheet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Open Sans',sans-serif;background:transparent}
+@media(min-width:768px){#t7-fab,#t7-sheet-overlay{display:none!important}}
+
+#t7-fab{position:fixed;bottom:24px;right:16px;z-index:9999;display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#00E5FF,#0080FF);color:rgba(0,0,0,.85);font-family:'Open Sans',sans-serif;font-weight:800;font-size:13px;padding:10px 16px;border-radius:99px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(0,229,255,.5),0 2px 8px rgba(0,0,0,.3);transition:transform .15s,box-shadow .15s;white-space:nowrap;}
+#t7-fab:active{transform:scale(0.95)}
+#t7-fab-icon{font-size:15px}
+#t7-fab-xp{font-weight:800}
+#t7-fab-streak{font-weight:800;opacity:.85}
+#t7-fab-sep{opacity:.5;margin:0 1px}
+
+#t7-sheet-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .3s ease;}
+#t7-sheet-overlay.open{opacity:1;pointer-events:all}
+
+#t7-sheet{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#080f1e;border-radius:20px 20px 0 0;border-top:1.5px solid rgba(0,229,255,.35);max-height:82vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);}
+#t7-sheet.open{transform:translateY(0)}
+
+.sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:99px;margin:12px auto 0;flex-shrink:0;}
+.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 0;flex-shrink:0;}
+.sheet-title{font-weight:800;font-size:15px;color:#fff;letter-spacing:-.01em;}
+.sheet-close{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);border:none;cursor:pointer;color:rgba(255,255,255,.7);font-size:16px;display:flex;align-items:center;justify-content:center;}
+.sheet-tabs{display:flex;gap:6px;padding:10px 16px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.08);}
+.sheet-tab{flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-family:'Open Sans',sans-serif;font-weight:700;font-size:12px;cursor:pointer;text-align:center;transition:all .15s;}
+.sheet-tab.active{background:rgba(0,229,255,.15);color:#00E5FF;border-color:rgba(0,229,255,.4);}
+.sheet-content{flex:1;overflow-y:auto;padding:14px 16px 24px;-webkit-overflow-scrolling:touch;min-height:300px;}
+
+/* FORTSCHRITT */
+.stat-row{display:flex;gap:8px;margin-bottom:12px}
+.stat-card{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;text-align:center;}
+.stat-num{font-weight:800;font-size:20px;color:#fff;line-height:1}
+.stat-num.aqua{color:#00E5FF}
+.stat-label{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:600}
+
+.streak-bar{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);border-radius:10px;padding:10px 11px;margin-bottom:12px;}
+.streak-val{font-weight:800;font-size:12px;color:#00E5FF}
+.streak-desc{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
+.streak-bottom{display:flex;align-items:center;gap:8px;margin-top:7px}
+.streak-days{display:flex;gap:3px;flex:1}
+.streak-day{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.07)}
+.streak-day.on{background:#00E5FF}
+
+.week-line{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px;margin-bottom:12px;}
+.week-xp{font-size:13px;font-weight:800;color:#fff}
+.week-xp span{color:#00E5FF}
+.week-delta{font-size:10px;font-weight:700;padding:3px 9px;border-radius:7px;display:inline-flex;align-items:center;gap:4px}
+.week-delta.up{background:rgba(0,200,100,.1);color:#00C864;border:1px solid rgba(0,200,100,.18)}
+.week-delta.down{background:rgba(255,59,59,.08);color:#FF6B6B;border:1px solid rgba(255,59,59,.15)}
+.week-delta.same{background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.07)}
+
+.m-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,229,255,.6);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.m-label::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.12)}
+.m-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:5px}
+.m-icon{font-size:13px;flex-shrink:0;width:18px;text-align:center}
+.m-body{flex:1;min-width:0}
+.m-title{font-weight:700;font-size:10px;color:#00E5FF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-title.gold{color:#FFD700}
+.m-sub{font-size:9px;color:rgba(255,255,255,.3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-date{font-size:9px;color:rgba(255,255,255,.2);font-weight:600;flex-shrink:0;white-space:nowrap}
+.m-empty{text-align:center;padding:10px;color:rgba(255,255,255,.2);font-size:10px}
+
+/* RANGLISTE */
+.rl-tabs{display:flex;gap:6px;margin-bottom:12px}
+.rl-tab{flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-family:'Open Sans',sans-serif;font-weight:700;font-size:11px;cursor:pointer;text-align:center;transition:all .15s}
+.rl-tab.active{background:rgba(0,229,255,.12);color:#00E5FF;border-color:rgba(0,229,255,.35)}
+.rank-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);}
+.rank-item.me{background:rgba(0,229,255,.08);border-color:rgba(0,229,255,.3)}
+.rank-pos{font-weight:800;font-size:14px;color:rgba(255,255,255,.3);width:20px;text-align:center;flex-shrink:0}
+.rank-pos.gold{color:#FFD700}.rank-pos.silver{color:#C0C8D0}.rank-pos.bronze{color:#CD7F32}
+.rank-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0080FF);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:rgba(0,0,0,.8);flex-shrink:0}
+.rank-avatar.me-av{box-shadow:0 0 0 2px #00E5FF}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-bar-wrap{height:3px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:4px;overflow:hidden}
+.rank-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#00E5FF,#0080FF)}
+.rank-bar.streak-bar-r{background:linear-gradient(90deg,#FF9500,#FF3B3B)}
+.rank-right{text-align:right;flex-shrink:0}
+.rank-primary{font-size:13px;font-weight:800;color:#00E5FF}
+.rank-secondary{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px}
+.loading-msg{text-align:center;padding:24px;color:rgba(255,255,255,.4);font-size:12px}
+</style>
+</head>
+<body>
+<button id="t7-fab" onclick="openSheet()">
+  <span id="t7-fab-icon">⚡</span>
+  <span id="t7-fab-xp">0 XP</span>
+  <span id="t7-fab-sep"> | </span>
+  <span id="t7-fab-streak">0 Wochen</span>
+</button>
+<div id="t7-sheet-overlay" onclick="closeSheet()"></div>
+<div id="t7-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title" id="sheet-title">Mein Fortschritt</div>
+    <button class="sheet-close" onclick="closeSheet()">✕</button>
+  </div>
+  <div class="sheet-tabs">
+    <button class="sheet-tab active" id="tab-fort" onclick="switchTab('fort')">📊 Fortschritt</button>
+    <button class="sheet-tab" id="tab-rang" onclick="switchTab('rang')">🏆 Rangliste</button>
+  </div>
+  <div class="sheet-content" id="sheet-content">
+    <div class="loading-msg">Lade...</div>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+var LIMIT=20;
+
+var state={
+  name:'Spieler',email:null,
+  totalXP:0,streak:0,weekXP:0,lastWeekXP:0,
+  modules:[],data:{},attemptsRows:[],
+  players:[],weeksByName:{},
+  playerInited:false,activeTab:'fort',sheetOpen:false,
+  fortLoaded:false,rangLoaded:false
+};
+
+function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
+function getBMEmail(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
+
+function sbHeaders(){return{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};}
+
+function loadPlayerData(email,cb){
+  var pP=fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var aP=fetch(SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(email)+'&select=attempted_at,xp,module_key&order=attempted_at.asc',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var cP=fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&select=module_key,challenge_idx,rating,xp,hit_count,completed_at',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var mP=fetch(SB_URL+'/rest/v1/modules?select=*&order=sort_order.asc',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  Promise.all([pP,aP,cP,mP]).then(function(res){cb(res[0],res[1],res[2],res[3]);});
+}
+
+function loadRangData(cb){
+  var pP=fetch(SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var aP=fetch(SB_URL+'/rest/v1/attempts?select=player_name,attempted_at&limit=10000',{headers:sbHeaders()}).then(function(r){return r.json();}).catch(function(){return[];});
+  Promise.all([pP,aP]).then(function(res){cb(res[0],res[1]);});
+}
+
+function getWeekKey(d){
+  var date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  var day=date.getUTCDay()||7;date.setUTCDate(date.getUTCDate()+4-day);
+  var yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  var week=Math.ceil((((date-yearStart)/86400000)+1)/7);
+  return date.getUTCFullYear()+'-W'+week;
+}
+function calcStreak(attempts){
+  var weeks={};
+  attempts.forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts)weeks[getWeekKey(new Date(ts))]=true;});
+  var now=new Date(),streak=0;
+  for(var i=0;i<52;i++){var wk=getWeekKey(new Date(now-i*7*86400000));if(weeks[wk])streak++;else if(i>0)break;}
+  return streak;
+}
+function calcWeekXP(attempts,weeksAgo){
+  var now=new Date(),target=getWeekKey(new Date(now-(weeksAgo||0)*7*86400000));
+  var xp=0;
+  attempts.forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts&&getWeekKey(new Date(ts))===target)xp+=(a.xp||0);});
+  return xp;
+}
+function relativeDate(ts){
+  if(!ts||ts<1000000000000)return '';
+  var diff=Date.now()-ts;
+  if(diff<0||diff>315360000000)return '';
+  var mins=Math.floor(diff/60000),hours=Math.floor(diff/3600000),days=Math.floor(diff/86400000);
+  if(mins<2)return 'gerade eben';
+  if(mins<60)return 'vor '+mins+' Min.';
+  if(hours<24)return 'vor '+hours+' Std.';
+  if(days===1)return 'gestern';
+  if(days<7)return 'vor '+days+' Tagen';
+  if(days<14)return 'vor einer Woche';
+  if(days<30)return 'vor '+Math.floor(days/7)+' Wochen';
+  return 'vor '+Math.floor(days/30)+' Monaten';
+}
+
+var JONG2_HIT_TARGETS={0:10,1:20};
+var MOD_ICON_MAP={'jong':'\u26bd','sz1':'\u2b50','sz2':'\u2b50','sz3':'\u2b50','sz4':'\u2b50','sz5':'\u2b50','fc1':'\ud83d\udd25','br1':'\ud83c\udde7\ud83c\uddf7','gm1':'\ud83c\udfc3','ft1':'\ud83d\udc5f','fta1':'\ud83c\udf2c\ufe0f','jong2':'\u261d\ufe0f','gc0':'\ud83c\udde7\ud83c\uddf7','gc1':'\ud83c\udde7\ud83c\uddf7'};
+
+function processPlayerData(playerRows,attRows,compRows,modRows){
+  state.totalXP=(playerRows&&playerRows.length)?playerRows[0].total_xp||0:0;
+  state.streak=calcStreak(attRows);
+  state.weekXP=calcWeekXP(attRows,0);
+  state.lastWeekXP=calcWeekXP(attRows,1);
+  state.attemptsRows=attRows||[];
+
+  var MODULES_FALLBACK=[
+    {key:'jong',label:'Jonglierschule',icon:'\u26bd',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10}]},
+    {key:'sz1',label:'1-Stern Zertifikat',icon:'\u2b50',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz2',label:'2-Stern Zertifikat',icon:'\u2b50',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz3',label:'3-Stern Zertifikat',icon:'\u2b50',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz4',label:'4-Stern Zertifikat',icon:'\u2b50',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'sz5',label:'5-Stern Zertifikat',icon:'\u2b50',challenges:[{idx:0,xp:15},{idx:1,xp:15},{idx:2,xp:15},{idx:3,xp:15},{idx:4,xp:20}]},
+    {key:'fc1',label:'Fun Challenge',icon:'\ud83d\udd25',challenges:[{idx:0,xp:10}]},
+    {key:'br1',label:'Brazilian Dance',icon:'\ud83c\udde7\ud83c\uddf7',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+    {key:'gm1',label:'Groundmoves',icon:'\ud83c\udfc3',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+    {key:'ft1',label:'First Touch',icon:'\ud83d\udc5f',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+    {key:'fta1',label:'First Touch Air',icon:'\ud83c\udf2c\ufe0f',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10},{idx:5,xp:10}]},
+    {key:'jong2',label:'Ball in der Luft halten',icon:'\u261d\ufe0f',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10}]},
+    {key:'gc0',label:'Ginga Basic',icon:'\ud83c\udde7\ud83c\uddf7',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+    {key:'gc1',label:'Ginga Advanced',icon:'\ud83c\udde7\ud83c\uddf7',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]}
+  ];
+  state.modules=(modRows&&modRows.length)?modRows:MODULES_FALLBACK;
+
+  var lastAttemptByModule={};
+  attRows.forEach(function(a){
+    var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;
+    if(ts&&a.module_key){if(!lastAttemptByModule[a.module_key]||ts>lastAttemptByModule[a.module_key])lastAttemptByModule[a.module_key]=ts;}
+  });
+
+  var JONG2_HIT_TARGETS_LOCAL={0:10,1:20};
+  state.data={};
+  state.modules.forEach(function(m){
+    var mrows=compRows.filter(function(r){return r.module_key===m.key;});
+    var ratings=[],bestHits=[],completedAt={};
+    mrows.forEach(function(r){
+      if(r.rating>=(ratings[r.challenge_idx]||0)){ratings[r.challenge_idx]=r.rating;if(r.completed_at)completedAt[r.challenge_idx]=typeof r.completed_at==='number'?r.completed_at:new Date(r.completed_at).getTime();}
+      if(r.hit_count!=null&&r.hit_count>(bestHits[r.challenge_idx]||0))bestHits[r.challenge_idx]=r.hit_count;
+    });
+    var done=0;
+    if(m.key==='jong2'){
+      for(var ci=0;ci<4;ci++){var target=JONG2_HIT_TARGETS_LOCAL[ci];if(target!=null){if((bestHits[ci]||0)>=target)done++;}else{if((ratings[ci]||0)>=4)done++;}}
+    }else{done=ratings.filter(function(r){return r>=4;}).length;}
+    var total=m.challenges?m.challenges.length:0;
+    var kursXP=0;
+    if(m.challenges)m.challenges.forEach(function(c){var r=ratings[c.idx]||0;if(r>=4)kursXP+=Math.round((r/5)*c.xp);});
+    state.data[m.key]={ratings:ratings,bestHits:bestHits,completedAt:completedAt,done:done,total:total,kursXP:kursXP,lastAttempt:lastAttemptByModule[m.key]||0};
+  });
+}
+
+function buildMilestones(){
+  var XP_THRESHOLDS=[50,100,200];
+  var STREAK_MILESTONES=[3,7];
+  var milestones=[];
+  state.modules.forEach(function(m){
+    var d=state.data[m.key];if(!d)return;
+    var allDone=m.challenges&&m.challenges.every(function(c){
+      if(m.key==='jong2'&&JONG2_HIT_TARGETS[c.idx]!=null)return(d.bestHits&&d.bestHits[c.idx]||0)>=JONG2_HIT_TARGETS[c.idx];
+      return(d.ratings[c.idx]||0)>=4;
+    });
+    if(allDone){
+      var ts=Math.max.apply(null,Object.values(d.completedAt||{}).concat([0]));
+      if(ts>1000000000000)milestones.push({ts:ts+1,variant:'gold',icon:MOD_ICON_MAP[m.key]||'\u26bd',title:m.label+' freigeschaltet!',sub:'Alle '+m.challenges.length+' Challenges gemeistert!'});
+    }
+  });
+  XP_THRESHOLDS.forEach(function(threshold){
+    if(state.totalXP>=threshold){
+      var running=0,thTs=0;
+      var sorted=(state.attemptsRows||[]).slice().sort(function(a,b){return a.attempted_at-b.attempted_at;});
+      for(var i=0;i<sorted.length;i++){running+=(sorted[i].xp||0);if(running>=threshold){thTs=(typeof sorted[i].attempted_at==='number'?sorted[i].attempted_at:parseInt(sorted[i].attempted_at)||0)+1;break;}}
+      if(thTs>1000000000000)milestones.push({ts:thTs,variant:'aqua',icon:'\u26a1',title:threshold+' XP kumuliert!',sub:'Du wirst immer besser!'});
+    }
+  });
+  var streak=state.streak;
+  STREAK_MILESTONES.forEach(function(s){
+    if(streak>=s)milestones.push({ts:Date.now()-((streak-s)*7*86400000),variant:'aqua',icon:'\ud83d\udd25',title:s+' Wochen in Folge!',sub:s===3?'Toller Rhythmus!':'Unaufhaltbar!'});
+  });
+  return milestones.filter(function(m){return m.ts>1000000000000;}).sort(function(a,b){return b.ts-a.ts;}).slice(0,3);
+}
+
+function processRangData(players,attempts){
+  state.players=players||[];
+  var weeksByName={};
+  attempts.forEach(function(a){
+    var name=a.player_name||'?';
+    var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;
+    if(!ts)return;
+    var wk=getWeekKey(new Date(ts));
+    if(!weeksByName[name])weeksByName[name]={};
+    weeksByName[name][wk]=true;
+  });
+  state.weeksByName=weeksByName;
+}
+function getPlayerStreak(name){
+  var weeks=state.weeksByName[name]||{};
+  var now=new Date(),streak=0;
+  for(var i=0;i<52;i++){var wk=getWeekKey(new Date(now-i*7*86400000));if(weeks[wk])streak++;else if(i>0)break;}
+  return streak;
+}
+
+function updateFAB(){
+  document.getElementById('t7-fab-xp').textContent=state.totalXP+' XP';
+  document.getElementById('t7-fab-streak').textContent=state.streak+' Wochen';
+}
+
+function renderFort(){
+  var streakDays='';
+  for(var i=0;i<8;i++)streakDays+='<div class="streak-day'+(i<state.streak?' on':'')+'"></div>';
+
+  var delta=state.weekXP-state.lastWeekXP;
+  var deltaHtml='';
+  if(delta>0)deltaHtml='<div class="week-delta up">\u2191 +'+delta+' XP</div>';
+  else if(delta<0)deltaHtml='<div class="week-delta down">\u2193 '+Math.abs(delta)+' XP</div>';
+  else deltaHtml='<div class="week-delta same">\u2014 Gleich</div>';
+
+  var milestones=buildMilestones();
+  var milestoneRows='';
+  if(!milestones.length){
+    milestoneRows='<div class="m-empty">Noch keine Meilensteine \u2014 leg los!</div>';
+  }else{
+    milestones.forEach(function(ev){
+      var tc='m-title'+(ev.variant==='gold'?' gold':'');
+      milestoneRows+='<div class="m-row"><div class="m-icon">'+ev.icon+'</div><div class="m-body"><div class="'+tc+'">'+ev.title+'</div><div class="m-sub">'+ev.sub+'</div></div><div class="m-date">'+relativeDate(ev.ts)+'</div></div>';
+    });
+  }
+
+  return '<div class="stat-row">'+
+    '<div class="stat-card"><div class="stat-num aqua">'+state.totalXP+'</div><div class="stat-label">Gesamt XP</div></div>'+
+    '<div class="stat-card"><div class="stat-num aqua">'+state.streak+'\u26a1</div><div class="stat-label">Wochen Streak</div></div>'+
+  '</div>'+
+  '<div class="streak-bar">'+
+    '<div style="display:flex;align-items:center;gap:8px">'+
+      '<span style="font-size:18px">\u26a1</span>'+
+      '<div style="flex:1">'+
+        '<div class="streak-val">'+state.streak+' Wochen in Folge</div>'+
+        '<div class="streak-desc">'+(state.streak>=8?'Unaufhaltbar!':state.streak>=4?'Super Rhythmus!':state.streak>0?'Weiter so!':'Trainiere diese Woche!')+'</div>'+
+        '<div class="streak-bottom"><div class="streak-days">'+streakDays+'</div></div>'+
+      '</div>'+
+    '</div>'+
+  '</div>'+
+  '<div class="week-line">'+
+    '<div class="week-xp">Diese Woche: <span>'+state.weekXP+' XP</span></div>'+
+    deltaHtml+
+  '</div>'+
+  '<div class="m-label">\ud83c\udfc6 Letzte Meilensteine</div>'+
+  milestoneRows;
+}
+
+function renderRang(mode){
+  mode=mode||'streak';
+  var isStreak=(mode==='streak');
+  var items=state.players.map(function(p){return{name:p.player_name,xp:p.total_xp||0,streak:getPlayerStreak(p.player_name)};});
+  items.sort(function(a,b){return isStreak?b.streak-a.streak:b.xp-a.xp;});
+  var maxVal=1;items.forEach(function(p){var v=isStreak?p.streak:p.xp;if(v>maxVal)maxVal=v;});
+  var tabs='<div class="rl-tabs">'+
+    '<button class="rl-tab'+(isStreak?' active':'')+'" onclick="reRenderRang(\'streak\')">\ud83d\udd25 Wochen Streak</button>'+
+    '<button class="rl-tab'+(isStreak?'':' active')+'" onclick="reRenderRang(\'xp\')">\u26a1 XP Rangliste</button>'+
+  '</div>';
+  var rows='';
+  items.forEach(function(p,i){
+    var name=p.name||'?';
+    var initials=name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+    var isMe=(state.name&&name.split(' ')[0]===state.name.split(' ')[0]);
+    var val=isStreak?p.streak:p.xp;
+    var pct=Math.round(val/maxVal*100);
+    var pos=i+1;
+    var posClass=pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+    var medal=pos===1?'\ud83e\udd47':pos===2?'\ud83e\udd48':pos===3?'\ud83e\udd49':pos;
+    rows+='<div class="rank-item'+(isMe?' me':'')+'">'+
+      '<div class="rank-pos '+posClass+'">'+medal+'</div>'+
+      '<div class="rank-avatar'+(isMe?' me-av':'')+'">'+initials+'</div>'+
+      '<div class="rank-info"><div class="rank-name">'+name+'</div>'+
+        '<div class="rank-bar-wrap"><div class="rank-bar'+(isStreak?' streak-bar-r':'')+'" style="width:'+pct+'%"></div></div></div>'+
+      '<div class="rank-right"><div class="rank-primary">'+val+(isStreak?' Wo':' XP')+'</div>'+
+        '<div class="rank-secondary">'+(isStreak?p.xp+' XP':p.streak+' Wo')+'</div></div>'+
+    '</div>';
+  });
+  return tabs+'<div id="rang-list">'+rows+'</div>';
+}
+
+window.reRenderRang=function(mode){document.getElementById('sheet-content').innerHTML=renderRang(mode);};
+
+window.openSheet=function(){
+  state.sheetOpen=true;
+  document.getElementById('t7-sheet').classList.add('open');
+  document.getElementById('t7-sheet-overlay').classList.add('open');
+  if(state.activeTab==='fort'&&!state.fortLoaded){document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';if(state.email)loadAndRenderFort();}
+  if(state.activeTab==='rang'&&!state.rangLoaded){document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';loadAndRenderRang();}
+};
+window.closeSheet=function(){
+  state.sheetOpen=false;
+  document.getElementById('t7-sheet').classList.remove('open');
+  document.getElementById('t7-sheet-overlay').classList.remove('open');
+};
+window.switchTab=function(tab){
+  state.activeTab=tab;
+  document.getElementById('tab-fort').className='sheet-tab'+(tab==='fort'?' active':'');
+  document.getElementById('tab-rang').className='sheet-tab'+(tab==='rang'?' active':'');
+  document.getElementById('sheet-title').textContent=tab==='fort'?'Mein Fortschritt':'Rangliste';
+  if(tab==='fort'){
+    if(state.fortLoaded)document.getElementById('sheet-content').innerHTML=renderFort();
+    else{document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';if(state.email)loadAndRenderFort();}
+  }else{
+    if(state.rangLoaded)document.getElementById('sheet-content').innerHTML=renderRang('streak');
+    else{document.getElementById('sheet-content').innerHTML='<div class="loading-msg">Lade...</div>';loadAndRenderRang();}
+  }
+};
+
+function loadAndRenderFort(){
+  loadPlayerData(state.email,function(pRows,aRows,cRows,mRows){
+    processPlayerData(pRows,aRows,cRows,mRows);
+    state.fortLoaded=true;updateFAB();
+    if(state.sheetOpen&&state.activeTab==='fort')document.getElementById('sheet-content').innerHTML=renderFort();
+  });
+}
+function loadAndRenderRang(){
+  loadRangData(function(players,attempts){
+    processRangData(players,attempts);state.rangLoaded=true;
+    if(state.sheetOpen&&state.activeTab==='rang')document.getElementById('sheet-content').innerHTML=renderRang('streak');
+  });
+}
+
+function init(name,email){
+  state.name=name;state.email=email;
+  var parts=name.split(' ');
+  document.getElementById('sheet-title').textContent='Hey '+parts[0]+'!';
+  loadPlayerData(email,function(pRows,aRows,cRows,mRows){
+    processPlayerData(pRows,aRows,cRows,mRows);
+    state.fortLoaded=true;updateFAB();
+  });
+}
+function tryInit(){var name=getBMName(),email=getBMEmail();if(name&&email){init(name,email);state.playerInited=true;return true;}return false;}
+
+window.addEventListener('t7xpupdate',function(){
+  if(!state.email)return;
+  state.fortLoaded=false;state.rangLoaded=false;
+  loadPlayerData(state.email,function(pRows,aRows,cRows,mRows){
+    processPlayerData(pRows,aRows,cRows,mRows);state.fortLoaded=true;updateFAB();
+    if(state.sheetOpen&&state.activeTab==='fort')document.getElementById('sheet-content').innerHTML=renderFort();
+  });
+  if(state.sheetOpen&&state.activeTab==='rang')loadAndRenderRang();
+});
+
+if(!tryInit()){
+  [100,300,600,1000,1600,2500,4000].forEach(function(ms){setTimeout(function(){if(!state.playerInited)tryInit();},ms);});
+  try{var obs=new MutationObserver(function(){if(!state.playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}
+}
+
+var touchStart=0;
+document.getElementById('t7-sheet').addEventListener('touchstart',function(e){touchStart=e.touches[0].clientY;},{passive:true});
+document.getElementById('t7-sheet').addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-touchStart>80)closeSheet();},{passive:true});
+
+})();
+</script>
+</body>
+</html>
