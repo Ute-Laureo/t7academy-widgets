@@ -204,11 +204,17 @@ function getRating(mk,idx){var d=state.data[mk];return d&&d.ratings?d.ratings[id
 function getCompletedAt(mk,idx){var d=state.data[mk];return d&&d.completed_at?d.completed_at[idx]||null:null;}
 function getTotalCumXP(){if(typeof state.sbTotalXP==='number')return state.sbTotalXP;var t=0;MODULES.forEach(function(m){if(state.data[m.key])t+=state.data[m.key].cumXP||0;});return t;}
 function getModuleChallengeScore(mk){var d=state.data[mk];if(!d||!d.challengeXP)return 0;var t=0;for(var i=0;i<d.challengeXP.length;i++)t+=d.challengeXP[i]||0;return t;}
-function isDone(mk,idx){return getRating(mk,idx)>=4;}
+var JONG2_HIT_TARGETS={0:10,1:20};
+function isDone(mk,idx){
+  if(mk==='jong2'&&JONG2_HIT_TARGETS[idx]!=null){
+    var d=state.data[mk];return d&&(d.bestHits&&d.bestHits[idx]||0)>=(JONG2_HIT_TARGETS[idx]);
+  }
+  return getRating(mk,idx)>=4;
+}
 function getDoneCount(){var t=0;MODULES.forEach(function(m){m.challenges.forEach(function(c){if(isDone(m.key,c.idx))t++;});});return t;}
 function getTotalChallenges(){var t=0;MODULES.forEach(function(m){t+=m.challenges.length;});return t;}
 
-var MOD_ICON_MAP={'jong':'\u26bd','sz1':'\u2b50','sz2':'\u2b50','sz3':'\u2b50','sz4':'\u2b50','sz5':'\u2b50','fc1':'\ud83d\udd25','br1':'\ud83c\udde7\ud83c\uddf7','gm1':'\ud83c\udfc3','ft1':'\ud83d\udc5f','fta1':'\ud83c\udf2c\ufe0f','jong2':'\u26bd'};
+var MOD_ICON_MAP={'jong':'\u26bd','sz1':'\u2b50','sz2':'\u2b50','sz3':'\u2b50','sz4':'\u2b50','sz5':'\u2b50','fc1':'\ud83d\udd25','br1':'\ud83c\udde7\ud83c\uddf7','gm1':'\ud83c\udfc3','ft1':'\ud83d\udc5f','fta1':'\ud83c\udf2c\ufe0f','jong2':'\u261d\ufe0f'};
 function modIcon(m){return MOD_ICON_MAP[m.key]||(typeof m.icon==='string'?m.icon:'\u26bd');}
 
 function relativeDate(ts){
@@ -458,10 +464,11 @@ function mergeSupabaseData(rows,attemptsRows,name,playerRows){
   rows.forEach(function(row){var mk=row.module_key;if(!byModule[mk])byModule[mk]=[];byModule[mk].push(row);});
   MODULES.forEach(function(m){
     var mk=m.key,mrows=byModule[mk]||[];
-    if(!state.data[mk])state.data[mk]={ratings:[],challengeXP:[],cumXP:0,completed_at:{},submitted:false};
+    if(!state.data[mk])state.data[mk]={ratings:[],challengeXP:[],cumXP:0,completed_at:{},submitted:false,bestHits:[]};
     var d=state.data[mk];
+    if(!d.bestHits)d.bestHits=[];
     d.cumXP=cumByModule[mk]||0;
-    mrows.forEach(function(row){var idx=row.challenge_idx,rating=row.rating||0;if(!d.ratings[idx]||rating>d.ratings[idx]){d.ratings[idx]=rating;if(row.completed_at&&(!d.completed_at[idx]||d.completed_at[idx]<=0))d.completed_at[idx]=row.completed_at;}});
+    mrows.forEach(function(row){var idx=row.challenge_idx,rating=row.rating||0;if(!d.ratings[idx]||rating>d.ratings[idx]){d.ratings[idx]=rating;if(row.completed_at&&(!d.completed_at[idx]||d.completed_at[idx]<=0))d.completed_at[idx]=row.completed_at;}if(row.hit_count!=null&&row.hit_count>(d.bestHits[idx]||0))d.bestHits[idx]=row.hit_count;});
     d.challengeXP=[];m.challenges.forEach(function(c){d.challengeXP[c.idx]=challengeScoreXP(d.ratings[c.idx]||0,c.xp);});
     if(mrows.length>0){try{var key=getStorageKey(mk,name),existing={};try{existing=JSON.parse(localStorage.getItem(key)||'{}');}catch(e){}existing.ratings=d.ratings;existing.challengeXP=d.challengeXP;existing.cumXP=d.cumXP;existing.completed_at=d.completed_at;localStorage.setItem(key,JSON.stringify(existing));}catch(e){}}
   });
