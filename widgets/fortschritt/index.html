@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mein Fortschritt</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f0;width:100%;margin:0;padding:0;}
+.tl-bg{width:100%;color:#f0f0f0;font-family:'Open Sans',sans-serif;}
+.page{background:#080f1e;border:1.5px solid rgba(0,229,255,.35);border-radius:12px;width:100%;padding:14px 12px 16px;overflow:hidden;}
+
+/* HERO */
+.hero{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:10px;padding:12px 11px;margin-bottom:10px;}
+.hero-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.hero-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0080FF);color:rgba(0,0,0,.85);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(0,229,255,.3)}
+.hero-name{font-weight:800;font-size:14px;letter-spacing:-.01em;color:#fff}
+.hero-sub{font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 5px;text-align:center}
+.stat-num{font-weight:800;font-size:15px;letter-spacing:-.01em;color:#fff;line-height:1}
+.stat-num.aqua{color:#00E5FF}
+.stat-label{font-size:8px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+
+/* STREAK */
+.streak-bar{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);border-radius:10px;padding:10px 11px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.streak-icon{font-size:22px;flex-shrink:0}
+.streak-text{flex:1;min-width:0}
+.streak-val{font-weight:800;font-size:12px;color:#00E5FF}
+.streak-desc{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
+.streak-bottom{display:flex;align-items:center;gap:8px;margin-top:7px}
+.streak-days{display:flex;gap:3px;flex:1}
+.streak-day{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.07)}
+.streak-day.on{background:#00E5FF}
+
+/* WEEK LINE */
+.week-line{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 12px;}
+.week-xp{font-size:13px;font-weight:800;color:#fff}
+.week-xp span{color:#00E5FF}
+.week-delta{font-size:10px;font-weight:700;padding:3px 9px;border-radius:7px;display:inline-flex;align-items:center;gap:4px}
+.week-delta.up{background:rgba(0,200,100,.1);color:#00C864;border:1px solid rgba(0,200,100,.18)}
+.week-delta.down{background:rgba(255,59,59,.08);color:#FF6B6B;border:1px solid rgba(255,59,59,.15)}
+.week-delta.same{background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.07)}
+
+.loading{text-align:center;padding:24px 10px;color:rgba(255,255,255,.25);font-size:11px}
+@media(max-width:480px){
+  .stat-num{font-size:13px}
+  .hero-name{font-size:13px}
+  .stat-row{gap:5px}
+}
+</style>
+</head>
+<body>
+<div class="tl-bg"><div class="page">
+  <div class="loading" id="tl-loading">Lade Fortschritt&hellip;</div>
+  <div id="tl-content" style="display:none">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-avatar" id="tl-avatar">?</div>
+        <div><div class="hero-name" id="tl-name">Spieler</div><div class="hero-sub">Mein Fortschritt</div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-num aqua" id="tl-total-xp">0</div><div class="stat-label">Gesamt XP</div></div>
+        <div class="stat-card"><div class="stat-num aqua" id="tl-streak-num">0&#9889;</div><div class="stat-label">Wochen Streak</div></div>
+      </div>
+    </div>
+
+    <!-- STREAK -->
+    <div class="streak-bar">
+      <div class="streak-icon">&#9889;</div>
+      <div class="streak-text">
+        <div class="streak-val" id="tl-streak-val">0 Wochen in Folge</div>
+        <div class="streak-desc" id="tl-streak-desc">Trainiere diese Woche!</div>
+        <div class="streak-bottom">
+          <div class="streak-days" id="tl-streak-days"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEK LINE -->
+    <div class="week-line">
+      <div class="week-xp">Diese Woche: <span id="tl-week-xp">0 XP</span></div>
+      <div class="week-delta same" id="tl-week-delta">&mdash;</div>
+    </div>
+
+  </div>
+</div></div>
+<script>
+(function(){
+'use strict';
+
+var MODULES=[];
+var MODULES_FALLBACK=[
+  {key:'jong',label:'Jonglierschule',icon:'\ud83e\udd39',color:'jong',challenges:[{idx:0,title:'Sit Downs Jonglieren',xp:10},{idx:1,title:'Sit Downs Fu\u00df Kopf Fu\u00df',xp:10},{idx:2,title:'Freestyle Jonglieren',xp:10},{idx:3,title:'Fu\u00dfball Jonglieren',xp:10}]},
+  {key:'sz1',label:'1-Stern Zertifikat',icon:'\u2b50',color:'star',challenges:[{idx:0,title:'V',xp:15},{idx:1,title:'Sohle Links Rechts',xp:15},{idx:2,title:'Sohle um den Fu\u00df',xp:15},{idx:3,title:'Spann Balancieren',xp:15},{idx:4,title:"Cross One's Leg",xp:20}]},
+  {key:'sz2',label:'2-Stern Zertifikat',icon:'\u2b50\u2b50',color:'star',challenges:[{idx:0,title:'Leg Cross',xp:15},{idx:1,title:'Seven',xp:15},{idx:2,title:'La Croqueta',xp:15},{idx:3,title:'No Look',xp:15},{idx:4,title:'Roulette',xp:20}]},
+  {key:'sz3',label:'3-Stern Zertifikat',icon:'\u2b50\u2b50\u2b50',color:'star',challenges:[{idx:0,title:'Hop Step-Over',xp:15},{idx:1,title:'Elastico',xp:15},{idx:2,title:'Samba',xp:15},{idx:3,title:'Hocus Pocus',xp:15},{idx:4,title:'Neckstall',xp:20}]},
+  {key:'sz4',label:'4-Stern Zertifikat',icon:'\u2b50\u2b50\u2b50\u2b50',color:'star',challenges:[{idx:0,title:'X-Over',xp:15},{idx:1,title:'Cross-Over',xp:15},{idx:2,title:'Heel Flick Turn',xp:15},{idx:3,title:'Dragon Stepover',xp:15},{idx:4,title:'Inside Out Chop',xp:20}]},
+  {key:'ft1',label:'First Touch',icon:'7\ufe0f\u20e3',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+  {key:'gm1',label:'Groundmoves',icon:'7\ufe0f\u20e3',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+  {key:'fc1',label:'Fun Challenge',icon:'\ud83d\udd25',color:'fun',challenges:[{idx:0,xp:10}]},
+  {key:'br1',label:'Brazilian Dance',icon:'\ud83c\udde7\ud83c\uddf7',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+  {key:'fta1',label:'First Touch Air',icon:'7\ufe0f\u20e3',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10},{idx:5,xp:10}]},
+  {key:'jong2',label:'Ball in der Luft halten',icon:'\u261d\ufe0f',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10}]},
+  {key:'gc0',label:'Ginga Basic',icon:'\ud83c\udde7\ud83c\uddf7',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]},
+  {key:'gc1',label:'Ginga Advanced',icon:'\ud83c\udde7\ud83c\uddf7',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]}
+];
+
+var XP_MULT=[0,.2,.4,.6,.8,1];
+function attemptXP(rating,maxXp){return Math.round((XP_MULT[rating]||0)*maxXp);}
+function challengeScoreXP(rating,maxXp){if(rating<4)return 0;return Math.round((XP_MULT[rating]||0)*maxXp);}
+
+var JONG2_HIT_TARGETS={0:10,1:20};
+var state={name:'Spieler',data:{},attemptsRows:[],sbTotalXP:null};
+
+function el(id){return document.getElementById(id);}
+
+function getRating(mk,idx){var d=state.data[mk];return d&&d.ratings?d.ratings[idx]||0:0;}
+function getTotalCumXP(){if(typeof state.sbTotalXP==='number')return state.sbTotalXP;var t=0;MODULES.forEach(function(m){if(state.data[m.key])t+=state.data[m.key].cumXP||0;});return t;}
+function isDone(mk,idx){
+  if(mk==='jong2'&&JONG2_HIT_TARGETS[idx]!=null){var d=state.data[mk];return d&&(d.bestHits&&d.bestHits[idx]||0)>=JONG2_HIT_TARGETS[idx];}
+  return getRating(mk,idx)>=4;
+}
+function getDoneCount(){var t=0;MODULES.forEach(function(m){m.challenges.forEach(function(c){if(isDone(m.key,c.idx))t++;});});return t;}
+function getTotalChallenges(){var t=0;MODULES.forEach(function(m){t+=m.challenges.length;});return t;}
+
+function getWeekKey(date){
+  var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  var day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);
+  var yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  var week=Math.ceil((((d-yearStart)/86400000)+1)/7);
+  return d.getUTCFullYear()+'-W'+week;
+}
+
+function computeStreak(){
+  var weekSet={};
+  (state.attemptsRows||[]).forEach(function(row){var ts=typeof row.attempted_at==='number'?row.attempted_at:parseInt(row.attempted_at)||0;if(ts)weekSet[getWeekKey(new Date(ts))]=true;});
+  var weeks=Object.keys(weekSet).sort().reverse();
+  if(!weeks.length)return 0;
+  var thisWeekKey=getWeekKey(new Date()),lastWeekKey=getWeekKey(new Date(Date.now()-7*86400000));
+  if(weeks[0]!==thisWeekKey&&weeks[0]!==lastWeekKey)return 0;
+  var streak=1;
+  for(var i=1;i<weeks.length;i++){
+    var py=parseInt(weeks[i-1].split('-W')[0]),pw=parseInt(weeks[i-1].split('-W')[1]);
+    var cy=parseInt(weeks[i].split('-W')[0]),cw=parseInt(weeks[i].split('-W')[1]);
+    if((py===cy&&pw-cw===1)||(py-cy===1&&pw===1&&cw>=52))streak++;else break;
+  }
+  return streak;
+}
+
+function getWeeklyXP(){
+  var now=new Date();
+  var startOfThisWeek=new Date(now);startOfThisWeek.setHours(0,0,0,0);startOfThisWeek.setDate(now.getDate()-((now.getDay()+6)%7));
+  var startOfLastWeek=new Date(startOfThisWeek);startOfLastWeek.setDate(startOfLastWeek.getDate()-7);
+  var t0=startOfThisWeek.getTime(),t1=startOfLastWeek.getTime();
+  var tw=0,lw=0;
+  (state.attemptsRows||[]).forEach(function(row){
+    var ts=typeof row.attempted_at==='number'?row.attempted_at:parseInt(row.attempted_at)||0;
+    if(ts>=t0)tw+=(row.xp||0);else if(ts>=t1)lw+=(row.xp||0);
+  });
+  return{thisWeek:tw,lastWeek:lw};
+}
+
+function render(){
+  var name=state.name,parts=name.trim().split(/\s+/);
+  var initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():name.slice(0,2).toUpperCase();
+  el('tl-avatar').textContent=initials;
+  el('tl-name').textContent=name;
+
+  var totalXP=getTotalCumXP(),streak=computeStreak();
+  el('tl-total-xp').textContent=totalXP;
+  el('tl-streak-num').textContent=streak+'\u26a1';
+  el('tl-streak-val').textContent=streak+' Woche'+(streak===1?'':'n')+' in Folge';
+  el('tl-streak-desc').textContent=streak===0?'Trainiere diese Woche!':streak>=8?'Unaufhaltbar!':streak>=4?'Super Rhythmus!':'Weiter so!';
+
+  var daysEl=el('tl-streak-days');daysEl.innerHTML='';
+  for(var d=0;d<8;d++){var dd=document.createElement('div');dd.className='streak-day'+(d<streak?' on':'');daysEl.appendChild(dd);}
+
+  var w=getWeeklyXP();
+  el('tl-week-xp').textContent=w.thisWeek+' XP';
+  var delta=w.thisWeek-w.lastWeek,deltaEl=el('tl-week-delta');
+  if(delta>0){deltaEl.className='week-delta up';deltaEl.textContent='\u2191 +'+delta+' XP vs. letzte Woche';}
+  else if(delta<0){deltaEl.className='week-delta down';deltaEl.textContent='\u2193 '+Math.abs(delta)+' XP vs. letzte Woche';}
+  else{deltaEl.className='week-delta same';deltaEl.textContent='\u2014 Gleich wie letzte Woche';}
+
+  el('tl-loading').style.display='none';
+  el('tl-content').style.display='block';
+}
+
+function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
+function getBMEmail(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
+
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+
+function sbLoadModules(cb){
+  fetch(SB_URL+'/rest/v1/modules?select=*&order=sort_order.asc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+    .then(function(r){return r.json();}).then(function(rows){
+      if(!rows||!rows.length){cb(null);return;}
+      cb(rows.map(function(r){var ch=typeof r.challenges==='string'?JSON.parse(r.challenges):r.challenges;return{key:r.key,label:r.label,icon:r.icon,color:r.color||'jong',challenges:ch};}));
+    }).catch(function(){cb(null);});
+}
+
+function sbLoadAll(email,cb){
+  if(!email){cb(null,null,null);return;}
+  var cP=fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&select=module_key,challenge_idx,rating,completed_at,hit_count',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];});
+  var aP=fetch(SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(email)+'&select=attempted_at,xp,module_key&order=attempted_at.asc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];});
+  var pP=fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];});
+  Promise.all([cP,aP,pP]).then(function(res){cb(res[0],res[1],res[2]);}).catch(function(){cb(null,null,null);});
+}
+
+function mergeData(compRows,attRows,playerRows){
+  state.attemptsRows=attRows||[];
+  state.sbTotalXP=null;
+  if(playerRows&&playerRows.length&&typeof playerRows[0].total_xp==='number')state.sbTotalXP=playerRows[0].total_xp;
+  var byModule={};
+  (compRows||[]).forEach(function(row){var mk=row.module_key;if(!byModule[mk])byModule[mk]=[];byModule[mk].push(row);});
+  MODULES.forEach(function(m){
+    var mk=m.key,mrows=byModule[mk]||[];
+    if(!state.data[mk])state.data[mk]={ratings:[],bestHits:[],cumXP:0,completed_at:{}};
+    var d=state.data[mk];
+    mrows.forEach(function(row){
+      var idx=row.challenge_idx,rating=row.rating||0;
+      if(rating>(d.ratings[idx]||0)){d.ratings[idx]=rating;if(row.completed_at)d.completed_at[idx]=row.completed_at;}
+      if(row.hit_count!=null&&row.hit_count>(d.bestHits[idx]||0))d.bestHits[idx]=row.hit_count;
+    });
+  });
+}
+
+function init(name){
+  state.name=name||'Spieler';
+  sbLoadModules(function(mods){
+    MODULES=mods||MODULES_FALLBACK;
+    MODULES.forEach(function(m){state.data[m.key]={ratings:[],bestHits:[],cumXP:0,completed_at:{}};});
+    var email=getBMEmail(),retries=0;
+    function tryLoadSB(){
+      email=getBMEmail();
+      if(email){sbLoadAll(email,function(cRows,aRows,pRows){mergeData(cRows,aRows,pRows);render();});}
+      else if(retries<6){retries++;setTimeout(tryLoadSB,600);}
+      else{render();}
+    }
+    tryLoadSB();
+  });
+}
+
+var playerInited=false;
+window.addEventListener('t7xpupdate',function(){
+  var email=getBMEmail();if(!email)return;
+  fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+    .then(function(r){return r.json();}).then(function(rows){
+      if(rows&&rows.length&&typeof rows[0].total_xp==='number'){state.sbTotalXP=rows[0].total_xp;var e=el('tl-total-xp');if(e)e.textContent=rows[0].total_xp;}
+    }).catch(function(){});
+});
+
+function tryInit(){var name=getBMName();if(name){init(name);playerInited=true;return true;}return false;}
+if(!tryInit()){
+  [100,300,600,1000,1600,2500,4000,6000].forEach(function(ms){setTimeout(function(){if(!playerInited)tryInit();},ms);});
+  try{var obs=new MutationObserver(function(){if(!playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}
+  setTimeout(function(){if(!playerInited){init('Spieler');playerInited=true;}},2000);
+}
+})();
+</script>
+</div>
+</body>
+</html>
