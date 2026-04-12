@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sterne Badge</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:transparent;font-family:'Open Sans',sans-serif}
+.badge-wrap{width:100%}
+.badge-loading{display:flex;align-items:center;gap:8px;padding:8px 0;opacity:.4}
+.badge-loading-dot{width:6px;height:6px;border-radius:50%;background:#00E5FF;animation:pulse .8s ease-in-out infinite}
+.badge-loading-dot:nth-child(2){animation-delay:.15s}
+.badge-loading-dot:nth-child(3){animation-delay:.3s}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+.cert-card{
+  position:relative;overflow:hidden;text-align:center;
+  background:linear-gradient(160deg,#060d1a 0%,#0a1628 50%,#060d1a 100%);
+  border-radius:16px;padding:24px 28px 22px;
+  box-shadow:0 0 0 1px rgba(0,229,255,.2),0 12px 50px rgba(0,0,0,.7),0 0 40px rgba(0,229,255,.05);
+  animation:certIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes certIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.cert-card::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(110deg,transparent 25%,rgba(0,229,255,.03) 50%,transparent 75%);animation:shimmer 4s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{opacity:0}50%{opacity:1}}
+.cert-top{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#007a99 15%,#00E5FF 35%,#7ffcff 50%,#00E5FF 65%,#007a99 85%,transparent);}
+.cert-bottom{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#007a99 15%,#00E5FF 35%,#7ffcff 50%,#00E5FF 65%,#007a99 85%,transparent);}
+.cc{position:absolute;width:22px;height:22px;z-index:2}
+.cc.tl{top:10px;left:10px;border-top:1.5px solid rgba(0,229,255,.4);border-left:1.5px solid rgba(0,229,255,.4)}
+.cc.tr{top:10px;right:10px;border-top:1.5px solid rgba(0,229,255,.4);border-right:1.5px solid rgba(0,229,255,.4)}
+.cc.bl{bottom:10px;left:10px;border-bottom:1.5px solid rgba(0,229,255,.4);border-left:1.5px solid rgba(0,229,255,.4)}
+.cc.br{bottom:10px;right:10px;border-bottom:1.5px solid rgba(0,229,255,.4);border-right:1.5px solid rgba(0,229,255,.4)}
+.cert-content{position:relative;z-index:1}
+.cert-brand{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,229,255,.9);margin-bottom:14px;}
+.cert-subtitle{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:16px;}
+.cert-line{height:1px;margin:0 auto 18px;width:55%;background:linear-gradient(90deg,transparent,rgba(0,229,255,.35),transparent);}
+.cert-line2{height:1px;margin:0 auto 14px;width:55%;background:linear-gradient(90deg,transparent,rgba(0,229,255,.35),transparent);}
+.cert-star-block{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px;}
+.cert-big-num{font-size:76px;font-weight:800;line-height:1;color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,.7),0 0 60px rgba(255,215,0,.3);animation:numGlow 2.5s ease-in-out infinite alternate;letter-spacing:-.03em;}
+@keyframes numGlow{from{text-shadow:0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,215,0,.2)}to{text-shadow:0 0 35px rgba(255,215,0,.9),0 0 70px rgba(255,215,0,.5)}}
+.cert-big-stars{font-size:26px;line-height:1.3;filter:drop-shadow(0 0 8px rgba(255,215,0,.8));animation:starsGlow 2.5s ease-in-out infinite alternate;}
+@keyframes starsGlow{from{filter:drop-shadow(0 0 5px rgba(255,215,0,.5))}to{filter:drop-shadow(0 0 18px rgba(255,215,0,.95))}}
+.cert-name{font-size:22px;font-weight:800;letter-spacing:.03em;color:#00E5FF;text-transform:uppercase;margin-bottom:7px;text-shadow:0 0 20px rgba(0,229,255,.7),0 0 50px rgba(0,229,255,.3);animation:nameGlow 2.5s ease-in-out infinite alternate;}
+@keyframes nameGlow{from{text-shadow:0 0 14px rgba(0,229,255,.5),0 0 30px rgba(0,229,255,.2)}to{text-shadow:0 0 28px rgba(0,229,255,.9),0 0 60px rgba(0,229,255,.4)}}
+.cert-official{font-size:12px;font-weight:600;letter-spacing:.06em;color:rgba(255,255,255,.55);text-transform:uppercase;}
+.cert-official strong{color:rgba(0,229,255,.9);font-weight:700}
+</style>
+</head>
+<body>
+<div class="badge-wrap" id="badgeWrap">
+  <div class="badge-loading">
+    <div class="badge-loading-dot"></div>
+    <div class="badge-loading-dot"></div>
+    <div class="badge-loading-dot"></div>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+
+function loadIdentity(){try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}}
+
+function lookupByBMId(cb){
+  var bmId=null,wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi],bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){cb(bm.intercom.bootProps.email);return;}
+      var links=w.document.querySelectorAll('a[href*="/member/"]');
+      for(var li=0;li<links.length;li++){var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m){bmId=m[1];break;}}
+      if(bmId)break;
+    }catch(e){}
+  }
+  if(!bmId){cb(null);return;}
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){cb(rows&&rows.length&&rows[0].email?rows[0].email:null);})
+  .catch(function(){cb(null);});
+}
+
+function starsHtml(n){
+  if(n<=3)return '⭐'.repeat(n);
+  var half=Math.ceil(n/2);
+  return '⭐'.repeat(half)+'<br>'+'⭐'.repeat(n-half);
+}
+
+function fmtDate(ts){
+  if(!ts)return '';
+  var d=new Date(typeof ts==='number'?ts:parseInt(ts));
+  return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+function showBadge(n,at,playerName){
+  document.getElementById('badgeWrap').innerHTML=
+    '<div class="cert-card">'+
+      '<div class="cert-top"></div>'+
+      '<div class="cert-bottom"></div>'+
+      '<div class="cc tl"></div><div class="cc tr"></div>'+
+      '<div class="cc bl"></div><div class="cc br"></div>'+
+      '<div class="cert-content">'+
+        '<div class="cert-brand">T7 Academy Zertifikat</div>'+
+        '<div class="cert-line"></div>'+
+        '<div class="cert-star-block">'+
+          '<div class="cert-big-num">'+n+'</div>'+
+          '<div class="cert-big-stars">'+starsHtml(n)+'</div>'+
+        '</div>'+
+        '<div class="cert-line2"></div>'+
+        (playerName?'<div class="cert-name">'+playerName+'</div>':'')+
+        '<div class="cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(at?' &nbsp;&middot;&nbsp; '+fmtDate(at):'')+' </div>'+
+      '</div>'+
+    '</div>';
+}
+
+function showNone(){document.getElementById('badgeWrap').innerHTML='';}
+
+function fetchCert(email){
+  fetch(SB_URL+'/rest/v1/certifications?player_email=eq.'+encodeURIComponent(email)+'&select=stars,awarded_at,player_name&order=stars.desc&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(rows&&rows.length&&rows[0].stars)showBadge(rows[0].stars,rows[0].awarded_at,rows[0].player_name);
+    else showNone();
+  }).catch(showNone);
+}
+
+function init(){
+  /* Step 1: BM admin */
+  var wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi],bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){
+        fetchCert(bm.intercom.bootProps.email);return true;
+      }
+    }catch(e){}
+  }
+  /* Step 2: localStorage identity */
+  var saved=loadIdentity();
+  if(saved){fetchCert(saved);return true;}
+  /* Step 3: BM member ID from page links */
+  lookupByBMId(function(email){
+    if(email)fetchCert(email);
+    else showNone();
+  });
+  return true;
+}
+
+init();
+/* Retry in case identity not yet set */
+var _a=0,_t=setInterval(function(){
+  _a++;
+  var saved=loadIdentity();
+  if(saved){fetchCert(saved);clearInterval(_t);return;}
+  if(_a>10)clearInterval(_t);
+},1000);
+
+})();
+</script>
+</body>
+</html>
