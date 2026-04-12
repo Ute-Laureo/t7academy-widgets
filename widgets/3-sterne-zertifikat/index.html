@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3 Sterne Zertifikat</title>
+<title>1 Stern Zertifikat</title>
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap");
-.sz-wrap{color-scheme:dark}
+.sz-wrap{color-scheme:dark;position:relative}
 .sz-wrap,.sz-wrap *{--sz-bg1:#080f1e;--sz-cr-bg:#080f1e;--sz-text:#f0f0f0;--sz-text-muted:rgba(240,240,240,.6);--sz-text-dim:rgba(240,240,240,.38);--sz-border:rgba(255,215,0,.15);--sz-row-bg:#0d1a2e;--sz-row-bg-hover:#112240;--sz-plabel:rgba(255,215,0,.5);--sz-plabel-line:rgba(255,215,0,.1)}
 .sz-wrap*{box-sizing:border-box}
 .sz-wrap{font-family:'Open Sans',sans-serif;font-size:13px;color:var(--sz-text);width:100%;background:transparent}
@@ -167,6 +167,48 @@
   .sz-wrap .btn-row-center .btn{flex:1 1 auto;justify-content:center}
   .sz-wrap .sent-card{display:none!important}
 }
+
+.sz-wrap .email-fallback{background:rgba(255,255,255,.06);border:1px solid rgba(0,229,255,.3);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.sz-wrap .email-fallback label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(0,229,255,.7);display:block;margin-bottom:6px}
+.sz-wrap .email-fallback input{width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(0,229,255,.25);border-radius:8px;padding:9px 12px;color:#fff;font-family:'Open Sans',sans-serif;font-size:13px;outline:none}
+.sz-wrap .email-fallback input:focus{border-color:#00E5FF}
+.sz-wrap .email-fallback input::placeholder{color:rgba(255,255,255,.3)}
+
+.sz-wrap .name-prompt{
+  position:absolute;top:0;left:0;right:0;bottom:0;z-index:50;
+  background:linear-gradient(160deg,#060d1a,#0a1628);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;text-align:center;border-radius:inherit;
+  min-height:200px;
+}
+.sz-wrap .name-prompt h2{
+  font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;
+}
+.sz-wrap .name-prompt p{
+  font-size:14px;color:rgba(255,255,255,.5);margin-bottom:28px;
+}
+.sz-wrap .name-prompt input{
+  width:100%;max-width:280px;
+  background:rgba(255,255,255,.08);
+  border:2px solid rgba(0,229,255,.4);
+  border-radius:14px;padding:14px 18px;
+  color:#fff;font-family:'Open Sans',sans-serif;
+  font-size:20px;font-weight:700;text-align:center;
+  outline:none;margin-bottom:16px;
+  transition:border-color .2s;
+}
+.sz-wrap .name-prompt input:focus{border-color:#00E5FF;}
+.sz-wrap .name-prompt input::placeholder{color:rgba(255,255,255,.25);font-weight:400;font-size:16px}
+.sz-wrap .name-prompt button{
+  background:linear-gradient(135deg,#00E5FF,#0080FF);
+  color:rgba(0,0,0,.85);font-family:'Open Sans',sans-serif;
+  font-weight:800;font-size:16px;
+  border:none;border-radius:12px;padding:14px 40px;
+  cursor:pointer;width:100%;max-width:280px;
+}
+.sz-wrap .name-prompt .np-hint{
+  font-size:11px;color:rgba(255,255,255,.25);margin-top:16px;
+}
 @media(max-width:380px){
   .sz-wrap .cr-title{font-size:12px}
   .sz-wrap .pbadge{display:none}
@@ -178,6 +220,14 @@
 </head>
 <body>
 <div class="sz-wrap">
+<div class="name-prompt" id="sz-name-prompt-UID_PLACEHOLDER" style="display:none">
+  <h2>👋 Wie heißt du?</h2>
+  <p>Gib deinen Vornamen ein um zu starten</p>
+  <input type="text" id="sz-name-input-UID_PLACEHOLDER" placeholder="Dein Vorname" maxlength="30" autocomplete="given-name">
+  <button onclick="submitNamePrompt()">Los geht's ✨</button>
+  <div class="np-hint">Nur für dich — kein Passwort nötig</div>
+</div>
+
 <div class="cr" id="sz-cr-UID_PLACEHOLDER">
   <div class="cr-badge" style="background:linear-gradient(135deg,#FFD700,#00E5FF)!important">&#11088;</div>
   <div class="cr-body">
@@ -211,7 +261,7 @@
       <div class="plabel" style="margin-top:6px">Zertifikat</div>
       <div class="prow prow-final plocked" id="sz-row-final-UID_PLACEHOLDER">
         <div class="prow-num" style="font-size:16px">&#127942;</div>
-        <div class="prow-body"><div class="prow-title">Final-Video beim Experten einreichen</div><div class="prow-meta">Experten-Review &middot; 2 Sterne Zertifikat</div></div>
+        <div class="prow-body"><div class="prow-title">Final-Video beim Experten einreichen</div><div class="prow-meta">Experten-Review &middot; 3 Sterne Zertifikat</div></div>
         <span class="pbadge b-locked" id="sz-badge-final-UID_PLACEHOLDER">&#128274; Gesperrt</span>
       </div>
     </div>
@@ -292,8 +342,8 @@
     <button class="back-btn" id="sz-submit-back-UID_PLACEHOLDER">&larr; Zur&uuml;ck</button>
     <div class="submit-hero">
       <div class="sh-eye">Experten-Review</div>
-      <div class="sh-title">Dein 2 Sterne Zertifikat</div>
-      <div class="sh-body">Fantastisch! Du hast alle 5 Challenges freigeschaltet. Jetzt Final-Video für das 2 Sterne Zertifikat einreichen!</div>
+      <div class="sh-title">Dein 3 Sterne Zertifikat</div>
+      <div class="sh-body">Fantastisch! Du hast alle 5 Challenges ausgeführt. Jetzt Final-Video für das 3 Sterne Zertifikat einreichen!</div>
     </div>
     <div class="ss-label">Deine abgeschlossenen Challenges</div>
     <div class="checklist" id="sz-checklist-UID_PLACEHOLDER"></div>
@@ -302,6 +352,10 @@
       <div class="nudge aqua" style="margin-bottom:14px">
         <div class="nudge-t">So geht&#39;s</div>
         <div class="nudge-s">Nimm ein Video auf &mdash; dann E-Mail &ouml;ffnen und Video anh&auml;ngen. Oder direkt E-Mail &ouml;ffnen und Video aus der Kamerarolle ausw&auml;hlen.</div>
+      </div>
+      <div class="email-fallback" id="sz-email-fallback-UID_PLACEHOLDER" style="display:none">
+        <label>Deine E-Mail-Adresse</label>
+        <input type="email" id="sz-email-input-UID_PLACEHOLDER" placeholder="deine@email.com" autocomplete="email">
       </div>
       <button class="btn btn-gold" id="sz-mob-btn-UID_PLACEHOLDER" style="width:100%;justify-content:center;padding:16px;font-size:15px;border-radius:14px;margin-bottom:10px">&#9993;&#65039; E-Mail an Experten &ouml;ffnen</button>
       <div id="sz-mob-sent-UID_PLACEHOLDER" style="display:none;flex-direction:column;gap:10px;margin-bottom:14px">
@@ -319,7 +373,6 @@
         <div class="nudge-t">Zeige alle &Uuml;bungen</div>
         <div class="nudge-s">Links, rechts &mdash; damit wir deine Fu&szlig;haltung gut sehen!</div>
       </div>
-      <!-- Option A: Record with camera then save+send -->
       <div id="sz-final-cam-card-UID_PLACEHOLDER" style="margin-bottom:14px">
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
           <button class="btn btn-gold" id="sz-final-open-UID_PLACEHOLDER" style="flex:1;justify-content:center;padding:11px 16px;font-size:13px">&#128249; Kamera &ouml;ffnen &amp; aufnehmen</button>
@@ -352,7 +405,7 @@
       <div class="sent-card" id="sz-sent-UID_PLACEHOLDER">
         <div class="sent-icon">&#127942;</div>
         <div class="sent-title">E-Mail gesendet!</div>
-        <div class="sent-body">Super gemacht! Dein 2 Sterne Zertifikat ist auf dem Weg. ⭐⭐</div>
+        <div class="sent-body">Super gemacht! Dein 3 Sterne Zertifikat ist auf dem Weg. ⭐⭐⭐</div>
         <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
           <button class="btn btn-sm btn-aqua" id="sz-retake-video-UID_PLACEHOLDER">&#128249; Neues Video</button>
           <button class="btn btn-sm btn-aqua" id="sz-reopen-mail-UID_PLACEHOLDER">&#9993; Mail nochmal</button>
@@ -371,11 +424,11 @@ var _uid=(Math.random().toString(36)+'00000').slice(2,7);
 function _pid(base){return base+'-'+_uid;}
 var INSTANCE_KEY='sz3';
 var drills=[
-  {title:'Hop Step-Over',eye:'Challenge 01',meta:'Technik \u00b7 Dribbling',vid:'1109282057',hash:'bdaaffaec2',xp:15,next:'Weiter zu Challenge 2!'},
-  {title:'Elastico',eye:'Challenge 02',meta:'Technik \u00b7 Dribbling',vid:'1109277349',hash:'08c13fbfa2',xp:15,next:'Weiter zu Challenge 3!'},
-  {title:'Samba',eye:'Challenge 03',meta:'Technik \u00b7 Rhythmus',vid:'1150310023',hash:'316bc2fb69',xp:15,next:'Weiter zu Challenge 4!'},
-  {title:'Hocus Pocus',eye:'Challenge 04',meta:'Technik \u00b7 Kreativit\u00e4t',vid:'1096847154',hash:'7f3afdc8df',xp:15,next:'Letzte Challenge!'},
-  {title:'Neckstall',eye:'Challenge 05',meta:'Technik \u00b7 Jonglage',vid:'1110029943',hash:'878275cd7f',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
+  {title:'Hop Step-Over',eye:'Challenge 01',meta:'Technik · Dribbling',vid:'1109282057',hash:'bdaaffaec2',xp:15,next:'Weiter zu Challenge 2!'},
+  {title:'Elastico',eye:'Challenge 02',meta:'Technik · Dribbling',vid:'1109277349',hash:'08c13fbfa2',xp:15,next:'Weiter zu Challenge 3!'},
+  {title:'Samba',eye:'Challenge 03',meta:'Technik · Rhythmus',vid:'1150310023',hash:'316bc2fb69',xp:15,next:'Weiter zu Challenge 4!'},
+  {title:'Hocus Pocus',eye:'Challenge 04',meta:'Technik · Kreativität',vid:'1096847154',hash:'7f3afdc8df',xp:15,next:'Letzte Challenge!'},
+  {title:'Neckstall',eye:'Challenge 05',meta:'Technik · Jonglage',vid:'1110029943',hash:'878275cd7f',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
 ];
 
 var XP_MULT=[0,.2,.4,.6,.8,1];
@@ -408,9 +461,7 @@ function save(){
 }
 function load(username){
   state.storageKey='t7_'+INSTANCE_KEY+'_'+(username||'guest').replace(/\s+/g,'_').toLowerCase();
-  /* Wipe old-format keys (no t7_ prefix) from original widget version */
-  try{var _uslug=(username||'guest').replace(/\s+/g,'_').toLowerCase();localStorage.removeItem('sz3_'+_uslug);localStorage.removeItem('sz_'+_uslug);}catch(e){}
-  /* Version wipe: clear stale localStorage data from old widget versions */
+  try{var _uslug=(username||'guest').replace(/\s+/g,'_').toLowerCase();localStorage.removeItem(INSTANCE_KEY+'_'+_uslug);localStorage.removeItem('sz_'+_uslug);}catch(e){}
   try{
     var _vkey=state.storageKey+'_v';
     if(localStorage.getItem(_vkey)!=='4'){
@@ -424,12 +475,7 @@ function load(username){
       var d=JSON.parse(raw);
       if(d.ratings)state.ratings=d.ratings;
       if(d.challengeXP)state.challengeXP=d.challengeXP;
-      else{
-        /* migrate: rebuild challengeXP from best ratings */
-        for(var i=0;i<drills.length;i++){
-          state.challengeXP[i]=challengeScoreXP(state.ratings[i]||0,drills[i].xp);
-        }
-      }
+      else{for(var i=0;i<drills.length;i++){state.challengeXP[i]=challengeScoreXP(state.ratings[i]||0,drills[i].xp);}}
       if(typeof d.cumXP==='number')state.cumXP=d.cumXP;
       else if(typeof d.xp==='number')state.cumXP=d.xp;
       if(d.completed_at)state.completed_at=d.completed_at;
@@ -490,7 +536,6 @@ function openSubmit(){
   if(!allDone())return;
   state.onSubmit=true;save();
   hide('sz-track');el('sz-drill').classList.remove('open');el('sz-submit').classList.add('open');
-  /* Render checklist dynamically */
   (function(){
     var cl=el('sz-checklist');if(!cl)return;
     cl.innerHTML=drills.map(function(d,i){
@@ -511,6 +556,10 @@ function openSubmit(){
     el('sz-mob').style.display='block';
     el('sz-mob-btn').innerHTML='&#9993;&#65039; E-Mail an Experten \u00f6ffnen';
     el('sz-mob-sent').style.display=state.submitted?'flex':'none';
+    /* Show email input if BM ID not detected */
+    var _mid=getBMId()||state.memberId||null;
+    if(!_mid||_mid==='unbekannt'){el('sz-email-fallback').style.display='block';}
+    else{el('sz-email-fallback').style.display='none';}
   }else{
     el('sz-desk').style.display='block';
     if(state.submitted){hide('sz-final-cam-card');hide('sz-final-cam');hide('sz-final-preview-wrap');show('sz-sent');}
@@ -530,53 +579,38 @@ function showOutcome(){
   var idx=state.drill;
   var prevRating=state.ratings[idx]||0;
   var earned=attemptXP(state.rate,d.xp);
-
-  /* Always add to cumulative */
   state.cumXP+=earned;
-
-  /* Challenge score: only update when reaching 4 or 5 for first time, or 4→5 */
   var prevScore=state.challengeXP[idx]||0;
   var newScore=challengeScoreXP(state.rate,d.xp);
   var scoreGain=0;
   if(newScore>prevScore){scoreGain=newScore-prevScore;state.challengeXP[idx]=newScore;}
-
   if(state.rate>prevRating){state.ratings[idx]=state.rate;if(!state.completed_at[idx])state.completed_at[idx]=Date.now();}
-
-  var _e=getBMId();
-  if(_e)sbUpsert(_e,state.currentPlayerName,'sz3','3 Sterne Zertifikat',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false);
-
+  var _e=getBMId()||state.memberId||null;
+  if(_e)sbUpsert(_e,state.currentPlayerName,INSTANCE_KEY,'3 Sterne Zertifikat',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false);
   updateXP();save();
-  /* Refresh total XP from Supabase after rating */
-  var _mid2=getBMId?getBMId():null;
-  if(!_mid2&&typeof getBMEmail==='function')_mid2=getBMEmail();
+  var _mid2=getBMId?getBMId():null;if(!_mid2||_mid2==='unbekannt')_mid2=state.memberId||null;
   if(_mid2&&_mid2!=='unbekannt'){
     setTimeout(function(){
       fetchSBTotalXP(_mid2);
       try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
-      /* Also update outcome total text if still visible */
-      setTimeout(function(){
-        var _cumEl=el('sz-xp-cumul');
-        if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';
-      },500);
+      setTimeout(function(){var _cumEl=el('sz-xp-cumul');if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';},500);
     },1500);
   }
-
   var totalCum=getTotalCumXP();
   var box=el('sz-out-box'),icon=el('sz-out-icon'),title=el('sz-out-title'),sub=el('sz-out-sub'),btns=el('sz-out-btns');
   el('sz-xp-earned').textContent='+'+earned+' XP diese Runde';
   el('sz-xp-cumul').textContent='Gesamt: '+totalCum+' XP';
-
   if(state.rate<=3){
     box.className='outcome out-low';icon.textContent=state.rate<=2?'\ud83d\udcaa':'\ud83e\udd14';
     title.textContent=state.rate<=2?'Weiter k\u00e4mpfen!':'Ganz gut!';
     sub.textContent='Noch ein Versuch f\u00fcr Bewertung 4 oder 5!';
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-amber';b1.textContent='\u21a9 Nochmal';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
-  } else if(state.rate===4){
+  }else if(state.rate===4){
     box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
-    title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
+    title.textContent=scoreGain>0?d.title+' ausgeführt!':'Richtig gut!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Noch ein Versuch f\u00fcr Perfektion!';
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-aqua';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
-  } else {
+  }else{
     box.className='outcome out-high';icon.textContent='\u2b50';
     title.textContent=d.title+' gemeistert!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Maximale Challenge-Punkte bereits erreicht!';
@@ -593,7 +627,7 @@ function stopCamera(){if(state.mediaStream){state.mediaStream.getTracks().forEac
 function resetCamera(){stopCamera();var pv=el('sz-vid-preview');if(pv){pv.pause();pv.src='';}show('sz-cam-card');hide('sz-cam-live');hide('sz-preview-wrap');flex('sz-skip-row');hide('sz-cam-err');}
 function startFinalCamera(){hide('sz-final-cam-card');navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:true}).then(function(stream){state.finalStream=stream;el('sz-final-stream').srcObject=stream;show('sz-final-cam');}).catch(function(err){show('sz-final-cam-card');var msg=err.name==='NotAllowedError'?'Kamera-Zugriff verweigert.':'Kamera nicht verf\u00fcgbar.';el('sz-final-cam-err').textContent=msg;show('sz-final-cam-err');});}
 function toggleFinalRecord(){
-  if(!state.finalRecording){state.finalChunks=[];var opts=MediaRecorder.isTypeSupported('video/webm')?{mimeType:'video/webm'}:{};state.finalRecorder=new MediaRecorder(state.finalStream,opts);state.finalRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)state.finalChunks.push(e.data);};state.finalRecorder.onstop=function(){var blob=new Blob(state.finalChunks,{type:state.finalRecorder.mimeType||'video/webm'});state.finalBlob=blob;var ext=blob.type&&blob.type.indexOf('mp4')>-1?'mp4':'webm';var pv=el('sz-final-preview');pv.src=URL.createObjectURL(blob);pv.load();stopFinalCamera();hide('sz-final-cam-card');show('sz-final-preview-wrap');state.finalVideoReady=true;};hide('sz-final-cam-card');state.finalRecorder.start();state.finalRecording=true;var rb=el('sz-final-rec-btn');rb.textContent='\u25a0 Stoppen';rb.style.background='\x23111';rb.style.borderColor='\x23111';show('sz-final-rec-timer');}else{state.finalRecorder.stop();state.finalRecording=false;}
+  if(!state.finalRecording){state.finalChunks=[];var opts=MediaRecorder.isTypeSupported('video/webm')?{mimeType:'video/webm'}:{};state.finalRecorder=new MediaRecorder(state.finalStream,opts);state.finalRecorder.ondataavailable=function(e){if(e.data&&e.data.size>0)state.finalChunks.push(e.data);};state.finalRecorder.onstop=function(){var blob=new Blob(state.finalChunks,{type:state.finalRecorder.mimeType||'video/webm'});state.finalBlob=blob;var pv=el('sz-final-preview');pv.src=URL.createObjectURL(blob);pv.load();stopFinalCamera();hide('sz-final-cam-card');show('sz-final-preview-wrap');state.finalVideoReady=true;};hide('sz-final-cam-card');state.finalRecorder.start();state.finalRecording=true;var rb=el('sz-final-rec-btn');rb.textContent='\u25a0 Stoppen';rb.style.background='\x23111';rb.style.borderColor='\x23111';show('sz-final-rec-timer');}else{state.finalRecorder.stop();state.finalRecording=false;}
 }
 function stopFinalCamera(){if(state.finalStream){state.finalStream.getTracks().forEach(function(t){t.stop();});state.finalStream=null;}var lv=el('sz-final-stream');if(lv)lv.srcObject=null;hide('sz-final-cam');var rb=el('sz-final-rec-btn');if(rb){rb.textContent='\u25cf Aufnahme starten';rb.style.background='\x23DC2626';rb.style.borderColor='\x23DC2626';}hide('sz-final-rec-timer');state.finalRecording=false;}
 function autoDownload(blob,filename){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},3000);}
@@ -601,12 +635,21 @@ function buildMailto(){
   var names=['Hop Step-Over','Elastico','Samba','Hocus Pocus','Neckstall'];
   var pn=state.currentPlayerName||'Spieler';
   var rows=state.ratings.map(function(r,i){var lbl=r>=5?'Gemeistert':r>=4?'Gemeistert':r>0?'In Arbeit':'Nicht gemacht';return (i+1)+'. '+names[i]+': '+lbl+(r>0?' ('+r+'/5)':'')+'\n';}).join('');
-  var subj=encodeURIComponent('\ud83c\udfc6 Final-Video von '+pn+' \u2013 1-Stern Zertifikat');
-  var mid=getBMId()||state.memberId||'unbekannt';
-  var _state=JSON.stringify({orderBy:{column:'createdAt',reverse:true},query:mid,filterBy:[]});
+  var subj=encodeURIComponent('\ud83c\udfc6 Final-Video von '+pn+' \u2013 3-Stern Zertifikat');
+  var mid=getBMId()||state.memberId||null;
+  /* Fallback: use manually entered email if BM ID not detected */
+  if(!mid||mid==='unbekannt'){
+    var _inp=el('sz-email-input');
+    if(_inp&&_inp.value.trim())mid=_inp.value.trim();
+    else mid=null;
+  }
+  /* Use name as search term if email still not available */
+  var searchTerm=mid||(pn||'');
+
+  var _state=JSON.stringify({orderBy:{column:'createdAt',reverse:true},query:searchTerm,filterBy:[]});
   var _b64=btoa(unescape(encodeURIComponent(_state)));
   var adminUrl='https://teco7.bettermode.io/manage/people/members?state='+_b64;
-  var body='Hallo,\n\nIch habe alle Skills geschafft. Anbei mein Video f\u00fcr das 2 Sterne Zertifikat.\n\nViele Gr\u00fc\u00dfe,\n'+pn+'\n\n---\nSpieler: '+pn+'\nE-Mail: '+mid+'\nAdmin-Suche: '+adminUrl+'\nKurs XP: '+computeKursXP()+' XP\nGesamt XP: '+getTotalCumXP()+' XP\n\nChallenge-Ergebnisse:\n'+rows;
+  var body='Hallo,\n\nIch habe alle Skills geschafft. Anbei mein Video f\u00fcr das 3 Sterne Zertifikat.\n\nViele Gr\u00fc\u00dfe,\n'+pn+'\n\n---\nSpieler: '+pn+'\nE-Mail: '+(mid||'Bitte im Formular eintragen')+'\nAdmin-Suche: '+adminUrl+'\n\n\u2b50 Zertifikat 1-Klick f\u00fcr Expert:\nhttps://teco7.bettermode.io/admin-section-meq4vkg2/?email='+encodeURIComponent(mid)+'&name='+encodeURIComponent(pn)+'&module=sz3&stars=3'+'\nKurs XP: '+computeKursXP()+' XP\nGesamt XP: '+getTotalCumXP()+' XP\n\nChallenge-Ergebnisse:\n'+rows;
   return 'mailto:expert@t7academy.com?subject='+subj+'&body='+encodeURIComponent(body);
 }
 function openMailto(){window.location.href=buildMailto();}
@@ -629,79 +672,458 @@ function wire(){
   el('sz-retake-video').addEventListener('click',function(){state.submitted=false;save();hide('sz-sent');if(isMobile()){el('sz-mob').style.display='block';el('sz-desk').style.display='none';el('sz-mob-btn').innerHTML='&#9993;&#65039; E-Mail an Experten \u00f6ffnen';el('sz-mob-sent').style.display='none';}else{el('sz-mob').style.display='none';el('sz-desk').style.display='block';stopFinalCamera();var pv=el('sz-final-preview');if(pv){pv.pause();pv.src='';}hide('sz-final-cam');hide('sz-final-preview-wrap');show('sz-final-cam-card');state.finalVideoReady=false;state.finalBlob=null;state.finalChunks=[];el('sz-download-ok').style.display='none';hide('sz-step-send');}});
   el('sz-reopen-mail').addEventListener('click',openMailto);el('sz-retry-all').addEventListener('click',resetProgress);
 }
-
 function fetchSBTotalXP(email){
   if(!email||email==='unbekannt')return;
-  fetch('https://qajjuhjmrtuomwrbxmpz.supabase.co/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{
-    headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4'}
+  fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();}).then(function(rows){
     if(rows&&rows.length&&typeof rows[0].total_xp==='number'){
       state.sbTotalXP=rows[0].total_xp;
       el('sz-xp-total').textContent=state.sbTotalXP+' XP';
+    } else {
+      state.sbTotalXP=0;
+      el('sz-xp-total').textContent='0 XP';
     }
-  }).catch(function(){});
+  }).catch(function(){
+    el('sz-xp-total').textContent='— XP';
+  });
 }
 function applyPlayer(name){
   var parts=name.trim().split(/\s+/);
   var initials=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():name.slice(0,2).toUpperCase();
-  el('sz-avatar').textContent=initials;state.currentPlayerName=parts[0]||name;state.memberId=getBMId();
+  el('sz-avatar').textContent=initials;
+  state.currentPlayerName=parts[0]||name;
+  /* Only update memberId from BM if we don't already have one */
+  if(!state.memberId){state.memberId=getBMId();}
   load(name);
-  var _e=getBMId()||state.memberId||null;if(_e){fetchSBTotalXP(_e);sbBackfill(_e,parts[0]||name);}
+  var _e=state.memberId||getBMId()||null;
+  if(_e&&_e!=='unbekannt'){
+    /* Email known - write to members and load XP */
+    var _rn=parts[0]||name;
+    if(_rn&&_rn!=='Spieler')upsertMember(_e,name,null);
+    fetchSBTotalXP(_e);
+    sbBackfill(_e,_rn);
+  }
   var ht=el('sz-hero-text');if(ht)ht.textContent='Hey '+parts[0]+'! Zeige deine Skills und erhalte dein Zertifikat!';
 }
 function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi];var bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
-function getBMId(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi];var bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;if(bp.user_id)return bp.user_id;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
-
+function getBMId(){
+  var wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi];
+      var bm=w.__BM_DATA__;
+      /* Method 1: Intercom bootProps */
+      if(bm&&bm.intercom&&bm.intercom.bootProps){
+        var bp=bm.intercom.bootProps;
+        if(bp.email)return bp.email;
+        if(bp.userId)return bp.userId;
+        if(bp.user_id)return bp.user_id;
+      }
+      /* Method 2: intercomSettings */
+      if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;
+      /* Method 3: BM member objects */
+      if(bm&&bm.member&&bm.member.email)return bm.member.email;
+      if(bm&&bm.member&&bm.member.id)return bm.member.id;
+      if(bm&&bm.currentMember&&bm.currentMember.email)return bm.currentMember.email;
+      if(bm&&bm.currentMember&&bm.currentMember.id)return bm.currentMember.id;
+      if(bm&&bm.user&&bm.user.email)return bm.user.email;
+      if(bm&&bm.viewer&&bm.viewer.email)return bm.viewer.email;
+      /* Method 4: Apollo/Next.js state */
+      try{
+        var apollo=w.__APOLLO_STATE__||w.__NEXT_DATA__;
+        if(apollo){var str=JSON.stringify(apollo);var em=str.match(/"email":"([^"@]+@[^"]+)"/);if(em)return em[1];}
+      }catch(ae){}
+      /* Method 5: Bettermode React root */
+      try{
+        var root=w.document.getElementById('__NEXT_DATA__');
+        if(root){var nd=JSON.parse(root.textContent);var ns=JSON.stringify(nd);var em2=ns.match(/"email":"([^"@]+@[^"]+)"/);if(em2)return em2[1];}
+      }catch(re){}
+      /* Method 6: scan all script tags for email */
+      try{
+        var scripts=w.document.querySelectorAll('script[type="application/json"],script#__NEXT_DATA__');
+        for(var si=0;si<scripts.length;si++){
+          var txt=scripts[si].textContent;
+          var em3=txt.match(/"email":"([^"@]+@[^"]+)"/);
+          if(em3)return em3[1];
+        }
+      }catch(se){}
+      /* Method 7: localStorage - BM sometimes stores session */
+      try{
+        for(var li=0;li<w.localStorage.length;li++){
+          var lk=w.localStorage.key(li);
+          if(lk&&(lk.indexOf('member')>-1||lk.indexOf('user')>-1||lk.indexOf('auth')>-1)){
+            var lv=w.localStorage.getItem(lk);
+            if(lv){var em4=lv.match(/"email":"([^"@]+@[^"]+)"/);if(em4)return em4[1];}
+          }
+        }
+      }catch(le){}
+      /* Method 8: cookie scan */
+      try{
+        var cookies=w.document.cookie;
+        var em5=cookies.match(/email=([^;@]+@[^;]+)/);
+        if(em5)return decodeURIComponent(em5[1]);
+      }catch(ce){}
+    }catch(e){}
+  }
+  return null;
+}
 var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 function sbDevice(){return /iphone|ipad|ipod|android/i.test(navigator.userAgent)?'mobile':'desktop';}
 function sbUpsert(email,name,mk,ml,idx,rating,xp,ts,skipPlayers,skipAttempts){
   if(!email||email==='unbekannt')return;
-  var totalXp=getTotalCumXP();
-  /* 1. Upsert completions — keeps best rating per challenge */
+  /* Increment Supabase total by the XP earned this attempt */
+  var currentTotal=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
+  var totalXp=currentTotal+xp;
+  state.sbTotalXP=totalXp;
+  el('sz-xp-total').textContent=totalXp+' XP';
   fetch(SB_URL+'/rest/v1/completions',{
     method:'POST',
-    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates','x-widget-token':'T7WIDGET2026'},
     body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,module_label:ml||'',challenge_idx:idx,rating:rating,xp:xp,total_xp:totalXp,completed_at:ts||Date.now(),platform:'bettermode',device:sbDevice()})
   }).catch(function(){});
-  /* 2. INSERT into attempts — only on real attempts, never on backfill */
   if(!skipAttempts){
     fetch(SB_URL+'/rest/v1/attempts',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal','x-widget-token':'T7WIDGET2026'},
       body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,challenge_idx:idx,rating:rating,xp:xp,attempted_at:ts||Date.now()})
     }).catch(function(){});
   }
-  /* 3. Update players table snapshot */
   if(!skipPlayers){
     fetch(SB_URL+'/rest/v1/players',{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates','x-widget-token':'T7WIDGET2026'},
       body:JSON.stringify({player_email:email,player_name:name||'',total_xp:totalXp})
     }).catch(function(){});
   }
 }
 function sbBackfill(email,name){
   if(!email||email==='unbekannt')return;
-  /* Backfill only upserts completions — never inserts into attempts */
-  for(var i=0;i<drills.length;i++){if(state.ratings[i]>0){var xp=attemptXP(state.ratings[i],drills[i].xp);sbUpsert(email,name,'sz3','3 Sterne Zertifikat',i,state.ratings[i],xp,state.completed_at[i]||Date.now(),true,true);}}
+  for(var i=0;i<drills.length;i++){if(state.ratings[i]>0){var xp=attemptXP(state.ratings[i],drills[i].xp);sbUpsert(email,name,INSTANCE_KEY,'3 Sterne Zertifikat',i,state.ratings[i],xp,state.completed_at[i]||Date.now(),true,true);}}
 }
-function tryInit(){var name=getBMName();if(name){applyPlayer(name);state.playerInited=true;return true;}return false;}
+
+
+function upsertMember(email, name, bmId){
+  if(!email||email==='unbekannt')return;
+  var payload={email:email,name:name||'',synced_at:Date.now()};
+  if(bmId)payload.bm_id=bmId;
+  fetch(SB_URL+'/rest/v1/members',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates','x-widget-token':'T7WIDGET2026'},
+    body:JSON.stringify(payload)
+  }).catch(function(){});
+}
+
+function lookupEmailByName(name, cb){
+  if(!name||name==='Spieler')return;
+  /* Try exact match first, then first-name match */
+  var firstName=name.trim().split(' ')[0];
+  fetch(SB_URL+'/rest/v1/members?name=eq.'+encodeURIComponent(name)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(rows&&rows.length&&rows[0].email){cb(rows[0].email,rows[0].name);return;}
+    /* Try first name only */
+    return fetch(SB_URL+'/rest/v1/members?name=ilike.'+encodeURIComponent(firstName+'%')+'&select=email,name&limit=1',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    }).then(function(r){return r.json();})
+    .then(function(rows2){
+      if(rows2&&rows2.length&&rows2[0].email)cb(rows2[0].email,rows2[0].name);
+    });
+  }).catch(function(){});
+}
+
+function lookupMemberByEmail(email, cb){
+  fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    cb(rows&&rows.length?rows[0]:{email:email,name:null});
+  }).catch(function(){cb({email:email,name:null});});
+}
+
+function applyPlayerFull(name, email){
+  if(email)state.memberId=email;
+  if(email){
+    /* Always look up name from Supabase members table */
+    lookupMemberByEmail(email, function(m){
+      var sbName=m.name||name||'Spieler';
+      applyPlayer(sbName);
+      fetchSBTotalXP(email);
+      sbBackfill(email, sbName);
+    });
+  } else {
+    applyPlayer(name||'Spieler');
+  }
+}
+function fetchBMMember(cb){
+  /* Query Bettermode GraphQL - try all known endpoints */
+  var queries=[
+    'https://api.bettermode.com/',
+    'https://teco7.bettermode.io/api/graphql',
+    window.location.origin+'/api/graphql'
+  ];
+  var query=JSON.stringify({query:'{authMember{id email name}}'});
+  var tried=0;
+  function tryNext(){
+    if(tried>=queries.length){cb(null,null);return;}
+    var url=queries[tried++];
+    fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      credentials:'include',
+      body:query
+    }).then(function(r){return r.json();})
+    .then(function(d){
+      var m=d&&d.data&&d.data.authMember;
+      if(m&&(m.email||m.id)){cb(m.email||m.id, m.name||null);}
+      else{tryNext();}
+    }).catch(function(){tryNext();});
+  }
+  tryNext();
+}
+
+function getNameFromStorage(instanceKey){
+  try{
+    var prefix='t7_'+instanceKey+'_';
+    var names=[];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf(prefix)===0){
+        /* Strip prefix and version suffix */
+        var raw=k.slice(prefix.length).replace(/_v$/,'').replace(/_v[0-9]+$/,'');
+        if(raw&&raw!=='spieler'&&raw!=='guest'&&raw.length>1){
+          /* Convert underscores to spaces and title case */
+          var name=raw.split('_').map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(' ');
+          names.push(name);
+        }
+      }
+    }
+    /* Return the most specific name (longest) */
+    if(names.length){names.sort(function(a,b){return b.length-a.length;});return names[0];}
+  }catch(e){}
+  return null;
+}
+
+
+function lookupByBMId(cb){
+  var bmId=null;
+  var wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi];
+      /* Method 1: __NEXT_DATA__ script tag */
+      var nd=w.document.getElementById('__NEXT_DATA__');
+      if(nd){
+        var txt=nd.textContent;
+        var m=txt.match(/"authMember"\s*:\s*\{[^}]*"id"\s*:\s*"([A-Za-z0-9]{6,15})"/);
+        if(m){bmId=m[1];break;}
+        m=txt.match(/"member"\s*:\s*\{[^}]*"id"\s*:\s*"([A-Za-z0-9]{6,15})"/);
+        if(m){bmId=m[1];break;}
+      }
+      /* Method 2: Apollo state */
+      var ap=w.__APOLLO_STATE__;
+      if(ap){
+        var apStr=JSON.stringify(ap);
+        var m2=apStr.match(/"authMember:\{"__ref":"Member:([A-Za-z0-9]{6,15})"/);
+        if(m2){bmId=m2[1];break;}
+      }
+      /* Method 3: Scan ALL script tags for member ID patterns */
+      var scripts=w.document.querySelectorAll('script');
+      for(var si=0;si<scripts.length;si++){
+        var st=scripts[si].textContent;
+        /* BM member IDs appear as /member/XXXXXX in links */
+        var m3=st.match(/\/member\/([A-Za-z0-9]{8,12})/);
+        if(m3){bmId=m3[1];break;}
+        /* Also look for "id":"XXXXXX" near "authMember" */
+        var m4=st.match(/"authMember"[^{]*\{[^}]*"id"\s*:\s*"([A-Za-z0-9]{6,15})"/);
+        if(m4){bmId=m4[1];break;}
+      }
+      if(bmId)break;
+      /* Method 4: Scan all links on the page for /member/ID */
+      var links=w.document.querySelectorAll('a[href*="/member/"]');
+      for(var li=0;li<links.length;li++){
+        var href=links[li].href||'';
+        var m5=href.match(/\/member\/([A-Za-z0-9]{8,12})/);
+        if(m5){bmId=m5[1];break;}
+      }
+      if(bmId)break;
+    }catch(e){}
+  }
+  if(!bmId){cb(null,null);return;}
+  /* Look up in members table by bm_id */
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(rows&&rows.length&&rows[0].email){cb(rows[0].email,rows[0].name);}
+    else{cb(null,null);}
+  }).catch(function(){cb(null,null);});
+}
+
+function saveIdentity(email){
+  try{localStorage.setItem('t7_player_identity',email);}catch(e){}
+}
+function loadIdentity(){
+  try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}
+}
+function fetchSBKursXP(email){
+  /* Load best ratings per challenge for this module from completions */
+  if(!email)return;
+  fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&module_key=eq.'+INSTANCE_KEY+'&select=challenge_idx,rating,xp&order=rating.desc',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(!rows||!rows.length)return;
+    /* Build best rating per challenge */
+    var bestRating={};var bestXP={};
+    rows.forEach(function(r){
+      var i=r.challenge_idx;
+      if(!(i in bestRating)||r.rating>bestRating[i]){
+        bestRating[i]=r.rating;
+        bestXP[i]=r.xp||0;
+      }
+    });
+    /* Update state with best ratings */
+    var changed=false;
+    Object.keys(bestRating).forEach(function(i){
+      var idx=parseInt(i);
+      if(bestRating[i]>=(state.ratings[idx]||0)){
+        state.ratings[idx]=bestRating[i];
+        state.challengeXP[idx]=challengeScoreXP(bestRating[i],drills[idx]?drills[idx].xp:15);
+        changed=true;
+      }
+    });
+    if(changed){updateXP();updateProgress();refreshTrack();}
+  }).catch(function(){});
+}
+
+function initFromEmail(email){
+  state.memberId=email;
+  lookupMemberByEmail(email,function(m){
+    var name=m.name||'Spieler';
+    applyPlayer(name);
+    fetchSBTotalXP(email);
+    fetchSBKursXP(email);
+  });
+  state.playerInited=true;
+}
+function tryInit(){
+  /* Step 1: BM __BM_DATA__ (admins) */
+  var bmEmail=getBMId();
+  if(bmEmail&&bmEmail!=='unbekannt'){
+    saveIdentity(bmEmail);
+    initFromEmail(bmEmail);
+    return true;
+  }
+  /* Step 2: Saved email in localStorage */
+  var savedEmail=loadIdentity();
+  if(savedEmail){
+    initFromEmail(savedEmail);
+    return true;
+  }
+  /* Step 3: Look up by BM member ID from page data */
+  lookupByBMId(function(email,name){
+    if(email&&!state.playerInited){
+      saveIdentity(email);
+      initFromEmail(email);
+    }
+  });
+  /* Step 4: Name from localStorage keys */
+  var name=getNameFromStorage(INSTANCE_KEY);
+  if(name&&name!=='Spieler'){
+    lookupEmailByName(name,function(email,sbName){
+      if(email&&!state.playerInited){saveIdentity(email);initFromEmail(email);}
+    });
+    state.playerInited=true;
+    return true;
+  }
+  return false;
+}
 try{
-/* Rename placeholder IDs to unique ones for this instance */
 (function(){
   var all=document.querySelectorAll('[id$="-UID_PLACEHOLDER"]');
   all.forEach(function(el){el.id=el.id.replace('-UID_PLACEHOLDER','-'+_uid);});
 })();
-/* Refresh total XP pill when another widget rates a challenge */
 window.addEventListener('t7xpupdate',function(){
   var _em=getBMId?getBMId():null;
-  if(!_em&&typeof getBMEmail==='function')_em=getBMEmail();
-  if(_em&&_em!=='unbekannt')fetchSBTotalXP(_em);
+  if(!_em||_em==='unbekannt')_em=state.memberId||loadIdentity()||null;
+  if(_em)fetchSBTotalXP(_em);
 });
 wire();}catch(e){setTimeout(function(){try{wire();}catch(e2){}},500);}
-applyPlayer('Spieler');
-if(!tryInit()){[100,300,600,1000,1600,2500,4000,6000,8000,10000,15000].forEach(function(ms){setTimeout(function(){if(!state.playerInited)tryInit();},ms);});try{var obs=new MutationObserver(function(){if(!state.playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}}
+/* Step 1: Try BM __BM_DATA__ and localStorage name */
+if(!tryInit()){
+  /* Retry silently - identity will come from sz1 name prompt */
+  var _retries=0;
+  var _retryTimer=setInterval(function(){
+    _retries++;
+    if(tryInit()||_retries>=30){
+      clearInterval(_retryTimer);
+    }
+  },500);
+}
+
+function showNamePrompt(){
+  var np=el('sz-name-prompt');
+  if(np)np.style.display='flex';
+  /* Focus the input */
+  setTimeout(function(){
+    var inp=el('sz-name-input');
+    if(inp)inp.focus();
+  },100);
+  /* Allow enter key */
+  var inp=el('sz-name-input');
+  if(inp)inp.addEventListener('keydown',function(e){if(e.key==='Enter')submitNamePrompt();});
+}
+
+window.submitNamePrompt=function(){
+  var inp=el('sz-name-input');
+  if(!inp)return;
+  var firstName=inp.value.trim();
+  if(!firstName)return;
+  /* Show loading state */
+  var btn=inp.nextElementSibling;
+  if(btn)btn.textContent='Suche...';
+  /* Look up by first name in members table */
+  lookupEmailByName(firstName,function(email,sbName){
+    if(!email){
+      /* Name not found - show error, let them try again */
+      if(btn)btn.textContent='Los geht\'s \u2728';
+      inp.style.borderColor='#FF6B6B';
+      var hint=inp.parentElement.querySelector('.np-hint');
+      if(hint)hint.innerHTML='\u26a0\ufe0f Name nicht gefunden. Bitte deinen Vornamen so eingeben wie er in der App steht.';
+      hint.style.color='#FF6B6B';
+      inp.value='';inp.focus();
+      return;
+    }
+    /* Found - save email, load everything from Supabase */
+    var np=el('sz-name-prompt');
+    if(np)np.style.display='none';
+    saveIdentity(email);
+    initFromEmail(email);
+  });
+};
+
+function tryInitGraphQL(){
+  if(state.playerInited)return;
+  fetchBMMember(function(email,name){
+    if(email||name){
+      var displayName=name||state.currentPlayerName||'Spieler';
+      if(!state.playerInited)applyPlayer(displayName);
+      if(email){state.memberId=email;}
+      state.playerInited=true;
+    } else {
+      /* GraphQL also failed - show name prompt */
+      if(!state.playerInited)showNamePrompt();
+    }
+  });
+}
+/* Already handled above - quick 1.5s fallback to name prompt */
 })();
 </script>
 </body>
