@@ -346,7 +346,7 @@ function getTotalCumXP(){if(typeof state.sbTotalXP==='number')return state.sbTot
 
 function updateXP(){
   el('gm-xp').textContent=computeKursXP()+' XP';
-  el('gm-xp-total').textContent=getTotalCumXP()+' XP';
+  var _tot=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;el('gm-xp-total').textContent=_tot+' XP';
 }
 function updateProgress(){
   var done=state.ratings.filter(function(r){return r>=4;}).length;
@@ -419,26 +419,15 @@ function showOutcome(){
     if(!state.completed_at[idx])state.completed_at[idx]=Date.now();
   }
 
-  var _mid=getBMId?getBMId():null;
-  if(_mid&&_mid!=='unbekannt'){
+  var _mid=state.memberId||loadIdentity()||(getBMId?getBMId():null)||null;
+  if(_mid){
     sbUpsert(_mid,state.currentPlayerName,'fta1','First Touch Air',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false);
   }
 
   updateXP();save();
-  var _mid2=getBMId?getBMId():null;
-  if(!_mid2&&typeof getBMEmail==='function')_mid2=getBMEmail();
-  if(_mid2&&_mid2!=='unbekannt'){
-    setTimeout(function(){
-      fetchSBTotalXP(_mid2);
-      try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
-      setTimeout(function(){
-        var _cumEl=el('gm-xp-cumul');
-        if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';
-      },500);
-    },1500);
-  }
+  try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
 
-  var totalCum=getTotalCumXP();
+  var totalCum=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
   var box=el('gm-out-box'),icon=el('gm-out-icon'),title=el('gm-out-title'),sub=el('gm-out-sub'),btns=el('gm-out-btns');
   el('gm-xp-earned').textContent='+'+earned+' XP diese Runde';
   el('gm-xp-cumul').textContent='Gesamt: '+totalCum+' XP';
@@ -545,7 +534,9 @@ var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 function sbDevice(){return /iphone|ipad|ipod|android/i.test(navigator.userAgent)?'mobile':'desktop';}
 function sbUpsert(email,name,mk,ml,idx,rating,xp,ts,skipPlayers,skipAttempts){
   if(!email||email==='unbekannt')return;
-  var totalXp=getTotalCumXP();
+  var currentTotal=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
+  var totalXp=currentTotal+xp;
+  state.sbTotalXP=totalXp;
   fetch(SB_URL+'/rest/v1/completions',{
     method:'POST',
     headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},
@@ -582,22 +573,88 @@ function sbBackfill(email,name){
     }
   }
 }
-function tryInit(){var name=getBMName();if(name){applyPlayer(name);state.playerInited=true;return true;}return false;}
+
+function saveIdentity(email){try{localStorage.setItem('t7_player_identity',email);}catch(e){}}
+function loadIdentity(){try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}}
+function lookupMemberByEmail(email,cb){
+  fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){cb(rows&&rows.length?rows[0]:{email:email,name:null});})
+  .catch(function(){cb({email:email,name:null});});
+}
+function lookupByBMId(cb){
+  var bmId=null,wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi],bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){cb(bm.intercom.bootProps.email,null);return;}
+      var links=w.document.querySelectorAll('a[href*="/member/"]');
+      for(var li=0;li<links.length;li++){var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m){bmId=m[1];break;}}
+      if(bmId)break;
+    }catch(e){}
+  }
+  if(!bmId){cb(null,null);return;}
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);else cb(null,null);})
+  .catch(function(){cb(null,null);});
+}
+
+function fetchSBKursXP(email){
+  if(!email)return;
+  fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&module_key=eq.fta1&select=challenge_idx,rating,xp&order=rating.desc',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(!rows||!rows.length)return;
+    var bestRating={};
+    rows.forEach(function(r){var i=r.challenge_idx;if(!(i in bestRating)||r.rating>bestRating[i])bestRating[i]=r.rating;});
+    var changed=false;
+    Object.keys(bestRating).forEach(function(i){
+      var idx=parseInt(i);
+      if(bestRating[i]>=(state.ratings[idx]||0)){
+        state.ratings[idx]=bestRating[i];
+        state.challengeXP[idx]=challengeScoreXP(bestRating[i],drills[idx]?drills[idx].xp:10);
+        changed=true;
+      }
+    });
+    if(changed){updateXP();updateProgress();refreshTrack();}
+  }).catch(function(){});
+}
+function initFromEmail(email){
+  state.memberId=email;
+  lookupMemberByEmail(email,function(m){
+    var name=m.name||'Spieler';
+    applyPlayer(name);
+    fetchSBTotalXP(email);
+    fetchSBKursXP(email);
+  });
+  state.playerInited=true;
+}
+
+function tryInit(){
+  var bmEmail=typeof getBMId==='function'?getBMId():null;
+  if(bmEmail&&bmEmail!=='unbekannt'){saveIdentity(bmEmail);initFromEmail(bmEmail);return true;}
+  var savedEmail=loadIdentity();
+  if(savedEmail){initFromEmail(savedEmail);return true;}
+  lookupByBMId(function(email,name){if(email&&!state.playerInited){saveIdentity(email);initFromEmail(email);}});
+  return false;
+}
 
 (function(){
   var all=document.querySelectorAll('[id$="-UID_PLACEHOLDER"]');
   all.forEach(function(el){el.id=el.id.replace('-UID_PLACEHOLDER','-'+_uid);});
 })();
 window.addEventListener('t7xpupdate',function(){
-  var _em=getBMId?getBMId():null;
-  if(!_em&&typeof getBMEmail==='function')_em=getBMEmail();
-  if(_em&&_em!=='unbekannt')fetchSBTotalXP(_em);
+  var _em=state.memberId||loadIdentity()||(getBMId?getBMId():null)||null;
+  if(_em)fetchSBTotalXP(_em);
 });
-wire();applyPlayer('Spieler');
-if(!tryInit()){
-  [100,300,600,1000,1600,2500,4000].forEach(function(ms){setTimeout(function(){if(!state.playerInited)tryInit();},ms);});
-  try{var obs=new MutationObserver(function(){if(!state.playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}
-}
+wire();
+if(!tryInit()){var _ret=0;var _retT=setInterval(function(){_ret++;if(tryInit()||_ret>=20)clearInterval(_retT);},500);}
 })();
 </script>
 </body>

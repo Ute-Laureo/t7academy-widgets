@@ -230,15 +230,15 @@ function mergeData(compRows,attRows,playerRows){
   });
 }
 
-function init(name){
+function init(name,knownEmail){
   state.name=name||'Spieler';
   sbLoadModules(function(mods){
     MODULES=mods||MODULES_FALLBACK;
     MODULES.forEach(function(m){state.data[m.key]={ratings:[],bestHits:[],cumXP:0,completed_at:{}};});
-    var email=getBMEmail(),retries=0;
+    var email=knownEmail||getBMEmail()||loadIdentity(),retries=0;
     function tryLoadSB(){
-      email=getBMEmail();
-      if(email){sbLoadAll(email,function(cRows,aRows,pRows){mergeData(cRows,aRows,pRows);render();});}
+      if(!email)email=getBMEmail()||loadIdentity();
+      if(email){saveIdentity(email);sbLoadAll(email,function(cRows,aRows,pRows){mergeData(cRows,aRows,pRows);render();});}
       else if(retries<6){retries++;setTimeout(tryLoadSB,600);}
       else{render();}
     }
@@ -248,18 +248,62 @@ function init(name){
 
 var playerInited=false;
 window.addEventListener('t7xpupdate',function(){
-  var email=getBMEmail();if(!email)return;
+  var email=getBMEmail()||loadIdentity()||null;
+  if(!email)return;
   fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
     .then(function(r){return r.json();}).then(function(rows){
       if(rows&&rows.length&&typeof rows[0].total_xp==='number'){state.sbTotalXP=rows[0].total_xp;var e=el('tl-total-xp');if(e)e.textContent=rows[0].total_xp;}
     }).catch(function(){});
 });
 
-function tryInit(){var name=getBMName();if(name){init(name);playerInited=true;return true;}return false;}
+
+function saveIdentity(email){try{localStorage.setItem('t7_player_identity',email);}catch(e){}}
+function loadIdentity(){try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}}
+function lookupMemberByEmail(email,cb){
+  fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){cb(rows&&rows.length?rows[0]:{email:email,name:null});})
+  .catch(function(){cb({email:email,name:null});});
+}
+function lookupByBMId(cb){
+  var bmId=null,wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi],bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){cb(bm.intercom.bootProps.email,null);return;}
+      var links=w.document.querySelectorAll('a[href*="/member/"]');
+      for(var li=0;li<links.length;li++){var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m){bmId=m[1];break;}}
+      if(bmId)break;
+    }catch(e){}
+  }
+  if(!bmId){cb(null,null);return;}
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);else cb(null,null);})
+  .catch(function(){cb(null,null);});
+}
+
+function tryInit(){
+  var bmEmail=typeof getBMId==='function'?getBMId():null;
+  if(bmEmail&&bmEmail!=='unbekannt'){saveIdentity(bmEmail);init(null,bmEmail);playerInited=true;return true;}
+  var savedEmail=loadIdentity();
+  if(savedEmail){
+    lookupMemberByEmail(savedEmail,function(m){init(m.name||'Spieler',savedEmail);playerInited=true;});
+    return true;
+  }
+  var name=getBMName();
+  if(name){init(name);playerInited=true;return true;}
+  lookupByBMId(function(email,name){
+    if(email&&!playerInited){saveIdentity(email);init(name||'Spieler',email);playerInited=true;}
+  });
+  return false;
+}
 if(!tryInit()){
-  [100,300,600,1000,1600,2500,4000,6000].forEach(function(ms){setTimeout(function(){if(!playerInited)tryInit();},ms);});
-  try{var obs=new MutationObserver(function(){if(!playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}
-  setTimeout(function(){if(!playerInited){init('Spieler');playerInited=true;}},2000);
+  var _ret=0;var _retT=setInterval(function(){_ret++;if(tryInit()||_ret>=20)clearInterval(_retT);},500);
 }
 })();
 </script>

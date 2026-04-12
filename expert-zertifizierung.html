@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expert Zertifizierung</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c10;--surface:#111318;--surface2:#181b22;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.04);
+  --text:#e8eaf0;--muted:rgba(232,234,240,.38);
+  --accent:#00d4ff;--accent-dim:rgba(0,212,255,.1);
+  --gold:#f5c842;--gold-dim:rgba(245,200,66,.1);
+  --danger:#ff4d6d;--success:#00c896;--r:9px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh;}
+
+.ez-header{padding:18px 18px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border2);margin-bottom:16px;}
+.ez-header-icon{width:30px;height:30px;border-radius:8px;background:var(--gold-dim);border:1px solid rgba(245,200,66,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.ez-header-text h1{font-size:13px;font-weight:600;color:var(--text);}
+.ez-header-text p{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
+
+#authGate{padding:18px}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:340px;margin:0 auto;}
+.auth-card h2{font-size:14px;font-weight:600;margin-bottom:3px}
+.auth-card p{font-size:11px;color:var(--muted);margin-bottom:14px}
+.auth-input,.form-input{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border .15s;}
+.auth-input{margin-bottom:10px;}
+.auth-input:focus,.form-input:focus{border-color:rgba(0,212,255,.35);}
+select.form-input{cursor:pointer}
+
+#mainApp{padding:0 18px 20px}
+.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:3px;margin-bottom:14px;}
+.tab{flex:1;padding:6px 8px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;background:transparent;border:none;cursor:pointer;color:var(--muted);transition:all .15s;}
+.tab.active{background:var(--surface2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+
+.slabel{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.form-group{margin-bottom:8px;}
+.form-group label{display:block;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+
+.star-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px;}
+.star-btn{padding:7px 2px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--muted);text-align:center;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:1px;}
+.star-btn:hover{border-color:rgba(245,200,66,.35);color:var(--text);}
+.star-btn.active{background:var(--gold-dim);border-color:rgba(245,200,66,.5);color:var(--gold);}
+.star-btn-num{font-size:11px;}
+.star-btn-label{font-size:8px;font-family:'DM Mono',monospace;opacity:.55;}
+
+.btn{display:block;width:100%;padding:9px;border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-primary:hover{opacity:.88;}
+.btn-sm{padding:4px 9px;border-radius:7px;border:1px solid var(--border);background:var(--accent-dim);color:var(--accent);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.btn-sm:hover{background:rgba(0,212,255,.18);}
+
+.cert-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);margin-bottom:4px;}
+.cert-stars{font-size:11px;flex-shrink:0;min-width:56px;}
+.cert-info{flex:1;min-width:0;}
+.cert-name{font-size:12px;font-weight:600;}
+.cert-meta{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cert-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);flex-shrink:0;}
+
+.player-card{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);margin-bottom:4px;}
+.player-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0;font-size:11px;}
+.player-info{flex:1;min-width:0;}
+.player-name{font-size:12px;font-weight:600;}
+.player-email{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.player-stars{font-size:11px;text-align:right;}
+.player-xp{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;text-align:right;}
+
+.badge-new{display:inline-block;padding:1px 5px;border-radius:4px;background:rgba(0,200,150,.12);color:var(--success);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-left:5px;vertical-align:middle;}
+.empty,.loading-txt{text-align:center;padding:20px;color:var(--muted);font-size:12px;}
+
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:var(--r);font-size:12px;font-weight:500;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:999;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.error{border-color:rgba(255,77,109,.25);color:var(--danger);}
+#toast.ok{border-color:rgba(0,200,150,.25);color:var(--success);}
+</style>
+</head>
+<body>
+
+<div class="ez-header">
+  <div class="ez-header-icon">⭐</div>
+  <div class="ez-header-text">
+    <h1>Expert Zertifizierung</h1>
+    <p>Sterne Vergabe · T7 Academy</p>
+  </div>
+</div>
+
+<div id="authGate">
+  <div class="auth-card">
+    <h2>Expert Login</h2>
+    <p>Dein Name für die Zertifizierung</p>
+    <input class="auth-input" id="expertName" placeholder="Dein Name" autocomplete="off">
+    <button class="btn btn-primary" onclick="login()">Weiter →</button>
+  </div>
+</div>
+
+<div id="mainApp" style="display:none">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('award')">Vergeben</button>
+    <button class="tab" onclick="switchTab('history')">Verlauf</button>
+    <button class="tab" onclick="switchTab('players')">Spieler</button>
+  </div>
+
+  <div id="tabAward">
+    <div class="slabel">Zertifikat vergeben</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Spieler E-Mail</label>
+        <input class="form-input" id="awardEmail" placeholder="email@domain.com" type="email">
+      </div>
+      <div class="form-group">
+        <label>Spieler Name</label>
+        <input class="form-input" id="awardName" placeholder="Vorname">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Modul</label>
+      <select class="form-input" id="awardModule">
+        <option value="sz1">1-Stern Zertifikat</option>
+        <option value="sz2">2-Stern Zertifikat</option>
+        <option value="sz3">3-Stern Zertifikat</option>
+        <option value="sz4">4-Stern Zertifikat</option>
+        <option value="sz5">5-Stern Zertifikat</option>
+        <option value="jong">Jonglierschule</option>
+        <option value="jong2">Ball in der Luft</option>
+        <option value="ft1">First Touch</option>
+        <option value="fta1">First Touch Air</option>
+        <option value="br1">Brazilian Dance</option>
+        <option value="gc0">Ginga Basic</option>
+        <option value="gc1">Ginga Advanced</option>
+        <option value="other">Andere</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Sterne</label>
+      <div class="star-grid">
+        <div class="star-btn" onclick="pickStar(1)"><div class="star-btn-num">⭐</div><div class="star-btn-label">1</div></div>
+        <div class="star-btn" onclick="pickStar(2)"><div class="star-btn-num">⭐⭐</div><div class="star-btn-label">2</div></div>
+        <div class="star-btn" onclick="pickStar(3)"><div class="star-btn-num">⭐⭐⭐</div><div class="star-btn-label">3</div></div>
+        <div class="star-btn" onclick="pickStar(4)"><div class="star-btn-num">⭐⭐⭐⭐</div><div class="star-btn-label">4</div></div>
+        <div class="star-btn" onclick="pickStar(5)"><div class="star-btn-num">⭐⭐⭐⭐⭐</div><div class="star-btn-label">5</div></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notiz (optional)</label>
+      <input class="form-input" id="awardNotes" placeholder="z.B. Sehr saubere Technik">
+    </div>
+    <button class="btn btn-primary" onclick="awardCert()">✓ Zertifikat vergeben</button>
+  </div>
+
+  <div id="tabHistory" style="display:none">
+    <div class="slabel">Vergabeverlauf</div>
+    <div id="historyList"><div class="loading-txt">Lade…</div></div>
+  </div>
+
+  <div id="tabPlayers" style="display:none">
+    <div class="slabel">Alle Spieler</div>
+    <div id="playersList"><div class="loading-txt">Lade…</div></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+var expertName='',selectedStars=0,currentTab='award';
+var AVATAR_COLORS=[['#1e3a5f','#93c5fd'],['#064e3b','#6ee7b7'],['#3b1e5f','#c4b5fd'],['#451a03','#fcd34d'],['#1c3a2e','#86efac'],['#312e81','#a5b4fc']];
+
+function ini(name){if(!name)return '?';return name.trim().split(/\s+/).map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);}
+function avColor(name){if(!name)return AVATAR_COLORS[0];return AVATAR_COLORS[name.charCodeAt(0)%AVATAR_COLORS.length];}
+function avDiv(name,size){size=size||34;var c=avColor(name);return '<div class="player-avatar" style="width:'+size+'px;height:'+size+'px;background:'+c[0]+';color:'+c[1]+';">'+ini(name)+'</div>';}
+function starsHtml(n){return '⭐'.repeat(Math.max(0,Math.min(n,5)));}
+function fmtDate(ts){if(!ts)return '';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit',year:'numeric'});}
+
+function sbFetch(path){return fetch(SB_URL+'/rest/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();});}
+function sbInsert(table,data){return fetch(SB_URL+'/rest/v1/'+table,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal','x-expert-token':'T7EXPERT2026'},body:JSON.stringify(data)}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);});}
+
+function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type?' '+type:'');setTimeout(function(){t.classList.add('show');},10);setTimeout(function(){t.classList.remove('show');},2800);}
+
+function login(){
+  var n=document.getElementById('expertName').value.trim();
+  if(!n){showToast('Bitte Namen eingeben','error');return;}
+  expertName=n;
+  document.getElementById('authGate').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  loadHistory();
+  applyUrlParams();
+}
+
+function switchTab(tab){
+  currentTab=tab;
+  document.getElementById('tabAward').style.display=tab==='award'?'block':'none';
+  document.getElementById('tabHistory').style.display=tab==='history'?'block':'none';
+  document.getElementById('tabPlayers').style.display=tab==='players'?'block':'none';
+  document.querySelectorAll('.tab').forEach(function(el,i){el.className='tab'+(['award','history','players'][i]===tab?' active':'');});
+  if(tab==='history')loadHistory();
+  if(tab==='players')loadPlayers();
+}
+
+function pickStar(n){selectedStars=n;document.querySelectorAll('.star-btn').forEach(function(el,i){el.className='star-btn'+(i+1===n?' active':'');});}
+
+function awardCert(){
+  var email=document.getElementById('awardEmail').value.trim().toLowerCase();
+  var name=document.getElementById('awardName').value.trim();
+  var mod=document.getElementById('awardModule').value;
+  var notes=document.getElementById('awardNotes').value.trim();
+  if(!email){showToast('Bitte E-Mail eingeben','error');return;}
+  if(!name){showToast('Bitte Name eingeben','error');return;}
+  if(!selectedStars){showToast('Bitte Sterne auswählen','error');return;}
+  sbInsert('certifications',{player_email:email,player_name:name,stars:selectedStars,module_key:mod,awarded_by:expertName,awarded_at:Date.now(),notes:notes||null})
+  .then(function(){
+    showToast('✓ '+selectedStars+' Stern(e) an '+name+' vergeben!','ok');
+    document.getElementById('awardEmail').value='';
+    document.getElementById('awardName').value='';
+    document.getElementById('awardNotes').value='';
+    selectedStars=0;
+    document.querySelectorAll('.star-btn').forEach(function(el){el.className='star-btn';});
+  }).catch(function(e){showToast('Fehler: '+e.message,'error');});
+}
+
+function loadHistory(){
+  var el=document.getElementById('historyList');
+  el.innerHTML='<div class="loading-txt">Lade…</div>';
+  sbFetch('certifications?select=*&order=awarded_at.desc&limit=50')
+  .then(function(data){
+    if(!data.length){el.innerHTML='<div class="empty">Noch keine Zertifikate vergeben.</div>';return;}
+    var now=Date.now();
+    el.innerHTML=data.map(function(c){
+      var isNew=(now-c.awarded_at)<86400000;
+      return '<div class="cert-row"><div class="cert-stars">'+starsHtml(c.stars)+'</div><div class="cert-info"><div class="cert-name">'+c.player_name+(isNew?'<span class="badge-new">Neu</span>':'')+'</div><div class="cert-meta">'+c.module_key+' · '+c.awarded_by+(c.notes?' · '+c.notes:'')+'</div></div><div class="cert-date">'+fmtDate(c.awarded_at)+'</div></div>';
+    }).join('');
+  }).catch(function(e){el.innerHTML='<div class="empty">Fehler: '+e.message+'</div>';});
+}
+
+function loadPlayers(){
+  var el=document.getElementById('playersList');
+  el.innerHTML='<div class="loading-txt">Lade…</div>';
+  Promise.all([sbFetch('players?select=*&order=total_xp.desc&limit=50'),sbFetch('certifications?select=player_email,stars&order=awarded_at.desc')])
+  .then(function(res){
+    var players=res[0],certs=res[1],starMap={};
+    certs.forEach(function(c){if(!starMap[c.player_email]||c.stars>starMap[c.player_email])starMap[c.player_email]=c.stars;});
+    if(!players.length){el.innerHTML='<div class="empty">Keine Spieler.</div>';return;}
+    el.innerHTML=players.map(function(p){
+      var stars=starMap[p.player_email]||0;
+      return '<div class="player-card">'+avDiv(p.player_name,34)+'<div class="player-info"><div class="player-name">'+p.player_name+'</div><div class="player-email">'+p.player_email+'</div></div><div style="text-align:right;flex-shrink:0"><div class="player-stars">'+(stars?starsHtml(stars):'—')+'</div><div class="player-xp">'+Number(p.total_xp||0).toLocaleString('de-AT')+' XP</div></div><button class="btn-sm" onclick="prefill(\''+p.player_email+'\',\''+p.player_name.replace(/'/g,"\\'")+'\')">+⭐</button></div>';
+    }).join('');
+  }).catch(function(e){el.innerHTML='<div class="empty">Fehler: '+e.message+'</div>';});
+}
+
+function prefill(email,name){switchTab('award');document.getElementById('awardEmail').value=email;document.getElementById('awardName').value=name;}
+
+function applyUrlParams(){
+  try{
+    var p=new URLSearchParams(window.location.search);
+    var email=p.get('email'),name=p.get('name'),module=p.get('module'),stars=parseInt(p.get('stars')||'0');
+    if(email)document.getElementById('awardEmail').value=decodeURIComponent(email);
+    if(name)document.getElementById('awardName').value=decodeURIComponent(name);
+    if(module){var sel=document.getElementById('awardModule');for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===module){sel.selectedIndex=i;break;}}}
+    if(stars>=1&&stars<=5)pickStar(stars);
+    if(email||name)switchTab('award');
+  }catch(e){}
+}
+
+document.getElementById('expertName').addEventListener('keydown',function(e){if(e.key==='Enter')login();});
+</script>
+</body>
+</html>

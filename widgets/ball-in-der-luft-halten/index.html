@@ -301,7 +301,7 @@ function load(username){
 }
 function computeKursXP(){var t=0;for(var i=0;i<state.challengeXP.length;i++)t+=state.challengeXP[i]||0;return t;}
 function getTotalCumXP(){if(typeof state.sbTotalXP==='number')return state.sbTotalXP;var total=0;try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('t7_')===0){var raw=localStorage.getItem(k);if(raw){var d=JSON.parse(raw);if(typeof d.cumXP==='number')total+=d.cumXP;else if(typeof d.xp==='number')total+=d.xp;}}}}catch(e){}return total;}
-function updateXP(){el('br-xp').textContent=computeKursXP()+' XP';el('br-xp-total').textContent=getTotalCumXP()+' XP';}
+function updateXP(){el('br-xp').textContent=computeKursXP()+' XP';var _tot=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;el('br-xp-total').textContent=_tot+' XP';}
 function updateProgress(){
   var done=0;
   for(var i=0;i<drills.length;i++){var d=drills[i];if(d.type==='hits'&&(state.bestHits[i]||0)>=d.maxHits)done++;else if(d.type==='yn'&&(state.ratings[i]||0)>=4)done++;}
@@ -360,12 +360,11 @@ function showOutcome(){
     if(earned>(state.challengeXP[idx]||0))state.challengeXP[idx]=earned;
   }
   state.cumXP+=earned;
-  var _mid=getBMId?getBMId():null;
-  if(_mid&&_mid!=='unbekannt'){var rfSB=(d.type==='hits')?Math.round((state.hits/d.maxHits)*5):(state.yn?5:1);sbUpsert(_mid,state.currentPlayerName,INSTANCE_KEY,'Ball in der Luft halten',idx,rfSB,earned,state.completed_at[idx]||Date.now(),false,false);}
+  var _mid=state.memberId||loadIdentity()||(getBMId?getBMId():null)||null;
+  if(_mid){var rfSB=(d.type==='hits')?Math.round((state.hits/d.maxHits)*5):(state.yn?5:1);sbUpsert(_mid,state.currentPlayerName,INSTANCE_KEY,'Ball in der Luft halten',idx,rfSB,earned,state.completed_at[idx]||Date.now(),false,false);}
   updateXP();save();
-  var _mid2=getBMId?getBMId():null;if(!_mid2&&typeof getBMEmail==='function')_mid2=getBMEmail();
-  if(_mid2&&_mid2!=='unbekannt'){setTimeout(function(){fetchSBTotalXP(_mid2);try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}setTimeout(function(){var c=el('br-xp-cumul');if(c)c.textContent='Gesamt: '+getTotalCumXP()+' XP';},500);},1500);}
-  var totalCum=getTotalCumXP();
+  try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+  var totalCum=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
   var box=el('br-out-box'),icon=el('br-out-icon'),title=el('br-out-title'),sub=el('br-out-sub'),btns=el('br-out-btns');
   el('br-xp-earned').textContent='+'+earned+' XP diese Runde';el('br-xp-cumul').textContent='Gesamt: '+totalCum+' XP';btns.innerHTML='';
   if(d.type==='hits'){
@@ -406,10 +405,98 @@ function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==win
 var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 function sbDevice(){return /iphone|ipad|ipod|android/i.test(navigator.userAgent)?'mobile':'desktop';}
-function sbUpsert(email,name,mk,ml,idx,rating,xp,ts,skipPlayers,skipAttempts){if(!email||email==='unbekannt')return;var totalXp=getTotalCumXP();fetch(SB_URL+'/rest/v1/completions',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,module_label:ml||'',challenge_idx:idx,rating:rating,xp:xp,total_xp:totalXp,completed_at:ts||Date.now(),platform:'bettermode',device:sbDevice()})}).catch(function(){});if(!skipAttempts){fetch(SB_URL+'/rest/v1/attempts',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,challenge_idx:idx,rating:rating,xp:xp,attempted_at:ts||Date.now()})}).catch(function(){});}if(!skipPlayers){fetch(SB_URL+'/rest/v1/players',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',total_xp:totalXp})}).catch(function(){});}}
+function sbUpsert(email,name,mk,ml,idx,rating,xp,ts,skipPlayers,skipAttempts){if(!email||email==='unbekannt')return;var currentTotal=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;var totalXp=currentTotal+xp;state.sbTotalXP=totalXp;fetch(SB_URL+'/rest/v1/completions',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,module_label:ml||'',challenge_idx:idx,rating:rating,xp:xp,total_xp:totalXp,completed_at:ts||Date.now(),platform:'bettermode',device:sbDevice()})}).catch(function(){});if(!skipAttempts){fetch(SB_URL+'/rest/v1/attempts',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'},body:JSON.stringify({player_email:email,player_name:name||'',module_key:mk,challenge_idx:idx,rating:rating,xp:xp,attempted_at:ts||Date.now()})}).catch(function(){});}if(!skipPlayers){fetch(SB_URL+'/rest/v1/players',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({player_email:email,player_name:name||'',total_xp:totalXp})}).catch(function(){});}}
 function getBMId(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
 function sbBackfill(email,name){if(!email||email==='unbekannt')return;for(var i=0;i<drills.length;i++){var d=drills[i],xp=0,rating=0;if(d.type==='hits'&&(state.bestHits[i]||0)>0){xp=hitsToXP(state.bestHits[i],d.maxHits,d.xp);rating=Math.round((state.bestHits[i]/d.maxHits)*5);}else if(d.type==='yn'&&(state.ratings[i]||0)>0){xp=state.ratings[i]>=4?d.xp:0;rating=state.ratings[i];}if(xp>0||rating>0)sbUpsert(email,name,INSTANCE_KEY,'Ball in der Luft halten',i,rating,xp,state.completed_at[i]||Date.now(),true,true);}}
-function tryInit(){var name=getBMName();if(name){applyPlayer(name);state.playerInited=true;return true;}return false;}
+
+function saveIdentity(email){
+  try{localStorage.setItem('t7_player_identity',email);}catch(e){}
+}
+function loadIdentity(){
+  try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}
+}
+function lookupMemberByEmail(email,cb){
+  fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){cb(rows&&rows.length?rows[0]:{email:email,name:null});})
+  .catch(function(){cb({email:email,name:null});});
+}
+function lookupByBMId(cb){
+  var bmId=null;
+  var wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi];
+      var bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){
+        cb(bm.intercom.bootProps.email,null);return;
+      }
+      var links=w.document.querySelectorAll('a[href*="/member/"]');
+      for(var li=0;li<links.length;li++){
+        var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);
+        if(m){bmId=m[1];break;}
+      }
+      if(bmId)break;
+    }catch(e){}
+  }
+  if(!bmId){cb(null,null);return;}
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);
+    else cb(null,null);
+  }).catch(function(){cb(null,null);});
+}
+
+function fetchSBKursXP(email){
+  if(!email)return;
+  fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&module_key=eq.jong2&select=challenge_idx,rating,xp&order=rating.desc',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(!rows||!rows.length)return;
+    var bestRating={};
+    rows.forEach(function(r){
+      var i=r.challenge_idx;
+      if(!(i in bestRating)||r.rating>bestRating[i])bestRating[i]=r.rating;
+    });
+    var changed=false;
+    Object.keys(bestRating).forEach(function(i){
+      var idx=parseInt(i);
+      if(bestRating[i]>=(state.ratings[idx]||0)){
+        state.ratings[idx]=bestRating[i];
+        state.challengeXP[idx]=challengeScoreXP(bestRating[i],drills[idx]?drills[idx].xp:10);
+        changed=true;
+      }
+    });
+    if(changed){updateXP();updateProgress();refreshTrack();}
+  }).catch(function(){});
+}
+function initFromEmail(email){
+  state.memberId=email;
+  lookupMemberByEmail(email,function(m){
+    var name=m.name||'Spieler';
+    applyPlayer(name);
+    fetchSBTotalXP(email);
+    fetchSBKursXP(email);
+  });
+  state.playerInited=true;
+}
+
+function tryInit(){
+  var bmEmail=typeof getBMId==='function'?getBMId():null;
+  if(bmEmail&&bmEmail!=='unbekannt'){saveIdentity(bmEmail);initFromEmail(bmEmail);return true;}
+  var savedEmail=loadIdentity();
+  if(savedEmail){initFromEmail(savedEmail);return true;}
+  lookupByBMId(function(email,name){
+    if(email&&!state.playerInited){saveIdentity(email);initFromEmail(email);}
+  });
+  return false;
+}
 (function(){var all=document.querySelectorAll('[id$="-UID_PLACEHOLDER"]');all.forEach(function(e){e.id=e.id.replace('-UID_PLACEHOLDER','-'+_uid);});})();
 window.addEventListener('t7xpupdate',function(){var _em=getBMId?getBMId():null;if(!_em&&typeof getBMEmail==='function')_em=getBMEmail();if(_em&&_em!=='unbekannt')fetchSBTotalXP(_em);});
 wire();applyPlayer('Spieler');

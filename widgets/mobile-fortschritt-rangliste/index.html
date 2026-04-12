@@ -11,10 +11,12 @@ body{font-family:'Open Sans',sans-serif;background:transparent}
 
 #t7-fab{position:fixed;bottom:24px;right:16px;z-index:9999;display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#00E5FF,#0080FF);color:rgba(0,0,0,.85);font-family:'Open Sans',sans-serif;font-weight:800;font-size:13px;padding:10px 16px;border-radius:99px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(0,229,255,.5),0 2px 8px rgba(0,0,0,.3);transition:transform .15s,box-shadow .15s;white-space:nowrap;}
 #t7-fab:active{transform:scale(0.95)}
+#t7-fab-stars{font-size:14px;font-weight:800;letter-spacing:.5px}
 #t7-fab-icon{font-size:15px}
 #t7-fab-xp{font-weight:800}
 #t7-fab-streak{font-weight:800;opacity:.85}
 #t7-fab-sep{opacity:.5;margin:0 1px}
+#t7-fab-stars-sep{opacity:.5;margin:0 1px}
 
 #t7-sheet-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .3s ease;}
 #t7-sheet-overlay.open{opacity:1;pointer-events:all}
@@ -88,6 +90,8 @@ body{font-family:'Open Sans',sans-serif;background:transparent}
 </head>
 <body>
 <button id="t7-fab" onclick="openSheet()">
+  <span id="t7-fab-stars" style="display:none;margin-right:1px">⭐<span id="t7-fab-stars-num"></span></span>
+  <span id="t7-fab-stars-sep" style="display:none"> | </span>
   <span id="t7-fab-icon">⚡</span>
   <span id="t7-fab-xp">0 XP</span>
   <span id="t7-fab-sep"> | </span>
@@ -288,6 +292,19 @@ function updateFAB(){
   document.getElementById('t7-fab-streak').textContent=state.streak+' Wochen';
 }
 
+function updateFABStars(email){
+  if(!email||email==='unbekannt')return;
+  fetch(SB_URL+'/rest/v1/certifications?player_email=eq.'+encodeURIComponent(email)+'&select=stars&order=stars.desc&limit=1',{headers:sbHeaders()})
+  .then(function(r){return r.json();}).then(function(rows){
+    if(rows&&rows.length&&rows[0].stars){
+      var n=rows[0].stars;
+      document.getElementById('t7-fab-stars-num').textContent=n;
+      document.getElementById('t7-fab-stars').style.display='inline';
+      document.getElementById('t7-fab-stars-sep').style.display='inline';
+    }
+  }).catch(function(){});
+}
+
 function renderFort(){
   var streakDays='';
   for(var i=0;i<8;i++)streakDays+='<div class="streak-day'+(i<state.streak?' on':'')+'"></div>';
@@ -413,8 +430,87 @@ function init(name,email){
     processPlayerData(pRows,aRows,cRows,mRows);
     state.fortLoaded=true;updateFAB();
   });
+  updateFABStars(email);
 }
-function tryInit(){var name=getBMName(),email=getBMEmail();if(name&&email){init(name,email);state.playerInited=true;return true;}return false;}
+
+function lookupEmailByName(name, cb){
+  if(!name||name==='Spieler')return;
+  var firstName=name.trim().split(' ')[0];
+  fetch(SB_URL+'/rest/v1/members?name=eq.'+encodeURIComponent(name)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(rows&&rows.length&&rows[0].email){cb(rows[0].email,rows[0].name);return;}
+    fetch(SB_URL+'/rest/v1/members?name=ilike.'+encodeURIComponent(firstName+'%')+'&select=email,name&limit=1',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    }).then(function(r){return r.json();})
+    .then(function(rows2){
+      if(rows2&&rows2.length&&rows2[0].email)cb(rows2[0].email,rows2[0].name);
+    });
+  }).catch(function(){});
+}
+function saveIdentity(email){try{localStorage.setItem('t7_player_identity',email);}catch(e){}}
+function loadIdentity(){try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}}
+function lookupByBMId(cb){
+  var bmId=null,wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi],bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){cb(bm.intercom.bootProps.email,null);return;}
+      var links=w.document.querySelectorAll('a[href*="/member/"]');
+      for(var li=0;li<links.length;li++){var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m){bmId=m[1];break;}}
+      if(bmId)break;
+    }catch(e){}
+  }
+  if(!bmId){cb(null,null);return;}
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);else cb(null,null);})
+  .catch(function(){cb(null,null);});
+}
+
+function tryInit(){
+  /* Step 1: BM identity */
+  var name=getBMName(),email=getBMEmail();
+  if(name&&email){saveIdentity(email);init(name,email);state.playerInited=true;return true;}
+  /* Step 2: Saved identity from localStorage */
+  var savedEmail=loadIdentity();
+  if(savedEmail){
+    fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(savedEmail)+'&select=name&limit=1',{headers:sbHeaders()})
+    .then(function(r){return r.json();}).then(function(rows){
+      var sbName=(rows&&rows.length&&rows[0].name)||savedEmail.split('@')[0];
+      init(sbName,savedEmail);
+      state.playerInited=true;
+    }).catch(function(){
+      init(savedEmail.split('@')[0],savedEmail);
+      state.playerInited=true;
+    });
+    return true;
+  }
+  /* Step 3: BM member ID from page links */
+  lookupByBMId(function(email,name){
+    if(email&&!state.playerInited){
+      saveIdentity(email);
+      var displayName=name||email.split('@')[0];
+      init(displayName,email);
+      state.playerInited=true;
+    }
+  });
+  /* Step 4: Name found but no email - look up in members table */
+  if(name&&name!=='Spieler'&&!state.playerInited){
+    lookupEmailByName(name,function(foundEmail,foundName){
+      if(foundEmail&&!state.playerInited){
+        saveIdentity(foundEmail);
+        init(foundName||name,foundEmail);
+        state.playerInited=true;
+      }
+    });
+  }
+  return false;
+}
 
 window.addEventListener('t7xpupdate',function(){
   if(!state.email)return;
@@ -427,8 +523,7 @@ window.addEventListener('t7xpupdate',function(){
 });
 
 if(!tryInit()){
-  [100,300,600,1000,1600,2500,4000].forEach(function(ms){setTimeout(function(){if(!state.playerInited)tryInit();},ms);});
-  try{var obs=new MutationObserver(function(){if(!state.playerInited)tryInit();});obs.observe(document.documentElement,{childList:true,subtree:true});setTimeout(function(){obs.disconnect();},10000);}catch(e){}
+  var _ret=0;var _retT=setInterval(function(){_ret++;if(tryInit()||_ret>=20)clearInterval(_retT);},500);
 }
 
 var touchStart=0;
