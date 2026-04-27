@@ -54,10 +54,10 @@
 .gm-wrap .prow-title{font-weight:700;font-size:13px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gm-wrap .prow-meta{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;font-weight:600}
 .gm-wrap .pbadge{font-weight:800;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:8px;flex-shrink:0;white-space:nowrap}
-.gm-wrap .b-new{background:rgba(0,229,255,.12);color:#00E5FF;border:1px solid rgba(0,229,255,.3);box-shadow:0 0 8px rgba(0,229,255,.15)}
-.gm-wrap .b-retry{background:rgba(255,149,0,.12);color:#FF9500;border:1px solid rgba(255,149,0,.25)}
-.gm-wrap .b-inprog{background:rgba(0,229,255,.1);color:#00E5FF;border:1px solid rgba(0,229,255,.22)}
-.gm-wrap .b-done{background:rgba(204,255,0,.12);color:#0080FF;border:1px solid rgba(204,255,0,.3);box-shadow:0 0 8px rgba(204,255,0,.15)}
+.gm-wrap .b-new{background:rgba(0,128,255,.12);color:#0080FF;border:1px solid rgba(0,128,255,.3);box-shadow:0 0 8px rgba(0,128,255,.15)}
+.gm-wrap .b-retry{background:rgba(0,128,255,.08);color:#0080FF;border:1px solid rgba(0,128,255,.2)}
+.gm-wrap .b-inprog{background:rgba(0,128,255,.1);color:#0080FF;border:1px solid rgba(0,128,255,.22)}
+.gm-wrap .b-done{background:rgba(0,128,255,.15);color:#0080FF;border:1px solid rgba(0,128,255,.4);box-shadow:0 0 8px rgba(0,128,255,.2)}
 .gm-wrap .b-locked{background:rgba(255,255,255,.05);color:rgba(255,255,255,.4);border:1px dashed rgba(255,255,255,.12)}
 .gm-wrap .unlock-banner{margin:0 14px 14px;display:flex;align-items:flex-start;gap:10px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(204,255,0,.04));border:1px solid rgba(0,229,255,.25);border-radius:16px;padding:11px 13px}
 .gm-wrap .ub-icon{font-size:18px;flex-shrink:0}
@@ -174,7 +174,7 @@
   <div id="gm-track-UID_PLACEHOLDER">
     <div class="ph">
       <div class="ph-title">First Touch &#127919;</div>
-      <div class="ph-body" id="gm-hero-text-UID_PLACEHOLDER">5 First Touch Skills von einfach bis schwierig. Jeder Versuch bringt Punkte &mdash; Bewertung 4 oder 5 schaltet die Challenge frei!</div>
+      <div class="ph-body" id="gm-hero-text-UID_PLACEHOLDER">5 First Touch &Uuml;bungen &mdash; von einfach bis mittel. Jeder Versuch bringt Punkte. Bewertung 4 oder 5 schaltet die n&auml;chste &Uuml;bung frei.</div>
     </div>
     <div class="plist">
       <div class="plabel">First Touch &Uuml;bungen</div>
@@ -414,7 +414,7 @@ function showOutcome(){
   var _mid=state.memberId||loadIdentity()||(getBMId?getBMId():null)||null;
   if(_mid){sbUpsert(_mid,state.currentPlayerName,'ft1','First Touch',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false);}
   updateXP();save();
-  try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+  setTimeout(function(){try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
   var totalCum=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
   var box=el('gm-out-box'),icon=el('gm-out-icon'),title=el('gm-out-title'),sub=el('gm-out-sub'),btns=el('gm-out-btns');
   el('gm-xp-earned').textContent='+'+earned+' XP diese Runde';
@@ -425,7 +425,7 @@ function showOutcome(){
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-amber';b1.textContent='\u21a9 Nochmal';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
   }else if(state.rate===4){
     box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
-    title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
+    title.textContent=scoreGain>0?d.title+' ausgef\u00fchrt!':'Richtig gut!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Challenge l\u00e4uft \u2014 noch ein Versuch f\u00fcr Perfektion!';
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-aqua';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
   }else{

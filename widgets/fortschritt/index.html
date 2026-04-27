@@ -250,10 +250,11 @@ var playerInited=false;
 window.addEventListener('t7xpupdate',function(){
   var email=getBMEmail()||loadIdentity()||null;
   if(!email)return;
-  fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
-    .then(function(r){return r.json();}).then(function(rows){
-      if(rows&&rows.length&&typeof rows[0].total_xp==='number'){state.sbTotalXP=rows[0].total_xp;var e=el('tl-total-xp');if(e)e.textContent=rows[0].total_xp;}
-    }).catch(function(){});
+  /* Reload all data including attempts so weekly XP updates */
+  sbLoadAll(email,function(cRows,aRows,pRows){
+    mergeData(cRows,aRows,pRows);
+    render();
+  });
 });
 
 

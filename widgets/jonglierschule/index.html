@@ -174,14 +174,14 @@
   <div id="jong-track-UID_PLACEHOLDER">
     <div class="ph">
       <div class="ph-title">Jonglierschule &#129337;</div>
-      <div class="ph-body" id="jong-hero-text-UID_PLACEHOLDER">4 Challenges von einfach bis schwierig. Jeder Versuch bringt Punkte &mdash; Bewertung 4 oder 5 schaltet die Challenge frei!</div>
+      <div class="ph-body" id="jong-hero-text-UID_PLACEHOLDER">4 &Uuml;bungen von einfach bis mittel. Bewertung 4 oder 5 schaltet die weiteren &Uuml;bungen frei.</div>
     </div>
     <div class="plist">
       <div class="plabel">Technik &Uuml;bungen</div>
       <div class="prow" id="jong-row-0-UID_PLACEHOLDER"><div class="prow-num">01</div><div class="prow-body"><div class="prow-title">Sit Downs Jonglieren</div><div class="prow-meta">Einfach &middot; Schusstechnik</div></div><span class="pbadge b-new" id="jong-badge-0-UID_PLACEHOLDER">Neu</span></div>
       <div class="prow" id="jong-row-1-UID_PLACEHOLDER"><div class="prow-num">02</div><div class="prow-body"><div class="prow-title">Sit Downs Fu&szlig; Kopf Fu&szlig;</div><div class="prow-meta">Einfach &middot; Schusstechnik</div></div><span class="pbadge b-new" id="jong-badge-1-UID_PLACEHOLDER">Neu</span></div>
-      <div class="prow plocked" id="jong-row-2-UID_PLACEHOLDER"><div class="prow-num">03</div><div class="prow-body"><div class="prow-title">Freestyle Jonglieren</div><div class="prow-meta">Fortgeschritten &middot; Ballannahme</div></div><span class="pbadge b-locked" id="jong-badge-2-UID_PLACEHOLDER">&#128274; Gesperrt</span></div>
-      <div class="prow plocked" id="jong-row-3-UID_PLACEHOLDER"><div class="prow-num">04</div><div class="prow-body"><div class="prow-title">Fu&szlig;ball Jonglieren</div><div class="prow-meta">Fortgeschritten &middot; Ballannahme</div></div><span class="pbadge b-locked" id="jong-badge-3-UID_PLACEHOLDER">&#128274; Gesperrt</span></div>
+      <div class="prow plocked" id="jong-row-2-UID_PLACEHOLDER"><div class="prow-num">03</div><div class="prow-body"><div class="prow-title">Freestyle Jonglieren</div><div class="prow-meta">Mittel &middot; Ballannahme</div></div><span class="pbadge b-locked" id="jong-badge-2-UID_PLACEHOLDER">&#128274; Gesperrt</span></div>
+      <div class="prow plocked" id="jong-row-3-UID_PLACEHOLDER"><div class="prow-num">04</div><div class="prow-body"><div class="prow-title">Fu&szlig;ball Jonglieren</div><div class="prow-meta">Mittel &middot; Ballannahme</div></div><span class="pbadge b-locked" id="jong-badge-3-UID_PLACEHOLDER">&#128274; Gesperrt</span></div>
     </div>
     <div class="unlock-banner" id="jong-unlock-UID_PLACEHOLDER">
       <div class="ub-icon">&#9889;</div>
@@ -272,10 +272,10 @@
 var _uid=(Math.random().toString(36)+'00000').slice(2,7);
 function _pid(base){return base+'-'+_uid;}
 var drills=[
-  {title:'Sit Downs Jonglieren',eye:'Challenge 01',meta:'Einstieg \u00b7 Sit Downs Jonglieren',vid:'1124934705',hash:'6a71a27daf',star:1,xp:10,next:'Challenge 2 ist jetzt offen!'},
-  {title:'Sit Downs Fu\u00df Kopf Fu\u00df',eye:'Challenge 02',meta:'Einstieg \u00b7 Fu\u00df\u2013Kopf\u2013Fu\u00df',vid:'1124935347',hash:'c8977c5fb4',star:1,xp:10,next:'Challenges 3 & 4 sind jetzt freigeschaltet!'},
-  {title:'Freestyle Jonglieren',eye:'Challenge 03',meta:'Fortgeschritten \u00b7 Freestyle',vid:'1125467352',hash:'30d35d6e70',star:3,xp:10,next:'Challenge 4 ist jetzt offen!'},
-  {title:'Fu\u00dfball Jonglieren',eye:'Challenge 04',meta:'Fortgeschritten \u00b7 Profi-Jonglieren',vid:'1125467472',hash:'e6c7888db8',star:3,xp:10,next:'Alle 4 Challenges abgeschlossen!'}
+  {title:'Sit Downs Jonglieren',eye:'Challenge 01',meta:'Einfach \u00b7 Schusstechnik',vid:'1124934705',hash:'6a71a27daf',star:1,xp:10,next:'Challenge 2 ist jetzt offen!'},
+  {title:'Sit Downs Fu\u00df Kopf Fu\u00df',eye:'Challenge 02',meta:'Einfach \u00b7 Schusstechnik',vid:'1124935347',hash:'c8977c5fb4',star:1,xp:10,next:'Challenges 3 & 4 sind jetzt freigeschaltet!'},
+  {title:'Freestyle Jonglieren',eye:'Challenge 03',meta:'Mittel \u00b7 Ballannahme',vid:'1125467352',hash:'30d35d6e70',star:3,xp:10,next:'Challenge 4 ist jetzt offen!'},
+  {title:'Fu\u00dfball Jonglieren',eye:'Challenge 04',meta:'Mittel \u00b7 Schusstechnik',vid:'1125467472',hash:'e6c7888db8',star:3,xp:10,next:'Alle 4 Challenges abgeschlossen!'}
 ];
 
 /* XP earned per attempt based on rating (cumulative, never deducted) */
@@ -432,7 +432,7 @@ function showOutcome(){
   updateXP();save();
   /* Refresh total XP from Supabase after rating */
   /* Dispatch XP update to all widgets */
-  try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+  setTimeout(function(){try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
 
   /* Outcome display */
   var totalCum=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
@@ -448,7 +448,7 @@ function showOutcome(){
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-amber';b1.textContent='\u21a9 Nochmal';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
   } else if(state.rate===4){
     box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
-    title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
+    title.textContent=scoreGain>0?d.title+' ausgef\u00fchrt!':'Richtig gut!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Challenge l\u00e4uft \u2014 noch ein Versuch f\u00fcr Perfektion!';
     btns.innerHTML='';var b1=document.createElement('button');b1.className='btn btn-aqua';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
   } else {

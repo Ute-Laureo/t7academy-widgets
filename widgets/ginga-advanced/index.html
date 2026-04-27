@@ -25,7 +25,7 @@
 .br-wrap .cr-title{font-weight:700;font-size:16px;color:var(--br-text)!important;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .br-wrap .cr-sub{font-size:10px;color:var(--br-text-muted)!important;margin-top:3px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .br-wrap .cr-prog{flex:1;max-width:70px;height:5px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
-.br-wrap .cr-prog-fill{height:100%;background:var(--br-yellow);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
+.br-wrap .cr-prog-fill{height:100%;background:linear-gradient(90deg,#FFDF00,#009C3B);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
 .br-wrap .cr-prog-label{font-size:10px;color:var(--br-yellow);font-weight:700;white-space:nowrap}
 .br-wrap .cr-player{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:1}
 .br-wrap .cr-avatar{width:28px!important;height:28px!important;border-radius:50%!important;background:#00E5FF!important;color:rgba(0,0,0,.85)!important;font-weight:800!important;font-size:10px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 8px rgba(0,229,255,.4)!important;flex-shrink:0!important}
@@ -154,7 +154,7 @@
     <div class="ph">
       <div class="ph-eye">⚽ Ginga Advanced</div>
       <div class="ph-title">Ginga Advanced</div>
-      <div class="ph-body" id="br-hero-text-UID_PLACEHOLDER">5 Ginga Advanced Challenges &mdash; von leicht bis schwer. Jeder Versuch bringt Punkte!</div>
+      <div class="ph-body" id="br-hero-text-UID_PLACEHOLDER">Zeige uns deine Groundmoves im Eins gegen Eins. Jeder Versuch bringt Punkte!</div>
     </div>
     <div class="plist">
       <div class="plabel">Challenges</div>
@@ -346,7 +346,7 @@ function showOutcome(){
   var _mid=state.memberId||loadIdentity()||(getBMId?getBMId():null)||null;
   if(_mid){sbUpsert(_mid,state.currentPlayerName,'gc1','Ginga Advanced',idx,state.rate,earned,state.completed_at[idx]||Date.now(),false,false);}
   updateXP();save();
-  try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+  setTimeout(function(){try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
   var totalCum=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
   var box=el('br-out-box'),icon=el('br-out-icon'),title=el('br-out-title'),sub=el('br-out-sub'),btns=el('br-out-btns');
   el('br-xp-earned').textContent='+'+earned+' XP diese Runde';
@@ -360,7 +360,7 @@ function showOutcome(){
     var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
   }else if(state.rate===4){
     box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
-    title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
+    title.textContent=scoreGain>0?d.title+' ausgef\u00fchrt!':'Richtig gut!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Noch ein Versuch f\u00fcr den Perfekt-Bonus!';
     var b1=document.createElement('button');b1.className='btn btn-green';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);
     var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);

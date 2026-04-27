@@ -592,7 +592,7 @@ function showOutcome(){
   if(_mid2&&_mid2!=='unbekannt'){
     setTimeout(function(){
       fetchSBTotalXP(_mid2);
-      try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+      setTimeout(function(){setTimeout(function(){try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);},1500);
       setTimeout(function(){var _cumEl=el('sz-xp-cumul');if(_cumEl)_cumEl.textContent='Gesamt: '+getTotalCumXP()+' XP';},500);
     },1500);
   }

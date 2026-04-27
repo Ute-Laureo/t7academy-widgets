@@ -27,7 +27,7 @@
 .br-wrap .cr-title{font-weight:700;font-size:16px;color:var(--br-text)!important;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .br-wrap .cr-sub{font-size:10px;color:var(--br-text-muted)!important;margin-top:3px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .br-wrap .cr-prog{flex:1;max-width:70px;height:5px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
-.br-wrap .cr-prog-fill{height:100%;background:var(--br-yellow);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
+.br-wrap .cr-prog-fill{height:100%;background:linear-gradient(90deg,#FFDF00,#009C3B);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
 .br-wrap .cr-prog-label{font-size:10px;color:var(--br-yellow);font-weight:700;white-space:nowrap}
 .br-wrap .cr-player{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:1}
 .br-wrap .cr-avatar{width:28px!important;height:28px!important;border-radius:50%!important;background:#00E5FF!important;color:rgba(0,0,0,.85)!important;font-weight:800!important;font-size:10px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 8px rgba(0,229,255,.4)!important;flex-shrink:0!important}
@@ -162,17 +162,17 @@
 <div class="br-panel" id="br-panel-UID_PLACEHOLDER">
   <div id="br-track-UID_PLACEHOLDER">
     <div class="ph">
-      <div class="ph-eye">🇧🇷 Brazilian Dance</div>
+      <div class="ph-eye">🇧🇷 Skills Challenge</div>
       <div class="ph-title">Brazilian Dance</div>
-      <div class="ph-body" id="br-hero-text-UID_PLACEHOLDER">Meistere die Tricks der brasilianischen Tanzschule &mdash; von leicht bis sehr schwer. Jeder Versuch bringt Punkte!</div>
+      <div class="ph-body" id="br-hero-text-UID_PLACEHOLDER">Meistere die Tricks der brasilianischen Ballk&uuml;nstler &mdash; von einfach bis schwierig. Jeder Versuch bringt Punkte!</div>
     </div>
     <div class="plist">
       <div class="plabel">Challenges</div>
-      <div class="prow" id="br-row-0-UID_PLACEHOLDER"><div class="prow-num">01</div><div class="prow-body"><div class="prow-title">Thiago</div><div class="prow-meta">🔥 Leicht &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-0-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="br-row-0-UID_PLACEHOLDER"><div class="prow-num">01</div><div class="prow-body"><div class="prow-title">Thiago</div><div class="prow-meta">🔥 Einfach &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-0-UID_PLACEHOLDER">Neu</span></div>
       <div class="prow" id="br-row-1-UID_PLACEHOLDER"><div class="prow-num">02</div><div class="prow-body"><div class="prow-title">Samba</div><div class="prow-meta">🔥🔥 Mittel &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-1-UID_PLACEHOLDER">Neu</span></div>
       <div class="prow" id="br-row-2-UID_PLACEHOLDER"><div class="prow-num">03</div><div class="prow-body"><div class="prow-title">Marcelo</div><div class="prow-meta">🔥🔥 Mittel &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-2-UID_PLACEHOLDER">Neu</span></div>
-      <div class="prow" id="br-row-3-UID_PLACEHOLDER"><div class="prow-num">04</div><div class="prow-body"><div class="prow-title">Rainbow</div><div class="prow-meta">🔥🔥🔥 Schwer &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-3-UID_PLACEHOLDER">Neu</span></div>
-      <div class="prow" id="br-row-4-UID_PLACEHOLDER"><div class="prow-num">05</div><div class="prow-body"><div class="prow-title">Brazilian Circle</div><div class="prow-meta">🔥🔥🔥 Sehr schwer &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-4-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="br-row-3-UID_PLACEHOLDER"><div class="prow-num">04</div><div class="prow-body"><div class="prow-title">Rainbow</div><div class="prow-meta">🔥🔥🔥 Schwierig &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-3-UID_PLACEHOLDER">Neu</span></div>
+      <div class="prow" id="br-row-4-UID_PLACEHOLDER"><div class="prow-num">05</div><div class="prow-body"><div class="prow-title">Brazilian Circle</div><div class="prow-meta">🔥🔥🔥 Schwierig &middot; 10 XP</div></div><span class="pbadge b-new" id="br-badge-4-UID_PLACEHOLDER">Neu</span></div>
     </div>
   </div>
   <div class="drill-screen" id="br-drill-UID_PLACEHOLDER">
@@ -254,11 +254,11 @@ var _uid=(Math.random().toString(36)+'00000').slice(2,7);
 function _pid(base){return base+'-'+_uid;}
 var INSTANCE_KEY='br1';
 var drills=[
-  {title:'Thiago',eye:'Brazil Challenge',meta:'\ud83d\udd25 Leicht \u00b7 10 XP',vid:'1109277286',hash:'0da9f2acec',xp:10,next:'N\u00e4chste Challenge: Samba'},
+  {title:'Thiago',eye:'Brazil Challenge',meta:'\ud83d\udd25 Einfach \u00b7 10 XP',vid:'1109277286',hash:'0da9f2acec',xp:10,next:'N\u00e4chste Challenge: Samba'},
   {title:'Samba',eye:'Brazil Challenge',meta:'\ud83d\udd25\ud83d\udd25 Mittel \u00b7 10 XP',vid:'1150310023',hash:'316bc2fb69',xp:10,next:'N\u00e4chste Challenge: Marcelo'},
   {title:'Marcelo',eye:'Brazil Challenge',meta:'\ud83d\udd25\ud83d\udd25 Mittel \u00b7 10 XP',vid:'1148623478',hash:'0af6a7d193',xp:10,next:'N\u00e4chste Challenge: Rainbow'},
-  {title:'Rainbow',eye:'Brazil Challenge',meta:'\ud83d\udd25\ud83d\udd25\ud83d\udd25 Schwer \u00b7 10 XP',vid:'1110029867',hash:'061207fe6c',xp:10,next:'N\u00e4chste Challenge: Brazilian Circle'},
-  {title:'Brazilian Circle',eye:'Brazil Challenge',meta:'Brazilian Dance \u00b7 \ud83d\udd25\ud83d\udd25\ud83d\udd25 Sehr schwer \u00b7 10 XP',vid:'1096847104',hash:'98fcc93e60',xp:10,next:'Alle Brazil Challenges gemeistert! \ud83c\udde7\ud83c\uddf7'}
+  {title:'Rainbow',eye:'Brazil Challenge',meta:'\ud83d\udd25\ud83d\udd25\ud83d\udd25 Schwierig \u00b7 10 XP',vid:'1110029867',hash:'061207fe6c',xp:10,next:'N\u00e4chste Challenge: Brazilian Circle'},
+  {title:'Brazilian Circle',eye:'Brazil Challenge',meta:'\ud83d\udd25\ud83d\udd25\ud83d\udd25 Schwierig \u00b7 10 XP',vid:'1096847104',hash:'98fcc93e60',xp:10,next:'Alle Brazil Challenges gemeistert! \ud83c\udde7\ud83c\uddf7'}
 ];
 
 var XP_MULT=[0,.2,.4,.6,.8,1];
@@ -360,7 +360,7 @@ function showOutcome(){
   }
   updateXP();save();
   /* Refresh total XP from Supabase after rating */
-  try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+  setTimeout(function(){try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
   var totalCum=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
   var box=el('br-out-box'),icon=el('br-out-icon'),title=el('br-out-title'),sub=el('br-out-sub'),btns=el('br-out-btns');
   el('br-xp-earned').textContent='+'+earned+' XP diese Runde';
@@ -374,7 +374,7 @@ function showOutcome(){
     var b2=document.createElement('button');b2.className='btn';b2.textContent='Zur \u00dcbersicht';b2.addEventListener('click',goTrack);btns.appendChild(b2);
   }else if(state.rate===4){
     box.className='outcome out-mid';icon.textContent='\ud83c\udf1f';
-    title.textContent=scoreGain>0?d.title+' freigeschaltet!':'Richtig gut!';
+    title.textContent=scoreGain>0?d.title+' ausgef\u00fchrt!':'Richtig gut!';
     sub.textContent=scoreGain>0?'Challenge-Score: +'+scoreGain+' XP \u2014 '+d.next:'Noch ein Versuch f\u00fcr den Perfekt-Bonus!';
     btns.innerHTML='';
     var b1=document.createElement('button');b1.className='btn btn-green';b1.textContent='Nochmal!';b1.addEventListener('click',function(){goStep(2);});btns.appendChild(b1);

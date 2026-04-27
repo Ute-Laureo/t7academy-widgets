@@ -27,7 +27,7 @@
 .br-wrap .cr-title{font-weight:700;font-size:16px;color:var(--br-text)!important;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .br-wrap .cr-sub{font-size:10px;color:var(--br-text-muted)!important;margin-top:3px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .br-wrap .cr-prog{flex:1;max-width:70px;height:5px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
-.br-wrap .cr-prog-fill{height:100%;background:var(--br-yellow);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
+.br-wrap .cr-prog-fill{height:100%;background:linear-gradient(90deg,#FFDF00,#009C3B);border-radius:99px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
 .br-wrap .cr-prog-label{font-size:10px;color:var(--br-yellow);font-weight:700;white-space:nowrap}
 .br-wrap .cr-player{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:1}
 .br-wrap .cr-avatar{width:28px!important;height:28px!important;border-radius:50%!important;background:#00E5FF!important;color:rgba(0,0,0,.85)!important;font-weight:800!important;font-size:10px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 8px rgba(0,229,255,.4)!important;flex-shrink:0!important}
@@ -496,7 +496,7 @@ function showOutcome(){
     sbUpsert(_mid,state.currentPlayerName,INSTANCE_KEY,'Ball in der Luft halten',idx,ratingForSB,earned,state.completed_at[idx]||Date.now(),false,false);
   }
   updateXP();save();
-  try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+  setTimeout(function(){try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
 
   var totalCum=typeof state.sbTotalXP==='number'?state.sbTotalXP:0;
   var box=el('br-out-box'),icon=el('br-out-icon'),title=el('br-out-title'),sub=el('br-out-sub'),btns=el('br-out-btns');
