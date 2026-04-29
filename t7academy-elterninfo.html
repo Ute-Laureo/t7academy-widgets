@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>t7 academy — Elterninformation</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a1f6e;--aqua:#00c8f8;--blue:#0080ff;
+  --dark:#0d1628;--light:#f0f8ff;--grey:#6677aa;
+  --white:#ffffff;
+}
+body{font-family:'Open Sans',sans-serif;background:#f5f7fa;color:var(--navy);font-size:15px;line-height:1.6;}
+
+/* HEADER */
+.header{
+  background:var(--dark);
+  padding:28px 24px 24px;
+  position:relative;overflow:hidden;
+}
+.header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--aqua),var(--blue));
+}
+.header-inner{max-width:680px;margin:0 auto;}
+.logo{height:36px;margin-bottom:20px;display:block;}
+.header-tag{
+  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(0,200,248,.6);margin-bottom:10px;
+}
+.header-title{
+  font-size:28px;font-weight:800;color:#fff;
+  line-height:1.15;margin-bottom:8px;letter-spacing:-.02em;
+}
+.header-sub{font-size:14px;color:var(--aqua);font-weight:600;}
+
+/* MAIN */
+.main{max-width:680px;margin:0 auto;padding:24px 20px 40px;}
+
+/* INTRO */
+.intro{
+  background:#fff;border-radius:12px;padding:20px;
+  border-left:4px solid var(--aqua);
+  font-size:15px;color:#333;line-height:1.7;
+  margin-bottom:24px;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+}
+.intro strong{color:var(--navy);}
+
+/* SECTION TITLE */
+.section-title{
+  font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--aqua);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:rgba(0,200,248,.2);}
+
+/* BENEFIT CARDS */
+.benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+@media(max-width:560px){.benefits{grid-template-columns:1fr;}}
+.benefit{
+  background:#fff;border-radius:12px;padding:16px;
+  border-top:3px solid var(--aqua);
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+}
+.benefit-icon{font-size:24px;margin-bottom:8px;}
+.benefit-title{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px;}
+.benefit-text{font-size:12px;color:var(--grey);line-height:1.55;}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.step{
+  display:flex;align-items:flex-start;gap:14px;
+  background:#fff;border-radius:12px;padding:14px 16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.step-num{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--aqua),var(--blue));
+  color:#fff;font-weight:800;font-size:13px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step-title{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:2px;}
+.step-text{font-size:12px;color:var(--grey);line-height:1.5;}
+
+/* TWO COL */
+.two-col{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  background:#fff;border-radius:12px;padding:18px;
+  margin-bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,.06);
+}
+@media(max-width:480px){.two-col{grid-template-columns:1fr;}}
+.col-title{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;}
+.col-item{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:12px;color:#444;margin-bottom:6px;
+}
+.col-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--aqua);flex-shrink:0;margin-top:5px;
+}
+
+/* QUOTE */
+.quote{
+  background:var(--light);border-radius:12px;
+  border-left:4px solid var(--aqua);
+  padding:16px 18px;margin-bottom:24px;
+  font-size:14px;font-style:italic;color:var(--navy);
+}
+.quote-author{font-size:11px;color:var(--grey);font-style:normal;font-weight:700;margin-top:6px;}
+
+/* FOOTER CTA */
+.footer-cta{
+  background:linear-gradient(135deg,var(--navy),#0d2080);
+  border-radius:16px;padding:24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;
+}
+.footer-left{}
+.footer-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px;}
+.footer-cta-title{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;}
+.footer-url{font-size:14px;color:var(--aqua);font-weight:700;}
+.footer-badge{
+  background:rgba(0,200,248,.15);border:1px solid rgba(0,200,248,.3);
+  border-radius:10px;padding:10px 16px;text-align:center;flex-shrink:0;
+}
+.footer-badge-text{font-size:11px;color:var(--aqua);font-weight:700;letter-spacing:.05em;}
+.footer-badge-big{font-size:22px;font-weight:800;color:#fff;display:block;margin-top:2px;}
+
+/* Team sig */
+.team-sig{text-align:center;margin-top:20px;font-size:11px;color:var(--grey);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <img src="https://raw.githubusercontent.com/Ute-Laureo/t7academy-widgets/main/assets/Logo_t7academy.png" alt="t7 academy" class="logo" onerror="this.style.display='none';document.getElementById('logo-text').style.display='block'">
+    <div id="logo-text" style="display:none;font-size:22px;font-weight:800;color:#fff;margin-bottom:20px;">t7 academy</div>
+    <div class="header-tag">Information für Eltern</div>
+    <div class="header-title">Dein Kind.<br>Besser am Ball.</div>
+    <div class="header-sub">Spielerisches Techniktraining mit Zertifikat — jederzeit, überall.</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="intro">
+    Die <strong>t7 academy</strong> ergänzt das Vereinstraining mit individuellem Techniktraining zu Hause.
+    Dein Kind trainiert auf seinem eigenen Level, sammelt Punkte und erhält offizielle Zertifikate —
+    Schritt für Schritt vom Einsteiger zum Profi.
+  </div>
+
+  <div class="section-title">Warum t7 academy</div>
+
+  <div class="benefits">
+    <div class="benefit">
+      <div class="benefit-icon">⚽</div>
+      <div class="benefit-title">Zu Hause trainieren</div>
+      <div class="benefit-text">Kurze Video-Übungen, die dein Kind alleine oder mit Freunden machen kann — ohne Platz, nur mit einem Ball.</div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon">⭐</div>
+      <div class="benefit-title">Offizielle Zertifikate</div>
+      <div class="benefit-text">Ein t7 Experte bewertet den Fortschritt und stellt offizielle Zertifikate aus — von 1 bis 5 Sterne.</div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon">🏆</div>
+      <div class="benefit-title">Motiviert bleiben</div>
+      <div class="benefit-text">XP und Rangliste sorgen dafür, dass dein Kind am Ball bleibt — spielerisch und mit Spaß.</div>
+    </div>
+  </div>
+
+  <div class="section-title">So funktioniert es</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Einladung annehmen</div>
+        <div class="step-text">Der Trainer sendet einen Einladungslink. Damit registrierst du dich auf teco7.bettermode.io.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Einwilligung erteilen</div>
+        <div class="step-text">Als Elternteil gibst du deine Zustimmung — sicher, einfach und DSGVO-konform.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Training starten</div>
+        <div class="step-text">Dein Kind schaut sich kurze Technik-Videos an, übt die Übung und bewertet sich ehrlich selbst.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Zertifikat verdienen</div>
+        <div class="step-text">Ein t7 Academy Expert bewertet das Final-Video und vergibt das offizielle Zertifikat.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Inhalte & Altersgruppe</div>
+
+  <div class="two-col">
+    <div>
+      <div class="col-title">Für wen</div>
+      <div class="col-item"><div class="col-dot"></div>Kinder & Jugendliche 8–14 Jahre</div>
+      <div class="col-item"><div class="col-dot"></div>Alle Spielniveaus</div>
+      <div class="col-item"><div class="col-dot"></div>Ergänzung zum Vereinstraining</div>
+      <div class="col-item"><div class="col-dot"></div>Smartphone oder Tablet genügt</div>
+    </div>
+    <div>
+      <div class="col-title">Technik-Bereiche</div>
+      <div class="col-item"><div class="col-dot"></div>Jonglierschule & Ballannahme</div>
+      <div class="col-item"><div class="col-dot"></div>First Touch & Ballgefühl</div>
+      <div class="col-item"><div class="col-dot"></div>Dribbling & Groundmoves</div>
+      <div class="col-item"><div class="col-dot"></div>Brazilian Dance & Kreativität</div>
+    </div>
+  </div>
+
+  <div class="quote">
+    „Fußballtechnik ist die Basis für das perfekte Match. Wir helfen deinem Kind, täglich ein bisschen besser zu werden."
+    <div class="quote-author">— t7 academy Team</div>
+  </div>
+
+  <div class="footer-cta">
+    <div class="footer-left">
+      <div class="footer-eyebrow">Jetzt starten</div>
+      <div class="footer-cta-title">Jetzt anmelden</div>
+      <div class="footer-url"><a href="https://ute-laureo.github.io/t7academy-widgets/register.html" style="color:var(--aqua);text-decoration:none;">Jetzt anmelden →</a></div>
+    </div>
+    <div class="footer-badge">
+      <div class="footer-badge-text">Altersgruppe</div>
+      <span class="footer-badge-big">8–14</span>
+      <div class="footer-badge-text">Jahre</div>
+    </div>
+  </div>
+
+  <div class="team-sig">© t7 academy · teco7.bettermode.io</div>
+
+</div>
+</body>
+</html>
