@@ -244,7 +244,7 @@ select.form-input option{background:#243058;}
   <div id="successScreen">
     <div class="success-card">
       <div class="success-icon">🎉</div>
-      <div class="success-title">Anmeldung erfolgreich!</div>
+      <div class="success-title" id="successTitle">Geschafft! 🎉</div>
       <div class="success-name" id="successName"></div>
       <div class="success-text">
         Wir haben deine Anmeldung erhalten und melden uns in Kürze mit dem Einladungslink für die t7 Academy Plattform.
@@ -338,20 +338,20 @@ function submitForm(){
     body:JSON.stringify(payload)
   }).then(function(r){
     if(r.ok||r.status===201||r.status===204){
-      onSuccess(childName);
+      onSuccess(document.getElementById('childFirstName').value.trim());
     } else {
       onError();
     }
   }).catch(function(){
     // Still show success - data might have saved
-    onSuccess(childName);
+    onSuccess(document.getElementById('childFirstName').value.trim());
   });
 }
 
 function onSuccess(name){
   document.getElementById('formScreen').style.display='none';
   document.getElementById('successScreen').style.display='block';
-  document.getElementById('successName').textContent=childFirstName+' ist angemeldet! ⚽';
+  document.getElementById('successName').textContent=name+' ist angemeldet! ⚽';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
