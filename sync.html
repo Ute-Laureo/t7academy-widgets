@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>t7 academy — Member Sync</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Open Sans',sans-serif;background:#0d1628;color:#e8f0ff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.card{background:#111e35;border:1px solid rgba(0,229,255,.12);border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.4);}
+.logo{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;}
+.logo span{color:#00E5FF;}
+.sub{font-size:12px;color:rgba(232,240,255,.5);margin-bottom:28px;}
+.section{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#00E5FF;opacity:.7;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.1);}
+.info{font-size:12px;color:rgba(232,240,255,.5);line-height:1.6;margin-bottom:20px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.12);border-radius:10px;padding:12px 14px;}
+.info strong{color:#e8f0ff;}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-family:'Open Sans',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;text-align:center;margin-bottom:10px;}
+.btn-primary{background:linear-gradient(135deg,#00E5FF,#0080ff);color:#000;box-shadow:0 4px 20px rgba(0,229,255,.2);}
+.btn-primary:hover{box-shadow:0 6px 28px rgba(0,229,255,.35);transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-secondary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(232,240,255,.6);font-size:13px;}
+.btn-secondary:hover{background:rgba(255,255,255,.1);}
+
+.log{background:#080f1e;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-top:16px;max-height:240px;overflow-y:auto;font-size:11px;font-family:monospace;display:none;}
+.log.visible{display:block;}
+.log-line{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(232,240,255,.6);}
+.log-line.ok{color:#00c896;}
+.log-line.err{color:#ff4d6d;}
+.log-line.info{color:#00E5FF;}
+.log-line.warn{color:#f59e0b;}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+.stat{background:#080f1e;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center;}
+.stat-num{font-size:22px;font-weight:800;}
+.stat-num.blue{color:#00E5FF;}
+.stat-num.green{color:#00c896;}
+.stat-num.warn{color:#f59e0b;}
+.stat-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,240,255,.4);margin-top:3px;}
+
+.result{display:none;text-align:center;padding:20px;border-radius:12px;margin-top:16px;}
+.result.ok{background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);}
+.result.err{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);}
+.result-icon{font-size:36px;margin-bottom:8px;}
+.result-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+.result.ok .result-title{color:#00c896;}
+.result.err .result-title{color:#ff4d6d;}
+.result-desc{font-size:12px;color:rgba(232,240,255,.5);}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">t7 <span>academy</span></div>
+  <div class="sub">Bettermode → Supabase Member Sync</div>
+
+  <div class="section">Status</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num blue" id="stat-bm">—</div><div class="stat-label">BM Mitglieder</div></div>
+    <div class="stat"><div class="stat-num green" id="stat-updated">—</div><div class="stat-label">Aktualisiert</div></div>
+    <div class="stat"><div class="stat-num warn" id="stat-err">—</div><div class="stat-label">Fehler</div></div>
+  </div>
+
+  <div class="section">Anleitung</div>
+  <div class="info">
+    <strong>Voraussetzung:</strong> Du musst in Bettermode als Admin eingeloggt sein (teco7.bettermode.io).<br><br>
+    Der Sync liest alle Bettermode-Mitglieder und aktualisiert deren <strong>bm_id</strong> und <strong>bm_username</strong> in Supabase.
+  </div>
+
+  <button class="btn btn-primary" id="syncBtn" onclick="startSync()">⟳ Sync starten</button>
+  <button class="btn btn-secondary" onclick="window.open('https://teco7.bettermode.io','_blank')">Bettermode öffnen →</button>
+
+  <div class="log" id="log"></div>
+  <div class="result" id="result">
+    <div class="result-icon" id="result-icon"></div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-desc" id="result-desc"></div>
+  </div>
+</div>
+
+<script>
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+var BM_URL='https://teco7.bettermode.io/api/graphql';
+
+var logEl=document.getElementById('log');
+function log(msg,type){
+  logEl.classList.add('visible');
+  var d=document.createElement('div');
+  d.className='log-line '+(type||'');
+  d.textContent=new Date().toLocaleTimeString('de-AT')+' — '+msg;
+  logEl.appendChild(d);
+  logEl.scrollTop=logEl.scrollHeight;
+}
+
+function setStats(bm,updated,err){
+  if(bm!==null)document.getElementById('stat-bm').textContent=bm;
+  if(updated!==null)document.getElementById('stat-updated').textContent=updated;
+  if(err!==null)document.getElementById('stat-err').textContent=err;
+}
+
+function showResult(ok,title,desc){
+  var r=document.getElementById('result');
+  r.style.display='block';
+  r.className='result '+(ok?'ok':'err');
+  document.getElementById('result-icon').textContent=ok?'✅':'❌';
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-desc').textContent=desc;
+}
+
+function startSync(){
+  var btn=document.getElementById('syncBtn');
+  btn.disabled=true;btn.textContent='Sync läuft…';
+  logEl.innerHTML='';logEl.classList.add('visible');
+  document.getElementById('result').style.display='none';
+  setStats(0,0,0);
+
+  log('Verbinde mit Bettermode GraphQL…','info');
+
+  /* Try multiple query formats */
+  var queries=[
+    '{members(limit:100){nodes{id name}}}',
+    '{members(spaceId:null,limit:100){nodes{id name}}}',
+    '{community{members(limit:100){nodes{id name}}}}',
+    '{authMember{id name email}}'
+  ];
+
+  tryQuery(queries,0,btn);
+}
+
+function tryQuery(queries,idx,btn){
+  if(idx>=queries.length){
+    log('Alle Query-Formate fehlgeschlagen.','err');
+    showResult(false,'Sync fehlgeschlagen','Bettermode GraphQL nicht erreichbar. Bist du als Admin eingeloggt?');
+    btn.disabled=false;btn.textContent='⟳ Sync starten';
+    return;
+  }
+
+  var q=queries[idx];
+  log('Versuche Query: '+q.substring(0,40)+'…','info');
+
+  fetch(BM_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    credentials:'include',
+    body:JSON.stringify({query:q})
+  }).then(function(r){return r.json();})
+  .then(function(d){
+    if(d.errors){
+      log('Query Fehler: '+JSON.stringify(d.errors[0].message),'warn');
+      tryQuery(queries,idx+1,btn);
+      return;
+    }
+    /* Find members array in response */
+    var nodes=null;
+    if(d.data){
+      if(d.data.members&&d.data.members.nodes)nodes=d.data.members.nodes;
+      else if(d.data.community&&d.data.community.members)nodes=d.data.community.members.nodes;
+      else if(d.data.authMember){
+        /* Single member - just log */
+        var m=d.data.authMember;
+        log('Eingeloggt als: '+m.name+' ('+m.email+')','ok');
+        log('Keine Mitgliederliste gefunden — falscher Query-Typ.','warn');
+        tryQuery(queries,idx+1,btn);
+        return;
+      }
+    }
+    if(!nodes||!nodes.length){
+      log('Leere Antwort oder keine Mitglieder.','warn');
+      tryQuery(queries,idx+1,btn);
+      return;
+    }
+    log('✓ '+nodes.length+' Bettermode Mitglieder gefunden!','ok');
+    setStats(nodes.length,null,null);
+    syncToSupabase(nodes,btn);
+  })
+  .catch(function(e){
+    log('Netzwerkfehler: '+e.message,'err');
+    tryQuery(queries,idx+1,btn);
+  });
+}
+
+function syncToSupabase(nodes,btn){
+  log('Synchronisiere mit Supabase…','info');
+  var done=0,updated=0,errors=0;
+
+  nodes.forEach(function(m){
+    if(!m.id){done++;check();return;}
+    fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(m.id),{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal','x-widget-token':'T7WIDGET2026'},
+      body:JSON.stringify({bm_username:m.name||null,status:'active'})
+    }).then(function(r){
+      if(r.ok){
+        updated++;
+        log('✓ '+m.name+' ('+m.id+')','ok');
+      } else {
+        errors++;
+        log('✗ Fehler für '+m.id+': HTTP '+r.status,'err');
+      }
+    }).catch(function(e){
+      errors++;
+      log('✗ Netzwerkfehler für '+m.id,'err');
+    }).finally(function(){
+      done++;check();
+    });
+
+    function check(){
+      setStats(nodes.length,updated,errors);
+      if(done===nodes.length){
+        btn.disabled=false;btn.textContent='⟳ Sync starten';
+        if(errors===0){
+          log('Sync abgeschlossen! '+updated+' Mitglieder aktualisiert.','ok');
+          showResult(true,'Sync erfolgreich!',updated+' Mitglieder in Supabase aktualisiert.');
+        } else {
+          log('Sync mit '+errors+' Fehlern abgeschlossen.','warn');
+          showResult(false,'Sync mit Fehlern',updated+' aktualisiert, '+errors+' Fehler. Prüfe das Log.');
+        }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
