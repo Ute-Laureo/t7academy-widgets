@@ -10,45 +10,16 @@
 html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f0;width:100%;margin:0;padding:0;}
 .tl-bg{width:100%;color:#f0f0f0;font-family:'Open Sans',sans-serif;}
 .page{background:#080f1e;border:1.5px solid rgba(0,229,255,.35);border-radius:12px;width:100%;padding:14px 12px 16px;overflow:hidden;}
-
-/* HERO */
 .hero{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:10px;padding:12px 11px;margin-bottom:10px;}
-.hero-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.hero-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0080FF);color:rgba(0,0,0,.85);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 10px rgba(0,229,255,.3)}
-.hero-name{font-weight:800;font-size:14px;letter-spacing:-.01em;color:#fff}
+.hero-top{display:flex;align-items:center;gap:10px;}
+.hero-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0080FF);color:rgba(0,0,0,.85);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.hero-name{font-weight:800;font-size:14px;color:#fff}
 .hero-sub{font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:10px;}
 .stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 5px;text-align:center}
-.stat-num{font-weight:800;font-size:15px;letter-spacing:-.01em;color:#fff;line-height:1}
-.stat-num.aqua{color:#00E5FF}
+.stat-num{font-weight:800;font-size:15px;color:#00E5FF;line-height:1}
 .stat-label{font-size:8px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-
-/* STREAK */
-.streak-bar{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);border-radius:10px;padding:10px 11px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
-.streak-icon{font-size:22px;flex-shrink:0}
-.streak-text{flex:1;min-width:0}
-.streak-val{font-weight:800;font-size:12px;color:#00E5FF}
-.streak-desc{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
-.streak-bottom{display:flex;align-items:center;gap:8px;margin-top:7px}
-.streak-days{display:flex;gap:3px;flex:1}
-.streak-day{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.07)}
-.streak-day.on{background:#00E5FF}
-
-/* WEEK LINE */
-.week-line{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 12px;}
-.week-xp{font-size:13px;font-weight:800;color:#fff}
-.week-xp span{color:#00E5FF}
-.week-delta{font-size:10px;font-weight:700;padding:3px 9px;border-radius:7px;display:inline-flex;align-items:center;gap:4px}
-.week-delta.up{background:rgba(0,200,100,.1);color:#00C864;border:1px solid rgba(0,200,100,.18)}
-.week-delta.down{background:rgba(255,59,59,.08);color:#FF6B6B;border:1px solid rgba(255,59,59,.15)}
-.week-delta.same{background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.07)}
-
 .loading{text-align:center;padding:24px 10px;color:rgba(255,255,255,.25);font-size:11px}
-@media(max-width:480px){
-  .stat-num{font-size:13px}
-  .hero-name{font-size:13px}
-  .stat-row{gap:5px}
-}
 </style>
 </head>
 <body>
@@ -56,34 +27,29 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
   <div class="loading" id="tl-loading">Lade Fortschritt&hellip;</div>
   <div id="tl-content" style="display:none">
 
-    <!-- HERO -->
     <div class="hero">
       <div class="hero-top">
         <div class="hero-avatar" id="tl-avatar">?</div>
         <div><div class="hero-name" id="tl-name">Spieler</div><div class="hero-sub">Mein Fortschritt</div></div>
       </div>
-      <div class="stat-row">
-        <div class="stat-card"><div class="stat-num aqua" id="tl-total-xp">0</div><div class="stat-label">Gesamt XP</div></div>
-        <div class="stat-card"><div class="stat-num aqua" id="tl-streak-num">0&#9889;</div><div class="stat-label">Wochen Streak</div></div>
+    </div>
+
+    <!-- ROW 1: Total XP | This week XP -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-num" id="tl-total-xp">0</div>
+        <div class="stat-label">Gesamt XP</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="tl-week-xp">—</div>
+        <div class="stat-label">Diese Woche</div>
       </div>
     </div>
 
-    <!-- STREAK -->
-    <div class="streak-bar">
-      <div class="streak-icon">&#9889;</div>
-      <div class="streak-text">
-        <div class="streak-val" id="tl-streak-val">0 Wochen in Folge</div>
-        <div class="streak-desc" id="tl-streak-desc">Trainiere diese Woche!</div>
-        <div class="streak-bottom">
-          <div class="streak-days" id="tl-streak-days"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- WEEK LINE -->
-    <div class="week-line">
-      <div class="week-xp">Diese Woche: <span id="tl-week-xp">0 XP</span></div>
-      <div class="week-delta same" id="tl-week-delta">&mdash;</div>
+    <!-- ROW 2: Streak bar -->
+    <div style="margin-top:8px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);border-radius:10px;padding:10px 12px;">
+      <div style="font-weight:800;font-size:11px;color:#00E5FF;margin-bottom:6px;" id="tl-streak-val">0 Wochen Streak</div>
+      <div style="display:flex;gap:3px;" id="tl-streak-days"></div>
     </div>
 
   </div>
@@ -109,23 +75,9 @@ var MODULES_FALLBACK=[
   {key:'gc1',label:'Ginga Advanced',icon:'\ud83c\udde7\ud83c\uddf7',color:'jong',challenges:[{idx:0,xp:10},{idx:1,xp:10},{idx:2,xp:10},{idx:3,xp:10},{idx:4,xp:10}]}
 ];
 
-var XP_MULT=[0,.2,.4,.6,.8,1];
-function attemptXP(rating,maxXp){return Math.round((XP_MULT[rating]||0)*maxXp);}
-function challengeScoreXP(rating,maxXp){if(rating<4)return 0;return Math.round((XP_MULT[rating]||0)*maxXp);}
-
-var JONG2_HIT_TARGETS={0:10,1:20};
 var state={name:'Spieler',data:{},attemptsRows:[],sbTotalXP:null};
-
 function el(id){return document.getElementById(id);}
-
-function getRating(mk,idx){var d=state.data[mk];return d&&d.ratings?d.ratings[idx]||0:0;}
 function getTotalCumXP(){if(typeof state.sbTotalXP==='number')return state.sbTotalXP;var t=0;MODULES.forEach(function(m){if(state.data[m.key])t+=state.data[m.key].cumXP||0;});return t;}
-function isDone(mk,idx){
-  if(mk==='jong2'&&JONG2_HIT_TARGETS[idx]!=null){var d=state.data[mk];return d&&(d.bestHits&&d.bestHits[idx]||0)>=JONG2_HIT_TARGETS[idx];}
-  return getRating(mk,idx)>=4;
-}
-function getDoneCount(){var t=0;MODULES.forEach(function(m){m.challenges.forEach(function(c){if(isDone(m.key,c.idx))t++;});});return t;}
-function getTotalChallenges(){var t=0;MODULES.forEach(function(m){t+=m.challenges.length;});return t;}
 
 function getWeekKey(date){
   var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
@@ -154,14 +106,14 @@ function computeStreak(){
 function getWeeklyXP(){
   var now=new Date();
   var startOfThisWeek=new Date(now);startOfThisWeek.setHours(0,0,0,0);startOfThisWeek.setDate(now.getDate()-((now.getDay()+6)%7));
-  var startOfLastWeek=new Date(startOfThisWeek);startOfLastWeek.setDate(startOfLastWeek.getDate()-7);
-  var t0=startOfThisWeek.getTime(),t1=startOfLastWeek.getTime();
-  var tw=0,lw=0;
+  var t0=startOfThisWeek.getTime();
+  var tw=0;
   (state.attemptsRows||[]).forEach(function(row){
-    var ts=typeof row.attempted_at==='number'?row.attempted_at:parseInt(row.attempted_at)||0;
-    if(ts>=t0)tw+=(row.xp||0);else if(ts>=t1)lw+=(row.xp||0);
+    var raw=row.attempted_at;
+    var ts=typeof raw==='number'?raw:(raw?new Date(raw).getTime()||0:0);
+    if(ts>=t0)tw+=(row.xp||0);
   });
-  return{thisWeek:tw,lastWeek:lw};
+  return tw;
 }
 
 function render(){
@@ -170,39 +122,34 @@ function render(){
   el('tl-avatar').textContent=initials;
   el('tl-name').textContent=name;
 
-  var totalXP=getTotalCumXP(),streak=computeStreak();
-  el('tl-total-xp').textContent=totalXP;
-  el('tl-streak-num').textContent=streak+'\u26a1';
-  el('tl-streak-val').textContent=streak+' Woche'+(streak===1?'':'n')+' in Folge';
-  el('tl-streak-desc').textContent=streak===0?'Trainiere diese Woche!':streak>=8?'Unaufhaltbar!':streak>=4?'Super Rhythmus!':'Weiter so!';
+  var totalXP=getTotalCumXP();
+  var streak=computeStreak();
+  var weekXP=getWeeklyXP();
 
+  el('tl-total-xp').textContent=totalXP+' XP';
+  el('tl-week-xp').textContent='+ '+weekXP+' XP';
+
+  el('tl-streak-val').textContent=streak+' Woche'+(streak===1?'':'n')+' Streak';
   var daysEl=el('tl-streak-days');daysEl.innerHTML='';
-  for(var d=0;d<8;d++){var dd=document.createElement('div');dd.className='streak-day'+(d<streak?' on':'');daysEl.appendChild(dd);}
-
-  var w=getWeeklyXP();
-  el('tl-week-xp').textContent=w.thisWeek+' XP';
-  var delta=w.thisWeek-w.lastWeek,deltaEl=el('tl-week-delta');
-  if(delta>0){deltaEl.className='week-delta up';deltaEl.textContent='\u2191 +'+delta+' XP vs. letzte Woche';}
-  else if(delta<0){deltaEl.className='week-delta down';deltaEl.textContent='\u2193 '+Math.abs(delta)+' XP vs. letzte Woche';}
-  else{deltaEl.className='week-delta same';deltaEl.textContent='\u2014 Gleich wie letzte Woche';}
+  for(var d=0;d<8;d++){
+    var dd=document.createElement('div');
+    dd.style.cssText='flex:1;height:6px;border-radius:99px;background:'+(d<streak?'#00E5FF':'rgba(255,255,255,.1)');
+    daysEl.appendChild(dd);
+  }
 
   el('tl-loading').style.display='none';
   el('tl-content').style.display='block';
 }
 
-function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;if(bm.currentMember&&bm.currentMember.name)return bm.currentMember.name;if(bm.user&&bm.user.name)return bm.user.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
-function getBMEmail(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}return null;}
+function getBMName(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm){if(bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.name)return bm.intercom.bootProps.name;if(bm.member&&bm.member.name)return bm.member.name;}if(w.intercomSettings&&w.intercomSettings.name)return w.intercomSettings.name;}catch(e){}}return null;}
+function getBMEmail(){var wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;if(bm&&bm.accessToken){try{var pl=JSON.parse(atob(bm.accessToken.split('.')[1]));if(pl&&pl.id&&pl.tokenType==='USER')return '__BMID__:'+pl.id;}catch(e){}}}catch(e){}}return null;}
 
 var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 
-function sbLoadModules(cb){
-  fetch(SB_URL+'/rest/v1/modules?select=*&order=sort_order.asc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
-    .then(function(r){return r.json();}).then(function(rows){
-      if(!rows||!rows.length){cb(null);return;}
-      cb(rows.map(function(r){var ch=typeof r.challenges==='string'?JSON.parse(r.challenges):r.challenges;return{key:r.key,label:r.label,icon:r.icon,color:r.color||'jong',challenges:ch};}));
-    }).catch(function(){cb(null);});
-}
+function lookupEmailByBMIdDirect(bmId,cb){fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(rows){if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);else cb(null,null);}).catch(function(){cb(null,null);});}
+
+function sbLoadModules(cb){fetch(SB_URL+'/rest/v1/modules?select=*&order=sort_order.asc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(rows){if(!rows||!rows.length){cb(null);return;}cb(rows.map(function(r){var ch=typeof r.challenges==='string'?JSON.parse(r.challenges):r.challenges;return{key:r.key,label:r.label,icon:r.icon,color:r.color||'jong',challenges:ch};}));}).catch(function(){cb(null);});}
 
 function sbLoadAll(email,cb){
   if(!email){cb(null,null,null);return;}
@@ -222,13 +169,14 @@ function mergeData(compRows,attRows,playerRows){
     var mk=m.key,mrows=byModule[mk]||[];
     if(!state.data[mk])state.data[mk]={ratings:[],bestHits:[],cumXP:0,completed_at:{}};
     var d=state.data[mk];
-    mrows.forEach(function(row){
-      var idx=row.challenge_idx,rating=row.rating||0;
-      if(rating>(d.ratings[idx]||0)){d.ratings[idx]=rating;if(row.completed_at)d.completed_at[idx]=row.completed_at;}
-      if(row.hit_count!=null&&row.hit_count>(d.bestHits[idx]||0))d.bestHits[idx]=row.hit_count;
-    });
+    mrows.forEach(function(row){var idx=row.challenge_idx,rating=row.rating||0;if(rating>(d.ratings[idx]||0)){d.ratings[idx]=rating;if(row.completed_at)d.completed_at[idx]=row.completed_at;}if(row.hit_count!=null&&row.hit_count>(d.bestHits[idx]||0))d.bestHits[idx]=row.hit_count;});
   });
 }
+
+function saveIdentity(email){try{localStorage.setItem('t7_player_identity',email);}catch(e){}}
+function loadIdentity(){try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}}
+function lookupMemberByEmail(email,cb){fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=email,name&limit=1',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length?rows[0]:{email:email,name:null});}).catch(function(){cb({email:email,name:null});});}
+function lookupByBMId(cb){var bmId=null,wins=[window];try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){cb(bm.intercom.bootProps.email,null);return;}var links=w.document.querySelectorAll('a[href*="/member/"]');for(var li=0;li<links.length;li++){var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m){bmId=m[1];break;}}if(bmId)break;}catch(e){}}if(!bmId){cb(null,null);return;}fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(rows){if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);else cb(null,null);}).catch(function(){cb(null,null);});}
 
 function init(name,knownEmail){
   state.name=name||'Spieler';
@@ -250,62 +198,29 @@ var playerInited=false;
 window.addEventListener('t7xpupdate',function(){
   var email=getBMEmail()||loadIdentity()||null;
   if(!email)return;
-  /* Reload all data including attempts so weekly XP updates */
-  sbLoadAll(email,function(cRows,aRows,pRows){
-    mergeData(cRows,aRows,pRows);
-    render();
-  });
+  sbLoadAll(email,function(cRows,aRows,pRows){mergeData(cRows,aRows,pRows);render();});
 });
 
-
-function saveIdentity(email){try{localStorage.setItem('t7_player_identity',email);}catch(e){}}
-function loadIdentity(){try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}}
-function lookupMemberByEmail(email,cb){
-  fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=email,name&limit=1',{
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-  }).then(function(r){return r.json();})
-  .then(function(rows){cb(rows&&rows.length?rows[0]:{email:email,name:null});})
-  .catch(function(){cb({email:email,name:null});});
-}
-function lookupByBMId(cb){
-  var bmId=null,wins=[window];
-  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
-  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
-  for(var wi=0;wi<wins.length;wi++){
-    try{
-      var w=wins[wi],bm=w.__BM_DATA__;
-      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email){cb(bm.intercom.bootProps.email,null);return;}
-      var links=w.document.querySelectorAll('a[href*="/member/"]');
-      for(var li=0;li<links.length;li++){var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m){bmId=m[1];break;}}
-      if(bmId)break;
-    }catch(e){}
-  }
-  if(!bmId){cb(null,null);return;}
-  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-  }).then(function(r){return r.json();})
-  .then(function(rows){if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);else cb(null,null);})
-  .catch(function(){cb(null,null);});
-}
-
 function tryInit(){
-  var bmEmail=typeof getBMId==='function'?getBMId():null;
-  if(bmEmail&&bmEmail!=='unbekannt'){saveIdentity(bmEmail);init(null,bmEmail);playerInited=true;return true;}
-  var savedEmail=loadIdentity();
-  if(savedEmail){
-    lookupMemberByEmail(savedEmail,function(m){init(m.name||'Spieler',savedEmail);playerInited=true;});
-    return true;
+  var bmResult=getBMEmail();
+  if(bmResult&&bmResult!=='unbekannt'){
+    if(bmResult.indexOf('__BMID__:')===0){
+      var bmId=bmResult.replace('__BMID__:','');
+      var savedEmail=loadIdentity();
+      if(savedEmail){lookupMemberByEmail(savedEmail,function(m){init(m.name||'Spieler',savedEmail);playerInited=true;});return true;}
+      lookupEmailByBMIdDirect(bmId,function(email,name){if(email&&!playerInited){saveIdentity(email);init(name||'Spieler',email);playerInited=true;}});
+      return false;
+    }
+    saveIdentity(bmResult);init(null,bmResult);playerInited=true;return true;
   }
+  var savedEmail=loadIdentity();
+  if(savedEmail){lookupMemberByEmail(savedEmail,function(m){init(m.name||'Spieler',savedEmail);playerInited=true;});return true;}
   var name=getBMName();
   if(name){init(name);playerInited=true;return true;}
-  lookupByBMId(function(email,name){
-    if(email&&!playerInited){saveIdentity(email);init(name||'Spieler',email);playerInited=true;}
-  });
+  lookupByBMId(function(email,name){if(email&&!playerInited){saveIdentity(email);init(name||'Spieler',email);playerInited=true;}});
   return false;
 }
-if(!tryInit()){
-  var _ret=0;var _retT=setInterval(function(){_ret++;if(tryInit()||_ret>=20)clearInterval(_retT);},500);
-}
+if(!tryInit()){var _ret=0;var _retT=setInterval(function(){_ret++;if(tryInit()||_ret>=20)clearInterval(_retT);},500);}
 })();
 </script>
 </div>
