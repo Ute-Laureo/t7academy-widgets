@@ -523,8 +523,33 @@ function getBMId(){
   var wins=[window];
   try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
   try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
-  for(var wi=0;wi<wins.length;wi++){try{var w=wins[wi],bm=w.__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps){var bp=bm.intercom.bootProps;if(bp.email)return bp.email;if(bp.userId)return bp.userId;}if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;}catch(e){}}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi],bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps){
+        var bp=bm.intercom.bootProps;
+        if(bp.email)return bp.email;
+        if(bp.userId)return bp.userId;
+      }
+      if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;
+      if(bm&&bm.accessToken){
+        try{
+          var payload=JSON.parse(atob(bm.accessToken.split('.')[1]));
+          if(payload&&payload.id&&payload.tokenType==='USER')return '__BMID__:'+payload.id;
+        }catch(e){}
+      }
+    }catch(e){}
+  }
   return null;
+}
+function lookupEmailByBMIdDirect(bmId,cb){
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email,name&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(rows&&rows.length&&rows[0].email)cb(rows[0].email,rows[0].name);
+    else cb(null,null);
+  }).catch(function(){cb(null,null);});
 }
 function sbBackfill(email,name){
   if(!email||email==='unbekannt')return;
@@ -596,11 +621,27 @@ function initFromEmail(email){
 }
 
 function tryInit(){
-  var bmEmail=typeof getBMId==='function'?getBMId():null;
-  if(bmEmail&&bmEmail!=='unbekannt'){saveIdentity(bmEmail);initFromEmail(bmEmail);return true;}
+  /* Step 1: BM __BM_DATA__ email (admins/intercom) or JWT token BM ID */
+  var bmResult=typeof getBMId==='function'?getBMId():null;
+  if(bmResult&&bmResult!=='unbekannt'){
+    if(bmResult.indexOf('__BMID__:')===0){
+      var bmId=bmResult.replace('__BMID__:','');
+      var savedEmail=loadIdentity();
+      if(savedEmail){initFromEmail(savedEmail);return true;}
+      lookupEmailByBMIdDirect(bmId,function(email,name){
+        if(email&&!state.playerInited){saveIdentity(email);initFromEmail(email);}
+      });
+      return false;
+    }
+    saveIdentity(bmResult);initFromEmail(bmResult);return true;
+  }
+  /* Step 2: Saved email in localStorage */
   var savedEmail=loadIdentity();
   if(savedEmail){initFromEmail(savedEmail);return true;}
-  lookupByBMId(function(email,name){if(email&&!state.playerInited){saveIdentity(email);initFromEmail(email);}});
+  /* Step 3: BM member ID from page links */
+  lookupByBMId(function(email,name){
+    if(email&&!state.playerInited){saveIdentity(email);initFromEmail(email);}
+  });
   return false;
 }
 (function(){
