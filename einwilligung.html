@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Einwilligung</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080f1e;--surface:#0d1528;--surface2:#111c30;
+  --border:rgba(0,229,255,.1);--border2:rgba(0,229,255,.06);
+  --text:#e8f4ff;--muted:rgba(232,244,255,.42);
+  --accent:#00E5FF;--accent-dim:rgba(0,229,255,.1);--accent2:#00b8d4;
+  --danger:#ff4d6d;--r:12px;
+}
+body{font-family:'Open Sans',sans-serif;background:transparent;color:var(--text);font-size:13px;line-height:1.6;}
+.sw{width:100%;display:none;}
+.sw.visible{display:block;animation:fadeUp .4s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sw-done{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
+.sw-done-icon{font-size:16px;flex-shrink:0;}
+.sw-done-text{font-size:11px;color:var(--muted);}
+.sw-done-text strong{color:var(--accent);font-weight:700;}
+#cwOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(4,8,20,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow-y:auto;padding:20px 16px 40px;animation:overlayIn .35s ease both;}
+#cwOverlay.active{display:flex;align-items:flex-start;justify-content:center;}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.ov-inner{width:100%;max-width:540px;margin:0 auto;animation:slideUp .4s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.cw-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,229,255,.08);}
+.cw-header{padding:22px 22px 18px;border-bottom:1px solid var(--border2);position:relative;}
+.cw-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent) 40%,transparent);}
+.cw-logo{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.cw-logo-badge{width:28px;height:28px;border-radius:7px;background:var(--accent-dim);border:1px solid rgba(0,229,255,.2);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.cw-logo-name{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);}
+.cw-title{font-size:22px;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:5px;letter-spacing:-.02em;}
+.cw-subtitle{font-size:12px;color:var(--muted);line-height:1.5;}
+.cw-steps{display:flex;gap:0;padding:0 22px;margin:16px 0 0;}
+.cw-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
+.cw-step:not(:last-child)::after{content:'';position:absolute;top:11px;left:50%;right:-50%;height:1px;background:var(--border2);z-index:0;}
+.cw-step-dot{width:22px;height:22px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);position:relative;z-index:1;transition:all .2s;flex-shrink:0;}
+.cw-step-dot.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.cw-step-dot.done{background:var(--accent);border-color:var(--accent);color:#000;font-size:10px;}
+.cw-step-label{font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:center;}
+.cw-step-label.active{color:var(--accent);}
+.cw-panels{padding:0 22px 22px;}
+.cw-panel{display:none;animation:fadeUp .3s ease both;}
+.cw-panel.active{display:block;}
+.panel-title{font-size:15px;font-weight:800;color:var(--text);margin-top:18px;margin-bottom:3px;letter-spacing:-.01em;}
+.panel-desc{font-size:11px;color:var(--muted);margin-bottom:0;}
+.doc-box{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin:12px 0;max-height:150px;overflow-y:auto;font-size:11px;color:var(--muted);line-height:1.75;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.doc-box::-webkit-scrollbar{width:3px;}
+.doc-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.doc-box h4{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:8px;}
+.doc-box p{margin-bottom:7px;}
+.doc-box p:last-child{margin-bottom:0;}
+.doc-scroll-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;opacity:.5;transition:opacity .3s;}
+.doc-scroll-hint.hidden{opacity:0;}
+.check-row{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:var(--accent-dim);border:1px solid rgba(0,229,255,.18);cursor:pointer;transition:all .15s;margin-top:10px;}
+.check-row:hover{background:rgba(0,229,255,.15);border-color:rgba(0,229,255,.32);}
+.check-row input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-color:var(--accent);cursor:pointer;}
+.check-label{font-size:11px;color:var(--text);line-height:1.5;cursor:pointer;}
+.check-label strong{color:var(--accent);font-weight:700;}
+.input-group{margin:12px 0 0;}
+.input-group label{display:block;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.input-group input{width:100%;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Open Sans',sans-serif;font-size:13px;outline:none;transition:border .15s;}
+.input-group input:focus{border-color:rgba(0,229,255,.4);}
+.input-group input::placeholder{color:var(--muted);}
+.btn-row{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
+.btn{padding:9px 18px;border-radius:9px;border:none;font-family:'Open Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);border-color:rgba(0,229,255,.25);}
+.btn-primary{background:var(--accent);color:#000;box-shadow:0 0 20px rgba(0,229,255,.2);}
+.btn-primary:hover{background:var(--accent2);box-shadow:0 0 28px rgba(0,229,255,.35);}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
+.err-msg{font-size:11px;color:var(--danger);margin-top:7px;display:none;padding:7px 10px;background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.18);border-radius:7px;}
+.err-msg.show{display:block;}
+.decline-bar{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;padding:10px;background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.15);border-radius:9px;}
+.decline-bar span{font-size:10px;color:rgba(255,77,109,.7);line-height:1.4;text-align:center;}
+.decline-bar strong{color:var(--danger);}
+.final-card{text-align:center;padding:28px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-top:18px;}
+.final-icon{font-size:40px;margin-bottom:12px;}
+.final-title{font-size:18px;font-weight:800;color:var(--accent);margin-bottom:6px;letter-spacing:-.01em;}
+.final-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.final-ts{margin-top:12px;font-size:10px;color:rgba(0,229,255,.4);}
+.loading-dots{display:inline-flex;gap:3px;align-items:center;}
+.loading-dots span{width:4px;height:4px;border-radius:50%;background:currentColor;animation:dot .8s ease-in-out infinite;}
+.loading-dots span:nth-child(2){animation-delay:.15s;}
+.loading-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+
+<div class="sw" id="swRoot">
+  <div class="sw-done">
+    <div class="sw-done-icon">✅</div>
+    <div class="sw-done-text">Einwilligung erteilt. <strong>Willkommen bei T7 Academy!</strong></div>
+  </div>
+</div>
+
+<div id="cwOverlay">
+  <div class="ov-inner">
+    <div class="cw-card">
+      <div class="cw-header">
+        <div class="cw-logo">
+          <div class="cw-logo-badge">⭐</div>
+          <div class="cw-logo-name">T7 Academy</div>
+        </div>
+        <div class="cw-title">Bevor es losgeht</div>
+        <div class="cw-subtitle">Bitte lies und bestätige die folgenden Dokumente — das dauert nur 2 Minuten.</div>
+        <div class="cw-steps" id="cwSteps">
+          <div class="cw-step">
+            <div class="cw-step-dot active" id="dot0">1</div>
+            <div class="cw-step-label active" id="lbl0">AGB</div>
+          </div>
+          <div class="cw-step">
+            <div class="cw-step-dot" id="dot1">2</div>
+            <div class="cw-step-label" id="lbl1">Datenschutz</div>
+          </div>
+          <div class="cw-step">
+            <div class="cw-step-dot" id="dot2">3</div>
+            <div class="cw-step-label" id="lbl2">Eltern</div>
+          </div>
+          <div class="cw-step">
+            <div class="cw-step-dot" id="dot3">4</div>
+            <div class="cw-step-label" id="lbl3">Fertig</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cw-panels">
+
+        <!-- STEP 1: AGB -->
+        <div class="cw-panel active" id="panel0">
+          <div class="panel-title">Allgemeine Geschäftsbedingungen</div>
+          <div class="panel-desc">Bitte lies die AGB vollständig durch.</div>
+          <div class="doc-box" id="agbBox">
+            <h4>AGB – T7 Academy GmbH</h4>
+            <p><strong>§1 Geltungsbereich und Anbieter</strong></p>
+            <p>Diese AGB regeln die Nutzung der Online-Plattform der T7 Academy GmbH, Hauptstrasse 4, 7111 Parndorf (Firmenbuch: 670195g, UID: ATU83012801, GF: Bernhard Bresich).</p>
+            <p><strong>§2 Leistungsbeschreibung</strong></p>
+            <p>Der Anbieter stellt eine Online-Plattform mit Trainingsvideos, Übungsbeschreibungen, Gamification-Funktionen (Challenges, XP-Punkte, Badges), Upload-Möglichkeiten sowie Community-Funktionen zur Verfügung.</p>
+            <p><strong>§3 Registrierung und Minderjährige</strong></p>
+            <p>Die Registrierung ist nur voll geschäftsfähigen Personen gestattet. Für Minderjährige unter 18 Jahren ist die Zustimmung eines Erziehungsberechtigten erforderlich. Zugangsdaten sind geheim zu halten.</p>
+            <p><strong>§4 Nutzungsrechte an Inhalten</strong></p>
+            <p>Alle Inhalte (Videos, Texte, Bilder, Trainingspläne) sind urheberrechtlich geschützt. Der Nutzer erhält ein einfaches, nicht übertragbares Nutzungsrecht für private bzw. vereinsinterne Zwecke. Weitergabe, öffentliche Zugänglichmachung oder kommerzielle Nutzung sind nicht gestattet.</p>
+            <p><strong>§5 Nutzerinhalte und Uploads</strong></p>
+            <p>Der Nutzer ist für seine Inhalte selbst verantwortlich und sichert zu, alle erforderlichen Rechte zu besitzen. Videos dürfen nur zu Marketingzwecken verwendet werden, wenn eine ausdrückliche Einwilligung vorliegt.</p>
+            <p><strong>§6 Nutzung durch Kinder und Jugendliche</strong></p>
+            <p>Die Plattform richtet sich auch an Kinder ab ca. 6 Jahren. Eltern sind verpflichtet, die Nutzung zu überwachen und das Nutzungsverhalten in der Community zu begleiten.</p>
+            <p><strong>§7 Community-Regeln</strong></p>
+            <p>Verboten sind Beleidigungen, Mobbing, Drohungen, diskriminierende Äußerungen, jugendgefährdende Inhalte sowie Spam und unerlaubte Werbung.</p>
+            <p><strong>§8 Haftung</strong></p>
+            <p>Der Anbieter haftet nach gesetzlichen Bestimmungen für Vorsatz und grobe Fahrlässigkeit. Die Nutzung der Trainingsinhalte erfolgt auf eigenes Risiko. Es wird keine Gewähr für bestimmte sportliche Erfolge übernommen.</p>
+            <p><strong>§9 Anwendbares Recht</strong></p>
+            <p>Es gilt österreichisches Recht. Vertragssprache ist Deutsch. T7 Academy GmbH, Parndorf, April 2025.</p>
+          </div>
+          <div class="doc-scroll-hint" id="agbHint">↓ Bitte nach unten scrollen</div>
+          <label class="check-row">
+            <input type="checkbox" id="chkAgb">
+            <span class="check-label">Ich habe die <strong>Allgemeinen Geschäftsbedingungen</strong> gelesen und stimme ihnen zu.</span>
+          </label>
+          <div class="err-msg" id="err0">Bitte bestätige die AGB um fortzufahren.</div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="nextStep(0)">Weiter →</button>
+          </div>
+          <div class="decline-bar">
+            <span>Ohne Zustimmung ist die Nutzung der T7 Academy <strong>nicht möglich</strong>.</span>
+          </div>
+        </div>
+
+        <!-- STEP 2: Datenschutz -->
+        <div class="cw-panel" id="panel1">
+          <div class="panel-title">Datenschutzerklärung</div>
+          <div class="panel-desc">Informationen zur Verarbeitung deiner Daten.</div>
+          <div class="doc-box" id="dsBox">
+            <h4>Datenschutzerklärung – T7 Academy GmbH</h4>
+            <p><strong>Verantwortlicher:</strong> T7 Academy GmbH, Hauptstrasse 4, 7111 Parndorf. Firmenbuch: 670195g, UID: ATU83012801, GF: Bernhard Bresich. mail@t7academy.com</p>
+            <p><strong>Rechtsgrundlagen:</strong> Art. 6 Abs. 1 lit. a DSGVO (Einwilligung), lit. b (Vertragserfüllung), lit. c (rechtliche Verpflichtung), lit. f (berechtigtes Interesse).</p>
+            <p><strong>Erhobene Daten:</strong> Name, E-Mail-Adresse, Vereinszugehörigkeit, Rolle, Zugangsdaten, Vertrags- und Nutzungsdaten, Trainingsfortschritte (XP, Ratings, Zertifikate), Zeitstempel der Aktivitäten, ggf. Video-Uploads.</p>
+            <p><strong>Zwecke:</strong> Bereitstellung der Plattform, Gamification-Funktionen, Vertragsabwicklung, Kundenservice, Community-Betrieb und pädagogische Unterstützung durch Trainer.</p>
+            <p><strong>Minderjährige:</strong> Die Plattform richtet sich auch an Kinder ab ca. 6 Jahren. Für Minderjährige ist die Einwilligung des/der Erziehungsberechtigten erforderlich. Erziehungsberechtigte sind für die Überwachung der Nutzung verantwortlich.</p>
+            <p><strong>Video-Uploads:</strong> Eigene Trainingsvideos können zur Bewertung hochgeladen werden. Eine Nutzung zu Marketingzwecken erfolgt nur mit ausdrücklicher gesonderter Einwilligung.</p>
+            <p><strong>Speicherdauer:</strong> Daten werden für die Dauer des Vertragsverhältnisses gespeichert. Nach Vertragsbeendigung werden Daten gelöscht oder anonymisiert, soweit keine gesetzlichen Aufbewahrungspflichten (bis zu 7 Jahre) entgegenstehen.</p>
+            <p><strong>Deine Rechte:</strong> Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung (Art. 18), Datenübertragbarkeit (Art. 20), Widerspruch (Art. 21 DSGVO). Kontakt: mail@t7academy.com</p>
+            <p><strong>Beschwerderecht:</strong> Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien, dsb@dsb.gv.at. Stand: 17. April 2026.</p>
+          </div>
+          <div class="doc-scroll-hint" id="dsHint">↓ Bitte nach unten scrollen</div>
+          <label class="check-row">
+            <input type="checkbox" id="chkDs">
+            <span class="check-label">Ich habe die <strong>Datenschutzerklärung</strong> gelesen und stimme der Verarbeitung meiner Daten zu.</span>
+          </label>
+          <div class="err-msg" id="err1">Bitte bestätige die Datenschutzerklärung um fortzufahren.</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="prevStep(1)">← Zurück</button>
+            <button class="btn btn-primary" onclick="nextStep(1)">Weiter →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Parental Consent -->
+        <div class="cw-panel" id="panel2">
+          <div class="panel-title">Einwilligung Erziehungsberechtigte</div>
+          <div class="panel-desc">Muss von einem Elternteil oder Erziehungsberechtigten ausgefüllt werden.</div>
+          <div class="doc-box" id="pcBox">
+            <h4>Einwilligungserklärung – Eltern / Erziehungsberechtigte</h4>
+            <p>Ich bin der Elternteil bzw. Erziehungsberechtigte und erkläre hiermit mein Einverständnis mit folgenden Punkten:</p>
+            <p>1. Ich erlaube meinem Kind die Nutzung der T7 Academy Plattform und die Speicherung der dafür notwendigen personenbezogenen Daten.</p>
+            <p>2. Ich bin damit einverstanden, dass Trainingsfortschritte, Bewertungen und Zertifikate meines Kindes auf der Plattform gespeichert und für Trainer sichtbar sind.</p>
+            <p>3. Ich bestätige, dass mein Kind die Übungen nur in einem sicheren Umfeld durchführt. T7 Academy haftet nicht für Verletzungen.</p>
+            <p>4. Ich bin damit einverstanden, dass Videos, die mein Kind zur Bewertung einreicht, vom T7 Academy Expert eingesehen werden.</p>
+            <p>5. Diese Einwilligung kann jederzeit widerrufen werden durch Kontaktaufnahme mit dem Trainer oder T7 Academy.</p>
+          </div>
+          <div class="doc-scroll-hint" id="pcHint">↓ Bitte nach unten scrollen</div>
+          <div class="input-group">
+            <label>Vor- und Nachname des Erziehungsberechtigten</label>
+            <input type="text" id="parentName" placeholder="z.B. Maria Muster" autocomplete="name">
+          </div>
+          <label class="check-row" style="margin-top:10px">
+            <input type="checkbox" id="chkPc">
+            <span class="check-label">Ich bin Erziehungsberechtigte/r und stimme der Teilnahme meines Kindes sowie der Datenverarbeitung zu.</span>
+          </label>
+          <div class="err-msg" id="err2">Bitte gib deinen Namen ein und bestätige die Einwilligung.</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="prevStep(2)">← Zurück</button>
+            <button class="btn btn-primary" id="btnConfirm" onclick="nextStep(2)">Bestätigen ✓</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: Done -->
+        <div class="cw-panel" id="panel3">
+          <div class="final-card">
+            <div class="final-icon">🎉</div>
+            <div class="final-title">Alles erledigt!</div>
+            <div class="final-desc">Danke für deine Bestätigung. Du kannst jetzt alle Challenges, Zertifikate und Features der T7 Academy nutzen. Viel Spaß!</div>
+            <div class="final-ts" id="finalTs"></div>
+          </div>
+          <div class="btn-row" style="justify-content:center;margin-top:16px">
+            <button class="btn btn-primary" onclick="closeOverlay()">Los geht's ⚡</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+
+var playerEmail=null;
+
+function getBMEmail(){
+  var wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{
+      var w=wins[wi],bm=w.__BM_DATA__;
+      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email)return bm.intercom.bootProps.email;
+      if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;
+      if(bm&&bm.accessToken){
+        try{var pl=JSON.parse(atob(bm.accessToken.split('.')[1]));if(pl&&pl.id&&pl.tokenType==='USER')return '__BMID__:'+pl.id;}catch(e){}
+      }
+    }catch(e){}
+  }
+  return null;
+}
+function loadIdentity(){try{return localStorage.getItem('t7_player_identity')||null;}catch(e){return null;}}
+
+function lookupByBMId(bmId,cb){
+  fetch(SB_URL+'/rest/v1/members?bm_id=eq.'+encodeURIComponent(bmId)+'&select=email&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){cb(rows&&rows.length&&rows[0].email?rows[0].email:null);})
+  .catch(function(){cb(null);});
+}
+function lookupByPageLinks(cb){
+  var bmId=null,wins=[window];
+  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
+  try{if(window.top&&window.top!==window&&window.top!==window.parent)wins.push(window.top);}catch(e){}
+  for(var wi=0;wi<wins.length;wi++){
+    try{var w=wins[wi];var links=w.document.querySelectorAll('a[href*="/member/"]');for(var li=0;li<links.length;li++){var m=links[li].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m){bmId=m[1];break;}}if(bmId)break;}catch(e){}
+  }
+  if(!bmId){cb(null);return;}
+  lookupByBMId(bmId,cb);
+}
+
+function checkConsent(email,cb){
+  fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=agb_accepted,datenschutz_accepted,parental_consent&limit=1',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();})
+  .then(function(rows){
+    if(rows&&rows.length){var r=rows[0];cb(r.agb_accepted&&r.datenschutz_accepted&&r.parental_consent);}
+    else{cb(false);}
+  }).catch(function(){cb(false);});
+}
+
+function showOverlay(){
+  document.getElementById('cwOverlay').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function hideOverlay(){
+  var ov=document.getElementById('cwOverlay');
+  ov.style.opacity='0';ov.style.transition='opacity .3s';
+  setTimeout(function(){ov.classList.remove('active');ov.style.opacity='';ov.style.transition='';document.body.style.overflow='';},300);
+}
+window.closeOverlay=function(){
+  hideOverlay();
+  var sw=document.getElementById('swRoot');
+  sw.classList.add('visible');
+  setTimeout(function(){sw.style.display='none';},4000);
+};
+
+function goToStep(n){
+  for(var i=0;i<4;i++){
+    document.getElementById('panel'+i).classList.remove('active');
+    var dot=document.getElementById('dot'+i),lbl=document.getElementById('lbl'+i);
+    dot.className='cw-step-dot';lbl.className='cw-step-label';
+    if(i<n){dot.className='cw-step-dot done';dot.textContent='✓';}
+    else if(i===n){dot.className='cw-step-dot active';dot.textContent=i+1;lbl.className='cw-step-label active';}
+    else{dot.textContent=i+1;}
+  }
+  document.getElementById('panel'+n).classList.add('active');
+  var ov=document.getElementById('cwOverlay');if(ov)ov.scrollTop=0;
+}
+
+window.nextStep=function(from){
+  if(from===0&&!document.getElementById('chkAgb').checked){showErr(0);return;}
+  if(from===1&&!document.getElementById('chkDs').checked){showErr(1);return;}
+  if(from===2){var pname=document.getElementById('parentName').value.trim();if(!pname||!document.getElementById('chkPc').checked){showErr(2);return;}saveConsent(pname);return;}
+  hideErr(from);goToStep(from+1);
+};
+window.prevStep=function(from){hideErr(from);goToStep(from-1);};
+function showErr(n){document.getElementById('err'+n).classList.add('show');}
+function hideErr(n){document.getElementById('err'+n).classList.remove('show');}
+
+function saveConsent(parentName){
+  var btn=document.getElementById('btnConfirm');
+  btn.disabled=true;
+  btn.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
+  var ts=Date.now();
+  var payload={agb_accepted:true,datenschutz_accepted:true,parental_consent:true,consent_at:ts,consent_name:parentName};
+  function onSaved(){
+    try{localStorage.setItem('t7_consent_done','1');}catch(e){}
+    var d=new Date(ts);
+    var fmt=d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'})+' · '+d.toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'})+' Uhr';
+    document.getElementById('finalTs').textContent='Einwilligung erteilt am '+fmt+' durch '+parentName;
+    goToStep(3);
+  }
+  if(playerEmail){
+    fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(playerEmail),{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal','x-widget-token':'T7WIDGET2026'},
+      body:JSON.stringify(payload)
+    }).then(function(r){if(r.ok){onSaved();}else{btn.disabled=false;btn.textContent='Bestätigen ✓';document.getElementById('err2').textContent='Fehler beim Speichern. Bitte versuche es nochmal.';showErr(2);}})
+    .catch(function(){onSaved();});
+  } else {
+    onSaved();
+  }
+}
+
+function setupScrollHint(boxId,hintId){
+  var box=document.getElementById(boxId),hint=document.getElementById(hintId);
+  if(!box||!hint)return;
+  box.addEventListener('scroll',function(){if(box.scrollTop+box.clientHeight>=box.scrollHeight-10)hint.classList.add('hidden');});
+}
+['agb','ds','pc'].forEach(function(k){setupScrollHint(k+'Box',k+'Hint');});
+
+function checkAndShow(email){
+  if(!email){showOverlay();return;}
+  playerEmail=email;
+  // Always check Supabase - never trust localStorage alone
+  checkConsent(email,function(done){
+    if(done){
+      try{localStorage.setItem('t7_consent_done','1');}catch(e){}
+    } else {
+      try{localStorage.removeItem('t7_consent_done');}catch(e){}
+      showOverlay();
+    }
+  });
+}
+
+function init(){
+  var bmResult=getBMEmail()||loadIdentity()||null;
+
+  if(bmResult&&bmResult.indexOf('__BMID__:')===0){
+    lookupByBMId(bmResult.replace('__BMID__:',''),function(email){checkAndShow(email);});
+  } else if(bmResult){
+    checkAndShow(bmResult);
+  } else {
+    lookupByPageLinks(function(email){checkAndShow(email);});
+    // Also retry as BM loads
+    var _ret=0;
+    var _retT=setInterval(function(){
+      _ret++;
+      var em=getBMEmail();
+      if(em&&em!==playerEmail){clearInterval(_retT);
+        if(em.indexOf('__BMID__:')===0){lookupByBMId(em.replace('__BMID__:',''),function(email){if(email&&!playerEmail)checkAndShow(email);});}
+        else{checkAndShow(em);}
+      }
+      if(_ret>=10)clearInterval(_retT);
+    },600);
+  }
+}
+
+init();
+})();
+</script>
+</body>
+</html>
