@@ -1,55 +1,41 @@
-// T7 Academy — Bettermode Members → Supabase Sync
-// Runs via GitHub Actions every night
-
 import { createClient } from '@supabase/supabase-js';
-import { parse } from 'csv-parse/sync';
 import { readFileSync } from 'fs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('❌ Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables');
+  console.error('Missing env vars');
   process.exit(1);
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// STEP 1: Read members.csv from repo root
-let raw;
-try {
-  raw = readFileSync('members.csv', 'utf8');
-} catch (e) {
-  console.error('❌ Could not read members.csv — make sure it exists in the repo root');
-  process.exit(1);
+const raw = readFileSync('members.csv', 'utf8');
+const lines = raw.trim().split('\n');
+const headers = lines[0].split(',');
+const records = [];
+
+for (let i = 1; i < lines.length; i++) {
+  const fields = [];
+  let current = '';
+  let inQuotes = false;
+  let bracketDepth = 0;
+  for (const ch of lines[i]) {
+    if (ch === '"' && bracketDepth === 0) { inQuotes = !inQuotes; }
+    else if (ch === '[') { bracketDepth++; current += ch; }
+    else if (ch === ']') { bracketDepth--; current += ch; }
+    else if (ch === ',' && !inQuotes && bracketDepth === 0) { fields.push(current.replace(/^"|"$/g, '')); current = ''; }
+    else { current += ch; }
+  }
+  fields.push(current.replace(/^"|"$/g, ''));
+  const obj = {};
+  headers.forEach((h, idx) => { obj[h.trim()] = fields[idx] ?? null; });
+  records.push(obj);
 }
 
-// STEP 2: Parse CSV
-const records = parse(raw, {
-  columns: true,
-  skip_empty_lines: true,
-});
-
-console.log(`📋 Found ${records.length} members in CSV`);
-
-// STEP 3: Map CSV columns to Supabase table columns
-const members = records.map(r => ({
-  bm_id:       r.id,
-  name:        r.name,
-  bm_username: r.username,
-  email:       r.email,
-  role:        r.role,
-  bm_joined_at: r.createdAt || null,
-}));
-
-// STEP 4: Upsert into Supabase
-const { error } = await supabase
-  .from('members')
-  .upsert(members, { onConflict: 'bm_id' });
-
-if (error) {
-  console.error('❌ Supabase error:', error.message);
-  process.exit(1);
-} else {
-  console.log(`✅ Successfully synced ${members.length} members to Supabase`);
-}
+console.log(`Found ${records.length} members`);
+const members = records.map(r => ({ bm_id: r.id, name: r.name, bm_username: r.username, email: r.email, role: r.role, bm_joined_at: r.createdAt || null }));
+const { error } = await supabase.from('members').upsert(members, { onConflict: 'bm_id' });
+if (error) { console.error('Error:', error.message); process.exit(1); }
+else { console.log(`Synced ${members.length} members!`); }
