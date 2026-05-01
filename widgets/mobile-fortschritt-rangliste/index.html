@@ -97,9 +97,9 @@ function loadPlayerData(email,cb){
   Promise.all([pP,aP]).then(function(res){cb(res[0],res[1]);});
 }
 function loadRangData(cb){
-  var pP=fetch(SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
-  var aP=fetch(SB_URL+'/rest/v1/attempts?select=player_name,attempted_at&limit=10000',{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
-  Promise.all([pP,aP]).then(function(res){cb(res[0],res[1]);});
+  var pP=fetch(SB_URL+'/rest/v1/players?select=player_name,player_email,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var mP=fetch(SB_URL+'/rest/v1/members?select=email,bm_joined_at&limit=200',{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
+  Promise.all([pP,mP]).then(function(res){cb(res[0],res[1]);});
 }
 
 function processPlayerData(playerRows,attRows){
@@ -107,13 +107,17 @@ function processPlayerData(playerRows,attRows){
   state.streak=calcStreak(attRows||[]);
   state.weekXP=calcWeekXP(attRows||[]);
 }
-function processRangData(players,attempts){
+function processRangData(players,members){
   state.players=players||[];
-  var weeksByName={};
-  attempts.forEach(function(a){var name=a.player_name||'?';var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(!ts)return;var wk=getWeekKey(new Date(ts));if(!weeksByName[name])weeksByName[name]={};weeksByName[name][wk]=true;});
-  state.weeksByName=weeksByName;
+  var joinedByEmail={};
+  (members||[]).forEach(function(m){if(m.email&&m.bm_joined_at)joinedByEmail[m.email]=m.bm_joined_at;});
+  state.joinedByEmail=joinedByEmail;
 }
-function getPlayerStreak(name){var weeks=state.weeksByName[name]||{};var now=new Date(),streak=0;for(var i=0;i<52;i++){var wk=getWeekKey(new Date(now-i*7*86400000));if(weeks[wk])streak++;else if(i>0)break;}return streak;}
+function getPlayerWeeks(email){
+  var ts=state.joinedByEmail&&email?state.joinedByEmail[email]||null:null;
+  if(!ts)return 0;
+  return Math.floor((Date.now()-ts)/(7*86400000));
+}
 
 function updateFAB(){
   document.getElementById('t7-fab-xp').textContent=state.totalXP+' XP';
@@ -146,12 +150,12 @@ function renderFort(){
 
 function renderRang(mode){
   mode=mode||'xp';
-  var isStreak=(mode==='streak');
-  var items=state.players.map(function(p){return{name:p.player_name,xp:p.total_xp||0,streak:getPlayerStreak(p.player_name)};});
-  items.sort(function(a,b){return isStreak?b.streak-a.streak:b.xp-a.xp;});
+  var isWeeks=(mode==='weeks');
+  var items=state.players.map(function(p){return{name:p.player_name,email:p.player_email,xp:p.total_xp||0,weeks:getPlayerWeeks(p.player_email)};});
+  items.sort(function(a,b){return isWeeks?b.weeks-a.weeks:b.xp-a.xp;});
   var tabs='<div class="rl-tabs">'+
-    '<button class="rl-tab'+(isStreak?'':' active')+'" onclick="reRenderRang(\'xp\')">⚡ XP</button>'+
-    '<button class="rl-tab'+(isStreak?' active':'')+'" onclick="reRenderRang(\'streak\')">🔥 Streak</button>'+
+    '<button class="rl-tab'+(isWeeks?'':' active')+'" onclick="reRenderRang(\'xp\')">⚡ XP</button>'+
+    '<button class="rl-tab'+(isWeeks?' active':'')+'" onclick="reRenderRang(\'weeks\')">📅 Wochen Mitglied</button>'+
   '</div>';
   var med=['🥇','🥈','🥉'];
   var rows=items.map(function(p,i){
@@ -159,7 +163,7 @@ function renderRang(mode){
     var name=p.name||'?';
     var initials=name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
     var isMe=(state.name&&name.split(' ')[0]===state.name.split(' ')[0]);
-    var val=isStreak?p.streak+' Woche'+(p.streak===1?'':'n'):p.xp+' XP';
+    var val=isWeeks?p.weeks+' Woche'+(p.weeks===1?'':'n'):p.xp+' XP';
     var posClass=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
     return '<div class="rank-item'+(isMe?' me':'')+'">'+
       '<div class="rank-pos '+posClass+'">'+(rank<=3?med[rank-1]:rank)+'</div>'+

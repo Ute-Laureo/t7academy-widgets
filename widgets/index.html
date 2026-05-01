@@ -33,7 +33,7 @@ html,body{font-family:'Open Sans',sans-serif;background:transparent;color:#f0f0f
   </div>
   <div class="view-toggle">
     <button class="vt-btn active" id="vt-xp" onclick="setView('xp')">⚡ XP Rangliste</button>
-    <button class="vt-btn" id="vt-streak" onclick="setView('streak')">🔥 Wochen Streak</button>
+    <button class="vt-btn" id="vt-weeks" onclick="setView('weeks')">📅 Wochen Mitglied</button>
   </div>
   <div id="rankList"><div class="loading">Lade&hellip;</div></div>
 </div>
@@ -51,57 +51,37 @@ var currentView='xp';
 function setView(v){
   currentView=v;
   document.getElementById('vt-xp').className='vt-btn'+(v==='xp'?' active':'');
-  document.getElementById('vt-streak').className='vt-btn'+(v==='streak'?' active':'');
+  document.getElementById('vt-weeks').className='vt-btn'+(v==='weeks'?' active':'');
   if(allPlayers.length)render();
 }
 window.setView=setView;
 
-function getWeekKey(date){
-  var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
-  var day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);
-  var yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
-  var week=Math.ceil((((d-yearStart)/86400000)+1)/7);
-  return d.getUTCFullYear()+'-W'+week;
-}
-
 function load(){
-  var playersP=fetch(SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];});
-  var attemptsP=fetch(SB_URL+'/rest/v1/attempts?select=player_name,attempted_at&limit=10000',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];});
+  var nowMs=Date.now();
 
-  Promise.all([playersP,attemptsP]).then(function(res){
+  var playersP=fetch(SB_URL+'/rest/v1/players?select=player_name,player_email,total_xp&order=total_xp.desc&limit='+LIMIT,{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();}).catch(function(){return[];});
+
+  var membersP=fetch(SB_URL+'/rest/v1/members?select=email,bm_joined_at&limit=200',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();}).catch(function(){return[];});
+
+  Promise.all([playersP,membersP]).then(function(res){
     var players=res[0]||[];
-    var attempts=res[1]||[];
-    var now=new Date();
-    var thisWeekKey=getWeekKey(now);
-    var lastWeekKey=getWeekKey(new Date(Date.now()-7*86400000));
+    var members=res[1]||[];
 
-    var weeksByName={};
-    attempts.forEach(function(row){
-      var name=row.player_name||'Unbekannt';
-      var ts=typeof row.attempted_at==='number'?row.attempted_at:parseInt(row.attempted_at)||0;
-      if(!ts)return;
-      var dt=new Date(ts);if(isNaN(dt.getTime()))return;
-      var wk=getWeekKey(dt);
-      if(!weeksByName[name])weeksByName[name]={};
-      weeksByName[name][wk]=true;
+    // Build email → bm_joined_at lookup
+    var joinedByEmail={};
+    members.forEach(function(m){
+      if(m.email&&m.bm_joined_at)joinedByEmail[m.email]=m.bm_joined_at;
     });
-
-    function calcStreak(weekSet){
-      var weeks=Object.keys(weekSet).sort().reverse();
-      if(!weeks.length)return 0;
-      if(weeks[0]!==thisWeekKey&&weeks[0]!==lastWeekKey)return 0;
-      var streak=1;
-      for(var i=1;i<weeks.length;i++){
-        var py=parseInt(weeks[i-1].split('-W')[0]),pw=parseInt(weeks[i-1].split('-W')[1]);
-        var cy=parseInt(weeks[i].split('-W')[0]),cw=parseInt(weeks[i].split('-W')[1]);
-        if((py===cy&&pw-cw===1)||(py-cy===1&&pw===1&&cw>=52))streak++;else break;
-      }
-      return streak;
-    }
 
     allPlayers=players.map(function(p){
       var name=p.player_name||'Unbekannt';
-      return{player_name:name,total_xp:Number(p.total_xp||0),weekly_streak:calcStreak(weeksByName[name]||{})};
+      var joinedTs=p.player_email?joinedByEmail[p.player_email]||null:null;
+      var totalWeeks=joinedTs?Math.floor((nowMs-joinedTs)/(7*86400000)):0;
+      return{player_name:name,total_xp:Number(p.total_xp||0),total_weeks:totalWeeks};
     });
 
     if(!allPlayers.length){document.getElementById('rankList').innerHTML='<div class="loading">Noch keine Eintr&auml;ge.</div>';return;}
@@ -110,14 +90,14 @@ function load(){
 }
 
 function render(){
-  var isStreak=currentView==='streak';
-  var sorted=allPlayers.slice().sort(function(a,b){return isStreak?b.weekly_streak-a.weekly_streak:b.total_xp-a.total_xp;});
+  var isWeeks=currentView==='weeks';
+  var sorted=allPlayers.slice().sort(function(a,b){return isWeeks?b.total_weeks-a.total_weeks:b.total_xp-a.total_xp;});
   var med=['🥇','🥈','🥉'];
   var rows=sorted.map(function(p,i){
     var rank=i+1;
     var name=p.player_name;
     var ai=acIdx(name);
-    var val=isStreak?p.weekly_streak+' Woche'+(p.weekly_streak===1?'':'n'):p.total_xp.toLocaleString('de-AT')+' XP';
+    var val=isWeeks?p.total_weeks+' Woche'+(p.total_weeks===1?'':'n'):p.total_xp.toLocaleString('de-AT')+' XP';
     return '<div class="rank-row">'+
       '<div class="rank-num" style="'+(rank===1?'color:#00E5FF':rank===2?'color:rgba(200,200,220,.7)':rank===3?'color:#FF9500':'')+'">'+(rank<=3?med[rank-1]:rank)+'</div>'+
       '<div class="r-avatar" style="background:'+AC[ai][0]+';color:'+AC[ai][1]+';border:2px solid '+(rank===1?'#00E5FF':rank===2?'rgba(200,200,220,.6)':rank===3?'rgba(255,149,0,.6)':AC[ai][1]+'55')+';">'+ini(name)+'</div>'+
