@@ -76,7 +76,7 @@ var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 var LIMIT=20;
 
-var state={name:'Spieler',email:null,totalXP:0,streak:0,weekXP:0,players:[],weeksByName:{},playerInited:false,activeTab:'fort',sheetOpen:false,fortLoaded:false,rangLoaded:false};
+var state={name:'Spieler',email:null,totalXP:0,streak:0,totalWeeks:0,weekXP:0,players:[],joinedByName:{},playerInited:false,activeTab:'fort',sheetOpen:false,fortLoaded:false,rangLoaded:false};
 
 function sbH(){return{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};}
 
@@ -94,34 +94,39 @@ function calcWeekXP(attempts){var now=new Date();var startOfWeek=new Date(now);s
 function loadPlayerData(email,cb){
   var pP=fetch(SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
   var aP=fetch(SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(email)+'&select=attempted_at,xp&order=attempted_at.asc',{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
-  Promise.all([pP,aP]).then(function(res){cb(res[0],res[1]);});
+  var mP=fetch(SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(email)+'&select=bm_joined_at&limit=1',{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
+  Promise.all([pP,aP,mP]).then(function(res){cb(res[0],res[1],res[2]);});
 }
 function loadRangData(cb){
-  var pP=fetch(SB_URL+'/rest/v1/players?select=player_name,player_email,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
-  var mP=fetch(SB_URL+'/rest/v1/members?select=email,bm_joined_at&limit=200',{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var pP=fetch(SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
+  var mP=fetch(SB_URL+'/rest/v1/members?select=email,name,bm_joined_at&limit=200',{headers:sbH()}).then(function(r){return r.json();}).catch(function(){return[];});
   Promise.all([pP,mP]).then(function(res){cb(res[0],res[1]);});
 }
 
-function processPlayerData(playerRows,attRows){
+function processPlayerData(playerRows,attRows,memberRows){
   state.totalXP=(playerRows&&playerRows.length)?playerRows[0].total_xp||0:0;
   state.streak=calcStreak(attRows||[]);
   state.weekXP=calcWeekXP(attRows||[]);
+  var joinedTs=memberRows&&memberRows.length?memberRows[0].bm_joined_at||null:null;
+  state.totalWeeks=joinedTs?Math.floor((Date.now()-joinedTs)/(7*86400000)):0;
 }
 function processRangData(players,members){
-  state.players=players||[];
-  var joinedByEmail={};
-  (members||[]).forEach(function(m){if(m.email&&m.bm_joined_at)joinedByEmail[m.email]=m.bm_joined_at;});
-  state.joinedByEmail=joinedByEmail;
+  var joinedByName={};
+  (members||[]).forEach(function(m){if(m.name&&m.bm_joined_at)joinedByName[m.name]=m.bm_joined_at;});
+  state.joinedByName=joinedByName;
+  state.players=(players||[]).map(function(p){
+    return{player_name:p.player_name,total_xp:p.total_xp||0};
+  });
 }
-function getPlayerWeeks(email){
-  var ts=state.joinedByEmail&&email?state.joinedByEmail[email]||null:null;
+function getPlayerWeeks(name){
+  var ts=state.joinedByName&&name?state.joinedByName[name]||null:null;
   if(!ts)return 0;
   return Math.floor((Date.now()-ts)/(7*86400000));
 }
 
 function updateFAB(){
   document.getElementById('t7-fab-xp').textContent=state.totalXP+' XP';
-  document.getElementById('t7-fab-streak').textContent=state.streak+' Woche'+(state.streak===1?'':'n');
+  document.getElementById('t7-fab-streak').textContent=state.totalWeeks+' Woche'+(state.totalWeeks===1?'':'n');
 }
 function updateFABStars(email){
   if(!email)return;
@@ -137,13 +142,13 @@ function updateFABStars(email){
 
 function renderFort(){
   var streakDays='';
-  for(var i=0;i<8;i++)streakDays+='<div style="flex:1;height:6px;border-radius:99px;background:'+(i<state.streak?'#00E5FF':'rgba(255,255,255,.1)')+'"></div>';
+  for(var i=0;i<8;i++)streakDays+='<div style="flex:1;height:6px;border-radius:99px;background:'+(i<state.totalWeeks?'#00E5FF':'rgba(255,255,255,.1)')+'"></div>';
   return '<div class="stat-row">'+
     '<div class="stat-card"><div class="stat-num">'+state.totalXP+' XP</div><div class="stat-label">Gesamt XP</div></div>'+
     '<div class="stat-card"><div class="stat-num">+ '+state.weekXP+' XP</div><div class="stat-label">Diese Woche</div></div>'+
   '</div>'+
   '<div style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);border-radius:10px;padding:10px 12px;">'+
-    '<div style="font-weight:800;font-size:12px;color:#00E5FF;margin-bottom:6px;">'+state.streak+' Woche'+(state.streak===1?'':'n')+' Streak</div>'+
+    '<div style="font-weight:800;font-size:12px;color:#00E5FF;margin-bottom:6px;">'+state.totalWeeks+' Woche'+(state.totalWeeks===1?'':'n')+' Mitglied</div>'+
     '<div style="display:flex;gap:3px;">'+streakDays+'</div>'+
   '</div>';
 }
@@ -151,7 +156,7 @@ function renderFort(){
 function renderRang(mode){
   mode=mode||'xp';
   var isWeeks=(mode==='weeks');
-  var items=state.players.map(function(p){return{name:p.player_name,email:p.player_email,xp:p.total_xp||0,weeks:getPlayerWeeks(p.player_email)};});
+  var items=state.players.map(function(p){return{name:p.player_name,xp:p.total_xp||0,weeks:getPlayerWeeks(p.player_name)};});
   items.sort(function(a,b){return isWeeks?b.weeks-a.weeks:b.xp-a.xp;});
   var tabs='<div class="rl-tabs">'+
     '<button class="rl-tab'+(isWeeks?'':' active')+'" onclick="reRenderRang(\'xp\')">⚡ XP</button>'+
@@ -204,8 +209,8 @@ window.switchTab=function(tab){
 };
 
 function loadAndRenderFort(){
-  loadPlayerData(state.email,function(pRows,aRows){
-    processPlayerData(pRows,aRows);state.fortLoaded=true;updateFAB();
+  loadPlayerData(state.email,function(pRows,aRows,mRows){
+    processPlayerData(pRows,aRows,mRows);state.fortLoaded=true;updateFAB();
     if(state.sheetOpen&&state.activeTab==='fort')document.getElementById('sheet-content').innerHTML=renderFort();
   });
 }
@@ -220,8 +225,8 @@ function init(name,email){
   state.name=name;state.email=email;
   var parts=(name||'').split(' ');
   document.getElementById('sheet-title').textContent='Hey '+parts[0]+'!';
-  loadPlayerData(email,function(pRows,aRows){
-    processPlayerData(pRows,aRows);state.fortLoaded=true;updateFAB();
+  loadPlayerData(email,function(pRows,aRows,mRows){
+    processPlayerData(pRows,aRows,mRows);state.fortLoaded=true;updateFAB();
   });
   updateFABStars(email);
 }
@@ -256,8 +261,8 @@ function tryInit(){
 
 window.addEventListener('t7xpupdate',function(){
   if(!state.email)return;
-  loadPlayerData(state.email,function(pRows,aRows){
-    processPlayerData(pRows,aRows);state.fortLoaded=true;updateFAB();
+  loadPlayerData(state.email,function(pRows,aRows,mRows){
+    processPlayerData(pRows,aRows,mRows);state.fortLoaded=true;updateFAB();
     if(state.sheetOpen&&state.activeTab==='fort')document.getElementById('sheet-content').innerHTML=renderFort();
   });
   if(state.sheetOpen&&state.activeTab==='rang')loadAndRenderRang();

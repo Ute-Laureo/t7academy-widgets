@@ -59,11 +59,11 @@ window.setView=setView;
 function load(){
   var nowMs=Date.now();
 
-  var playersP=fetch(SB_URL+'/rest/v1/players?select=player_name,player_email,total_xp&order=total_xp.desc&limit='+LIMIT,{
+  var playersP=fetch(SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();}).catch(function(){return[];});
 
-  var membersP=fetch(SB_URL+'/rest/v1/members?select=email,bm_joined_at&limit=200',{
+  var membersP=fetch(SB_URL+'/rest/v1/members?select=email,name,bm_joined_at&limit=200',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();}).catch(function(){return[];});
 
@@ -71,15 +71,15 @@ function load(){
     var players=res[0]||[];
     var members=res[1]||[];
 
-    // Build email → bm_joined_at lookup
-    var joinedByEmail={};
+    // player_name is display name — match to members.name
+    var joinedByName={};
     members.forEach(function(m){
-      if(m.email&&m.bm_joined_at)joinedByEmail[m.email]=m.bm_joined_at;
+      if(m.name&&m.bm_joined_at)joinedByName[m.name]=m.bm_joined_at;
     });
 
     allPlayers=players.map(function(p){
       var name=p.player_name||'Unbekannt';
-      var joinedTs=p.player_email?joinedByEmail[p.player_email]||null:null;
+      var joinedTs=joinedByName[name]||null;
       var totalWeeks=joinedTs?Math.floor((nowMs-joinedTs)/(7*86400000)):0;
       return{player_name:name,total_xp:Number(p.total_xp||0),total_weeks:totalWeeks};
     });
