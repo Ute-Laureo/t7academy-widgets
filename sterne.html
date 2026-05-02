@@ -123,12 +123,12 @@ function load(){
 function render(){
   var filtered=currentFilter==='all'?allVideos:allVideos.filter(function(v){return v.stars==currentFilter;});
   if(!filtered.length){document.getElementById('grid').innerHTML='<div class="loading">Keine Videos gefunden.</div>';return;}
+  window._filteredVideos=filtered;
   document.getElementById('grid').innerHTML=filtered.map(function(v,i){
     var diff=diffClass(v.difficulty);
-    var thumb=v.vimeo_code?'https://vumbnail.com/'+v.vimeo_code.split('/')[0]+'.jpg':'';
-    return '<div class="card" onclick="openVideo('+i+'_'+v.id+')" data-id="'+v.id+'">'+
+    return '<div class="card" onclick="openVideo(' + i + ')">'+
       '<div class="card-thumb">'+
-        (thumb?'<img src="'+thumb+'" alt="" onerror="this.style.display=\'none\'">':'<div class="card-thumb-placeholder"><div class="play-icon"></div></div>')+
+        '<div class="card-thumb-placeholder"><div class="play-icon"></div></div>'+
         '<div class="card-stars">'+starsLabel(v.stars)+'</div>'+
         (diff?'<div class="card-diff '+diff+'">'+v.difficulty+'</div>':'')+
       '</div>'+
@@ -138,18 +138,12 @@ function render(){
       '</div>'+
     '</div>';
   }).join('');
-  // store filtered for modal lookup
-  window._filteredVideos=filtered;
 }
-
 window.openVideo=function(idx){
   var v=(window._filteredVideos||allVideos)[idx];
   if(!v)return;
-
   var modal=document.getElementById('modal');
   document.getElementById('modalTitle').textContent=v.title_DE;
-
-  // video embed
   var videoEl=document.getElementById('modalVideo');
   if(v.vimeo_code){
     var parts=v.vimeo_code.split('/');
@@ -159,32 +153,25 @@ window.openVideo=function(idx){
   } else {
     videoEl.style.display='none';
     videoEl.innerHTML='';
-    document.getElementById('modalVideo').insertAdjacentHTML('afterend','<div class="no-video">Kein Video verfügbar</div>');
   }
-
-  // meta tags
   var meta='';
   if(v.stars)meta+='<span class="meta-tag meta-stars">'+starsLabel(v.stars)+' '+v.stars+' Stern'+(v.stars>1?'e':'')+'</span>';
   if(v.category)meta+='<span class="meta-tag meta-cat">'+v.category+'</span>';
   if(v.difficulty)meta+='<span class="meta-tag meta-diff">'+v.difficulty+'</span>';
   document.getElementById('modalMeta').innerHTML=meta;
-
-  // description
   var descEl=document.getElementById('modalDesc');
   if(v.description){
     try{
       var steps=typeof v.description==='string'?JSON.parse(v.description):v.description;
       if(Array.isArray(steps)&&steps.length){
         descEl.innerHTML='<div class="desc-title">Ablauf</div><ul class="desc-list">'+steps.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ul>';
-      } else {descEl.innerHTML='';}
+      }else{descEl.innerHTML='';}
     }catch(e){descEl.innerHTML='';}
-  } else {descEl.innerHTML='';}
-
+  }else{descEl.innerHTML='';}
   modal.classList.add('open');
   modal.scrollTop=0;
   document.body.style.overflow='hidden';
 };
-
 document.getElementById('modalBack').onclick=function(){
   document.getElementById('modal').classList.remove('open');
   document.getElementById('modalVideo').innerHTML='';
