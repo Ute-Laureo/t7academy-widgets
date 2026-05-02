@@ -142,9 +142,8 @@ function render(){
   window._filteredVideos=filtered;
 }
 
-window.openVideo=function(key){
-  var id=key.toString().split('_').slice(1).join('_');
-  var v=(window._filteredVideos||allVideos).find(function(x){return x.id===id;});
+window.openVideo=function(idx){
+  var v=(window._filteredVideos||allVideos)[idx];
   if(!v)return;
 
   var modal=document.getElementById('modal');
