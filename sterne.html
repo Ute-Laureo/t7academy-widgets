@@ -12,15 +12,15 @@
 /* THEMES */
 [data-theme="dark"]{
   --bg:#080f1e;--surface:#0d1528;--surface2:#111c30;
-  --border:rgba(0,229,255,.12);--accent:#00E5FF;--accent-dark:#0080FF;
+  --border:rgba(0,229,255,.12);--accent:#00E5FF;--accent2:#1f80ff;--accent3:#1800ad;
   --text:#e8f4ff;--muted:rgba(232,244,255,.45);
   --nav-bg:#0a1628;--nav-border:rgba(0,229,255,.15);
-  --card-title-bg:#00E5FF;--card-title-text:#080f1e;
+  --card-title-bg:linear-gradient(90deg,#00E5FF,#1f80ff);--card-title-text:#080f1e;
   --search-bg:#0d1528;--btn-ghost-color:rgba(232,244,255,.45);
 }
 [data-theme="light"]{
   --bg:#f0f4f8;--surface:#ffffff;--surface2:#e8eef5;
-  --border:rgba(0,100,180,.15);--accent:#0080FF;--accent-dark:#0055cc;
+  --border:rgba(0,100,180,.15);--accent:#00E5FF;--accent2:#1f80ff;--accent3:#1800ad;
   --text:#0d1528;--muted:rgba(13,21,40,.5);
   --nav-bg:#ffffff;--nav-border:rgba(0,100,180,.15);
   --card-title-bg:#0080FF;--card-title-text:#ffffff;
@@ -31,7 +31,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 
 /* TOP NAV */
 .topnav{
-  position:sticky;top:0;z-index:100;
+  position:sticky;top:0;z-index:300;
   background:var(--nav-bg);
   border-bottom:1px solid var(--nav-border);
   padding:0 20px;height:56px;
@@ -42,29 +42,39 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 .nav-logo img{height:36px;width:auto;}
 .nav-links{display:flex;gap:2px;align-items:center;}
-.nav-link{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;transition:all .15s;}
+.nav-link{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;letter-spacing:.04em;text-decoration:none;transition:all .15s;}
 .nav-link:hover{color:var(--text);background:rgba(128,128,128,.1);}
 .nav-link.active{color:var(--accent);background:rgba(0,229,255,.08);}
 .nav-right{display:flex;align-items:center;gap:8px;}
 .theme-toggle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all .15s;}
 .theme-toggle:hover{color:var(--text);border-color:var(--accent);}
-.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#000;cursor:pointer;}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#1800ad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#000;cursor:pointer;}
 
 /* HERO */
 .hero{
-  position:relative;
-  background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Stars_Hero_Pic.jpg') center/cover no-repeat;
-  padding:40px 20px 32px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  min-height:220px;
   border-bottom:1px solid var(--nav-border);
-  min-height:200px;
-  display:flex;flex-direction:column;justify-content:flex-end;
 }
-.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,15,30,.3) 0%,rgba(8,15,30,.8) 100%);}
-[data-theme="light"] .hero::before{background:linear-gradient(180deg,rgba(8,15,30,.2) 0%,rgba(8,15,30,.65) 100%);}
-.hero-text{position:relative;z-index:1;}
-.hero h1{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:36px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:6px;}
-.hero h1 span{color:var(--accent);}
-.hero p{font-size:13px;color:rgba(255,255,255,.8);line-height:1.6;max-width:520px;}
+.hero-text{
+  background:#00E5FF;
+  padding:36px 28px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.hero h1{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:36px;font-weight:900;color:#000;line-height:1.1;margin-bottom:10px;}
+.hero h1 span{color:#fff;}
+.hero p{font-size:13px;color:rgba(0,0,0,.7);line-height:1.6;}
+.hero-image{
+  background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Stars_Hero_Pic.jpg') center/cover no-repeat;
+}
+@media(max-width:600px){
+  .hero{grid-template-columns:1fr;}
+  .hero-image{height:180px;order:-1;}
+  .hero-text{order:1;}
+}
 
 /* CONTROLS */
 .controls{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;background:var(--surface);}
@@ -105,9 +115,9 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
 
 /* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(4,8,20,.97);overflow-y:auto;padding:20px;}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,8,20,.97);overflow-y:auto;padding:20px;}
 [data-theme="light"] .modal-overlay{background:rgba(240,244,248,.97);}
-.modal-overlay.open{display:block;}
+.modal-overlay.open{display:block;padding-top:76px;}
 .modal-inner{max-width:740px;margin:0 auto;}
 .modal-back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:16px;padding:6px 0;letter-spacing:.05em;text-transform:uppercase;border:none;background:transparent;}
 .modal-back:hover{color:var(--accent);}
@@ -151,8 +161,9 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 <div class="hero">
   <div class="hero-text">
     <h1>Zeige Deine <span>Skills!</span></h1>
-    <p>Schaue dir die Videos genau an. Übe zuerst langsam und dann schnell — immer rechts und links!</p>
+    <p>Schaue dir die Videos genau an. Übe zuerst langsam und dann schnell — immer rechts und links. Sei ehrlich mit Dir und Deiner Community!</p>
   </div>
+  <div class="hero-image"></div>
 </div>
 
 <!-- CONTROLS -->
@@ -192,12 +203,12 @@ var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 // THEME
 var theme=localStorage.getItem('t7_theme')||'dark';
 document.documentElement.setAttribute('data-theme',theme);
-document.getElementById('themeToggle').textContent=theme==='dark'?'🌙':'☀️';
+document.getElementById('themeToggle').innerHTML=theme==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 document.getElementById('themeToggle').onclick=function(){
   theme=theme==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',theme);
   localStorage.setItem('t7_theme',theme);
-  this.textContent=theme==='dark'?'🌙':'☀️';
+  this.innerHTML=theme==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 };
 
 // IDENTITY
