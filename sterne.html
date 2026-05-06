@@ -255,7 +255,8 @@ function render(){
   if(!filtered.length){document.getElementById('grid').innerHTML='<div class="no-results">Keine Videos gefunden.</div>';return;}
   document.getElementById('grid').innerHTML=filtered.map(function(v,i){
     var diff=diffClass(v.difficulty);
-    var thumb=v.vimeo_code?'https://vumbnail.com/'+v.vimeo_code.split('/')[0]+'.jpg':'';
+    var vimeoId=v.vimeo_code?v.vimeo_code.split('/')[0]:'';
+    var thumb=vimeoId?'https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnails/'+vimeoId+'_'+v.title_DE+'.png':'';
     return '<div class="card" onclick="openVideo('+i+')">'+
       '<div class="card-thumb">'+
         (thumb?'<img src="'+thumb+'" alt="" onerror="this.remove()">':'')+
