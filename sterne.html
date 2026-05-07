@@ -15,7 +15,7 @@
   --border:rgba(0,229,255,.12);--accent:#00E5FF;--accent2:#1f80ff;--accent3:#1800ad;
   --text:#e8f4ff;--muted:rgba(232,244,255,.45);
   --nav-bg:#0a1628;--nav-border:rgba(0,229,255,.15);
-  --card-title-bg:linear-gradient(90deg,#00E5FF,#1f80ff);--card-title-text:#080f1e;
+  --card-title-bg:#111c30;--card-title-text:#00E5FF;
   --search-bg:#1a2640;--btn-ghost-color:rgba(232,244,255,.45);
 }
 [data-theme="light"]{
@@ -97,7 +97,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .grid{padding:16px;}
 .star-group{margin-bottom:28px;}
 .star-group-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:18px;font-weight:900;color:var(--text);padding:10px 0 12px;border-bottom:2px solid var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
 .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
 .card-thumb{position:relative;aspect-ratio:16/9;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
@@ -111,8 +111,8 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .card-diff.hard{background:rgba(255,59,59,.12);color:#FF6B6B;border:1px solid rgba(255,59,59,.2);}
 .card-title-bar{background:var(--card-title-bg);padding:8px 12px;}
 .card-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:14px;font-weight:900;color:var(--card-title-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.card-cat{font-size:9px;color:rgba(8,15,30,.6);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
-[data-theme="light"] .card-cat{color:rgba(255,255,255,.7);}
+.card-cat{font-size:9px;color:rgba(0,229,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+[data-theme="light"] .card-cat{color:rgba(0,229,255,.7);}
 
 .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:13px;}
 .no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
