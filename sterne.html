@@ -97,7 +97,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .grid{padding:16px;}
 .star-group{margin-bottom:28px;}
 .star-group-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:18px;font-weight:900;color:var(--text);padding:10px 0 12px;border-bottom:2px solid var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
 .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
 .card-thumb{position:relative;aspect-ratio:16/9;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
@@ -239,10 +239,18 @@ var currentSearch='';
 var thumbnailIndex={};
 
 // Load thumbnail index first, then videos
-fetch('https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnail_index.json')
+fetch('https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnail_index.json?v='+Date.now())
   .then(function(r){return r.json();})
-  .then(function(idx){thumbnailIndex=idx;load();})
-  .catch(function(){load();});
+  .then(function(idx){
+    thumbnailIndex=idx;
+    console.log('Thumbnail index loaded:',Object.keys(idx).length,'entries');
+    console.log('Sample:',JSON.stringify(idx).slice(0,200));
+    load();
+  })
+  .catch(function(e){
+    console.error('Thumbnail index failed:',e);
+    load();
+  });
 
 function diffClass(d){return d==='Einfach'?'easy':d==='Mittel'?'medium':d==='Schwierig'?'hard':'';}
 function starsLabel(n){return Array(n+1).join('⭐');}
