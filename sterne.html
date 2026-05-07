@@ -16,7 +16,7 @@
   --text:#e8f4ff;--muted:rgba(232,244,255,.45);
   --nav-bg:#0a1628;--nav-border:rgba(0,229,255,.15);
   --card-title-bg:linear-gradient(90deg,#00E5FF,#1f80ff);--card-title-text:#080f1e;
-  --search-bg:#0d1528;--btn-ghost-color:rgba(232,244,255,.45);
+  --search-bg:#1a2640;--btn-ghost-color:rgba(232,244,255,.45);
 }
 [data-theme="light"]{
   --bg:#f0f4f8;--surface:#ffffff;--surface2:#e8eef5;
@@ -81,12 +81,12 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .search-wrap{position:relative;}
 .search-wrap input{
   width:100%;padding:9px 16px 9px 38px;
-  background:var(--search-bg);border:1px solid var(--border);
+  background:var(--search-bg);border:1.5px solid rgba(0,229,255,.35);
   border-radius:10px;color:var(--text);
   font-family:'Open Sans',sans-serif;font-size:13px;outline:none;transition:border .15s;
 }
 .search-wrap input:focus{border-color:var(--accent);}
-.search-wrap input::placeholder{color:var(--muted);}
+.search-wrap input::placeholder{color:rgba(232,244,255,.6);}
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
 .filter-bar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
 .filter-bar::-webkit-scrollbar{display:none;}
@@ -94,7 +94,10 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .filter-btn.active,.filter-btn:hover{background:rgba(0,150,255,.1);border-color:var(--accent);color:var(--accent);}
 
 /* GRID */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;padding:16px;}
+.grid{padding:16px;}
+.star-group{margin-bottom:28px;}
+.star-group-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:18px;font-weight:900;color:var(--text);padding:10px 0 12px;border-bottom:2px solid var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
 .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
 .card-thumb{position:relative;aspect-ratio:16/9;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
@@ -235,11 +238,11 @@ var currentFilter='all';
 var currentSearch='';
 var thumbnailIndex={};
 
-// Load thumbnail index
+// Load thumbnail index first, then videos
 fetch('https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnail_index.json')
   .then(function(r){return r.json();})
-  .then(function(idx){thumbnailIndex=idx;})
-  .catch(function(){});
+  .then(function(idx){thumbnailIndex=idx;load();})
+  .catch(function(){load();});
 
 function diffClass(d){return d==='Einfach'?'easy':d==='Mittel'?'medium':d==='Schwierig'?'hard':'';}
 function starsLabel(n){return Array(n+1).join('⭐');}
@@ -328,7 +331,7 @@ document.getElementById('searchInput').addEventListener('input',function(){
   currentSearch=this.value;render();
 });
 
-load();
+// load() called after thumbnail index
 </script>
 </body>
 </html>
