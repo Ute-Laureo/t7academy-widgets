@@ -276,7 +276,8 @@ function render(){
     var vimeoId=v.vimeo_code?v.vimeo_code.split('/')[0]:'';
     var thumb='';
     var baseUrl='https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnails/';
-    var thumbUrl=vimeoId?baseUrl+vimeoId+'_':'' ;
+    var thumbFile=vimeoId&&thumbnailIndex[vimeoId]?thumbnailIndex[vimeoId]:'';
+    var thumbUrl=thumbFile?baseUrl+thumbFile.replace(/ /g,'%20'):'';
     return '<div class="card" onclick="openVideo('+i+')">'+ 
       '<div class="card-thumb">'+
         (thumbUrl?'<img src="'+thumbUrl+'" alt="" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.remove()">':'')+
