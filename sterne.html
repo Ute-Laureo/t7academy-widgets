@@ -34,18 +34,25 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   position:sticky;top:0;z-index:300;
   background:var(--nav-bg);
   border-bottom:1px solid var(--nav-border);
-  padding:0 20px;height:56px;
+  padding:0 20px;
   display:flex;align-items:center;justify-content:space-between;
-  gap:12px;
+  flex-wrap:wrap;
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
 }
 .nav-logo img{height:36px;width:auto;}
-.nav-links{display:flex;gap:2px;align-items:center;}
+.nav-links{display:flex;gap:2px;align-items:center;flex-wrap:wrap;}
 .nav-link{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;letter-spacing:.04em;text-decoration:none;transition:all .15s;}
 .nav-link:hover{color:var(--text);background:rgba(128,128,128,.1);}
 .nav-link.active{color:var(--accent);background:rgba(0,229,255,.08);}
 .nav-right{display:flex;align-items:center;gap:8px;}
+/* Mobile nav: logo+icons on top row, links wrap below */
+@media(max-width:520px){
+  .topnav{padding:0 16px;}
+  .nav-logo,.nav-right{height:52px;display:flex;align-items:center;}
+  .nav-links{width:100%;padding:4px 0 8px;border-top:1px solid var(--nav-border);}
+  .nav-link{font-size:11px;padding:5px 10px;}
+}
 .theme-toggle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all .15s;}
 .theme-toggle:hover{color:var(--text);border-color:var(--accent);}
 .nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#1800ad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#000;cursor:pointer;}
@@ -89,16 +96,27 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .search-wrap input:focus{border-color:var(--accent);}
 .search-wrap input::placeholder{color:rgba(232,244,255,.6);}
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
-.filter-bar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
-.filter-bar::-webkit-scrollbar{display:none;}
-.filter-btn{padding:6px 16px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Open Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;}
-.filter-btn.active,.filter-btn:hover{background:rgba(0,150,255,.1);border-color:var(--accent);color:var(--accent);}
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;}
+.filter-btn,.filter-btn2,.filter-btn3{
+  padding:6px 14px;border-radius:99px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);
+  font-family:'Open Sans',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:all .15s;
+}
+.filter-btn.active,.filter-btn:hover,
+.filter-btn2.active,.filter-btn2:hover,
+.filter-btn3.active,.filter-btn3:hover{
+  background:rgba(0,150,255,.1);border-color:var(--accent);color:var(--accent);
+}
+@media(max-width:480px){
+  .filter-btn,.filter-btn2,.filter-btn3{font-size:11px;padding:5px 10px;}
+}
 
 /* GRID */
 .grid{padding:16px;}
 .star-group{margin-bottom:28px;}
 .star-group-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:18px;font-weight:900;color:var(--text);padding:10px 0 12px;border-bottom:2px solid var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:10px;}
+.star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
 .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
 .card-thumb{position:relative;width:100%;aspect-ratio:16/9;background:var(--surface2);overflow:hidden;}
@@ -120,7 +138,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .card-action-btn:hover{color:var(--accent);background:rgba(0,229,255,.05);}
 .card-action-btn:first-child{border-right:1px solid var(--border);}
 .card-action-btn.liked{color:#ff6b6b;}
-.card-action-btn.reminded{color:#00C864;}
+.card-action-btn.vorgemerkt{color:#00C864;}
 [data-theme="light"] .card-cat{color:rgba(0,229,255,.7);}
 
 .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:13px;}
@@ -192,6 +210,28 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
     <button class="filter-btn" data-stars="4">⭐⭐⭐⭐ 4 Sterne</button>
     <button class="filter-btn" data-stars="5">⭐⭐⭐⭐⭐ 5 Sterne</button>
   </div>
+  <div class="filter-bar" id="filterBar2">
+    <button class="filter-btn2 active" data-diff="all">Alle Level</button>
+    <button class="filter-btn2" data-diff="Einfach">🟢 Einfach</button>
+    <button class="filter-btn2" data-diff="Mittel">🟡 Mittel</button>
+    <button class="filter-btn2" data-diff="Schwierig">🔴 Schwierig</button>
+    <button class="filter-btn2" data-diff="liked">❤️ Liked</button>
+    <button class="filter-btn2" data-diff="vorgemerkt">🔔 Vorgemerkt</button>
+  </div>
+  <div class="filter-bar" id="filterBar3">
+    <button class="filter-btn3 active" data-cat="all">Alle Kategorien</button>
+    <button class="filter-btn3" data-cat="Grundlage">Grundlage</button>
+    <button class="filter-btn3" data-cat="Sitdown">Sitdown</button>
+    <button class="filter-btn3" data-cat="Finte">Finte</button>
+    <button class="filter-btn3" data-cat="Lowers">Lowers</button>
+    <button class="filter-btn3" data-cat="Jonglieren">Jonglieren</button>
+    <button class="filter-btn3" data-cat="Uppers">Uppers</button>
+    <button class="filter-btn3" data-cat="Profitrick">Profitrick</button>
+    <button class="filter-btn3" data-cat="Ballannahme">Ballannahme</button>
+    <button class="filter-btn3" data-cat="Ballmitnahme">Ballmitnahme</button>
+    <button class="filter-btn3" data-cat="Passtechnik">Passtechnik</button>
+    <button class="filter-btn3" data-cat="Schusstechnik">Schusstechnik</button>
+  </div>
 </div>
 
 <!-- GRID -->
@@ -228,6 +268,8 @@ document.getElementById('themeToggle').onclick=function(){
 // VIDEOS
 var allVideos=[];
 var currentFilter='all';
+var currentDiff='all';
+var currentCat='all';
 var currentSearch='';
 var thumbnailIndex={};
 
@@ -257,7 +299,7 @@ function load(){
 }
 
 var likedVideos=JSON.parse(localStorage.getItem('t7_liked')||'{}');
-var remindVideos=JSON.parse(localStorage.getItem('t7_remind')||'{}');
+var vorgemerkteVideos=JSON.parse(localStorage.getItem('t7_vormerken')||'{}');
 
 window.toggleLike=function(id){
   likedVideos[id]=!likedVideos[id];
@@ -266,17 +308,21 @@ window.toggleLike=function(id){
   var btn=document.querySelector('#card-'+id+' .card-action-btn:first-child');
   if(btn){btn.className='card-action-btn'+(likedVideos[id]?' liked':'');btn.innerHTML=(likedVideos[id]?'❤️':'🤍')+' Like';}
 };
-window.toggleRemind=function(id){
-  remindVideos[id]=!remindVideos[id];
-  if(!remindVideos[id])delete remindVideos[id];
-  localStorage.setItem('t7_remind',JSON.stringify(remindVideos));
+window.toggleVormerken=function(id){
+  vorgemerkteVideos[id]=!vorgemerkteVideos[id];
+  if(!vorgemerkteVideos[id])delete vorgemerkteVideos[id];
+  localStorage.setItem('t7_vormerken',JSON.stringify(vorgemerkteVideos));
   var btn=document.querySelector('#card-'+id+' .card-action-btn:last-child');
-  if(btn){btn.className='card-action-btn'+(remindVideos[id]?' reminded':'');btn.innerHTML=(remindVideos[id]?'✅':'🔔')+' Trainieren';}
+  if(btn){btn.className='card-action-btn'+(vorgemerkteVideos[id]?' vorgemerkt':'');btn.innerHTML=(vorgemerkteVideos[id]?'✅':'🔔')+' Vormerken';}
 };
 
 function render(){
   var filtered=allVideos.filter(function(v){
     if(currentFilter!=='all'&&v.stars!=currentFilter)return false;
+    if(currentDiff==='liked'&&!likedVideos[v.id])return false;
+    if(currentDiff==='vorgemerkt'&&!vorgemerkteVideos[v.id])return false;
+    if(currentDiff!=='all'&&currentDiff!=='liked'&&currentDiff!=='vorgemerkt'&&v.difficulty!==currentDiff)return false;
+    if(currentCat!=='all'&&v.category!==currentCat)return false;
     if(currentSearch&&v.title_DE.toLowerCase().indexOf(currentSearch.toLowerCase())<0)return false;
     return true;
   });
@@ -289,7 +335,7 @@ function render(){
     var thumbFile=vimeoId&&thumbnailIndex[vimeoId]?thumbnailIndex[vimeoId]:'';
     var thumbUrl=thumbFile?'https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnails/'+thumbFile.replace(/ /g,'%20'):'';
     var liked=likedVideos[v.id]?true:false;
-    var reminded=remindVideos[v.id]?true:false;
+    var vorgemerkt=vorgemerkteVideos[v.id]?true:false;
     return '<div class="card" id="card-'+v.id+'">'+
       '<div class="card-thumb" onclick="openVideo('+i+')">'+
         (thumbUrl?'<img src="'+thumbUrl+'" alt="" onerror="this.remove()">':'')+
@@ -309,8 +355,8 @@ function render(){
         '<button class="card-action-btn'+(liked?' liked':'')+'" onclick="toggleLike(\''+v.id+'\')">'+
           (liked?'❤️':'🤍')+' Like'+
         '</button>'+
-        '<button class="card-action-btn'+(reminded?' reminded':'')+'" onclick="toggleRemind(\''+v.id+'\')">'+
-          (reminded?'✅':'🔔')+' Trainieren'+
+        '<button class="card-action-btn'+(vorgemerkt?' vorgemerkt':'')+'" onclick="toggleVormerken(\''+v.id+'\')">'+
+          (vorgemerkt?'✅':'🔔')+' Vormerken'+
         '</button>'+
       '</div>'+
     '</div>';
@@ -370,6 +416,22 @@ document.getElementById('filterBar').onclick=function(e){
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   currentFilter=btn.dataset.stars;
+  render();
+};
+document.getElementById('filterBar2').onclick=function(e){
+  var btn=e.target.closest('.filter-btn2');
+  if(!btn)return;
+  document.querySelectorAll('.filter-btn2').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  currentDiff=btn.dataset.diff;
+  render();
+};
+document.getElementById('filterBar3').onclick=function(e){
+  var btn=e.target.closest('.filter-btn3');
+  if(!btn)return;
+  document.querySelectorAll('.filter-btn3').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  currentCat=btn.dataset.cat;
   render();
 };
 document.getElementById('searchInput').addEventListener('input',function(){
