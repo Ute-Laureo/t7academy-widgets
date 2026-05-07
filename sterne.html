@@ -223,23 +223,7 @@ document.getElementById('themeToggle').onclick=function(){
   this.innerHTML=theme==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 };
 
-// IDENTITY
-function getBMEmail(){
-  var wins=[window];
-  try{if(window.parent&&window.parent!==window)wins.push(window.parent);}catch(e){}
-  try{if(window.top&&window.top!==window)wins.push(window.top);}catch(e){}
-  for(var i=0;i<wins.length;i++){
-    try{
-      var w=wins[i],bm=w.__BM_DATA__;
-      if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email)return bm.intercom.bootProps.email;
-      if(w.intercomSettings&&w.intercomSettings.email)return w.intercomSettings.email;
-      if(bm&&bm.accessToken){try{var pl=JSON.parse(atob(bm.accessToken.split('.')[1]));if(pl&&pl.id&&pl.tokenType==='USER'){var av=document.getElementById('navAvatar');if(av)av.textContent=pl.id.slice(0,2).toUpperCase();}}catch(e){}}
-    }catch(e){}
-  }
-  return null;
-}
-var email=getBMEmail()||localStorage.getItem('t7_player_identity');
-if(email){var av=document.getElementById('navAvatar');if(av)av.textContent=(email.slice(0,2)).toUpperCase();}
+// Identity handled by WordPress
 
 // VIDEOS
 var allVideos=[];
