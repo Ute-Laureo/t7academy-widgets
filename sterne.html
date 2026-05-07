@@ -233,6 +233,13 @@ if(email){var av=document.getElementById('navAvatar');if(av)av.textContent=(emai
 var allVideos=[];
 var currentFilter='all';
 var currentSearch='';
+var thumbnailIndex={};
+
+// Load thumbnail index
+fetch('https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnail_index.json')
+  .then(function(r){return r.json();})
+  .then(function(idx){thumbnailIndex=idx;})
+  .catch(function(){});
 
 function diffClass(d){return d==='Einfach'?'easy':d==='Mittel'?'medium':d==='Schwierig'?'hard':'';}
 function starsLabel(n){return Array(n+1).join('⭐');}
@@ -256,10 +263,12 @@ function render(){
   document.getElementById('grid').innerHTML=filtered.map(function(v,i){
     var diff=diffClass(v.difficulty);
     var vimeoId=v.vimeo_code?v.vimeo_code.split('/')[0]:'';
-    var thumb=vimeoId?'https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnails/'+vimeoId+'_'+v.title_DE+'.png':'';
-    return '<div class="card" onclick="openVideo('+i+')">'+
+    var thumb='';
+    var baseUrl='https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnails/';
+    var thumbUrl=vimeoId?baseUrl+vimeoId+'_':'' ;
+    return '<div class="card" onclick="openVideo('+i+')">'+ 
       '<div class="card-thumb">'+
-        (thumb?'<img src="'+thumb+'" alt="" onerror="this.remove()">':'')+
+        (thumbUrl?'<img src="'+thumbUrl+'" alt="" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.remove()">':'')+
         '<div class="play-icon"></div>'+
         '<div class="card-stars">'+starsLabel(v.stars)+'</div>'+
         (diff?'<div class="card-diff '+diff+'">'+v.difficulty+'</div>':'')+
