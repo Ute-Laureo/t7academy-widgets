@@ -34,22 +34,23 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   position:sticky;top:0;z-index:300;
   background:var(--nav-bg);
   border-bottom:1px solid var(--nav-border);
-  padding:0 20px;
+  padding:0 24px;
+  min-height:72px;
   display:flex;align-items:center;justify-content:space-between;
   flex-wrap:wrap;
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
 }
-.nav-logo img{height:36px;width:auto;}
-.nav-links{display:flex;gap:2px;align-items:center;flex-wrap:wrap;}
-.nav-link{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;letter-spacing:.04em;text-decoration:none;transition:all .15s;}
+.nav-logo img{height:48px;width:auto;}
+.nav-links{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.nav-link{padding:10px 18px;border-radius:8px;font-size:15px;font-weight:700;font-family:'Garet W05 Bold','Open Sans',sans-serif;color:var(--muted);cursor:pointer;letter-spacing:.04em;text-decoration:none;transition:all .15s;}
 .nav-link:hover{color:var(--text);background:rgba(128,128,128,.1);}
 .nav-link.active{color:var(--accent);background:rgba(0,229,255,.08);}
-.nav-right{display:flex;align-items:center;gap:8px;}
+.nav-right{display:flex;align-items:center;gap:10px;}
 /* Mobile nav: logo+icons on top row, links wrap below */
 @media(max-width:520px){
   .topnav{padding:0 16px;}
-  .nav-logo,.nav-right{height:52px;display:flex;align-items:center;}
+  .nav-logo,.nav-right{height:64px;display:flex;align-items:center;}
   .nav-links{width:100%;padding:4px 0 8px;border-top:1px solid var(--nav-border);}
   .nav-link{font-size:11px;padding:5px 10px;}
 }
@@ -73,7 +74,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 .hero h1{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:36px;font-weight:900;color:#000;line-height:1.1;margin-bottom:10px;}
 .hero h1 span{color:#fff;}
-.hero p{font-size:13px;color:rgba(0,0,0,.7);line-height:1.6;}
+.hero p{font-size:16px;color:rgba(0,0,0,.7);line-height:1.6;}
 .hero-image{
   background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Stars_Hero_Pic.jpg') center/cover no-repeat;
 }
@@ -89,27 +90,53 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .search-wrap{position:relative;}
 .search-wrap input{
   width:100%;padding:9px 16px 9px 38px;
-  background:var(--search-bg);border:1.5px solid rgba(0,229,255,.35);
-  border-radius:10px;color:var(--text);
-  font-family:'Open Sans',sans-serif;font-size:13px;outline:none;transition:border .15s;
+  background:transparent;border:1px solid var(--border);
+  border-radius:99px;color:var(--text);
+  font-family:'Open Sans',sans-serif;font-size:12px;font-weight:700;outline:none;transition:border .15s;
 }
 .search-wrap input:focus{border-color:var(--accent);}
-.search-wrap input::placeholder{color:rgba(232,244,255,.6);}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
-.filter-bar{display:flex;gap:6px;flex-wrap:wrap;}
-.filter-btn,.filter-btn2,.filter-btn3{
-  padding:6px 14px;border-radius:99px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);
-  font-family:'Open Sans',sans-serif;font-size:12px;font-weight:700;
-  cursor:pointer;white-space:nowrap;transition:all .15s;
+.search-wrap input::placeholder{color:var(--muted);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none;}
+/* PILL DROPDOWNS */
+.pill-filters{display:flex;gap:8px;flex-wrap:wrap;}
+.pill-wrap{position:relative;}
+.pill-toggle{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:99px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-family:'Open Sans',sans-serif;
+  font-size:12px;font-weight:700;cursor:pointer;
+  white-space:nowrap;transition:all .15s;
 }
-.filter-btn.active,.filter-btn:hover,
-.filter-btn2.active,.filter-btn2:hover,
-.filter-btn3.active,.filter-btn3:hover{
-  background:rgba(0,150,255,.1);border-color:var(--accent);color:var(--accent);
+.pill-toggle:hover{border-color:var(--accent);color:var(--accent);}
+.pill-toggle.has-active{background:rgba(0,150,255,.1);border-color:var(--accent);color:var(--accent);}
+.pill-arrow{
+  display:inline-block;width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-top:7px solid currentColor;
+  transition:transform .2s;
+  flex-shrink:0;
 }
+.pill-wrap.open .pill-arrow{transform:rotate(180deg);}
+.pill-dropdown{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:8px;z-index:100;
+  min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.3);
+}
+.pill-wrap.open .pill-dropdown{display:flex;flex-direction:column;gap:2px;}
+.pill-option{
+  padding:7px 12px;border-radius:8px;border:none;background:transparent;
+  color:var(--muted);font-family:'Open Sans',sans-serif;
+  font-size:12px;font-weight:700;cursor:pointer;text-align:left;
+  white-space:nowrap;transition:all .15s;
+}
+.pill-option:hover{background:rgba(0,229,255,.07);color:var(--text);}
+.pill-option.active{background:rgba(0,150,255,.12);color:var(--accent);}
+.pill-divider{height:1px;background:var(--border);margin:4px 2px;}
 @media(max-width:480px){
-  .filter-btn,.filter-btn2,.filter-btn3{font-size:11px;padding:5px 10px;}
+  .pill-toggle{font-size:11px;padding:6px 11px;}
 }
 
 /* GRID */
@@ -199,38 +226,56 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 <!-- CONTROLS -->
 <div class="controls">
   <div class="search-wrap">
-    <span class="search-icon">🔍</span>
+    <span class="search-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
     <input type="text" id="searchInput" placeholder="Suche Dein Sterne-Video…">
   </div>
-  <div class="filter-bar" id="filterBar">
-    <button class="filter-btn active" data-stars="all">Alle</button>
-    <button class="filter-btn" data-stars="1">⭐ 1 Stern</button>
-    <button class="filter-btn" data-stars="2">⭐⭐ 2 Sterne</button>
-    <button class="filter-btn" data-stars="3">⭐⭐⭐ 3 Sterne</button>
-    <button class="filter-btn" data-stars="4">⭐⭐⭐⭐ 4 Sterne</button>
-    <button class="filter-btn" data-stars="5">⭐⭐⭐⭐⭐ 5 Sterne</button>
-  </div>
-  <div class="filter-bar" id="filterBar2">
-    <button class="filter-btn2 active" data-diff="all">Alle Level</button>
-    <button class="filter-btn2" data-diff="Einfach">🟢 Einfach</button>
-    <button class="filter-btn2" data-diff="Mittel">🟡 Mittel</button>
-    <button class="filter-btn2" data-diff="Schwierig">🔴 Schwierig</button>
-    <button class="filter-btn2" data-diff="liked">❤️ Liked</button>
-    <button class="filter-btn2" data-diff="vorgemerkt">🔔 Vorgemerkt</button>
-  </div>
-  <div class="filter-bar" id="filterBar3">
-    <button class="filter-btn3 active" data-cat="all">Alle Kategorien</button>
-    <button class="filter-btn3" data-cat="Grundlage">Grundlage</button>
-    <button class="filter-btn3" data-cat="Sitdown">Sitdown</button>
-    <button class="filter-btn3" data-cat="Finte">Finte</button>
-    <button class="filter-btn3" data-cat="Lowers">Lowers</button>
-    <button class="filter-btn3" data-cat="Jonglieren">Jonglieren</button>
-    <button class="filter-btn3" data-cat="Uppers">Uppers</button>
-    <button class="filter-btn3" data-cat="Profitrick">Profitrick</button>
-    <button class="filter-btn3" data-cat="Ballannahme">Ballannahme</button>
-    <button class="filter-btn3" data-cat="Ballmitnahme">Ballmitnahme</button>
-    <button class="filter-btn3" data-cat="Passtechnik">Passtechnik</button>
-    <button class="filter-btn3" data-cat="Schusstechnik">Schusstechnik</button>
+  <div class="pill-filters">
+    <!-- Pill 1: Schwierigkeitsgrad (Stars + Difficulty) -->
+    <div class="pill-wrap" id="pillWrap1">
+      <button class="pill-toggle" id="pillToggle1">Schwierigkeitsgrad<span class="pill-arrow"></span></button>
+      <div class="pill-dropdown" id="pillDrop1">
+        <button class="pill-option active" data-stars="all" data-diff="all">Alle</button>
+        <div class="pill-divider"></div>
+        <button class="pill-option" data-stars="1" data-diff="all">⭐ 1 Stern</button>
+        <button class="pill-option" data-stars="2" data-diff="all">⭐⭐ 2 Sterne</button>
+        <button class="pill-option" data-stars="3" data-diff="all">⭐⭐⭐ 3 Sterne</button>
+        <button class="pill-option" data-stars="4" data-diff="all">⭐⭐⭐⭐ 4 Sterne</button>
+        <button class="pill-option" data-stars="5" data-diff="all">⭐⭐⭐⭐⭐ 5 Sterne</button>
+        <div class="pill-divider"></div>
+        <button class="pill-option" data-stars="all" data-diff="Einfach">🟢 Einfach</button>
+        <button class="pill-option" data-stars="all" data-diff="Mittel">🟡 Mittel</button>
+        <button class="pill-option" data-stars="all" data-diff="Schwierig">🔴 Schwierig</button>
+      </div>
+    </div>
+    <!-- Pill 2: Kategorien -->
+    <div class="pill-wrap" id="pillWrap2">
+      <button class="pill-toggle" id="pillToggle2">Kategorien<span class="pill-arrow"></span></button>
+      <div class="pill-dropdown" id="pillDrop2">
+        <button class="pill-option active" data-cat="all">Alle Kategorien</button>
+        <div class="pill-divider"></div>
+        <button class="pill-option" data-cat="Grundlage">Grundlage</button>
+        <button class="pill-option" data-cat="Sitdown">Sitdown</button>
+        <button class="pill-option" data-cat="Finte">Finte</button>
+        <button class="pill-option" data-cat="Lowers">Lowers</button>
+        <button class="pill-option" data-cat="Jonglieren">Jonglieren</button>
+        <button class="pill-option" data-cat="Uppers">Uppers</button>
+        <button class="pill-option" data-cat="Profitrick">Profitrick</button>
+        <button class="pill-option" data-cat="Ballannahme">Ballannahme</button>
+        <button class="pill-option" data-cat="Ballmitnahme">Ballmitnahme</button>
+        <button class="pill-option" data-cat="Passtechnik">Passtechnik</button>
+        <button class="pill-option" data-cat="Schusstechnik">Schusstechnik</button>
+      </div>
+    </div>
+    <!-- Pill 3: Persönliche Filter -->
+    <div class="pill-wrap" id="pillWrap3">
+      <button class="pill-toggle" id="pillToggle3">Persönliche Filter<span class="pill-arrow"></span></button>
+      <div class="pill-dropdown" id="pillDrop3">
+        <button class="pill-option active" data-personal="all">Alle</button>
+        <div class="pill-divider"></div>
+        <button class="pill-option" data-personal="liked">❤️ Liked</button>
+        <button class="pill-option" data-personal="vorgemerkt">🔔 Vorgemerkt</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -249,6 +294,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 </div>
 
 <script>
+(function(){
 var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 
@@ -267,9 +313,6 @@ document.getElementById('themeToggle').onclick=function(){
 
 // VIDEOS
 var allVideos=[];
-var currentFilter='all';
-var currentDiff='all';
-var currentCat='all';
 var currentSearch='';
 var thumbnailIndex={};
 
@@ -294,7 +337,7 @@ function load(){
   fetch(SB_URL+'/rest/v1/videos?stars=not.is.null&select=id,title_DE,vimeo_code,stars,category,difficulty,description&order=stars.asc,nr.asc',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();})
-  .then(function(rows){allVideos=rows||[];render();})
+  .then(function(rows){allVideos=rows||[];updateAvailableOptions();render();})
   .catch(function(){document.getElementById('grid').innerHTML='<div class="loading">Fehler beim Laden.</div>';});
 }
 
@@ -319,9 +362,9 @@ window.toggleVormerken=function(id){
 function render(){
   var filtered=allVideos.filter(function(v){
     if(currentFilter!=='all'&&v.stars!=currentFilter)return false;
-    if(currentDiff==='liked'&&!likedVideos[v.id])return false;
-    if(currentDiff==='vorgemerkt'&&!vorgemerkteVideos[v.id])return false;
-    if(currentDiff!=='all'&&currentDiff!=='liked'&&currentDiff!=='vorgemerkt'&&v.difficulty!==currentDiff)return false;
+    if(currentDiff!=='all'&&v.difficulty!==currentDiff)return false;
+    if(currentPersonal==='liked'&&!likedVideos[v.id])return false;
+    if(currentPersonal==='vorgemerkt'&&!vorgemerkteVideos[v.id])return false;
     if(currentCat!=='all'&&v.category!==currentCat)return false;
     if(currentSearch&&v.title_DE.toLowerCase().indexOf(currentSearch.toLowerCase())<0)return false;
     return true;
@@ -375,6 +418,112 @@ function render(){
   document.getElementById('grid').innerHTML=html;
 }
 
+// Hide filter options that have no matching videos (except personal filters)
+function updateAvailableOptions(){
+  var stars=allVideos.map(function(v){return v.stars;});
+  var diffs=allVideos.map(function(v){return v.difficulty;});
+  var cats=allVideos.map(function(v){return v.category;});
+
+  document.querySelectorAll('#pillDrop1 .pill-option[data-stars]').forEach(function(btn){
+    var s=btn.dataset.stars;
+    var d=btn.dataset.diff;
+    if(s==='all'&&d==='all')return; // always show "Alle"
+    var hasMatch;
+    if(s!=='all'&&d==='all') hasMatch=stars.indexOf(parseInt(s))>=0;
+    else if(s==='all'&&d!=='all') hasMatch=diffs.indexOf(d)>=0;
+    else hasMatch=false;
+    btn.style.display=hasMatch?'':'none';
+    // hide divider if all options in a group are hidden
+  });
+  document.querySelectorAll('#pillDrop2 .pill-option[data-cat]').forEach(function(btn){
+    var c=btn.dataset.cat;
+    if(c==='all')return;
+    btn.style.display=cats.indexOf(c)>=0?'':'none';
+  });
+  // hide dividers if all siblings below them are hidden
+  document.querySelectorAll('.pill-dropdown').forEach(function(drop){
+    drop.querySelectorAll('.pill-divider').forEach(function(div){
+      var next=div.nextElementSibling;
+      var allHidden=true;
+      while(next&&!next.classList.contains('pill-divider')){
+        if(next.style.display!=='none'){allHidden=false;break;}
+        next=next.nextElementSibling;
+      }
+      div.style.display=allHidden?'none':'';
+    });
+  });
+}
+
+// PILL DROPDOWN INTERACTIONS
+var currentFilter='all';
+var currentDiff='all';
+var currentCat='all';
+var currentPersonal='all';
+
+function setPillLabel(toggleId,label,isDefault){
+  var t=document.getElementById(toggleId);
+  t.innerHTML=label+' <span class="pill-arrow"></span>';
+  t.classList.toggle('has-active',!isDefault);
+}
+
+function closePills(){
+  document.querySelectorAll('.pill-wrap').forEach(function(w){w.classList.remove('open');});
+}
+
+document.querySelectorAll('.pill-wrap').forEach(function(wrap){
+  wrap.querySelector('.pill-toggle').addEventListener('click',function(e){
+    e.stopPropagation();
+    var wasOpen=wrap.classList.contains('open');
+    closePills();
+    if(!wasOpen)wrap.classList.add('open');
+  });
+});
+document.addEventListener('click',function(){closePills();});
+document.querySelectorAll('.pill-dropdown').forEach(function(d){
+  d.addEventListener('click',function(e){e.stopPropagation();});
+});
+
+// Pill 1: Schwierigkeitsgrad
+document.getElementById('pillDrop1').addEventListener('click',function(e){
+  var btn=e.target.closest('.pill-option');
+  if(!btn)return;
+  document.querySelectorAll('#pillDrop1 .pill-option').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  currentFilter=btn.dataset.stars;
+  currentDiff=btn.dataset.diff;
+  var isDefault=currentFilter==='all'&&currentDiff==='all';
+  setPillLabel('pillToggle1',isDefault?'Schwierigkeitsgrad':btn.textContent.replace('▾','').trim(),isDefault);
+  closePills();render();
+});
+
+// Pill 2: Kategorien
+document.getElementById('pillDrop2').addEventListener('click',function(e){
+  var btn=e.target.closest('.pill-option');
+  if(!btn)return;
+  document.querySelectorAll('#pillDrop2 .pill-option').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  currentCat=btn.dataset.cat;
+  var isDefault=currentCat==='all';
+  setPillLabel('pillToggle2',isDefault?'Kategorien':btn.textContent.trim(),isDefault);
+  closePills();render();
+});
+
+// Pill 3: Persönliche Filter
+document.getElementById('pillDrop3').addEventListener('click',function(e){
+  var btn=e.target.closest('.pill-option');
+  if(!btn)return;
+  document.querySelectorAll('#pillDrop3 .pill-option').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  currentPersonal=btn.dataset.personal;
+  var isDefault=currentPersonal==='all';
+  setPillLabel('pillToggle3',isDefault?'Persönliche Filter':btn.textContent.trim(),isDefault);
+  closePills();render();
+});
+
+document.getElementById('searchInput').addEventListener('input',function(){
+  currentSearch=this.value;render();
+});
+
 window.openVideo=function(idx){
   var v=(window._filteredVideos||allVideos)[idx];
   if(!v)return;
@@ -410,35 +559,8 @@ document.getElementById('modalBack').onclick=function(){
   document.getElementById('modalVideo').innerHTML='';
   document.body.style.overflow='';
 };
-document.getElementById('filterBar').onclick=function(e){
-  var btn=e.target.closest('.filter-btn');
-  if(!btn)return;
-  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  currentFilter=btn.dataset.stars;
-  render();
-};
-document.getElementById('filterBar2').onclick=function(e){
-  var btn=e.target.closest('.filter-btn2');
-  if(!btn)return;
-  document.querySelectorAll('.filter-btn2').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  currentDiff=btn.dataset.diff;
-  render();
-};
-document.getElementById('filterBar3').onclick=function(e){
-  var btn=e.target.closest('.filter-btn3');
-  if(!btn)return;
-  document.querySelectorAll('.filter-btn3').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  currentCat=btn.dataset.cat;
-  render();
-};
-document.getElementById('searchInput').addEventListener('input',function(){
-  currentSearch=this.value;render();
-});
-
 // load() called after thumbnail index
+})();
 </script>
 </body>
 </html>
