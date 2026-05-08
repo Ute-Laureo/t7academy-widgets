@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sterne – T7 Academy</title>
+<title>Sevens – T7 Academy</title>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
 <style>
@@ -112,7 +112,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .hero h1 span{color:#fff;}
 .hero p{font-size:16px;color:rgba(0,0,0,.7);line-height:1.6;}
 .hero-image{
-  background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Stars_Hero_Pic.png') center/cover no-repeat;
+  background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Sterne_Hero_Pic.png') center/cover no-repeat;
 }
 @media(max-width:600px){
   .hero{grid-template-columns:1fr;}
@@ -260,8 +260,8 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   </div>
   <div class="nav-links">
     <a href="https://www.laureo.at/" class="nav-link">Home</a>
-    <a href="https://www.laureo.at/sterne/" class="nav-link active">Sterne</a>
-    <a href="https://www.laureo.at/sevens/" class="nav-link">Sevens</a>
+    <a href="https://www.laureo.at/sterne/" class="nav-link">Sterne</a>
+    <a href="https://www.laureo.at/sevens/" class="nav-link active">Sevens</a>
     <a href="https://www.laureo.at/challenges/" class="nav-link">Challenges</a>
   </div>
   <div class="nav-right">
@@ -273,8 +273,8 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 <!-- HERO -->
 <div class="hero">
   <div class="hero-text">
-    <h1>Sterne. Zeige Deine <span>Skills!</span></h1>
-    <p>Schaue dir die Videos genau an. Übe zuerst langsam und dann schnell — immer rechts und links. Sei ehrlich mit Dir und Deiner Community!</p>
+    <h1>Sevens. Deine ständigen <span>Begleiter!</span></h1>
+    <p>Übe wann immer Du Zeit hast. Damit perfektionierst Du Deine Technik und erreichst die 4- und 5-Sterne!</p>
   </div>
   <div class="hero-image"></div>
 </div>
@@ -283,24 +283,22 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 <div class="controls">
   <div class="search-wrap">
     <span class="search-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-    <input type="text" id="searchInput" placeholder="Suche Dein Sterne-Video…">
+    <input type="text" id="searchInput" placeholder="Suche Dein Sevens-Video…">
   </div>
   <div class="pill-filters">
-    <!-- Pill 1: Schwierigkeitsgrad (Stars + Difficulty) -->
+    <!-- Pill 1: Schwierigkeitsgrad (Difficulty only, no stars) -->
     <div class="pill-wrap" id="pillWrap1">
       <button class="pill-toggle" id="pillToggle1">Schwierigkeitsgrad<span class="pill-arrow"></span></button>
       <div class="pill-dropdown" id="pillDrop1">
-        <button class="pill-option active" data-stars="all" data-diff="all">Alle</button>
+        <button class="pill-option active" data-sevens="all" data-diff="all">Alle</button>
         <div class="pill-divider"></div>
-        <button class="pill-option" data-stars="1" data-diff="all">⭐ 1 Stern</button>
-        <button class="pill-option" data-stars="2" data-diff="all">⭐⭐ 2 Sterne</button>
-        <button class="pill-option" data-stars="3" data-diff="all">⭐⭐⭐ 3 Sterne</button>
-        <button class="pill-option" data-stars="4" data-diff="all">⭐⭐⭐⭐ 4 Sterne</button>
-        <button class="pill-option" data-stars="5" data-diff="all">⭐⭐⭐⭐⭐ 5 Sterne</button>
+        <button class="pill-option" data-sevens="1" data-diff="all">7️⃣ 1 Seven</button>
+        <button class="pill-option" data-sevens="2" data-diff="all">7️⃣7️⃣ 2 Sevens</button>
+        <button class="pill-option" data-sevens="3" data-diff="all">7️⃣7️⃣7️⃣ 3 Sevens</button>
         <div class="pill-divider"></div>
-        <button class="pill-option" data-stars="all" data-diff="Einfach">🟢 Einfach</button>
-        <button class="pill-option" data-stars="all" data-diff="Mittel">🟡 Mittel</button>
-        <button class="pill-option" data-stars="all" data-diff="Schwierig">🔴 Schwierig</button>
+        <button class="pill-option" data-sevens="all" data-diff="Einfach">🟢 Einfach</button>
+        <button class="pill-option" data-sevens="all" data-diff="Mittel">🟡 Mittel</button>
+        <button class="pill-option" data-sevens="all" data-diff="Schwierig">🔴 Schwierig</button>
       </div>
     </div>
     <!-- Pill 2: Kategorien -->
@@ -378,9 +376,10 @@ fetch('https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnail_index.jso
 
 function diffClass(d){return d==='Einfach'?'easy':d==='Mittel'?'medium':d==='Schwierig'?'hard':'';}
 function starsLabel(n){return Array(n+1).join('⭐');}
+function sevensLabel(n){return Array(n+1).join('7️⃣');}
 
 function load(){
-  fetch(SB_URL+'/rest/v1/videos?stars=not.is.null&select=id,title_DE,vimeo_code,stars,category,difficulty,description&order=stars.asc,nr.asc',{
+  fetch(SB_URL+'/rest/v1/videos?sevens=not.is.null&select=id,title_DE,vimeo_code,sevens,category,difficulty,description&order=sevens.asc,nr.asc',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();})
   .then(function(rows){allVideos=rows||[];updateAvailableOptions();render();})
@@ -410,7 +409,7 @@ window.toggleVormerken=function(id){
 
 function render(){
   var filtered=allVideos.filter(function(v){
-    if(currentFilter!=='all'&&v.stars!=currentFilter)return false;
+    if(currentSevens!=='all'&&v.sevens!=currentSevens)return false;
     if(currentDiff!=='all'&&v.difficulty!==currentDiff)return false;
     if(currentPersonal==='liked'&&!likedVideos[v.id])return false;
     if(currentPersonal==='vorgemerkt'&&!vorgemerkteVideos[v.id])return false;
@@ -452,11 +451,11 @@ function render(){
   }
 
   var html='';
-  [1,2,3,4,5].forEach(function(s){
-    var group=filtered.filter(function(v){return v.stars==s;});
+  [1,2,3].forEach(function(s){
+    var group=filtered.filter(function(v){return v.sevens==s;});
     if(!group.length)return;
     html+='<div class="star-group">';
-    html+='<div class="star-group-title"><span class="title-stars">'+starsLabel(s)+'</span> '+s+' Stern'+(s>1?'e':'')+'</div>';
+    html+='<div class="star-group-title"><span class="title-stars">'+sevensLabel(s)+'</span> '+s+' Seven'+(s>1?'s':'')+'</div>';
     html+='<div class="star-group-grid">';
     group.forEach(function(v){html+=makeCard(v,filtered.indexOf(v));});
     html+='</div></div>';
@@ -466,14 +465,17 @@ function render(){
 
 // Hide filter options that have no matching videos (except personal filters)
 function updateAvailableOptions(){
-  var stars=allVideos.map(function(v){return v.stars;});
+  var sevens=allVideos.map(function(v){return v.sevens;});
   var diffs=allVideos.map(function(v){return v.difficulty;});
   var cats=allVideos.map(function(v){return v.category;}).filter(function(c,i,a){return c&&a.indexOf(c)===i;}).sort();
 
   // Build category buttons dynamically
   var drop=document.getElementById('pillDrop2');
+  var divider=document.getElementById('catDivider');
+  // Remove old dynamic buttons
   var old=drop.querySelectorAll('[data-cat]:not([data-cat="all"])');
   old.forEach(function(b){b.remove();});
+  // Add fresh ones after divider
   cats.forEach(function(c){
     var btn=document.createElement('button');
     btn.className='pill-option';
@@ -482,12 +484,12 @@ function updateAvailableOptions(){
     drop.appendChild(btn);
   });
 
-  document.querySelectorAll('#pillDrop1 .pill-option[data-stars]').forEach(function(btn){
-    var s=btn.dataset.stars;
+  document.querySelectorAll('#pillDrop1 .pill-option[data-sevens]').forEach(function(btn){
+    var s=btn.dataset.sevens;
     var d=btn.dataset.diff;
     if(s==='all'&&d==='all')return;
     var hasMatch;
-    if(s!=='all'&&d==='all') hasMatch=stars.indexOf(parseInt(s))>=0;
+    if(s!=='all'&&d==='all') hasMatch=sevens.indexOf(parseInt(s))>=0;
     else if(s==='all'&&d!=='all') hasMatch=diffs.indexOf(d)>=0;
     else hasMatch=false;
     btn.style.display=hasMatch?'':'none';
@@ -507,7 +509,7 @@ function updateAvailableOptions(){
 }
 
 // PILL DROPDOWN INTERACTIONS
-var currentFilter='all';
+var currentSevens='all';
 var currentDiff='all';
 var currentCat='all';
 var currentPersonal='all';
@@ -541,9 +543,9 @@ document.getElementById('pillDrop1').addEventListener('click',function(e){
   if(!btn)return;
   document.querySelectorAll('#pillDrop1 .pill-option').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
-  currentFilter=btn.dataset.stars;
+  currentSevens=btn.dataset.sevens;
   currentDiff=btn.dataset.diff;
-  var isDefault=currentFilter==='all'&&currentDiff==='all';
+  var isDefault=currentSevens==='all'&&currentDiff==='all';
   setPillLabel('pillToggle1',isDefault?'Schwierigkeitsgrad':btn.textContent.replace('▾','').trim(),isDefault);
   closePills();render();
 });
