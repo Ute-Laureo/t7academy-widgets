@@ -10,14 +10,14 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 
 /* THEMES */
-[data-theme="dark"]{
+[data-theme="dark"],body[data-theme="dark"]{
   --bg:#080f1e;--surface:#0d1528;--surface2:#1a2640;
   --border:rgba(0,229,255,.12);--accent:#00E5FF;--accent2:#1f80ff;--accent3:#1800ad;
   --text:#e8f4ff;--muted:rgba(232,244,255,.45);
   --nav-bg:#0a1628;--nav-border:rgba(0,229,255,.15);
   --card-title-bg:var(--surface2);--card-title-text:var(--text);
 }
-[data-theme="light"]{
+[data-theme="light"],body[data-theme="light"]{
   --bg:#f0f4f8;--surface:#ffffff;--surface2:#e2e8f0;
   --border:rgba(0,100,180,.15);--accent:#00E5FF;--accent2:#1f80ff;--accent3:#1800ad;
   --text:#0d1528;--muted:rgba(13,21,40,.5);
@@ -29,9 +29,19 @@
 /* Hide WordPress page title */
 .wp-block-post-title, h1.entry-title, .page-title, .entry-header, .wp-block-group .wp-block-heading:first-child{display:none!important;}
 /* Full width breakout */
-.wp-block-html{width:100vw!important;position:relative!important;left:50%!important;right:50%!important;margin-left:-50vw!important;margin-right:-50vw!important;max-width:100vw!important;}
-.entry-content,.wp-block-post-content,.is-layout-constrained>*{max-width:100%!important;padding:0!important;margin:0!important;}
+.wp-block-html{width:calc(100vw - 1px)!important;position:relative!important;left:50%!important;right:50%!important;margin-left:calc(-50vw + 0.5px)!important;margin-right:calc(-50vw + 0.5px)!important;max-width:calc(100vw - 1px)!important;}
+.entry-content,.wp-block-post-content,.is-layout-constrained>*{max-width:100%!important;padding:0.5px!important;margin:0!important;}
+.wp-site-blocks,.wp-block-group,.is-layout-flow,.is-layout-constrained{padding:0.5px!important;margin:0!important;}
+.site-content,.entry,.post,.page{padding:0.5px!important;margin:0!important;}
+body.page .site-main{padding:0.5px!important;margin:0!important;}
 html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s;}
+
+/* Light mode solid backgrounds */
+[data-theme="light"] body,body[data-theme="light"]{background:#f0f4f8!important;}
+[data-theme="light"] .grid,body[data-theme="light"] .grid{background:#f0f4f8;}
+[data-theme="light"] .controls,body[data-theme="light"] .controls{background:#ffffff;}
+[data-theme="light"] .topnav,body[data-theme="light"] .topnav{background:#ffffff!important;}
+[data-theme="light"] .modal-overlay,body[data-theme="light"] .modal-overlay{background:#f0f4f8!important;}
 
 /* TOP NAV */
 .topnav{
@@ -62,31 +72,30 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .topnav.nav-shrunk .nav-logo,.topnav.nav-shrunk .nav-right{height:50px;}
 @media(max-width:520px){
   .topnav{padding:0 16px;flex-wrap:wrap;}
-  /* Row 1: logo on left, toggle+avatar on right */
   .nav-logo{height:56px;display:flex;align-items:center;flex:1;}
   .nav-right{height:56px;display:flex;align-items:center;order:1;}
-  /* Row 2: nav links full width */
   .nav-links{width:100%;order:2;padding:4px 0 8px;border-top:1px solid var(--nav-border);flex-wrap:wrap;}
   .nav-link{font-size:11px;padding:5px 10px;}
 }
 /* Mobile dark mode contrast boosts */
 @media(max-width:520px){
-  [data-theme="dark"] .search-wrap input{
+  [data-theme="dark"] .search-wrap input,body[data-theme="dark"] .search-wrap input{
     border-color:rgba(0,229,255,.4);background:rgba(255,255,255,.06);
   }
-  [data-theme="dark"] .pill-toggle{
+  [data-theme="dark"] .pill-toggle,body[data-theme="dark"] .pill-toggle{
     border-color:rgba(0,229,255,.4);background:rgba(255,255,255,.06);color:var(--text);
   }
-  [data-theme="dark"] .card-action-btn{
+  [data-theme="dark"] .card-action-btn,body[data-theme="dark"] .card-action-btn{
     color:rgba(232,244,255,.75);font-size:12px;
   }
-  [data-theme="dark"] .card-action-btn.liked,[data-theme="dark"] .card-action-btn.vorgemerkt{
-    color:#E8A800;
+  [data-theme="dark"] .card-action-btn.liked,[data-theme="dark"] .card-action-btn.vorgemerkt,
+  body[data-theme="dark"] .card-action-btn.liked,body[data-theme="dark"] .card-action-btn.vorgemerkt{
+    color:#ff2828;
   }
-  [data-theme="dark"] .card{
+  [data-theme="dark"] .card,body[data-theme="dark"] .card{
     background:#1e2e48;border-color:rgba(0,229,255,.25);
   }
-  [data-theme="dark"] .card-actions{
+  [data-theme="dark"] .card-actions,body[data-theme="dark"] .card-actions{
     background:#253550;
   }
 }
@@ -119,11 +128,13 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   .hero-image{height:180px;order:-1;}
   .hero-text{order:1;}
   .star-group-grid{grid-template-columns:repeat(2,1fr);}
+  .search-wrap{width:100%;min-width:0;}
 }
 
 /* CONTROLS */
-.controls{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;background:var(--surface);}
-.search-wrap{position:relative;}
+.controls{padding:14px 16px!important;border-bottom:none;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
+.search-wrap{position:relative;width:50%;min-width:280px;}
+.grid{padding:14px 16px 16px!important;}
 .search-wrap input{
   width:100%;padding:9px 16px 9px 38px;
   background:transparent;border:1px solid var(--border);
@@ -146,7 +157,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 .pill-toggle:hover{border-color:var(--accent);color:var(--accent);}
 .pill-toggle.has-active{background:rgba(0,150,255,.1);border-color:var(--accent);color:var(--accent);}
-.pill-toggle.has-personal{background:rgba(232,168,0,.1);border-color:#E8A800;color:#E8A800;}
+.pill-toggle.has-personal{background:rgba(232,168,0,.1);border-color:#ff2828;color:#ff2828;}
 .pill-arrow{
   display:inline-block;width:0;height:0;
   border-left:5px solid transparent;
@@ -171,24 +182,24 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 .pill-option:hover{background:rgba(0,229,255,.07);color:var(--text);}
 .pill-option.active{background:rgba(0,150,255,.12);color:var(--accent);}
-.pill-option[data-personal="liked"],.pill-option[data-personal="vorgemerkt"]{color:#E8A800;}
-.pill-option[data-personal="liked"].active,.pill-option[data-personal="vorgemerkt"].active{background:rgba(232,168,0,.1);color:#E8A800;}
+.pill-option[data-personal="liked"],.pill-option[data-personal="vorgemerkt"]{color:#ff2828;}
+.pill-option[data-personal="liked"].active,.pill-option[data-personal="vorgemerkt"].active{background:rgba(232,168,0,.1);color:#ff2828;}
 .pill-divider{height:1px;background:var(--border);margin:4px 2px;}
 @media(max-width:480px){
   .pill-toggle{font-size:11px;padding:6px 11px;}
 }
 
 /* GRID */
-.grid{padding:16px;}
-.star-group{margin-bottom:28px;}
-.star-group-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:18px;font-weight:900;color:var(--text);padding:10px 0 12px;border-bottom:2px solid var(--accent);margin-bottom:14px;display:flex;align-items:baseline;gap:8px;}
+
+.star-group{margin-bottom:28px;padding-top:0;}
+.star-group-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:18px;font-weight:900;color:var(--text);padding:0 0 12px;border-bottom:2px solid var(--accent);margin-bottom:14px;display:flex;align-items:baseline;gap:8px;}
 .star-group-title .title-stars{position:relative;top:1px;}
 .star-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;}
 .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
 .card-actions{display:flex;gap:0;border-top:1px solid var(--border);border-radius:0 0 11px 11px;overflow:hidden;background:var(--surface2);}
 .card-thumb{position:relative;width:100%;aspect-ratio:16/9;background:var(--surface2);overflow:hidden;border-radius:12px 12px 0 0;}
-.card-thumb img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;}
+.card-thumb img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;background:var(--surface2);}
 .play-icon{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;position:absolute;bottom:8px;left:8px;z-index:2;}
 .play-icon::after{content:'';border-left:10px solid var(--accent);border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:2px;}
 .card-title-bar{background:var(--card-title-bg);padding:8px 12px;}
@@ -196,28 +207,21 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .card-sub{display:flex;align-items:center;justify-content:space-between;margin-top:3px;}
 .card-cat-wrap{display:flex;align-items:center;gap:6px;}
 .card-cat{font-size:11px;color:var(--text);font-weight:700;text-transform:none;letter-spacing:0;padding:1px 6px;border-radius:4px;border:1px solid var(--border);}
-[data-theme="dark"] .card-cat{color:#ffffff;border-color:rgba(255,255,255,.25);}
-[data-theme="light"] .card-cat{color:#000000;border-color:rgba(0,0,0,.25);}
-.card-stars-inline{font-size:12px;color:var(--accent);}
+[data-theme="dark"] .card-cat,body[data-theme="dark"] .card-cat{color:#ffffff;border-color:rgba(255,255,255,.25);}
+[data-theme="light"] .card-cat,body[data-theme="light"] .card-cat{color:#000000;border-color:rgba(0,0,0,.25);}
 .card-diff-inline{font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;color:var(--text);border:1px solid var(--border);}
-.card-diff-inline.easy{color:var(--text);border:1px solid var(--border);}
-.card-diff-inline.medium{color:var(--text);border:1px solid var(--border);}
-.card-diff-inline.hard{color:var(--text);border:1px solid var(--border);}
-
 .card-action-btn{flex:1;padding:7px 0;display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);background:transparent;border:none;cursor:pointer;transition:all .15s;font-family:'Open Sans',sans-serif;}
 .card-action-btn:hover{color:var(--accent);background:rgba(0,229,255,.05);}
 .card-action-btn:first-child{border-right:1px solid var(--border);}
-.card-action-btn.liked{color:#E8A800;}
-.card-action-btn.vorgemerkt{color:#E8A800;}
-
-
+.card-action-btn.liked{color:#ff2828;}
+.card-action-btn.vorgemerkt{color:#ff2828;}
 .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:13px;}
 .no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
 
 /* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,8,20,.97);overflow-y:auto;padding:20px;}
-[data-theme="light"] .modal-overlay{background:rgba(240,244,248,.97);}
-.modal-overlay.open{display:block;padding-top:120px;}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(4,8,20,.97);overflow-y:auto;padding:20px!important;}
+[data-theme="light"] .modal-overlay,body[data-theme="light"] .modal-overlay{background:#f0f4f8!important;}
+.modal-overlay.open{display:block;padding-top:120px!important;}
 .modal-inner{max-width:740px;margin:0 auto;}
 .modal-back{
   display:inline-flex;align-items:center;gap:8px;
@@ -286,7 +290,6 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
     <input type="text" id="searchInput" placeholder="Suche Dein Sterne-Video…">
   </div>
   <div class="pill-filters">
-    <!-- Pill 1: Schwierigkeitsgrad (Stars + Difficulty) -->
     <div class="pill-wrap" id="pillWrap1">
       <button class="pill-toggle" id="pillToggle1">Schwierigkeitsgrad<span class="pill-arrow"></span></button>
       <div class="pill-dropdown" id="pillDrop1">
@@ -303,16 +306,13 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
         <button class="pill-option" data-stars="all" data-diff="Schwierig">🔴 Schwierig</button>
       </div>
     </div>
-    <!-- Pill 2: Kategorien -->
     <div class="pill-wrap" id="pillWrap2">
       <button class="pill-toggle" id="pillToggle2">Kategorien<span class="pill-arrow"></span></button>
       <div class="pill-dropdown" id="pillDrop2">
         <button class="pill-option active" data-cat="all">Alle Kategorien</button>
         <div class="pill-divider" id="catDivider"></div>
-        <!-- dynamically populated -->
       </div>
     </div>
-    <!-- Pill 3: Persönliche Filter -->
     <div class="pill-wrap" id="pillWrap3">
       <button class="pill-toggle" id="pillToggle3">Persönliche Filter<span class="pill-arrow"></span></button>
       <div class="pill-dropdown" id="pillDrop3">
@@ -347,34 +347,26 @@ var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 // THEME
 var theme=localStorage.getItem('t7_theme')||'dark';
 document.documentElement.setAttribute('data-theme',theme);
+document.body.setAttribute('data-theme',theme);
 document.getElementById('themeToggle').innerHTML=theme==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 document.getElementById('themeToggle').onclick=function(){
   theme=theme==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',theme);
+  document.body.setAttribute('data-theme',theme);
   localStorage.setItem('t7_theme',theme);
   this.innerHTML=theme==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 };
 
 // Identity handled by WordPress
 
-// VIDEOS
 var allVideos=[];
 var currentSearch='';
 var thumbnailIndex={};
 
-// Load thumbnail index first, then videos
 fetch('https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnail_index.json?v='+Date.now())
   .then(function(r){return r.json();})
-  .then(function(idx){
-    thumbnailIndex=idx;
-    console.log('Thumbnail index loaded:',Object.keys(idx).length,'entries');
-    console.log('Sample:',JSON.stringify(idx).slice(0,200));
-    load();
-  })
-  .catch(function(e){
-    console.error('Thumbnail index failed:',e);
-    load();
-  });
+  .then(function(idx){thumbnailIndex=idx;load();})
+  .catch(function(){load();});
 
 function diffClass(d){return d==='Einfach'?'easy':d==='Mittel'?'medium':d==='Schwierig'?'hard':'';}
 function starsLabel(n){return Array(n+1).join('⭐');}
@@ -389,7 +381,6 @@ function load(){
 
 var likedVideos=JSON.parse(localStorage.getItem('t7_liked')||'{}');
 var vorgemerkteVideos=JSON.parse(localStorage.getItem('t7_vormerken')||'{}');
-
 var SVG_HEART='<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 var SVG_BELL='<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>';
 
@@ -408,6 +399,11 @@ window.toggleVormerken=function(id){
   if(btn){btn.className='card-action-btn'+(vorgemerkteVideos[id]?' vorgemerkt':'');btn.innerHTML=SVG_BELL+' Vormerken';}
 };
 
+var currentFilter='all';
+var currentDiff='all';
+var currentCat='all';
+var currentPersonal='all';
+
 function render(){
   var filtered=allVideos.filter(function(v){
     if(currentFilter!=='all'&&v.stars!=currentFilter)return false;
@@ -420,7 +416,6 @@ function render(){
   });
   window._filteredVideos=filtered;
   if(!filtered.length){document.getElementById('grid').innerHTML='<div class="no-results">Keine Videos gefunden.</div>';return;}
-
   function makeCard(v,i){
     var diff=diffClass(v.difficulty);
     var vimeoId=v.vimeo_code?v.vimeo_code.split('/')[0]:'';
@@ -441,147 +436,92 @@ function render(){
         '</div>'+
       '</div>'+
       '<div class="card-actions">'+
-        '<button class="card-action-btn'+(liked?' liked':'')+'" onclick="toggleLike(\''+v.id+'\')">'+
-          SVG_HEART+' Like'+
-        '</button>'+
-        '<button class="card-action-btn'+(vorgemerkt?' vorgemerkt':'')+'" onclick="toggleVormerken(\''+v.id+'\')">'+
-          SVG_BELL+' Vormerken'+
-        '</button>'+
+        '<button class="card-action-btn'+(liked?' liked':'')+'" onclick="toggleLike(\''+v.id+'\')">'+SVG_HEART+' Like</button>'+
+        '<button class="card-action-btn'+(vorgemerkt?' vorgemerkt':'')+'" onclick="toggleVormerken(\''+v.id+'\')">'+SVG_BELL+' Vormerken</button>'+
       '</div>'+
     '</div>';
   }
-
   var html='';
   [1,2,3,4,5].forEach(function(s){
     var group=filtered.filter(function(v){return v.stars==s;});
     if(!group.length)return;
-    html+='<div class="star-group">';
-    html+='<div class="star-group-title"><span class="title-stars">'+starsLabel(s)+'</span> '+s+' Stern'+(s>1?'e':'')+'</div>';
-    html+='<div class="star-group-grid">';
+    html+='<div class="star-group"><div class="star-group-title"><span class="title-stars">'+starsLabel(s)+'</span> '+s+' Stern'+(s>1?'e':'')+'</div><div class="star-group-grid">';
     group.forEach(function(v){html+=makeCard(v,filtered.indexOf(v));});
     html+='</div></div>';
   });
   document.getElementById('grid').innerHTML=html;
 }
 
-// Hide filter options that have no matching videos (except personal filters)
 function updateAvailableOptions(){
   var stars=allVideos.map(function(v){return v.stars;});
   var diffs=allVideos.map(function(v){return v.difficulty;});
   var cats=allVideos.map(function(v){return v.category;}).filter(function(c,i,a){return c&&a.indexOf(c)===i;}).sort();
-
-  // Build category buttons dynamically
   var drop=document.getElementById('pillDrop2');
-  var old=drop.querySelectorAll('[data-cat]:not([data-cat="all"])');
-  old.forEach(function(b){b.remove();});
+  drop.querySelectorAll('[data-cat]:not([data-cat="all"])').forEach(function(b){b.remove();});
   cats.forEach(function(c){
     var btn=document.createElement('button');
-    btn.className='pill-option';
-    btn.dataset.cat=c;
-    btn.textContent=c;
-    drop.appendChild(btn);
+    btn.className='pill-option';btn.dataset.cat=c;btn.textContent=c;drop.appendChild(btn);
   });
-
   document.querySelectorAll('#pillDrop1 .pill-option[data-stars]').forEach(function(btn){
-    var s=btn.dataset.stars;
-    var d=btn.dataset.diff;
+    var s=btn.dataset.stars,d=btn.dataset.diff;
     if(s==='all'&&d==='all')return;
-    var hasMatch;
-    if(s!=='all'&&d==='all') hasMatch=stars.indexOf(parseInt(s))>=0;
-    else if(s==='all'&&d!=='all') hasMatch=diffs.indexOf(d)>=0;
-    else hasMatch=false;
+    var hasMatch=s!=='all'&&d==='all'?stars.indexOf(parseInt(s))>=0:s==='all'&&d!=='all'?diffs.indexOf(d)>=0:false;
     btn.style.display=hasMatch?'':'none';
   });
-  // hide dividers if all siblings below them are hidden
   document.querySelectorAll('.pill-dropdown').forEach(function(drop){
     drop.querySelectorAll('.pill-divider').forEach(function(div){
-      var next=div.nextElementSibling;
-      var allHidden=true;
-      while(next&&!next.classList.contains('pill-divider')){
-        if(next.style.display!=='none'){allHidden=false;break;}
-        next=next.nextElementSibling;
-      }
+      var next=div.nextElementSibling,allHidden=true;
+      while(next&&!next.classList.contains('pill-divider')){if(next.style.display!=='none'){allHidden=false;break;}next=next.nextElementSibling;}
       div.style.display=allHidden?'none':'';
     });
   });
 }
-
-// PILL DROPDOWN INTERACTIONS
-var currentFilter='all';
-var currentDiff='all';
-var currentCat='all';
-var currentPersonal='all';
 
 function setPillLabel(toggleId,label,isDefault){
   var t=document.getElementById(toggleId);
   t.innerHTML=label+' <span class="pill-arrow"></span>';
   t.classList.toggle('has-active',!isDefault);
 }
-
-function closePills(){
-  document.querySelectorAll('.pill-wrap').forEach(function(w){w.classList.remove('open');});
-}
-
+function closePills(){document.querySelectorAll('.pill-wrap').forEach(function(w){w.classList.remove('open');});}
 document.querySelectorAll('.pill-wrap').forEach(function(wrap){
   wrap.querySelector('.pill-toggle').addEventListener('click',function(e){
-    e.stopPropagation();
-    var wasOpen=wrap.classList.contains('open');
-    closePills();
-    if(!wasOpen)wrap.classList.add('open');
+    e.stopPropagation();var wasOpen=wrap.classList.contains('open');closePills();if(!wasOpen)wrap.classList.add('open');
   });
 });
 document.addEventListener('click',function(){closePills();});
-document.querySelectorAll('.pill-dropdown').forEach(function(d){
-  d.addEventListener('click',function(e){e.stopPropagation();});
-});
+document.querySelectorAll('.pill-dropdown').forEach(function(d){d.addEventListener('click',function(e){e.stopPropagation();});});
 
-// Pill 1: Schwierigkeitsgrad
 document.getElementById('pillDrop1').addEventListener('click',function(e){
-  var btn=e.target.closest('.pill-option');
-  if(!btn)return;
+  var btn=e.target.closest('.pill-option');if(!btn)return;
   document.querySelectorAll('#pillDrop1 .pill-option').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  currentFilter=btn.dataset.stars;
-  currentDiff=btn.dataset.diff;
+  btn.classList.add('active');currentFilter=btn.dataset.stars;currentDiff=btn.dataset.diff;
   var isDefault=currentFilter==='all'&&currentDiff==='all';
   setPillLabel('pillToggle1',isDefault?'Schwierigkeitsgrad':btn.textContent.replace('▾','').trim(),isDefault);
   closePills();render();
 });
-
-// Pill 2: Kategorien
 document.getElementById('pillDrop2').addEventListener('click',function(e){
-  var btn=e.target.closest('.pill-option');
-  if(!btn)return;
+  var btn=e.target.closest('.pill-option');if(!btn)return;
   document.querySelectorAll('#pillDrop2 .pill-option').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  currentCat=btn.dataset.cat;
+  btn.classList.add('active');currentCat=btn.dataset.cat;
   var isDefault=currentCat==='all';
   setPillLabel('pillToggle2',isDefault?'Kategorien':btn.textContent.trim(),isDefault);
   closePills();render();
 });
-
-// Pill 3: Persönliche Filter
 document.getElementById('pillDrop3').addEventListener('click',function(e){
-  var btn=e.target.closest('.pill-option');
-  if(!btn)return;
+  var btn=e.target.closest('.pill-option');if(!btn)return;
   document.querySelectorAll('#pillDrop3 .pill-option').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  currentPersonal=btn.dataset.personal;
+  btn.classList.add('active');currentPersonal=btn.dataset.personal;
   var isDefault=currentPersonal==='all';
   var toggle=document.getElementById('pillToggle3');
   toggle.innerHTML=(isDefault?'Persönliche Filter':btn.textContent.trim())+' <span class="pill-arrow"></span>';
   toggle.classList.remove('has-active','has-personal');
-  if(!isDefault) toggle.classList.add('has-personal');
+  if(!isDefault)toggle.classList.add('has-personal');
   closePills();render();
 });
-
-document.getElementById('searchInput').addEventListener('input',function(){
-  currentSearch=this.value;render();
-});
+document.getElementById('searchInput').addEventListener('input',function(){currentSearch=this.value;render();});
 
 window.openVideo=function(idx){
-  var v=(window._filteredVideos||allVideos)[idx];
-  if(!v)return;
+  var v=(window._filteredVideos||allVideos)[idx];if(!v)return;
   var modal=document.getElementById('modal');
   document.getElementById('modalTitle').textContent=v.title_DE;
   var videoEl=document.getElementById('modalVideo');
@@ -604,29 +544,18 @@ window.openVideo=function(idx){
       }else{descEl.innerHTML='';}
     }catch(e){descEl.innerHTML='';}
   }else{descEl.innerHTML='';}
-  modal.classList.add('open');
-  modal.scrollTop=0;
-  document.body.style.overflow='hidden';
+  modal.classList.add('open');modal.scrollTop=0;document.body.style.overflow='hidden';
 };
-
 document.getElementById('modalBack').onclick=function(){
   document.getElementById('modal').classList.remove('open');
   document.getElementById('modalVideo').innerHTML='';
   document.body.style.overflow='';
 };
-// load() called after thumbnail index
 
-// Admin bar detection - adjust nav offset
+// Admin bar detection
 var adminBar=document.getElementById('wpadminbar');
 var nav=document.querySelector('.topnav');
-function updateNavTop(){
-  if(adminBar){
-    var barH=adminBar.offsetHeight;
-    nav.style.top=barH+'px';
-  } else {
-    nav.style.top='0px';
-  }
-}
+function updateNavTop(){nav.style.top=adminBar?adminBar.offsetHeight+'px':'0px';}
 updateNavTop();
 window.addEventListener('resize',updateNavTop);
 window.addEventListener('scroll',function(){
