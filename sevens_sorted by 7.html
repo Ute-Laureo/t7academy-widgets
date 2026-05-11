@@ -266,12 +266,6 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 
-// Category order definition
-var CATEGORY_ORDER=['Jonglieren','Sitdowns','Sitdown','Ballannahme','Ballmitnahme','Passtechnik','Schusstechnik'];
-var CATEGORY_DISPLAY={'Sitdown':'Sitdowns'};
-// Difficulty order definition
-var DIFF_ORDER=['Einfach','Mittel','Schwierig'];
-
 // THEME
 var theme=localStorage.getItem('t7_theme')||'dark';
 document.documentElement.setAttribute('data-theme',theme);
@@ -299,8 +293,7 @@ function starsLabel(n){return Array(n+1).join('⭐');}
 function sevensLabel(n){return Array(n+1).join('7️⃣');}
 
 function load(){
-  // Fetch sorted by category/difficulty: use nr.asc as secondary fallback within same difficulty
-  fetch(SB_URL+'/rest/v1/videos?sevens=not.is.null&vimeo_code=not.is.null&select=id,title_DE,vimeo_code,sevens,category,difficulty,description&order=category.asc,nr.asc',{
+  fetch(SB_URL+'/rest/v1/videos?sevens=not.is.null&vimeo_code=not.is.null&select=id,title_DE,vimeo_code,sevens,category,difficulty,description&order=sevens.asc,nr.asc',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();})
   .then(function(rows){allVideos=rows||[];updateAvailableOptions();render();})
@@ -339,26 +332,8 @@ function render(){
     if(currentSearch&&v.title_DE.toLowerCase().indexOf(currentSearch.toLowerCase())<0)return false;
     return true;
   });
-
-  // Sort: first by category order, then by difficulty order within each category
-  filtered.sort(function(a,b){
-    var catA=CATEGORY_ORDER.indexOf(a.category);
-    var catB=CATEGORY_ORDER.indexOf(b.category);
-    // Unknown categories go to the end
-    if(catA===-1)catA=999;
-    if(catB===-1)catB=999;
-    if(catA!==catB)return catA-catB;
-    // Within same category, sort by difficulty
-    var diffA=DIFF_ORDER.indexOf(a.difficulty);
-    var diffB=DIFF_ORDER.indexOf(b.difficulty);
-    if(diffA===-1)diffA=999;
-    if(diffB===-1)diffB=999;
-    return diffA-diffB;
-  });
-
   window._filteredVideos=filtered;
   if(!filtered.length){document.getElementById('grid').innerHTML='<div class="no-results">Keine Videos gefunden.</div>';return;}
-
   function makeCard(v,i){
     var diff=diffClass(v.difficulty);
     var vimeoId=v.vimeo_code?v.vimeo_code.split('/')[0]:'';
@@ -366,7 +341,6 @@ function render(){
     var thumbUrl=thumbFile?'https://ute-laureo.github.io/t7academy-widgets/Assets/thumbnails/'+thumbFile.replace(/ /g,'%20'):'';
     var liked=likedVideos[v.id]?true:false;
     var vorgemerkt=vorgemerkteVideos[v.id]?true:false;
-    // Show Sevens count in card instead of category (category is now the group header)
     return '<div class="card" id="card-'+v.id+'">'+
       '<div class="card-thumb" onclick="openVideo('+i+')">'+
         (thumbUrl?'<img src="'+thumbUrl+'" alt="" onerror="this.remove()">':'')+
@@ -375,7 +349,7 @@ function render(){
       '<div class="card-title-bar" onclick="openVideo('+i+')">'+
         '<div class="card-title">'+v.title_DE+'</div>'+
         '<div class="card-sub">'+
-          '<span class="card-cat">'+(v.sevens?sevensLabel(v.sevens)+' '+v.sevens+' Seven'+(v.sevens>1?'s':''):'')+'</span>'+
+          '<span class="card-cat">'+(v.category||'')+'</span>'+
           (diff?'<span class="card-diff-inline '+diff+'">'+v.difficulty+'</span>':'')+
         '</div>'+
       '</div>'+
@@ -385,48 +359,21 @@ function render(){
       '</div>'+
     '</div>';
   }
-
   var html='';
-
-  // Build groups by category in the specified order
-  // Collect all categories present in filtered results, respecting CATEGORY_ORDER
-  var presentCats=[];
-  CATEGORY_ORDER.forEach(function(cat){
-    if(filtered.some(function(v){return v.category===cat;})){
-      presentCats.push(cat);
-    }
-  });
-  // Also add any categories not in CATEGORY_ORDER (unknown ones) at the end
-  filtered.forEach(function(v){
-    if(v.category&&CATEGORY_ORDER.indexOf(v.category)===-1&&presentCats.indexOf(v.category)===-1){
-      presentCats.push(v.category);
-    }
-  });
-
-  presentCats.forEach(function(cat){
-    var group=filtered.filter(function(v){return v.category===cat;});
+  [1,2,3].forEach(function(s){
+    var group=filtered.filter(function(v){return v.sevens==s;});
     if(!group.length)return;
-    html+='<div class="star-group">'+
-      '<div class="star-group-title">'+
-        '<span class="title-stars">⚽</span> '+(CATEGORY_DISPLAY[cat]||cat)+
-      '</div>'+
-      '<div class="star-group-grid">';
+    html+='<div class="star-group"><div class="star-group-title"><span class="title-stars">'+sevensLabel(s)+'</span> '+s+' Seven'+(s>1?'s':'')+'</div><div class="star-group-grid">';
     group.forEach(function(v){html+=makeCard(v,filtered.indexOf(v));});
     html+='</div></div>';
   });
-
   document.getElementById('grid').innerHTML=html;
 }
 
 function updateAvailableOptions(){
   var sevens=allVideos.map(function(v){return v.sevens;});
   var diffs=allVideos.map(function(v){return v.difficulty;});
-  // Build category list respecting CATEGORY_ORDER, then add any extras
-  var rawCats=allVideos.map(function(v){return v.category;}).filter(function(c,i,a){return c&&a.indexOf(c)===i;});
-  var cats=[];
-  CATEGORY_ORDER.forEach(function(c){if(rawCats.indexOf(c)>=0)cats.push(c);});
-  rawCats.forEach(function(c){if(cats.indexOf(c)===-1)cats.push(c);});
-
+  var cats=allVideos.map(function(v){return v.category;}).filter(function(c,i,a){return c&&a.indexOf(c)===i;}).sort();
   var drop=document.getElementById('pillDrop2');
   drop.querySelectorAll('[data-cat]:not([data-cat="all"])').forEach(function(b){b.remove();});
   cats.forEach(function(c){
@@ -501,7 +448,7 @@ window.openVideo=function(idx){
     videoEl.style.display='block';
   }else{videoEl.style.display='none';videoEl.innerHTML='';}
   var meta='';
-  if(v.sevens)meta+='<span class="meta-tag meta-stars">'+sevensLabel(v.sevens)+' '+v.sevens+' Seven'+(v.sevens>1?'s':'')+'</span>';
+  if(v.stars)meta+='<span class="meta-tag meta-stars">'+starsLabel(v.stars)+' '+v.stars+' Stern'+(v.stars>1?'e':'')+'</span>';
   if(v.category)meta+='<span class="meta-tag meta-cat">'+v.category+'</span>';
   if(v.difficulty)meta+='<span class="meta-tag meta-diff">'+v.difficulty+'</span>';
   document.getElementById('modalMeta').innerHTML=meta;
