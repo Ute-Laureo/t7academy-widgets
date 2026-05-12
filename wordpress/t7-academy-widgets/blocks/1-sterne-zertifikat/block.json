@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schemas.wp.org/wp/6.0/block.json",
+  "apiVersion": 3,
+  "name": "t7/1-sterne-zertifikat",
+  "title": "T7 1-Stern Zertifikat",
+  "description": "1-Star Certificate learning widget",
+  "category": "widgets",
+  "icon": "star",
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"]
+  },
+  "attributes": {
+    "playerName": {
+      "type": "string",
+      "default": "Spieler"
+    },
+    "playerEmail": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "textdomain": "t7-academy-widgets"
+}

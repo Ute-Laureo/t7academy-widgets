@@ -1,0 +1,23 @@
+:root {
+  --t7-primary: #FFD700;
+  --t7-secondary: #00E5FF;
+  --t7-bg: #080f1e;
+  --t7-text: #f0f0f0;
+}
+
+.wp-block-t7-1-sterne-zertifikat,
+.wp-block-t7-2-sterne-zertifikat,
+.wp-block-t7-3-sterne-zertifikat,
+.wp-block-t7-4-sterne-zertifikat,
+.wp-block-t7-5-sterne-zertifikat {
+  margin: 1.5em 0;
+}
+
+.t7-widget {
+  color-scheme: dark;
+}
+
+.t7-widget iframe {
+  background: var(--t7-bg);
+  color: var(--t7-text);
+}
