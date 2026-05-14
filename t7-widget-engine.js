@@ -611,29 +611,69 @@ function T7Fortschritt(containerId){
   var cont=document.getElementById(containerId);
   if(!cont)return;
   cont.innerHTML='<div class="t7f-loading">Lade\u2026</div>';
+  function getWeekKey(date){
+    var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+    var day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);
+    var yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    var week=Math.ceil((((d-yearStart)/86400000)+1)/7);
+    return d.getUTCFullYear()+'-W'+week;
+  }
+  function computeStreak(attempts){
+    var weekSet={};
+    (attempts||[]).forEach(function(row){
+      var ts=typeof row.attempted_at==='number'?row.attempted_at:parseInt(row.attempted_at)||0;
+      if(ts)weekSet[getWeekKey(new Date(ts))]=true;
+    });
+    var weeks=Object.keys(weekSet).sort().reverse();
+    if(!weeks.length)return 0;
+    var thisW=getWeekKey(new Date()),lastW=getWeekKey(new Date(Date.now()-7*86400000));
+    if(weeks[0]!==thisW&&weeks[0]!==lastW)return 0;
+    var streak=1;
+    for(var i=1;i<weeks.length;i++){
+      var py=parseInt(weeks[i-1].split('-W')[0]),pw=parseInt(weeks[i-1].split('-W')[1]);
+      var cy=parseInt(weeks[i].split('-W')[0]),cw=parseInt(weeks[i].split('-W')[1]);
+      if((py===cy&&pw-cw===1)||(py-cy===1&&pw===1&&cw>=52))streak++;else break;
+    }
+    return streak;
+  }
+  function getWeeklyXP(attempts){
+    var now=new Date();
+    var startOfWeek=new Date(now);startOfWeek.setHours(0,0,0,0);
+    startOfWeek.setDate(now.getDate()-((now.getDay()+6)%7));
+    var t0=startOfWeek.getTime(),tw=0;
+    (attempts||[]).forEach(function(row){
+      var raw=row.attempted_at;
+      var ts=typeof raw==='number'?raw:parseInt(raw)||0;
+      if(ts>=t0)tw+=Number(row.xp||0);
+    });
+    return tw;
+  }
   function render(email,name){
     Promise.all([
       fetch(T7_SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}),
-      fetch(T7_SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&select=module_key,module_label,challenge_idx,rating',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();})
+      fetch(T7_SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(email)+'&select=attempted_at,xp&order=attempted_at.asc',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();})
     ]).then(function(res){
-      var players=res[0]||[],comps=res[1]||[];
+      var players=res[0]||[],attempts=res[1]||[];
       var totalXP=players.length?Number(players[0].total_xp||0):0;
+      var weekXP=getWeeklyXP(attempts);
+      var streak=computeStreak(attempts);
       var parts=(name||email||'?').trim().split(/\s+/);
       var dispName=parts[0]||'Spieler';
       var ini=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():dispName.slice(0,2).toUpperCase();
-      var mods={};
-      comps.forEach(function(c){
-        var mk=c.module_key;
-        if(!mods[mk])mods[mk]={label:c.module_label||mk,done:0,total:0};
-        mods[mk].total++;
-        if(c.rating>=4)mods[mk].done++;
-      });
-      var mkKeys=Object.keys(mods);
-      var modsHTML=mkKeys.length?mkKeys.map(function(mk){
-        var m=mods[mk],pct=m.total?Math.round(m.done/m.total*100):0;
-        return '<div><div class="t7f-mod-row"><span class="t7f-mod-name">'+m.label+'</span><span class="t7f-mod-stat">'+m.done+'/'+m.total+'</span></div><div class="t7f-bar"><div class="t7f-bar-fill" style="width:'+pct+'%"></div></div></div>';
-      }).join(''):'<div class="t7f-empty">Noch keine Challenges gestartet.</div>';
-      cont.innerHTML='<div class="t7f-player"><div class="t7f-avatar">'+ini+'</div><div><div class="t7f-pname">'+dispName+'</div><div class="t7f-xp-total">'+totalXP.toLocaleString('de-AT')+' XP gesamt</div></div></div><div class="t7f-mods">'+modsHTML+'</div>';
+      var daysHtml='';
+      for(var d=0;d<8;d++){daysHtml+='<div class="t7f-streak-day'+(d<streak?' on':'')+'"></div>';}
+      cont.innerHTML=
+        '<div class="t7f-hero">'+
+          '<div class="t7f-hero-top">'+
+            '<div class="t7f-avatar">'+ini+'</div>'+
+            '<div><div class="t7f-pname">'+dispName+'</div><div class="t7f-sub">Mein Fortschritt</div></div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="t7f-stat-row">'+
+          '<div class="t7f-stat-card"><div class="t7f-stat-num">'+totalXP.toLocaleString('de-AT')+'</div><div class="t7f-stat-label">Gesamt XP</div></div>'+
+          '<div class="t7f-stat-card"><div class="t7f-stat-num">+'+weekXP+'</div><div class="t7f-stat-label">Diese Woche</div></div>'+
+        '</div>'+
+        '<div class="t7f-streak"><div class="t7f-streak-val">'+streak+' Woche'+(streak===1?'':'n')+' Streak</div><div class="t7f-streak-days">'+daysHtml+'</div></div>';
     }).catch(function(){cont.innerHTML='<div class="t7f-empty">Fehler beim Laden.</div>';});
   }
   T7Identity.resolve(function(email,name){
@@ -716,6 +756,160 @@ function T7Badge(containerId){
   }
   T7Identity.resolve(function(email){if(email)fetchBadge(email);else cont.innerHTML='<div class="t7f-empty">Kein Spieler erkannt.</div>';});
   window.addEventListener('t7xpupdate',function(){var id=T7Identity.get();if(id&&id.email)fetchBadge(id.email);});
+}
+
+/* === MOBILE BOTTOM SHEET (FAB + Fortschritt/Rangliste/Zertifikat) === */
+function T7MobileSheet(){
+  if(document.getElementById('t7-fab'))return; // already injected
+  var sheetHTML=
+    '<button id="t7-fab" type="button">'+
+      '<span id="t7-fab-stars" style="display:none">\u2b50<span id="t7-fab-stars-num"></span></span>'+
+      '<span id="t7-fab-stars-sep" style="display:none;opacity:.5"> | </span>'+
+      '<span>\u26a1</span>'+
+      '<span id="t7-fab-xp">0 XP</span>'+
+      '<span style="opacity:.5"> | </span>'+
+      '<span id="t7-fab-streak">0 Wochen</span>'+
+    '</button>'+
+    '<div id="t7-sheet-overlay"></div>'+
+    '<div id="t7-sheet">'+
+      '<div class="t7-sheet-handle"></div>'+
+      '<div class="t7-sheet-header">'+
+        '<div class="t7-sheet-title" id="t7-sheet-title">Mein Fortschritt</div>'+
+        '<button class="t7-sheet-close" id="t7-sheet-close" type="button">\u2715</button>'+
+      '</div>'+
+      '<div class="t7-sheet-tabs">'+
+        '<button class="t7-sheet-tab active" id="t7-tab-fort" type="button">\ud83d\udcca Fortschritt</button>'+
+        '<button class="t7-sheet-tab" id="t7-tab-rang" type="button">\ud83c\udfc6 Rangliste</button>'+
+        '<button class="t7-sheet-tab" id="t7-tab-cert" type="button">\u2b50 Zertifikat</button>'+
+      '</div>'+
+      '<div class="t7-sheet-content" id="t7-sheet-content"><div class="t7m-loading">Lade\u2026</div></div>'+
+    '</div>';
+  var wrap=document.createElement('div');wrap.innerHTML=sheetHTML;
+  while(wrap.firstChild)document.body.appendChild(wrap.firstChild);
+
+  var st={open:false,tab:'fort',email:null,name:'Spieler',totalXP:0,weekXP:0,streak:0,joinedAt:null,joinedWeeks:0,stars:0,starsAt:null,players:[],joinMap:{},fortLoaded:false,rangLoaded:false,certLoaded:false};
+  function $(id){return document.getElementById(id);}
+  function getWeekKey(d){var x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);var ys=new Date(Date.UTC(x.getUTCFullYear(),0,1));return x.getUTCFullYear()+'-W'+Math.ceil((((x-ys)/86400000)+1)/7);}
+  function calcStreak(att){var wk={};(att||[]).forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts)wk[getWeekKey(new Date(ts))]=true;});var now=new Date(),s=0;for(var i=0;i<52;i++){var k=getWeekKey(new Date(now-i*7*86400000));if(wk[k])s++;else if(i>0)break;}return s;}
+  function calcWeekXP(att){var now=new Date(),sw=new Date(now);sw.setHours(0,0,0,0);sw.setDate(now.getDate()-((now.getDay()+6)%7));var t0=sw.getTime(),xp=0;(att||[]).forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts>=t0)xp+=Number(a.xp||0);});return xp;}
+  function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
+
+  function loadFort(){
+    Promise.all([
+      fetch(T7_SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(st.email)+'&select=total_xp',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
+      fetch(T7_SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(st.email)+'&select=attempted_at,xp&order=attempted_at.asc',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
+      fetch(T7_SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(st.email)+'&select=bm_joined_at&limit=1',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
+    ]).then(function(res){
+      st.totalXP=res[0]&&res[0].length?Number(res[0][0].total_xp||0):0;
+      st.weekXP=calcWeekXP(res[1]);
+      st.streak=calcStreak(res[1]);
+      st.joinedAt=res[2]&&res[2].length?res[2][0].bm_joined_at||null:null;
+      st.joinedWeeks=st.joinedAt?Math.floor((Date.now()-st.joinedAt)/(7*86400000)):0;
+      st.fortLoaded=true;updateFAB();
+      if(st.open&&st.tab==='fort')$('t7-sheet-content').innerHTML=renderFort();
+    });
+  }
+  function loadRang(){
+    Promise.all([
+      fetch(T7_SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit=20',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
+      fetch(T7_SB_URL+'/rest/v1/members?select=name,bm_joined_at&limit=200',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
+    ]).then(function(res){
+      var jm={};(res[1]||[]).forEach(function(m){if(m.name&&m.bm_joined_at)jm[m.name]=m.bm_joined_at;});
+      st.joinMap=jm;st.players=(res[0]||[]).map(function(p){return{name:p.player_name||'Unbekannt',xp:Number(p.total_xp||0)};});
+      st.rangLoaded=true;
+      if(st.open&&st.tab==='rang')$('t7-sheet-content').innerHTML=renderRang('xp');
+    });
+  }
+  function loadCert(){
+    fetch(T7_SB_URL+'/rest/v1/certifications?player_email=eq.'+encodeURIComponent(st.email)+'&select=stars,awarded_at,player_name&order=stars.desc&limit=1',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).then(function(rows){
+      if(rows&&rows.length&&rows[0].stars){st.stars=rows[0].stars;st.starsAt=rows[0].awarded_at;}
+      st.certLoaded=true;updateFAB();
+      if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();
+    }).catch(function(){st.certLoaded=true;if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML='<div class="t7m-empty">Fehler beim Laden.</div>';});
+  }
+  function updateFAB(){
+    $('t7-fab-xp').textContent=st.totalXP.toLocaleString('de-AT')+' XP';
+    $('t7-fab-streak').textContent=st.joinedWeeks+' Woche'+(st.joinedWeeks===1?'':'n');
+    if(st.stars){$('t7-fab-stars-num').textContent=st.stars;$('t7-fab-stars').style.display='inline';$('t7-fab-stars-sep').style.display='inline';}
+  }
+  function renderFort(){
+    if(!st.fortLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
+    var days='';
+    for(var i=0;i<8;i++)days+='<div class="t7f-streak-day'+(i<st.streak?' on':'')+'"></div>';
+    return '<div class="t7f-stat-row">'+
+      '<div class="t7f-stat-card"><div class="t7f-stat-num">'+st.totalXP.toLocaleString('de-AT')+'</div><div class="t7f-stat-label">Gesamt XP</div></div>'+
+      '<div class="t7f-stat-card"><div class="t7f-stat-num">+'+st.weekXP+'</div><div class="t7f-stat-label">Diese Woche</div></div>'+
+    '</div>'+
+    '<div class="t7f-streak"><div class="t7f-streak-val">'+st.streak+' Woche'+(st.streak===1?'':'n')+' Streak</div><div class="t7f-streak-days">'+days+'</div></div>';
+  }
+  function renderRang(mode){
+    if(!st.rangLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
+    var isW=(mode==='weeks');
+    var items=st.players.map(function(p){var jt=st.joinMap[p.name]||null;return{name:p.name,xp:p.xp,weeks:jt?Math.floor((Date.now()-jt)/(7*86400000)):0};});
+    items.sort(function(a,b){return isW?b.weeks-a.weeks:b.xp-a.xp;});
+    var tabs='<div class="t7m-rl-tabs"><button class="t7m-rl-tab'+(isW?'':' active')+'" data-mode="xp" type="button">\u26a1 XP</button><button class="t7m-rl-tab'+(isW?' active':'')+'" data-mode="weeks" type="button">\ud83d\udcc5 Wochen</button></div>';
+    var med=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
+    var firstName=(st.name||'').split(' ')[0];
+    var rows=items.map(function(p,i){
+      var r=i+1,isMe=firstName&&p.name.split(' ')[0]===firstName;
+      var val=isW?p.weeks+' Woche'+(p.weeks===1?'':'n'):p.xp.toLocaleString('de-AT')+' XP';
+      var posCls=r===1?' gold':r===2?' silver':r===3?' bronze':'';
+      return '<div class="t7m-rank'+(isMe?' me':'')+'"><div class="t7m-rank-pos'+posCls+'">'+(r<=3?med[r-1]:r)+'</div><div class="t7m-rank-av'+(isMe?' me':'')+'">'+ini(p.name)+'</div><div class="t7m-rank-name">'+p.name+'</div><div class="t7m-rank-val">'+val+'</div></div>';
+    }).join('');
+    return tabs+'<div>'+rows+'</div>';
+  }
+  function renderCert(){
+    if(!st.certLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
+    if(!st.stars)return '<div class="t7m-empty">Noch kein Zertifikat. \u00dcbe weiter und reiche dein Final-Video ein!</div>';
+    function starsHtml(n){if(n<=3)return'\u2b50'.repeat(n);var h=Math.ceil(n/2);return'\u2b50'.repeat(h)+'<br>'+'\u2b50'.repeat(n-h);}
+    function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
+    return '<div class="t7-cert">'+
+      '<div class="t7-cert-top"></div><div class="t7-cert-bottom"></div>'+
+      '<div class="t7-cert-brand">T7 Academy Zertifikat</div>'+
+      '<div class="t7-cert-line"></div>'+
+      '<div class="t7-cert-star-block">'+
+        '<div class="t7-cert-num">'+st.stars+'</div>'+
+        '<div class="t7-cert-stars">'+starsHtml(st.stars)+'</div>'+
+      '</div>'+
+      '<div class="t7-cert-line"></div>'+
+      '<div class="t7-cert-name">'+(st.name||'Spieler')+'</div>'+
+      '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(st.starsAt?' \u00b7 '+fmtDate(st.starsAt):'')+'</div>'+
+    '</div>';
+  }
+
+  function openSheet(){st.open=true;$('t7-sheet').classList.add('open');$('t7-sheet-overlay').classList.add('open');renderActive();}
+  function closeSheet(){st.open=false;$('t7-sheet').classList.remove('open');$('t7-sheet-overlay').classList.remove('open');}
+  function switchTab(t){
+    st.tab=t;
+    $('t7-tab-fort').className='t7-sheet-tab'+(t==='fort'?' active':'');
+    $('t7-tab-rang').className='t7-sheet-tab'+(t==='rang'?' active':'');
+    $('t7-tab-cert').className='t7-sheet-tab'+(t==='cert'?' active':'');
+    $('t7-sheet-title').textContent=t==='fort'?'Mein Fortschritt':t==='rang'?'Rangliste':'Mein Zertifikat';
+    renderActive();
+  }
+  function renderActive(){
+    if(st.tab==='fort'){if(!st.fortLoaded&&st.email)loadFort();$('t7-sheet-content').innerHTML=renderFort();}
+    else if(st.tab==='rang'){if(!st.rangLoaded)loadRang();$('t7-sheet-content').innerHTML=renderRang('xp');}
+    else{if(!st.certLoaded&&st.email)loadCert();$('t7-sheet-content').innerHTML=renderCert();}
+  }
+
+  $('t7-fab').onclick=openSheet;
+  $('t7-sheet-close').onclick=closeSheet;
+  $('t7-sheet-overlay').onclick=closeSheet;
+  $('t7-tab-fort').onclick=function(){switchTab('fort');};
+  $('t7-tab-rang').onclick=function(){switchTab('rang');};
+  $('t7-tab-cert').onclick=function(){switchTab('cert');};
+  $('t7-sheet-content').addEventListener('click',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('t7m-rl-tab')){$('t7-sheet-content').innerHTML=renderRang(t.dataset.mode);}});
+  var ts=0,sheet=$('t7-sheet');
+  sheet.addEventListener('touchstart',function(e){ts=e.touches[0].clientY;},{passive:true});
+  sheet.addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-ts>80)closeSheet();},{passive:true});
+
+  T7Identity.resolve(function(email,name){
+    if(!email)return;
+    st.email=email;st.name=name||(email.split('@')[0]);
+    loadFort();loadCert();
+  });
+  window.addEventListener('t7xpupdate',function(){if(st.email){st.fortLoaded=false;loadFort();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
 }
 
 /* === PUBLIC API === */
