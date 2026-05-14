@@ -561,7 +561,7 @@ function T7Cert(cfg){
     }).join('');
     return '<div class="t7w t7b-wrap" data-uid="'+uid+'">'+
       '<div class="cr" id="t7b-cr-'+uid+'">'+
-        '<div class="cr-badge" style="background:linear-gradient(135deg,#FFD700,#00E5FF);box-shadow:0 0 14px rgba(0,229,255,.35)">\u2b50</div>'+
+        '<div class="cr-badge" style="background:linear-gradient(135deg,#FFD700,#FF8C00);box-shadow:0 0 14px rgba(255,160,0,.4)">\u2b50</div>'+
         '<div class="cr-body"><div class="cr-title">'+(cfg.title||'Zertifikat')+'</div>'+
           '<div class="cr-sub"><span>Stern Zertifikat</span><div class="cr-prog"><div class="cr-prog-fill" id="t7b-pf-'+uid+'" style="width:0%"></div></div><span class="cr-prog-label" id="t7b-pl-'+uid+'">0 / '+nd+'</span></div></div>'+
         '<div class="cr-player"><div class="cr-avatar" id="t7b-av-'+uid+'">?</div>'+
