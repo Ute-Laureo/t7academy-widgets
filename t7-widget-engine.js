@@ -693,18 +693,18 @@ function T7Badge(containerId){
   function starsHtml(n){if(n<=3)return'\u2b50'.repeat(n);var h=Math.ceil(n/2);return'\u2b50'.repeat(h)+'<br>'+'\u2b50'.repeat(n-h);}
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
   function showBadge(n,at,nm){
-    cont.innerHTML='<div style="position:relative;overflow:hidden;text-align:center;background:linear-gradient(160deg,#060d1a 0%,#0a1628 50%,#060d1a 100%);border-radius:14px;padding:22px 22px 18px;box-shadow:0 0 0 1px rgba(0,229,255,.18),0 10px 40px rgba(0,0,0,.6)">'+
-      '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#007a99 15%,#00E5FF 35%,#7ffcff 50%,#00E5FF 65%,#007a99 85%,transparent)"></div>'+
-      '<div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#007a99 15%,#00E5FF 35%,#7ffcff 50%,#00E5FF 65%,#007a99 85%,transparent)"></div>'+
-      '<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,229,255,.85);margin-bottom:12px">T7 Academy Zertifikat</div>'+
-      '<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.3),transparent);margin:0 auto 14px;width:55%"></div>'+
-      '<div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px">'+
-        '<div style="font-size:70px;font-weight:800;line-height:1;color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,.6)">'+n+'</div>'+
-        '<div style="font-size:24px;filter:drop-shadow(0 0 8px rgba(255,215,0,.7))">'+starsHtml(n)+'</div>'+
+    cont.innerHTML='<div class="t7-cert">'+
+      '<div class="t7-cert-top"></div>'+
+      '<div class="t7-cert-bottom"></div>'+
+      '<div class="t7-cert-brand">T7 Academy Zertifikat</div>'+
+      '<div class="t7-cert-line"></div>'+
+      '<div class="t7-cert-star-block">'+
+        '<div class="t7-cert-num">'+n+'</div>'+
+        '<div class="t7-cert-stars">'+starsHtml(n)+'</div>'+
       '</div>'+
-      '<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.3),transparent);margin:0 auto 12px;width:55%"></div>'+
-      (nm?'<div style="font-size:20px;font-weight:800;letter-spacing:.03em;color:#00E5FF;text-transform:uppercase;margin-bottom:5px;text-shadow:0 0 18px rgba(0,229,255,.6)">'+nm+'</div>':'')+
-      '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.04em;text-transform:uppercase">Zertifiziert von <strong style="color:rgba(0,229,255,.85)">T7 Academy Expert</strong>'+(at?' &nbsp;&middot;&nbsp; '+fmtDate(at):'')+' </div>'+
+      '<div class="t7-cert-line"></div>'+
+      (nm?'<div class="t7-cert-name">'+nm+'</div>':'')+
+      '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(at?' \u00b7 '+fmtDate(at):'')+'</div>'+
     '</div>';
   }
   function fetchBadge(email){
@@ -715,7 +715,6 @@ function T7Badge(containerId){
     }).catch(function(){cont.innerHTML='<div class="t7f-empty">Fehler beim Laden.</div>';});
   }
   T7Identity.resolve(function(email){if(email)fetchBadge(email);else cont.innerHTML='<div class="t7f-empty">Kein Spieler erkannt.</div>';});
-  // Retry on XP update (in case cert was just awarded)
   window.addEventListener('t7xpupdate',function(){var id=T7Identity.get();if(id&&id.email)fetchBadge(id.email);});
 }
 
