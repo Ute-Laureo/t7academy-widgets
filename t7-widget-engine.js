@@ -730,7 +730,7 @@ function T7Rangliste(containerId){
 function T7Badge(containerId){
   var cont=document.getElementById(containerId);if(!cont)return;
   cont.innerHTML='<div class="t7f-loading">Lade\u2026</div>';
-  function starsHtml(n){if(n<=3)return'\u2b50'.repeat(n);var h=Math.ceil(n/2);return'\u2b50'.repeat(h)+'<br>'+'\u2b50'.repeat(n-h);}
+  function starsHtml(n){return '\u2b50';}
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
   function showBadge(n,at,nm){
     cont.innerHTML='<div class="t7-cert">'+
@@ -738,9 +738,9 @@ function T7Badge(containerId){
       '<div class="t7-cert-bottom"></div>'+
       '<div class="t7-cert-brand">T7 Academy Zertifikat</div>'+
       '<div class="t7-cert-line"></div>'+
-      '<div class="t7-cert-star-block">'+
-        '<div class="t7-cert-num">'+n+'</div>'+
-        '<div class="t7-cert-stars">'+starsHtml(n)+'</div>'+
+        '<div class="t7-cert-star-block">'+
+        (st.stars>1?'<div class="t7-cert-num">'+st.stars+'</div>':'')+
+        '<div class="t7-cert-stars">'+starsHtml(st.stars)+'</div>'+
       '</div>'+
       '<div class="t7-cert-line"></div>'+
       (nm?'<div class="t7-cert-name">'+nm+'</div>':'')+
@@ -861,7 +861,7 @@ function T7MobileSheet(){
   function renderCert(){
     if(!st.certLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
     if(!st.stars)return '<div class="t7m-empty">Noch kein Zertifikat. \u00dcbe weiter und reiche dein Final-Video ein!</div>';
-    function starsHtml(n){if(n<=3)return'\u2b50'.repeat(n);var h=Math.ceil(n/2);return'\u2b50'.repeat(h)+'<br>'+'\u2b50'.repeat(n-h);}
+    function starsHtml(n){return '\u2b50';}
     function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
     return '<div class="t7-cert">'+
       '<div class="t7-cert-top"></div><div class="t7-cert-bottom"></div>'+
