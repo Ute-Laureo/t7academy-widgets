@@ -37,8 +37,11 @@
     var el = document.getElementById(FEED_ID);
     if (!el) return;
 
-    injectStyles();
-    el.classList.add('t7-news-scroll');
+    // Apply scroll constraints inline (avoids any CSS specificity surprises)
+    var maxH = VISIBLE_ITEMS * CARD_HEIGHT_PX + (VISIBLE_ITEMS - 1) * CARD_GAP_PX;
+    el.style.maxHeight = maxH + 'px';
+    el.style.overflowY = 'auto';
+    el.style.paddingRight = '4px';
 
     if (!CSV_URL || CSV_URL.indexOf('PASTE_') === 0) {
       fallback(el);
@@ -113,31 +116,6 @@
     if (de) return new Date(+de[3], +de[2] - 1, +de[1]).getTime();
     var d = new Date(s);
     return isNaN(d) ? 0 : d.getTime();
-  }
-
-  // Inject scroll styling once. Sized to fit VISIBLE_ITEMS cards;
-  // any extras become scrollable. Uses theme accent for the scrollbar.
-  function injectStyles(){
-    if (document.getElementById('t7-news-styles')) return;
-    var max = VISIBLE_ITEMS * CARD_HEIGHT_PX + (VISIBLE_ITEMS - 1) * CARD_GAP_PX;
-    var css = ''
-      + '.news-feed.t7-news-scroll{'
-      +   'max-height:' + max + 'px;'
-      +   'overflow-y:auto;'
-      +   'padding-right:6px;'
-      +   'scrollbar-width:thin;'
-      +   'scrollbar-color:var(--accent,#00E5FF) transparent;'
-      + '}'
-      + '.news-feed.t7-news-scroll::-webkit-scrollbar{width:8px;}'
-      + '.news-feed.t7-news-scroll::-webkit-scrollbar-track{background:transparent;}'
-      + '.news-feed.t7-news-scroll::-webkit-scrollbar-thumb{'
-      +   'background:linear-gradient(180deg,#00E5FF,#0080FF);'
-      +   'border-radius:99px;'
-      + '}';
-    var style = document.createElement('style');
-    style.id = 't7-news-styles';
-    style.textContent = css;
-    document.head.appendChild(style);
   }
 
   // Minimal CSV parser — handles quoted fields, escaped quotes, CRLF
