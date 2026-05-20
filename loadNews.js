@@ -19,20 +19,26 @@
       - image: thumbnail URL (optional, beats emoji if present)
       - published: leave blank or "yes" to show; "no" to hide
 
-   The newest 4 published rows are shown, sorted by date desc.
-   If the sheet can't be reached, falls back to whatever
-   renderNewsFallback() is defined on the page (or a built-in
-   minimal fallback if none exists).
+   All published rows are rendered, sorted newest-first.
+   About 5 cards are visible at once; if there are more, the
+   feed scrolls. If the sheet can't be reached, falls back to
+   whatever renderNewsFallback() is defined on the page (or a
+   built-in minimal fallback if none exists).
    ============================================================ */
 
 (function(){
-  var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQHWaswAJIeuF1xBh_yBGIDKcB58lya5y6NEJ-rLS_3pJ-7mEZruDXjo7uOj5s5DwtXSEuH7-iq-kYk/pub?output=csv';
-  var MAX_ITEMS = 4;
+  var CSV_URL = 'PASTE_PUBLISHED_CSV_URL_HERE';
+  var VISIBLE_ITEMS = 5;          // how many cards fit before scroll kicks in
+  var CARD_HEIGHT_PX = 96;        // approx height of one news-card (thumb + padding)
+  var CARD_GAP_PX = 10;           // matches CSS gap between cards
   var FEED_ID = 'news-feed';
 
   function loadNews(){
     var el = document.getElementById(FEED_ID);
     if (!el) return;
+
+    injectStyles();
+    el.classList.add('t7-news-scroll');
 
     if (!CSV_URL || CSV_URL.indexOf('PASTE_') === 0) {
       fallback(el);
@@ -52,8 +58,7 @@
           var p = (it.published || '').toLowerCase();
           return p !== 'no' && p !== 'false' && p !== '0';
         })
-        .sort(function(a, b){ return (b.date || '').localeCompare(a.date || ''); })
-        .slice(0, MAX_ITEMS);
+        .sort(function(a, b){ return parseDate(b.date) - parseDate(a.date); });
 
       if (!items.length) { fallback(el); return; }
 
@@ -66,8 +71,8 @@
   function renderCard(it){
     var dateText = '';
     if (it.date) {
-      var d = new Date(it.date);
-      if (!isNaN(d)) dateText = d.toLocaleDateString('de-AT', { day:'2-digit', month:'short', year:'numeric' });
+      var t = parseDate(it.date);
+      if (t) dateText = new Date(t).toLocaleDateString('de-AT', { day:'2-digit', month:'short', year:'numeric' });
       else dateText = it.date;
     }
     var thumb = it.image
@@ -95,6 +100,44 @@
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c];
     });
+  }
+
+  // Parse a date string in ISO (YYYY-MM-DD), German (DD.MM.YYYY) or
+  // any format new Date() accepts. Returns a timestamp (ms) or 0.
+  function parseDate(s){
+    if (!s) return 0;
+    s = String(s).trim();
+    var iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3]).getTime();
+    var de = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (de) return new Date(+de[3], +de[2] - 1, +de[1]).getTime();
+    var d = new Date(s);
+    return isNaN(d) ? 0 : d.getTime();
+  }
+
+  // Inject scroll styling once. Sized to fit VISIBLE_ITEMS cards;
+  // any extras become scrollable. Uses theme accent for the scrollbar.
+  function injectStyles(){
+    if (document.getElementById('t7-news-styles')) return;
+    var max = VISIBLE_ITEMS * CARD_HEIGHT_PX + (VISIBLE_ITEMS - 1) * CARD_GAP_PX;
+    var css = ''
+      + '.news-feed.t7-news-scroll{'
+      +   'max-height:' + max + 'px;'
+      +   'overflow-y:auto;'
+      +   'padding-right:6px;'
+      +   'scrollbar-width:thin;'
+      +   'scrollbar-color:var(--accent,#00E5FF) transparent;'
+      + '}'
+      + '.news-feed.t7-news-scroll::-webkit-scrollbar{width:8px;}'
+      + '.news-feed.t7-news-scroll::-webkit-scrollbar-track{background:transparent;}'
+      + '.news-feed.t7-news-scroll::-webkit-scrollbar-thumb{'
+      +   'background:linear-gradient(180deg,#00E5FF,#0080FF);'
+      +   'border-radius:99px;'
+      + '}';
+    var style = document.createElement('style');
+    style.id = 't7-news-styles';
+    style.textContent = css;
+    document.head.appendChild(style);
   }
 
   // Minimal CSV parser — handles quoted fields, escaped quotes, CRLF
