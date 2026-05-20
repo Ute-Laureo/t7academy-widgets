@@ -27,7 +27,7 @@
    ============================================================ */
 
    (function(){
-    var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQHWaswAJIeuF1xBh_yBGIDKcB58lya5y6NEJ-rLS_3pJ-7mEZruDXjo7uOj5s5DwtXSEuH7-iq-kYk/pubhtml';
+    var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQHWaswAJIeuF1xBh_yBGIDKcB58lya5y6NEJ-rLS_3pJ-7mEZruDXjo7uOj5s5DwtXSEuH7-iq-kYk/pub?output=csv';    var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQHWaswAJIeuF1xBh_yBGIDKcB58lya5y6NEJ-rLS_3pJ-7mEZruDXjo7uOj5s5DwtXSEuH7-iq-kYk/pub?output=csv';
     var VISIBLE_ITEMS = 5;          // how many cards fit before scroll kicks in
     var CARD_HEIGHT_PX = 96;        // approx height of one news-card (thumb + padding)
     var CARD_GAP_PX = 10;           // matches CSS gap between cards
