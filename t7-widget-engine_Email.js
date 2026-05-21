@@ -498,13 +498,11 @@ function T7Cert(cfg){
   }
   function autoDownload(blob,fname){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);}
   function mailto(){
-    if (typeof window.T7CertUpload === 'function') {
-      window.T7CertUpload(cfg.stars);
-    } else {
-      console.warn('T7CertUpload not loaded — include t7-cert-upload.js on this page.');
-      alert('Upload-Widget nicht geladen. Bitte Seite neu laden oder Support kontaktieren.');
-    }
-  }  // Init player
+    var rows=drills.map(function(d,i){var r=S.ratings[i]||0;return 'Challenge '+(i+1)+' '+d.title+': '+(r===5?'Perfekt':r===4?'Gut ('+r+'/5)':r>0?r+'/5':'--');}).join('\n');
+    var body='Hallo,\n\nIch m\xf6chte mein '+cfg.title+' einreichen.\n\nSpieler: '+S.name+'\nE-Mail: '+(S.email||'')+'\n\nErgebnisse:\n'+rows+'\n\nKurs-XP: '+modXP()+'\nGesamt-XP: '+(typeof S.sbTotal==='number'?S.sbTotal:0);
+    window.location.href='mailto:'+(cfg.expertEmail||'expert@t7academy.com')+'?subject='+encodeURIComponent(cfg.title+' \u2013 Einreichung von '+S.name)+'&body='+encodeURIComponent(body);
+  }
+  // Init player
   function initPlayer(email,name){
     S.email=email;S.inited=true;
     var parts=(name||'Spieler').trim().split(/\s+/);
