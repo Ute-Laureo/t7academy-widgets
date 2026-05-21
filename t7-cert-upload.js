@@ -22,7 +22,6 @@
   var BUCKET = 'cert-submissions';
   var MAX_BYTES = 100 * 1024 * 1024;        // 100 MB
   var MAX_REC_SECONDS = 120;                // 2 min hard stop on in-browser recording
-  var ALLOWED_TYPES = ['video/mp4','video/quicktime','video/webm','video/x-m4v'];
 
   // Recording state (per-modal)
   var rec = { stream:null, recorder:null, chunks:[], blob:null, mime:'video/webm', timer:null, seconds:0 };
@@ -235,7 +234,16 @@
   function startRecording(stars, email){
     rec.chunks = [];
     rec.blob = null;
-    var preferred = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
+    // Include audio codec in probe strings — Firefox returns true for
+    // 'video/webm;codecs=vp8' but then fails when the stream has audio.
+    var preferred = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm;codecs=opus,vp9',
+      'video/webm;codecs=opus,vp8',
+      'video/webm',
+      'video/mp4'
+    ];
     var mime = '';
     for (var i = 0; i < preferred.length; i++) {
       if (window.MediaRecorder && MediaRecorder.isTypeSupported(preferred[i])) { mime = preferred[i]; break; }
@@ -243,7 +251,8 @@
     try {
       rec.recorder = mime ? new MediaRecorder(rec.stream, { mimeType: mime }) : new MediaRecorder(rec.stream);
     } catch(e){
-      showStatus('error', 'Aufnahme nicht unterstützt: ' + (e && e.message || e));
+      showStatus('error', 'Aufnahme nicht unterstützt: ' + (e && e.message || e) + ' Bitte stattdessen "Anhängen und senden" verwenden.');
+      backToChoose();
       return;
     }
     rec.mime = rec.recorder.mimeType || mime || 'video/webm';
@@ -258,7 +267,13 @@
       document.getElementById('t7cu-rec-timer').style.display = 'none';
       renderRecActions('preview', stars, email);
     };
-    rec.recorder.start();
+    try {
+      rec.recorder.start();
+    } catch(e){
+      showStatus('error', 'Aufnahme konnte nicht starten: ' + (e && e.message || e) + '. Bitte stattdessen "Anhängen und senden" verwenden.');
+      backToChoose();
+      return;
+    }
     rec.seconds = 0;
     document.getElementById('t7cu-rec-timer').style.display = 'inline-block';
     document.getElementById('t7cu-rec-timer').textContent = '⏺ 0:00';
@@ -302,12 +317,12 @@
       showStatus('error', 'Das Video ist zu gross (' + fmtMB(file.size) + ', max. ' + fmtMB(MAX_BYTES) + '). Bitte kürze oder reduziere die Qualität.');
       return;
     }
-    if (file.type && ALLOWED_TYPES.indexOf(file.type) === -1) {
-      // Recorded WebM with codec hint may not exact-match — accept anything starting with "video/"
-      if (file.type.indexOf('video/') !== 0) {
-        showStatus('error', 'Dateityp ' + (file.type || 'unbekannt') + ' wird nicht unterstützt. Bitte MP4, MOV oder WEBM verwenden.');
-        return;
-      }
+    // Strip codec parameters from file.type so 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'
+    // becomes 'video/mp4' — Supabase Storage's allowed_mime_types is an exact match list.
+    var contentType = (file.type || 'video/webm').split(';')[0].trim().toLowerCase();
+    if (contentType && contentType.indexOf('video/') !== 0) {
+      showStatus('error', 'Dateityp ' + contentType + ' wird nicht unterstützt. Bitte MP4, MOV oder WEBM verwenden.');
+      return;
     }
 
     // Free the camera, hide other stages, show progress
@@ -325,7 +340,7 @@
     xhr.open('POST', SB_URL + '/storage/v1/object/' + BUCKET + '/' + path);
     xhr.setRequestHeader('apikey', SB_KEY);
     xhr.setRequestHeader('Authorization', 'Bearer ' + SB_KEY);
-    xhr.setRequestHeader('Content-Type', file.type || 'video/webm');
+    xhr.setRequestHeader('Content-Type', contentType);
     xhr.setRequestHeader('x-upsert', 'false');
 
     xhr.upload.onprogress = function(e){
