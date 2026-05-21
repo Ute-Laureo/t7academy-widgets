@@ -385,8 +385,9 @@ function T7Challenge(cfg){
 
 /* ===========================================================
    TYPE B ENGINE -- T7Cert
-   Star certificates: 5 drills, then submit final video to expert
-   All drills must be rated >=4 to unlock the submission row
+   Star certificates: 5 drills, then upload final video via
+   T7CertUpload (Supabase). All drills must be rated >=4
+   to unlock the submission row.
    =========================================================== */
 function T7Cert(cfg){
   var uid=(Math.random().toString(36)+'00000').slice(2,7);
@@ -394,7 +395,7 @@ function T7Cert(cfg){
   var XMUL=[0,.2,.4,.6,.8,1];
   function aXP(r,max){return Math.round((XMUL[r]||0)*max);}
   function cXP(r,max){return r<4?0:Math.round((XMUL[r]||0)*max);}
-  var S={expanded:false,drill:-1,rate:0,ratings:drills.map(function(){return 0;}),scXP:drills.map(function(){return 0;}),cumXP:0,cat:{},sk:'t7_'+cfg.instanceKey+'_g',ms:null,mr:null,ch:[],rec:false,fms:null,fmr:null,fch:[],frec:false,fblob:null,inited:false,name:'Spieler',sbTotal:null,email:null,submitted:false};
+  var S={expanded:false,drill:-1,rate:0,ratings:drills.map(function(){return 0;}),scXP:drills.map(function(){return 0;}),cumXP:0,cat:{},sk:'t7_'+cfg.instanceKey+'_g',ms:null,mr:null,ch:[],rec:false,inited:false,name:'Spieler',sbTotal:null,email:null,submitted:false};
   var cont=document.getElementById(cfg.containerId||'cert-container');if(!cont)return;
   cont.insertAdjacentHTML('beforeend',_html());
   function el(id){return document.getElementById('t7b-'+id+'-'+uid);}
@@ -432,7 +433,7 @@ function T7Cert(cfg){
     if(S.expanded){cr.classList.add('open');panel.classList.add('open');el('crb').textContent='Schlie\xdfen \u25b2';}
     else{cr.classList.remove('open');panel.classList.remove('open');el('crb').textContent='Starten \u25bc';goTrack();}
   }
-  function goTrack(){el('embed').src='';el('drill').classList.remove('open');el('submit').classList.remove('open');show('track');stopCam();stopFCam();refresh();sv();}
+  function goTrack(){el('embed').src='';el('drill').classList.remove('open');show('track');stopCam();refresh();sv();}
   function openDrill(idx){
     S.drill=idx;S.rate=0;var d=drills[idx];
     el('deye').textContent=d.eye;el('dh').textContent=d.title;el('dmeta').textContent=d.meta;
@@ -442,14 +443,11 @@ function T7Cert(cfg){
   }
   function openSubmit(){
     if(!allDone())return;
-    hide('track');el('drill').classList.remove('open');el('submit').classList.add('open');
-    var cl=el('checklist');
-    if(cl)cl.innerHTML=drills.map(function(d,i){var r=S.ratings[i]||0,done=r>=4;return'<div class="ci'+(done?' done':'')+'"><div class="ci-check">'+(done?'\u2713':r>0?r:'')+'</div><div class="ci-name">'+d.title+'</div><div class="ci-score">'+(r===5?'\u2605 Perfekt':r===4?'\u2713 Gut':r>0?r+'/5':'')+'</div></div>';}).join('');
-    var mob=/iphone|ipad|ipod|android/i.test(navigator.userAgent);
-    el('mob').style.display=mob?'block':'none';el('desk').style.display=mob?'none':'block';
-    if(mob&&S.submitted)el('mobsent').style.display='flex';
-    if(!mob&&S.submitted){hide('fcamcard');hide('fcam');hide('fprevw');show('sent');}
-    sv();
+    if(typeof window.T7CertUpload==='function'){
+      window.T7CertUpload(cfg.stars);
+    }else{
+      alert('Upload-Widget nicht geladen. Bitte Seite neu laden.');
+    }
   }
   function goStep(n){
     ['s1','s2','s3','s4'].forEach(function(id,i){el(id).style.display=(i===n-1)?'block':'none';});
@@ -488,23 +486,9 @@ function T7Cert(cfg){
     if(!S.rec){S.ch=[];var opt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].filter(function(t){return MediaRecorder.isTypeSupported(t);})[0]||'';S.mr=new MediaRecorder(S.ms,opt?{mimeType:opt}:{});S.mr.ondataavailable=function(e){if(e.data&&e.data.size>0)S.ch.push(e.data);};S.mr.onstop=function(){var blob=new Blob(S.ch,{type:S.mr.mimeType||'video/webm'});var pv=el('prev');pv.src=URL.createObjectURL(blob);pv.load();el('camlive').style.display='none';el('prevw').style.display='block';hide('skiprow');stopCam();};S.mr.start();S.rec=true;el('recbtn').textContent='\u2B1B Stopp';el('recbtn').style.background='#DC2626';el('rectim').style.display='block';}
     else{if(S.mr&&S.mr.state!=='inactive')S.mr.stop();S.rec=false;el('recbtn').textContent='\u25cf Aufnahme';el('rectim').style.display='none';}
   }
-  // Final camera (desktop)
-  function startFCam(){navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(function(s){S.fms=s;var v=el('fcamv');v.srcObject=s;v.play();hide('fcamcard');el('fcam').style.display='block';}).catch(function(){});}
-  function stopFCam(){if(S.fms){S.fms.getTracks().forEach(function(t){t.stop();});S.fms=null;}if(S.fmr&&S.fmr.state!=='inactive')try{S.fmr.stop();}catch(e){}S.fmr=null;S.fch=[];S.frec=false;}
-  function toggleFRec(){
-    if(!S.fms)return;
-    if(!S.frec){S.fch=[];var opt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].filter(function(t){return MediaRecorder.isTypeSupported(t);})[0]||'';S.fmr=new MediaRecorder(S.fms,opt?{mimeType:opt}:{});S.fmr.ondataavailable=function(e){if(e.data&&e.data.size>0)S.fch.push(e.data);};S.fmr.onstop=function(){S.fblob=new Blob(S.fch,{type:S.fmr.mimeType||'video/webm'});var pv=el('fprev');pv.src=URL.createObjectURL(S.fblob);pv.load();el('fcam').style.display='none';el('fprevw').style.display='block';stopFCam();};S.fmr.start();S.frec=true;el('frecbtn').textContent='\u2B1B Stopp';el('frectim').style.display='block';}
-    else{if(S.fmr&&S.fmr.state!=='inactive')S.fmr.stop();S.frec=false;el('frecbtn').textContent='\u25cf Aufnahme';el('frectim').style.display='none';}
-  }
-  function autoDownload(blob,fname){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);}
-  function mailto(){
-    if (typeof window.T7CertUpload === 'function') {
-      window.T7CertUpload(cfg.stars);
-    } else {
-      console.warn('T7CertUpload not loaded — include t7-cert-upload.js on this page.');
-      alert('Upload-Widget nicht geladen. Bitte Seite neu laden oder Support kontaktieren.');
-    }
-  }  // Init player
+  // Final-video submission is handled entirely by T7CertUpload (see t7-cert-upload.js).
+  // No in-engine recording or email path remains.
+  // Init player
   function initPlayer(email,name){
     S.email=email;S.inited=true;
     var parts=(name||'Spieler').trim().split(/\s+/);
@@ -528,7 +512,7 @@ function T7Cert(cfg){
     el('crb').addEventListener('click',function(e){e.stopPropagation();toggle();});
     for(var i=0;i<nd;i++){(function(idx){var row=el('row-'+idx);if(row)row.addEventListener('click',function(){openDrill(idx);});})(i);}
     el('rowfinal').addEventListener('click',function(){if(allDone())openSubmit();});
-    el('back').addEventListener('click',goTrack);el('suback').addEventListener('click',goTrack);
+    el('back').addEventListener('click',goTrack);
     el('s1next').addEventListener('click',function(){goStep(2);});
     el('s2next').addEventListener('click',function(){goStep(3);});
     el('skip').addEventListener('click',function(){goStep(3);});
@@ -537,17 +521,12 @@ function T7Cert(cfg){
     el('camopen').addEventListener('click',startCam);el('recbtn').addEventListener('click',toggleRec);
     el('camstop').addEventListener('click',function(){resetCam();el('skiprow').style.display='flex';show('camcard');});
     el('retrycam').addEventListener('click',resetCam);
-    // Submit - mobile
-    el('mobbtn').addEventListener('click',function(){mailto();S.submitted=true;save();refresh();el('mobsent').style.display='flex';});
-    // Submit - desktop
-    el('fcamopen').addEventListener('click',startFCam);el('frecbtn').addEventListener('click',toggleFRec);
-    el('fcamstop').addEventListener('click',function(){stopFCam();show('fcamcard');});
-    el('fretry').addEventListener('click',function(){var pv=el('fprev');if(pv){pv.pause();pv.src='';}hide('fprevw');S.fblob=null;S.fch=[];show('fcamcard');});
-    el('dlbtn').addEventListener('click',function(){if(!S.fblob)return;var ext=S.fblob.type&&S.fblob.type.indexOf('mp4')>-1?'mp4':'webm';autoDownload(S.fblob,'final-'+(S.name||'player').toLowerCase()+'.'+ext);el('dlok').style.display='flex';setTimeout(function(){el('stepsend').style.display='block';},700);});
-    el('sendbtn').addEventListener('click',function(){mailto();S.submitted=true;save();hide('fprevw');show('sent');refresh();});
-    el('dirsend').addEventListener('click',function(){mailto();S.submitted=true;save();hide('fcamcard');show('sent');refresh();});
-    el('retakebtn').addEventListener('click',function(){S.submitted=false;save();hide('sent');show('fcamcard');stopFCam();var pv=el('fprev');if(pv){pv.pause();pv.src='';}hide('fprevw');S.fblob=null;S.fch=[];refresh();});
-    el('reopenbtn').addEventListener('click',mailto);
+    // Final-video submission: T7CertUpload fires 't7cert-submitted' on successful upload.
+    window.addEventListener('t7cert-submitted',function(ev){
+      if(ev&&ev.detail&&parseInt(ev.detail.stars,10)===parseInt(cfg.stars,10)){
+        S.submitted=true;save();refresh();
+      }
+    });
     window.addEventListener('t7xpupdate',function(){if(S.email)T7SB.getTotalXP(S.email,function(t){S.sbTotal=t;updXP();});});
   }
   // Build HTML
@@ -586,20 +565,6 @@ function T7Cert(cfg){
           '<div id="t7b-s2-'+uid+'" style="display:none"><div class="nudge"><div class="nudge-t">Leg das Handy weg und \xfcb!</div><div class="nudge-s">Probiere mehrmals. Dann filme einen Versuch.</div></div><div class="try-card" id="t7b-camcard-'+uid+'"><div class="try-icon">\uD83D\uDCF9</div><div class="try-title">Filme deinen Versuch</div><div class="try-sub">Nichts wird gespeichert oder hochgeladen.</div><button class="btn btn-sm btn-acc" id="t7b-camopen-'+uid+'">Kamera \xf6ffnen</button><div id="t7b-camerr-'+uid+'" style="display:none;margin-top:10px;font-size:11px;color:#FF3B3B"></div></div><div id="t7b-camlive-'+uid+'" style="display:none;margin-bottom:14px"><video id="t7b-camv-'+uid+'" autoplay playsinline muted></video><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn btn-sm" id="t7b-recbtn-'+uid+'" style="background:#DC2626;color:#fff;border-color:#DC2626">\u25cf Aufnahme</button><button class="btn btn-sm" id="t7b-camstop-'+uid+'">Abbrechen</button></div><div id="t7b-rectim-'+uid+'" style="display:none;text-align:center;font-size:11px;font-weight:800;color:#FF3B3B;margin-top:8px;text-transform:uppercase">\u23fa L\xe4uft\u2026</div></div><div id="t7b-prevw-'+uid+'" style="display:none;margin-bottom:14px"><video id="t7b-prev-'+uid+'" controls playsinline></video><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" id="t7b-retrycam-'+uid+'">\uD83D\uDCF9 Nochmal</button><button class="btn btn-sm btn-acc" id="t7b-s2next-'+uid+'">Jetzt bewerten \u2192</button></div></div><div class="btn-row" id="t7b-skiprow-'+uid+'" style="display:flex"><button class="btn btn-sm" id="t7b-skip-'+uid+'">Ohne Aufnahme \u2192</button></div></div>'+
           '<div id="t7b-s3-'+uid+'" style="display:none"><div class="nudge"><div class="nudge-t">Sei ehrlich zu dir selbst</div><div class="nudge-s">4 oder 5 z\xe4hlt f\xfcr das Zertifikat!</div></div><div class="rate-intro">Wie lief dein Versuch?</div><div class="rate-opts">'+rOpts+'</div><div class="btn-row" id="t7b-rconf-'+uid+'" style="display:none"><button class="btn btn-acc" id="t7b-rconfbtn-'+uid+'">Best\xe4tigen \u2192</button></div></div>'+
           '<div id="t7b-s4-'+uid+'" style="display:none"><div class="outcome out-low" id="t7b-obox-'+uid+'"><div class="outcome-icon" id="t7b-oicon-'+uid+'"></div><div class="outcome-title" id="t7b-otitle-'+uid+'"></div><div class="outcome-sub" id="t7b-osub-'+uid+'"></div><div><span class="xp-pill" id="t7b-oxp-'+uid+'"></span></div><div><span class="xp-total-pill" id="t7b-oxpt-'+uid+'"></span></div></div><div class="btn-row-c" id="t7b-obtns-'+uid+'"></div></div>'+
-        '</div>'+
-        '<div class="submit-screen" id="t7b-submit-'+uid+'">'+
-          '<button class="back-btn" id="t7b-suback-'+uid+'">\u2190 Zur\xfcck</button>'+
-          '<div class="submit-hero"><div class="sh-eye">ZERTIFIKAT EINREICHEN</div><div class="sh-title">'+(cfg.title||'Zertifikat')+'</div><div class="sh-body">Alle '+(cfg.stars||1)+' Stern'+(cfg.stars>1?'e':'')+' gemeistert! Reiche dein Final-Video ein.</div></div>'+
-          '<div class="ss-label">Deine Ergebnisse</div><div class="checklist" id="t7b-checklist-'+uid+'"></div>'+
-          // Mobile path
-          '<div id="t7b-mob-'+uid+'" style="display:none"><div class="nudge"><div class="nudge-t">Schritt 1 \u2014 Video aufnehmen</div><div class="nudge-s">Nimm ein kurzes Video auf, das deine Skills zeigt, und h\xe4nge es an die E-Mail an.</div></div><button class="btn btn-gold" id="t7b-mobbtn-'+uid+'" style="width:100%;justify-content:center;padding:13px;font-size:13px;border-radius:14px">\u2709\ufe0f E-Mail an Experten \xf6ffnen</button><div id="t7b-mobsent-'+uid+'" style="display:none;align-items:center;gap:10px;margin-top:12px;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.28);border-radius:12px;padding:12px"><div style="font-size:20px">\u2b50</div><div><div style="font-weight:800;font-size:13px;color:#FFD700">E-Mail ge\xf6ffnet!</div><div style="font-size:11px;color:rgba(255,255,255,.55)">H\xe4nge dein Video an und sende die Mail.</div></div></div></div>'+
-          // Desktop path
-          '<div id="t7b-desk-'+uid+'" style="display:none">'+
-            '<div class="try-card" id="t7b-fcamcard-'+uid+'"><div class="try-icon">\uD83C\uDFAC</div><div class="try-title">Final-Video aufnehmen</div><div class="try-sub">Zeige deine besten Skills. Wird lokal gespeichert.</div><button class="btn btn-sm btn-acc" id="t7b-fcamopen-'+uid+'">Kamera \xf6ffnen</button><div style="margin-top:10px"><button class="btn btn-sm" id="t7b-dirsend-'+uid+'">\u2709\ufe0f Direkt per E-Mail (ohne Video)</button></div></div>'+
-            '<div id="t7b-fcam-'+uid+'" style="display:none;margin-bottom:14px"><video id="t7b-fcamv-'+uid+'" autoplay playsinline muted></video><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn btn-sm" id="t7b-frecbtn-'+uid+'" style="background:#DC2626;color:#fff;border-color:#DC2626">\u25cf Aufnahme</button><button class="btn btn-sm" id="t7b-fcamstop-'+uid+'">Abbrechen</button></div><div id="t7b-frectim-'+uid+'" style="display:none;text-align:center;font-size:11px;font-weight:800;color:#FF3B3B;margin-top:8px;text-transform:uppercase">\u23fa L\xe4uft\u2026</div></div>'+
-            '<div id="t7b-fprevw-'+uid+'" style="display:none;margin-bottom:14px"><video id="t7b-fprev-'+uid+'" controls playsinline></video><div style="display:flex;align-items:center;gap:8px;background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.18);border-radius:12px;padding:10px 13px;margin-bottom:8px"><span>1\ufe0f\u20e3</span><span style="font-weight:700;font-size:12px;color:#00E5FF">Video herunterladen</span></div><button class="btn btn-acc" id="t7b-dlbtn-'+uid+'" style="width:100%;justify-content:center;margin-bottom:8px">\u2b07\ufe0f Video herunterladen</button><div id="t7b-dlok-'+uid+'" style="display:none;align-items:center;gap:8px;background:rgba(204,255,0,.09);border:1px solid rgba(204,255,0,.25);border-radius:12px;padding:10px 13px;margin-bottom:8px"><span>\u2705</span><span style="font-weight:700;font-size:12px;color:#CCFF00">Gespeichert! Jetzt Schritt 2.</span></div><div id="t7b-stepsend-'+uid+'" style="display:none"><div style="display:flex;align-items:center;gap:8px;background:rgba(255,215,0,.09);border:1px solid rgba(255,215,0,.25);border-radius:12px;padding:10px 13px;margin-bottom:10px"><span>2\ufe0f\u20e3</span><span style="font-weight:700;font-size:12px;color:#FFD700">E-Mail senden</span></div><button class="btn btn-gold" id="t7b-sendbtn-'+uid+'" style="width:100%;justify-content:center;padding:13px;font-size:13px;border-radius:14px">\u2709\ufe0f E-Mail an Experten \xf6ffnen</button></div><div style="text-align:center;margin-top:12px"><button class="btn btn-sm" id="t7b-fretry-'+uid+'">\uD83D\uDCF9 Neu aufnehmen</button></div></div>'+
-            '<div class="sent-card" id="t7b-sent-'+uid+'" style="display:none"><div class="sent-icon">\uD83C\uDFC6</div><div class="sent-title">E-Mail gesendet!</div><div class="sent-body">Super! Dein '+cfg.title+' ist auf dem Weg. Wir melden uns bald. \u2b50</div><div class="btn-row-c" style="margin-top:14px"><button class="btn btn-sm btn-acc" id="t7b-retakebtn-'+uid+'">\uD83D\uDCF9 Neues Video</button><button class="btn btn-sm btn-acc" id="t7b-reopenbtn-'+uid+'">\u2709\ufe0f Mail nochmal</button></div></div>'+
-          '</div>'+
         '</div>'+
       '</div>'+
     '</div>';
