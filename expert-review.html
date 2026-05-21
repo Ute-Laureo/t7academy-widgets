@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Expert Review · T7 Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080f1e; --surface:#0d1528; --surface2:#1a2640;
+    --border:rgba(0,229,255,.12); --accent:#00E5FF; --gold:#FFD700;
+    --text:#e0f0ff; --muted:rgba(224,240,255,.6);
+    --red:#ef4444; --green:#10b981;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:'Open Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  body{padding:24px 16px}
+  .wrap{max-width:980px;margin:0 auto}
+
+  /* HEADER */
+  header.bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-dot{width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold)}
+  .brand h1{font-size:18px;font-weight:800;letter-spacing:-.01em}
+  .brand small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:2px}
+  .who{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+  .btn{background:linear-gradient(135deg,var(--gold),#FF8C00);color:#1a1100;border:0;padding:10px 18px;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px;transition:transform .15s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn.danger{background:var(--red);color:#fff}
+  .btn.green{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* LOGIN */
+  .login{max-width:380px;margin:80px auto 0;background:var(--surface);border:1.5px solid transparent;background-image:linear-gradient(var(--surface),var(--surface)),linear-gradient(135deg,#FFD700,#FF8C00);background-origin:border-box;background-clip:padding-box,border-box;border-radius:16px;padding:32px 28px}
+  .login h2{margin-bottom:6px;font-size:22px}
+  .login p{color:var(--muted);font-size:13px;margin-bottom:20px;line-height:1.55}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+  .field input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 12px;border-radius:8px;font-family:inherit;font-size:14px}
+  .field input:focus{outline:none;border-color:var(--accent)}
+  .err{color:#fca5a5;font-size:13px;margin-top:10px;min-height:18px}
+
+  /* LIST */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+  @media(max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .stat-num{font-size:22px;font-weight:800;color:var(--gold)}
+  .stat-num.accent{color:var(--accent)}
+  .stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:2px;font-weight:600}
+
+  .filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .pill{background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:99px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;transition:all .15s}
+  .pill:hover{color:var(--text)}
+  .pill.active{background:rgba(255,215,0,.12);border-color:var(--gold);color:var(--gold)}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;transition:border-color .15s}
+  .card:hover{border-color:var(--accent)}
+  .card-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .card-left{flex:1;min-width:220px}
+  .card-title{font-size:16px;font-weight:800;margin-bottom:4px}
+  .card-stars{color:var(--gold);letter-spacing:3px;margin-right:8px}
+  .card-meta{font-size:12px;color:var(--muted);line-height:1.6}
+  .card-meta strong{color:var(--text);font-weight:600}
+  .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+  .badge.pending{background:rgba(0,229,255,.12);color:var(--accent)}
+  .badge.approved{background:rgba(16,185,129,.15);color:var(--green)}
+  .badge.rejected{background:rgba(239,68,68,.15);color:var(--red)}
+  .badge.expired{background:rgba(128,140,160,.15);color:var(--muted)}
+
+  .card-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* REVIEW PANEL */
+  .review{margin-top:18px;padding-top:18px;border-top:1px solid var(--border);display:none}
+  .review.open{display:block}
+  .video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:14px}
+  .video-wrap video{width:100%;display:block;max-height:60vh}
+  .watermark{position:absolute;top:10px;right:14px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;font-family:monospace;letter-spacing:.05em;pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.6);user-select:none}
+  .watermark.bl{top:auto;bottom:14px;left:14px;right:auto}
+
+  .reject-box{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px}
+  .reject-box.open{display:block}
+  .reject-box textarea{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-family:inherit;font-size:13px;min-height:80px;resize:vertical}
+  .reject-box textarea:focus{outline:none;border-color:var(--accent)}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty-icon{font-size:48px;margin-bottom:10px;opacity:.5}
+  .loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:1000;opacity:0;transition:opacity .2s,bottom .2s}
+  .toast.show{opacity:1;bottom:32px}
+  .toast.ok{border-color:var(--green);color:var(--green)}
+  .toast.err{border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGIN VIEW -->
+  <div id="view-login" style="display:none">
+    <div class="login">
+      <div class="brand" style="margin-bottom:20px">
+        <div class="brand-dot"></div>
+        <div>
+          <small>T7 Academy</small>
+          <h1>Expert Review</h1>
+        </div>
+      </div>
+      <h2>Anmelden</h2>
+      <p>Nur für autorisierte Experten. Dieser Bereich enthält Videos von Spielern und unterliegt der Verschwiegenheitspflicht.</p>
+      <div class="field">
+        <label>E-Mail</label>
+        <input id="li-email" type="email" autocomplete="username" placeholder="expert@t7academy.com">
+      </div>
+      <div class="field">
+        <label>Passwort</label>
+        <input id="li-pass" type="password" autocomplete="current-password">
+      </div>
+      <button class="btn" id="li-btn" style="width:100%">Anmelden</button>
+      <div class="err" id="li-err"></div>
+      <p style="margin-top:18px;font-size:11px;color:var(--muted)">2FA wird beim ersten Login eingerichtet.</p>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="view-admin" style="display:none">
+    <header class="bar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div>
+          <small>T7 Academy</small>
+          <h1>Expert Review</h1>
+        </div>
+      </div>
+      <div class="who">
+        <span id="who-email"></span>
+        <button class="btn ghost" id="logout-btn">Logout</button>
+      </div>
+    </header>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="filter-bar">
+      <button class="pill active" data-filter="pending">Offen</button>
+      <button class="pill" data-filter="approved">Zertifiziert</button>
+      <button class="pill" data-filter="rejected">Abgelehnt</button>
+      <button class="pill" data-filter="expired">Abgelaufen</button>
+      <button class="pill" data-filter="all">Alle</button>
+    </div>
+
+    <div id="list"><div class="loading">Lade…</div></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  // ── CONFIG ─────────────────────────────────────────────
+  var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+  var BUCKET = 'cert-submissions';
+  var SIGNED_URL_TTL = 3600; // 1 hour
+  var LS_KEY = 't7_expert_session';
+
+  var session = null;
+  try { session = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){}
+
+  var currentFilter = 'pending';
+
+  // ── BOOT ───────────────────────────────────────────────
+  function boot(){
+    if (session && session.access_token && session.user) showAdmin();
+    else showLogin();
+  }
+
+  function showLogin(){
+    document.getElementById('view-login').style.display = 'block';
+    document.getElementById('view-admin').style.display = 'none';
+    document.getElementById('li-btn').onclick = login;
+    document.getElementById('li-pass').onkeydown = function(e){ if (e.key === 'Enter') login(); };
+  }
+
+  function showAdmin(){
+    document.getElementById('view-login').style.display = 'none';
+    document.getElementById('view-admin').style.display = 'block';
+    document.getElementById('who-email').textContent = (session && session.user && session.user.email) || '';
+    document.getElementById('logout-btn').onclick = logout;
+    Array.prototype.forEach.call(document.querySelectorAll('.pill'), function(b){
+      b.onclick = function(){
+        Array.prototype.forEach.call(document.querySelectorAll('.pill'), function(x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        currentFilter = b.getAttribute('data-filter');
+        loadList();
+      };
+    });
+    loadStats();
+    loadList();
+  }
+
+  // ── AUTH ───────────────────────────────────────────────
+  function login(){
+    var email = document.getElementById('li-email').value.trim();
+    var pass  = document.getElementById('li-pass').value;
+    var err   = document.getElementById('li-err');
+    var btn   = document.getElementById('li-btn');
+    err.textContent = '';
+    if (!email || !pass) { err.textContent = 'Bitte E-Mail und Passwort eingeben.'; return; }
+    btn.disabled = true; btn.textContent = 'Anmelden…';
+
+    fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass })
+    }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, body: j }; }); })
+      .then(function(res){
+        btn.disabled = false; btn.textContent = 'Anmelden';
+        if (!res.ok) { err.textContent = res.body.error_description || res.body.msg || 'Login fehlgeschlagen.'; return; }
+        session = res.body;
+        localStorage.setItem(LS_KEY, JSON.stringify(session));
+        showAdmin();
+      }).catch(function(){
+        btn.disabled = false; btn.textContent = 'Anmelden';
+        err.textContent = 'Netzwerkfehler.';
+      });
+  }
+
+  function logout(){
+    session = null;
+    localStorage.removeItem(LS_KEY);
+    showLogin();
+  }
+
+  function authHeaders(){
+    return {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + (session && session.access_token)
+    };
+  }
+
+  // Detect 401 -> session expired
+  function handle401(r){
+    if (r.status === 401) { logout(); throw new Error('session_expired'); }
+    return r;
+  }
+
+  // ── STATS ──────────────────────────────────────────────
+  function loadStats(){
+    fetch(SB_URL + '/rest/v1/certification_submissions?select=status', {
+      headers: authHeaders()
+    }).then(handle401).then(function(r){ return r.json(); })
+      .then(function(rows){
+        var counts = { pending:0, approved:0, rejected:0, expired:0 };
+        rows.forEach(function(r){ counts[r.status] = (counts[r.status]||0) + 1; });
+        document.getElementById('stats').innerHTML = ''
+          + statTile(counts.pending,  'Offen',         'accent')
+          + statTile(counts.approved, 'Zertifiziert',  '')
+          + statTile(counts.rejected, 'Abgelehnt',     '')
+          + statTile(counts.expired,  'Abgelaufen',    '');
+      }).catch(function(){});
+  }
+
+  function statTile(n, lbl, cls){
+    return '<div class="stat"><div class="stat-num ' + cls + '">' + n + '</div><div class="stat-lbl">' + lbl + '</div></div>';
+  }
+
+  // ── LIST ───────────────────────────────────────────────
+  function loadList(){
+    var el = document.getElementById('list');
+    el.innerHTML = '<div class="loading">Lade…</div>';
+
+    var q = '?select=*&order=submitted_at.desc';
+    if (currentFilter !== 'all') q += '&status=eq.' + currentFilter;
+
+    fetch(SB_URL + '/rest/v1/certification_submissions' + q, { headers: authHeaders() })
+      .then(handle401)
+      .then(function(r){ if (!r.ok) throw r; return r.json(); })
+      .then(function(rows){
+        if (!rows.length) {
+          el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>'
+            + 'Keine ' + filterLabel() + '.</div>';
+          return;
+        }
+        el.innerHTML = rows.map(renderItem).join('');
+        bindItems();
+      }).catch(function(e){
+        if (e && e.message === 'session_expired') return;
+        el.innerHTML = '<div class="empty">Fehler beim Laden.</div>';
+      });
+  }
+
+  function filterLabel(){
+    return { pending:'offenen Einreichungen', approved:'zertifizierten Einreichungen', rejected:'abgelehnten Einreichungen', expired:'abgelaufenen Einreichungen', all:'Einreichungen' }[currentFilter];
+  }
+
+  function renderItem(it){
+    var stars = '★'.repeat(it.stars);
+    var date  = new Date(it.submitted_at).toLocaleDateString('de-AT', { day:'2-digit', month:'short', year:'numeric' });
+    var reviewedLine = it.reviewed_at
+      ? ('<div>Geprüft: <strong>' + new Date(it.reviewed_at).toLocaleString('de-AT') + '</strong> von ' + esc(it.reviewed_by || '?') + '</div>')
+      : '';
+    var notesLine = it.notes ? ('<div>Notiz: <strong>' + esc(it.notes) + '</strong></div>') : '';
+    var expiresLine = it.status === 'pending'
+      ? ('<div>Läuft ab: <strong>' + new Date(it.expires_at).toLocaleDateString('de-AT') + '</strong></div>') : '';
+
+    var actions = '';
+    if (it.status === 'pending' || it.status === 'expired') {
+      actions = '<button class="btn" data-review="' + it.id + '">Video ansehen</button>';
+    } else if (it.video_path) {
+      actions = '<button class="btn ghost" data-review="' + it.id + '">Datei prüfen</button>';
+    }
+
+    return ''
+      + '<div class="card" data-id="' + it.id + '">'
+      +   '<div class="card-row">'
+      +     '<div class="card-left">'
+      +       '<div class="card-title"><span class="card-stars">' + stars + '</span>' + esc(it.player_email) + '</div>'
+      +       '<div class="card-meta">'
+      +         '<span class="badge ' + it.status + '">' + statusLabel(it.status) + '</span>'
+      +         '<span>Eingereicht: <strong>' + date + '</strong></span>'
+      +         reviewedLine + notesLine + expiresLine
+      +       '</div>'
+      +     '</div>'
+      +     '<div class="card-actions">' + actions + '</div>'
+      +   '</div>'
+      +   '<div class="review" id="review-' + it.id + '"></div>'
+      + '</div>';
+  }
+
+  function statusLabel(s){
+    return { pending:'Offen', approved:'Zertifiziert', rejected:'Abgelehnt', expired:'Abgelaufen' }[s] || s;
+  }
+
+  function bindItems(){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-review]'), function(btn){
+      btn.onclick = function(){
+        var id = btn.getAttribute('data-review');
+        openReview(parseInt(id, 10), btn);
+      };
+    });
+  }
+
+  // ── REVIEW ─────────────────────────────────────────────
+  function openReview(id, btn){
+    var box = document.getElementById('review-' + id);
+    if (box.classList.contains('open')) { box.classList.remove('open'); box.innerHTML = ''; return; }
+    box.classList.add('open');
+    box.innerHTML = '<div class="loading">Video wird vorbereitet…</div>';
+
+    // Fetch the submission
+    fetch(SB_URL + '/rest/v1/certification_submissions?id=eq.' + id + '&select=*', { headers: authHeaders() })
+      .then(handle401).then(function(r){ return r.json(); })
+      .then(function(rows){
+        if (!rows.length) throw new Error('not found');
+        var sub = rows[0];
+        return getSignedUrl(sub.video_path).then(function(url){
+          // Log the view (audit trail)
+          logView(sub.id);
+          // Render
+          renderReviewPanel(box, sub, url);
+        });
+      }).catch(function(e){
+        if (e && e.message === 'session_expired') return;
+        box.innerHTML = '<div class="empty">Video konnte nicht geladen werden.</div>';
+      });
+  }
+
+  function getSignedUrl(path){
+    return fetch(SB_URL + '/storage/v1/object/sign/' + BUCKET + '/' + path, {
+      method: 'POST',
+      headers: Object.assign({}, authHeaders(), { 'Content-Type':'application/json' }),
+      body: JSON.stringify({ expiresIn: SIGNED_URL_TTL })
+    }).then(handle401).then(function(r){ return r.json(); })
+      .then(function(j){
+        if (!j.signedURL && !j.signedUrl) throw new Error('no signed url');
+        var p = j.signedURL || j.signedUrl;
+        return SB_URL + '/storage/v1' + p;
+      });
+  }
+
+  function logView(submissionId){
+    fetch(SB_URL + '/rest/v1/submission_views', {
+      method: 'POST',
+      headers: Object.assign({}, authHeaders(), { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        submission_id: submissionId,
+        viewer_email:  session.user.email,
+        user_agent:    navigator.userAgent.slice(0, 200)
+      })
+    }).catch(function(){});
+  }
+
+  function renderReviewPanel(box, sub, url){
+    var wm = esc(session.user.email) + ' · ' + new Date().toLocaleString('de-AT');
+    box.innerHTML = ''
+      + '<div class="video-wrap">'
+      +   '<video src="' + esc(url) + '" controls controlsList="nodownload" playsinline></video>'
+      +   '<div class="watermark">' + wm + '</div>'
+      +   '<div class="watermark bl">' + wm + '</div>'
+      + '</div>'
+      + (sub.status === 'pending' ? ''
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">'
+        +   '<button class="btn green" id="approve-' + sub.id + '">✓ Zertifizieren</button>'
+        +   '<button class="btn danger" id="reject-open-' + sub.id + '">Ablehnen…</button>'
+        + '</div>'
+        + '<div class="reject-box" id="reject-box-' + sub.id + '">'
+        +   '<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Grund für Ablehnung (sichtbar für den Spieler)</div>'
+        +   '<textarea id="reject-notes-' + sub.id + '" placeholder="z.B. Im Hintergrund sind andere Personen sichtbar – bitte erneut ohne weitere Personen drehen."></textarea>'
+        +   '<div style="display:flex;gap:8px;margin-top:10px">'
+        +     '<button class="btn danger" id="reject-confirm-' + sub.id + '">Ablehnung bestätigen</button>'
+        +     '<button class="btn ghost" id="reject-cancel-' + sub.id + '">Abbrechen</button>'
+        +   '</div>'
+        + '</div>'
+        : '');
+
+    if (sub.status === 'pending') {
+      document.getElementById('approve-' + sub.id).onclick = function(){ approveSubmission(sub); };
+      document.getElementById('reject-open-' + sub.id).onclick = function(){
+        document.getElementById('reject-box-' + sub.id).classList.add('open');
+      };
+      document.getElementById('reject-cancel-' + sub.id).onclick = function(){
+        document.getElementById('reject-box-' + sub.id).classList.remove('open');
+      };
+      document.getElementById('reject-confirm-' + sub.id).onclick = function(){
+        var notes = document.getElementById('reject-notes-' + sub.id).value.trim();
+        rejectSubmission(sub, notes);
+      };
+    }
+  }
+
+  // ── APPROVE / REJECT ───────────────────────────────────
+  function approveSubmission(sub){
+    if (!confirm('Zertifikat erteilen und Video löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
+
+    // 1. Insert certification row
+    fetch(SB_URL + '/rest/v1/certifications', {
+      method: 'POST',
+      headers: Object.assign({}, authHeaders(), { 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' }),
+      body: JSON.stringify({
+        player_email: sub.player_email,
+        stars:        sub.stars
+      })
+    }).then(handle401).then(function(r){
+      // Some installations may not have certifications table; that's not fatal
+      if (!r.ok && r.status !== 409) console.warn('certifications insert returned', r.status);
+      // 2. Mark submission as approved
+      return updateSubmission(sub.id, { status:'approved', reviewed_at: new Date().toISOString(), reviewed_by: session.user.email, notes: null });
+    }).then(function(){
+      // 3. Delete the video file
+      return deleteVideo(sub.video_path);
+    }).then(function(){
+      toast('ok', 'Zertifikat erteilt und Video gelöscht.');
+      loadStats(); loadList();
+    }).catch(function(e){
+      if (e && e.message === 'session_expired') return;
+      toast('err', 'Fehler: ' + (e.message || e));
+    });
+  }
+
+  function rejectSubmission(sub, notes){
+    if (!notes) { alert('Bitte einen Grund eintragen.'); return; }
+    if (!confirm('Einreichung ablehnen und Video löschen?')) return;
+
+    updateSubmission(sub.id, { status:'rejected', reviewed_at:new Date().toISOString(), reviewed_by:session.user.email, notes:notes })
+      .then(function(){ return deleteVideo(sub.video_path); })
+      .then(function(){
+        toast('ok', 'Einreichung abgelehnt. Spieler benachrichtigen nicht vergessen.');
+        loadStats(); loadList();
+      }).catch(function(e){
+        if (e && e.message === 'session_expired') return;
+        toast('err', 'Fehler: ' + (e.message || e));
+      });
+  }
+
+  function updateSubmission(id, patch){
+    return fetch(SB_URL + '/rest/v1/certification_submissions?id=eq.' + id, {
+      method: 'PATCH',
+      headers: Object.assign({}, authHeaders(), { 'Content-Type': 'application/json', 'Prefer':'return=minimal' }),
+      body: JSON.stringify(patch)
+    }).then(handle401).then(function(r){
+      if (!r.ok) throw new Error('update failed (' + r.status + ')');
+    });
+  }
+
+  function deleteVideo(path){
+    return fetch(SB_URL + '/storage/v1/object/' + BUCKET + '/' + path, {
+      method: 'DELETE',
+      headers: authHeaders()
+    }).then(handle401).then(function(r){
+      // 404 is OK (already gone)
+      if (!r.ok && r.status !== 404) throw new Error('delete failed (' + r.status + ')');
+    });
+  }
+
+  // ── UTILS ──────────────────────────────────────────────
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+
+  function toast(kind, msg){
+    var t = document.getElementById('toast');
+    t.className = 'toast ' + kind + ' show';
+    t.textContent = msg;
+    setTimeout(function(){ t.className = 'toast ' + kind; }, 3200);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
