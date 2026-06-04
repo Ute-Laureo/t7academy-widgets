@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="de" data-theme="dark">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minis - T7 Academy</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Open+Sans:wght@600;700;800&family=Garet+W05+Bold&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Open+Sans:wght@600;700;800&amp;family=Garet+W05+Bold&amp;display=swap" rel="stylesheet">
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -318,8 +315,8 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .t7-overlay button{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a1530;font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;padding:13px 32px;border-radius:16px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(255,180,0,.5);transition:transform .15s}
 .t7-overlay button:hover{transform:scale(1.05)}
 </style>
-</head>
-<body>
+
+
 
 <!-- === TOP NAV === -->
 <nav class="topnav">
@@ -335,7 +332,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   </div>
   <div class="nav-right">
     <button class="mute-toggle" id="muteBtn" title="Ton an/aus">🔊</button>
-    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">&#9790;</button>
+    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
   </div>
 </nav>
 
@@ -555,7 +552,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
       <div class="kmodal-step" id="kstep-watch">
         <div class="kmodal-title" id="kmodal-title">…</div>
         <div class="kmodal-sub">Schau dir das Video an, dann probiere es selbst!</div>
-        <div class="kembed"><iframe id="kembed" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+        <div class="kembed"><iframe id="kembed" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen=""></iframe></div>
         <div class="speech-with-mascot">
           <img class="speech-mascot-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/cheetah_yip_avatar.png" alt="Keon">
           <div class="speech"><strong>Keon sagt:</strong> Schau gut zu! Achte auf die Füße. Du schaffst das! 🎉</div>
@@ -972,5 +969,3 @@ if (window.T7Identity) { T7Identity.resolve(function(email, name){ boot(email, n
 else { setTimeout(function(){ if (window.T7Identity) T7Identity.resolve(function(email, name){ boot(email, name); }); else boot(null, null); }, 1500); }
 })();
 </script>
-</body>
-</html>
