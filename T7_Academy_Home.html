@@ -223,37 +223,59 @@
 
     function renderEmptyTile(el,msg){el.innerHTML='<div class="po-empty">'+msg+'</div>';}
 
-    /* === STERNE / SEVENS placeholder (videos table not yet wired up) === */
+    /* === STERNE / SEVENS: real watch-time stats from video_progress ===
+       Categorization rule: a video is "Sevens" if videos.sevens IS NOT NULL,
+       "Sterne" if videos.stars IS NOT NULL. Adjust filter below if your
+       schema convention differs (e.g. swap to category='sevens'). */
+    var SEEN_THRESHOLD_SEC=30; /* total_seconds >= 30 counts as "seen" */
 
-    function renderSevens(el){
-    el.innerHTML=
+    function renderVideoCard(el,profileId,kind){
+    /* kind: 'sevens' or 'sterne' */
+    if(!profileId){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
+    var videoFilter=kind==='sevens'?'sevens=not.is.null':'stars=not.is.null';
+    var numCls=kind==='sterne'?' gold':'';
+    Promise.all([
+        fetch(SB_URL+'/rest/v1/videos?'+videoFilter+'&select=vimeo_code',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
+        fetch(SB_URL+'/rest/v1/video_progress?profile_id=eq.'+encodeURIComponent(profileId)+'&select=vimeo_id,total_seconds',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
+    ]).then(function(res){
+        var videos=res[0]||[],progress=res[1]||[];
+        var ids={};videos.forEach(function(v){if(v.vimeo_code)ids[v.vimeo_code]=true;});
+        var totalVideos=Object.keys(ids).length;
+        var seen=0,seconds=0;
+        progress.forEach(function(p){
+        if(!ids[p.vimeo_id])return;
+        var s=Number(p.total_seconds||0);
+        seconds+=s;
+        if(s>=SEEN_THRESHOLD_SEC)seen++;
+        });
+        var minutes=Math.round(seconds/60);
+        var timeStr=minutes<60?(minutes+' Min'):(Math.floor(minutes/60)+'h '+(minutes%60)+'m');
+        el.innerHTML=
         '<div class="po-stats-row">'+
-        '<div class="po-stat-tile"><div class="po-stat-num">&mdash;</div><div class="po-stat-label">Videos gesehen</div></div>'+
-        '<div class="po-stat-tile"><div class="po-stat-num">&mdash;</div><div class="po-stat-label">Stunden</div></div>'+
-        '</div>'+
-        '<div class="po-empty" style="margin-top:10px">Tracking wird aktiviert &mdash; bald verf&uuml;gbar.</div>';
+            '<div class="po-stat-tile"><div class="po-stat-num'+numCls+'">'+seen+(totalVideos?'<span style="opacity:.5;font-weight:400">/'+totalVideos+'</span>':'')+'</div><div class="po-stat-label">Videos gesehen</div></div>'+
+            '<div class="po-stat-tile"><div class="po-stat-num'+numCls+'">'+timeStr+'</div><div class="po-stat-label">Watch Time</div></div>'+
+        '</div>';
+    }).catch(function(){renderEmptyTile(el,'Fehler beim Laden.');});
     }
-    function renderSterne(el){
-    el.innerHTML=
-        '<div class="po-stats-row">'+
-        '<div class="po-stat-tile"><div class="po-stat-num gold">&mdash;</div><div class="po-stat-label">Videos gesehen</div></div>'+
-        '<div class="po-stat-tile"><div class="po-stat-num gold">&mdash;</div><div class="po-stat-label">Stunden</div></div>'+
-        '</div>'+
-        '<div class="po-empty" style="margin-top:10px">Tracking wird aktiviert &mdash; bald verf&uuml;gbar.</div>';
-    }
-    /* === CHALLENGES progress (from Supabase completions) === */
-    function renderChallenges(el,email){
-    if(!email){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
-    fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&select=module_key,challenge_idx,rating',{
+
+    function renderSevens(el,profileId){renderVideoCard(el,profileId,'sevens');}
+    function renderSterne(el,profileId){renderVideoCard(el,profileId,'sterne');}
+    /* === CHALLENGES progress (from drill_attempts, best rating per drill) === */
+    function renderChallenges(el,profileId){
+    if(!profileId){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
+    fetch(SB_URL+'/rest/v1/drill_attempts?profile_id=eq.'+encodeURIComponent(profileId)+'&select=module_key,drill_idx,rating',{
         headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}
     }).then(function(r){return r.json();}).then(function(rows){
-        var byMod={};
-        (rows||[]).forEach(function(c){
-        if(!byMod[c.module_key])byMod[c.module_key]={};
-        if(c.rating>=4)byMod[c.module_key][c.challenge_idx]=true;
+        /* Reduce to best rating per (module_key, drill_idx) */
+        var best={};
+        (rows||[]).forEach(function(a){
+        if(!best[a.module_key])best[a.module_key]={};
+        var cur=best[a.module_key][a.drill_idx]||0;
+        if(a.rating>cur)best[a.module_key][a.drill_idx]=a.rating;
         });
         var html=CHALLENGE_MODULES.map(function(m){
-        var done=byMod[m.key]?Object.keys(byMod[m.key]).length:0;
+        var mb=best[m.key]||{};
+        var done=Object.keys(mb).filter(function(k){return mb[k]>=4;}).length;
         var pct=Math.round(done/m.total*100);
         return '<div><div class="po-mod-row"><span class="po-mod-name">'+m.label+'</span><span class="po-mod-stat">'+done+'/'+m.total+'</span></div><div class="po-bar"><div class="po-bar-fill cyan" style="width:'+pct+'%"></div></div></div>';
         }).join('');
@@ -261,24 +283,26 @@
     }).catch(function(){renderEmptyTile(el,'Fehler beim Laden.');});
     }
 
-    /* === CERTIFICATES progress (from Supabase completions + certifications) === */
-    function renderCerts(el,email){
-    if(!email){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
+    /* === CERTIFICATES progress (drill_attempts for cert modules + player_stats.stars) === */
+    function renderCerts(el,profileId){
+    if(!profileId){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
     Promise.all([
-        fetch(SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&select=module_key,challenge_idx,rating',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
-        fetch(SB_URL+'/rest/v1/certifications?player_email=eq.'+encodeURIComponent(email)+'&select=stars',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
+        fetch(SB_URL+'/rest/v1/drill_attempts?profile_id=eq.'+encodeURIComponent(profileId)+'&select=module_key,drill_idx,rating',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
+        fetch(SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(profileId)+'&select=stars',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
     ]).then(function(res){
-        var comps=res[0]||[],certs=res[1]||[];
-        var certifiedStars={};(certs||[]).forEach(function(c){certifiedStars[c.stars]=true;});
-        var byMod={};
-        (comps||[]).forEach(function(c){
-        if(!byMod[c.module_key])byMod[c.module_key]={};
-        if(c.rating>=4)byMod[c.module_key][c.challenge_idx]=true;
+        var attempts=res[0]||[],statsRow=(res[1]||[])[0];
+        var earnedStars=statsRow&&statsRow.stars?Number(statsRow.stars):0;
+        var best={};
+        attempts.forEach(function(a){
+        if(!best[a.module_key])best[a.module_key]={};
+        var cur=best[a.module_key][a.drill_idx]||0;
+        if(a.rating>cur)best[a.module_key][a.drill_idx]=a.rating;
         });
         var html=CERT_MODULES.map(function(m){
-        var done=byMod[m.key]?Object.keys(byMod[m.key]).length:0;
+        var mb=best[m.key]||{};
+        var done=Object.keys(mb).filter(function(k){return mb[k]>=4;}).length;
         var pct=Math.round(done/m.total*100);
-        var cert=certifiedStars[m.stars]?' <span style="color:#FF8C00;font-weight:800">\u2605</span>':'';
+        var cert=earnedStars>=m.stars?' <span style="color:#FF8C00;font-weight:800">\u2605</span>':'';
         return '<div><div class="po-mod-row"><span class="po-mod-name">'+m.label+cert+'</span><span class="po-mod-stat">'+done+'/'+m.total+'</span></div><div class="po-bar"><div class="po-bar-fill gold" style="width:'+pct+'%"></div></div></div>';
         }).join('');
         el.innerHTML=html;
@@ -291,17 +315,23 @@
     var elSevens=document.getElementById('po-sevens-body');
     var elCh=document.getElementById('po-challenges-body');
     var elCt=document.getElementById('po-certs-body');
-    renderSterne(elSterne);
-    renderSevens(elSevens);
-    if(window.T7Identity){
-        T7Identity.resolve(function(email){
-        renderChallenges(elCh,email);
-        renderCerts(elCt,email);
-        });
-    }else{
-        /* engine not loaded yet, retry */
-        setTimeout(function(){if(window.T7Identity)T7Identity.resolve(function(email){renderChallenges(elCh,email);renderCerts(elCt,email);});else{renderChallenges(elCh,null);renderCerts(elCt,null);}},1500);
+    function renderAll(id){
+        renderSevens(elSevens,id);
+        renderSterne(elSterne,id);
+        renderChallenges(elCh,id);
+        renderCerts(elCt,id);
     }
+    function go(){T7Identity.resolve(function(id){renderAll(id);});}
+    if(window.T7Identity)go();
+    else setTimeout(function(){
+        if(window.T7Identity)go();
+        else renderAll(null);
+    },1500);
+    /* Refresh when XP is gained in any widget on the page */
+    window.addEventListener('t7xpupdate',function(){
+        var info=window.T7Identity&&T7Identity.get();
+        if(info&&info.id){renderChallenges(elCh,info.id);renderCerts(elCt,info.id);}
+    });
     }
 
     /* === NEWS FEED (WordPress REST API + fallback) === */
