@@ -7,121 +7,132 @@ var T7_SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
 var T7_SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 
 /* === SHARED IDENTITY MODULE ===
-   Resolves once per page-load; all widgets share the result.
-   Lookup chain: BM admin -> localStorage -> BM JWT -> page links -> name prompt
-   Future Supabase player ID: swap T7Identity._fromSupabase() only. */
+   The WordPress integration sets window.T7_PROFILE_ID (the player_profiles.id UUID)
+   before this script loads. We read it, fetch first_name from player_profiles,
+   and broadcast (id, firstName) to every widget on the page. */
 var T7Identity=(function(){
-  var _email=null,_name=null,_done=false,_going=false,_q=[];
+  var _id=null,_name=null,_done=false,_going=false,_q=[];
   function _hdr(){return{'apikey':T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY};}
-  function _fire(em,nm){
-    _email=em;_name=nm;_done=true;
-    try{if(em)localStorage.setItem('t7_player_identity',em);}catch(e){}
-    var parts=(nm||em||'?').trim().split(/\s+/);
-    var ini=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():(nm||em||'?').slice(0,2).toUpperCase();
+  function _fire(id,nm){
+    _id=id;_name=nm;_done=true;
+    var label=(nm||'?').trim();
+    var parts=label.split(/\s+/);
+    var ini=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():label.slice(0,2).toUpperCase();
     var av=document.getElementById('navAvatar');if(av)av.textContent=ini;
-    _q.forEach(function(cb){cb(em,nm);});_q=[];
+    _q.forEach(function(cb){cb(id,nm);});_q=[];
   }
-  function _wins(){
-    var w=[window];
-    try{if(window.parent&&window.parent!==window)w.push(window.parent);}catch(e){}
-    try{if(window.top&&window.top!==window&&window.top!==window.parent)w.push(window.top);}catch(e){}
-    return w;
-  }
-  function _bmEmail(){
-    var ws=_wins();
+  function _readGlobalId(){
+    // Check current window + parent + top for the WP-injected profile id
+    var ws=[window];
+    try{if(window.parent&&window.parent!==window)ws.push(window.parent);}catch(e){}
+    try{if(window.top&&window.top!==window&&window.top!==window.parent)ws.push(window.top);}catch(e){}
     for(var i=0;i<ws.length;i++){
-      try{var bm=ws[i].__BM_DATA__;if(bm&&bm.intercom&&bm.intercom.bootProps&&bm.intercom.bootProps.email)return{email:bm.intercom.bootProps.email,name:bm.intercom.bootProps.name||null};}catch(e){}
-      try{var is=ws[i].intercomSettings;if(is&&is.email)return{email:is.email,name:is.name||null};}catch(e){}
+      try{if(ws[i].T7_PROFILE_ID)return String(ws[i].T7_PROFILE_ID);}catch(e){}
     }
     return null;
   }
-  function _bmJwtId(){
-    var ws=_wins();
-    for(var i=0;i<ws.length;i++){
-      try{var bm=ws[i].__BM_DATA__;if(bm&&bm.accessToken){var p=JSON.parse(atob(bm.accessToken.split('.')[1]));if(p&&p.id)return p.id;}}catch(e){}
-    }
-    return null;
-  }
-  function _pageLinks(){
-    var ws=_wins();
-    for(var i=0;i<ws.length;i++){
-      try{var links=ws[i].document.querySelectorAll('a[href*="/member/"]');for(var j=0;j<links.length;j++){var m=links[j].href.match(/\/member\/([A-Za-z0-9]{8,12})/);if(m)return m[1];}}catch(e){}
-    }
-    return null;
-  }
-  function _sbLookup(field,val,cb){
-    fetch(T7_SB_URL+'/rest/v1/members?'+field+'=eq.'+encodeURIComponent(val)+'&select=email,name&limit=1',{headers:_hdr()})
-    .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length?rows[0]:null);}).catch(function(){cb(null);});
-  }
-  function _prompt(){
-    var ov=document.getElementById('t7-id-overlay');if(ov)ov.style.display='flex';
-    var inp=document.getElementById('t7-id-input');
-    if(inp){inp.focus();inp.onkeydown=function(e){if(e.key==='Enter')T7Identity._submit();};}
+  function _fetchName(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/player_profiles?id=eq.'+encodeURIComponent(id)+'&select=first_name&limit=1',{headers:_hdr()})
+    .then(function(r){return r.json();}).then(function(rows){
+      cb(rows&&rows.length&&rows[0].first_name?rows[0].first_name:'Spieler');
+    }).catch(function(){cb('Spieler');});
   }
   function _go(){
-    // 1. BM direct
-    var bm=_bmEmail();if(bm){_fire(bm.email,bm.name);return;}
-    // 2. localStorage
-    var saved=null;try{saved=localStorage.getItem('t7_player_identity');}catch(e){}
-    if(saved){_fire(saved,null);return;}
-    // 3. BM JWT -> Supabase
-    var jwtId=_bmJwtId();
-    if(jwtId){_sbLookup('bm_id',jwtId,function(row){if(row&&row.email)_fire(row.email,row.name);else _tryLinks();});return;}
-    _tryLinks();
-  }
-  function _tryLinks(){
-    var linkId=_pageLinks();
-    if(linkId){_sbLookup('bm_id',linkId,function(row){if(row&&row.email)_fire(row.email,row.name);else _prompt();});}
-    else _prompt();
+    var id=_readGlobalId();
+    if(!id){
+      console.warn('[T7] window.T7_PROFILE_ID not set \u2014 widgets cannot identify the player.');
+      _done=true;_q.forEach(function(cb){cb(null,null);});_q=[];
+      return;
+    }
+    _fetchName(id,function(nm){_fire(id,nm);});
   }
   return{
     resolve:function(cb){
-      if(_done){cb(_email,_name);return;}
+      if(_done){cb(_id,_name);return;}
       _q.push(cb);if(!_going){_going=true;_go();}
     },
-    fire:function(em,nm){_fire(em,nm);},
-    get:function(){return _done?{email:_email,name:_name}:null;},
-    _submit:function(){
-      var inp=document.getElementById('t7-id-input');if(!inp)return;
-      var fn=inp.value.trim();if(!fn)return;
-      var hint=document.getElementById('t7-id-hint');if(hint)hint.textContent='Suche...';
-      fetch(T7_SB_URL+'/rest/v1/members?name=ilike.'+encodeURIComponent(fn+'%')+'&select=email,name&limit=5',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}})
-      .then(function(r){return r.json();}).then(function(rows){
-        if(rows&&rows.length&&rows[0].email){
-          var ov=document.getElementById('t7-id-overlay');if(ov)ov.style.display='none';
-          _fire(rows[0].email,rows[0].name);
-        }else{
-          if(hint){hint.textContent='Name nicht gefunden. Bitte wie in der App eingeben.';hint.style.color='#FF6B6B';}
-          inp.value='';inp.focus();
-        }
-      }).catch(function(){if(hint)hint.textContent='Verbindungsfehler. Bitte nochmal.';});
-    }
+    fire:function(id,nm){_fire(id,nm);},
+    get:function(){return _done?{id:_id,name:_name}:null;}
   };
 })();
 
-/* === SUPABASE HELPERS === */
+/* === SUPABASE HELPERS ===
+   All XP and stars live in `player_stats`, keyed by `id` (FK -> player_profiles.id).
+   first_name is read via PostgREST embedded select (player_profiles!inner). */
 var T7SB={
   _hdr:function(extra){return Object.assign({'apikey':T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY,'Content-Type':'application/json'},extra||{});},
-  getTotalXP:function(email,cb){
-    fetch(T7_SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:this._hdr()})
+  getTotalXP:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=total_xp',{headers:this._hdr()})
     .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length&&typeof rows[0].total_xp==='number'?rows[0].total_xp:0);}).catch(function(){cb(0);});
   },
-  getModuleXP:function(email,mk,cb){
-    fetch(T7_SB_URL+'/rest/v1/completions?player_email=eq.'+encodeURIComponent(email)+'&module_key=eq.'+encodeURIComponent(mk)+'&select=challenge_idx,rating,xp&order=rating.desc',{headers:this._hdr()})
-    .then(function(r){return r.json();}).then(function(rows){cb(rows||[]);}).catch(function(){cb([]);});
+  getStats:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=total_xp,stars,stars_awarded_at,player_profiles(first_name)',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){
+      var row=rows&&rows.length?rows[0]:null;
+      cb(row?{
+        total_xp:Number(row.total_xp||0),
+        stars:row.stars||null,
+        stars_awarded_at:row.stars_awarded_at||null,
+        first_name:(row.player_profiles&&row.player_profiles.first_name)||null
+      }:null);
+    }).catch(function(){cb(null);});
   },
-  getCert:function(email,stars,cb){
-    fetch(T7_SB_URL+'/rest/v1/certifications?player_email=eq.'+encodeURIComponent(email)+'&stars=eq.'+stars+'&select=stars,awarded_at&limit=1',{headers:this._hdr()})
-    .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length?rows[0]:null);}).catch(function(){cb(null);});
+  getStars:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=stars,stars_awarded_at',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length&&rows[0].stars?rows[0]:null);}).catch(function(){cb(null);});
   },
-  upsert:function(email,name,mk,ml,idx,rating,xp,ts,curTotal){
-    if(!email||email==='unbekannt')return;
+  /* Adds xpDelta to total_xp. Race-safe enough for this volume:
+     client computes newTotal from curTotal, upsert merges on PK. */
+  addXP:function(id,xpDelta,curTotal){
+    if(!id||!xpDelta)return;
+    var newTotal=(curTotal||0)+xpDelta;
+    fetch(T7_SB_URL+'/rest/v1/player_stats',{method:'POST',headers:this._hdr({'Prefer':'resolution=merge-duplicates'}),
+      body:JSON.stringify({id:id,total_xp:newTotal,updated_at:new Date().toISOString()})}).catch(function(){});
+  },
+  /* Sets stars only if it's higher than the current value. */
+  setStars:function(id,stars){
+    if(!id||!stars)return;
     var self=this;
-    fetch(T7_SB_URL+'/rest/v1/completions',{method:'POST',headers:self._hdr({'Prefer':'resolution=merge-duplicates'}),
-      body:JSON.stringify({player_email:email,player_name:name,module_key:mk,module_label:ml,challenge_idx:idx,rating:rating,xp:xp,completed_at:new Date(ts).toISOString()})}).catch(function(){});
-    var newTotal=(curTotal||0)+xp;
-    fetch(T7_SB_URL+'/rest/v1/players',{method:'POST',headers:self._hdr({'Prefer':'resolution=merge-duplicates'}),
-      body:JSON.stringify({player_email:email,player_name:name,total_xp:newTotal})}).catch(function(){});
+    this.getStars(id,function(cur){
+      if(cur&&cur.stars>=stars)return;
+      fetch(T7_SB_URL+'/rest/v1/player_stats',{method:'POST',headers:self._hdr({'Prefer':'resolution=merge-duplicates'}),
+        body:JSON.stringify({id:id,stars:stars,stars_awarded_at:new Date().toISOString(),updated_at:new Date().toISOString()})}).catch(function(){});
+    });
+  },
+  /* Top N players ordered by total_xp; joins first_name from player_profiles. */
+  getLeaderboard:function(limit,cb){
+    fetch(T7_SB_URL+'/rest/v1/player_stats?select=id,total_xp,stars,player_profiles!inner(first_name)&order=total_xp.desc&limit='+(limit||20),{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){
+      cb((rows||[]).map(function(r){return{
+        id:r.id,
+        xp:Number(r.total_xp||0),
+        stars:r.stars||null,
+        name:(r.player_profiles&&r.player_profiles.first_name)||'Spieler'
+      };}));
+    }).catch(function(){cb([]);});
+  },
+  /* Append-only event. One row per rating submission. */
+  recordAttempt:function(profileId,moduleKey,drillIdx,rating,xp){
+    if(!profileId||!moduleKey)return;
+    fetch(T7_SB_URL+'/rest/v1/drill_attempts',{method:'POST',headers:this._hdr(),
+      body:JSON.stringify({profile_id:profileId,module_key:moduleKey,drill_idx:drillIdx,rating:rating,xp:xp||0,attempted_at:new Date().toISOString()})}).catch(function(){});
+  },
+  /* Returns the best rating + xp per drill_idx for one module. */
+  getBestRatings:function(profileId,moduleKey,cb){
+    fetch(T7_SB_URL+'/rest/v1/drill_attempts?profile_id=eq.'+encodeURIComponent(profileId)+'&module_key=eq.'+encodeURIComponent(moduleKey)+'&select=drill_idx,rating,xp&order=rating.desc',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){
+      var best={};(rows||[]).forEach(function(r){
+        var i=r.drill_idx;
+        if(!(i in best)||r.rating>best[i].rating)best[i]={rating:r.rating,xp:r.xp};
+      });
+      cb(best);
+    }).catch(function(){cb({});});
+  },
+  /* Returns all attempts as [{attempted_at, xp, module_key, drill_idx, rating}]
+     for streak / weekly / cross-module aggregation. */
+  getAllAttempts:function(profileId,cb){
+    fetch(T7_SB_URL+'/rest/v1/drill_attempts?profile_id=eq.'+encodeURIComponent(profileId)+'&select=attempted_at,xp,module_key,drill_idx,rating&order=attempted_at.asc',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){cb(rows||[]);}).catch(function(){cb([]);});
   }
 };
 
@@ -136,7 +147,7 @@ function T7Challenge(cfg){
   var XMUL=[0,.2,.4,.6,.8,1];
   function aXP(r,max){return Math.round((XMUL[r]||0)*max);}
   function cXP(r,max){return r<4?0:Math.round((XMUL[r]||0)*max);}
-  var S={expanded:false,drill:-1,rate:0,hits:0,ratings:drills.map(function(){return 0;}),bestHits:drills.map(function(){return 0;}),scXP:drills.map(function(){return 0;}),cumXP:0,cat:{},sk:'t7_'+cfg.moduleKey+'_g',ms:null,mr:null,ch:[],rec:false,inited:false,name:'Spieler',sbTotal:null,email:null};
+  var S={expanded:false,drill:-1,rate:0,hits:0,ratings:drills.map(function(){return 0;}),bestHits:drills.map(function(){return 0;}),scXP:drills.map(function(){return 0;}),cumXP:0,cat:{},sk:'t7_'+cfg.moduleKey+'_g',ms:null,mr:null,ch:[],rec:false,inited:false,name:'Spieler',sbTotal:null,id:null};
   function isDone(i){var d=drills[i];return d.type==='hits'?(S.bestHits[i]||0)>=(d.maxHits||1):(S.ratings[i]||0)>=4;}
   function hXP(hits,d){return Math.min(d.xp,Math.round(((hits||0)/(d.maxHits||1))*d.xp));}
   var cont=document.getElementById(cfg.containerId||'ch-container');if(!cont)return;
@@ -225,16 +236,16 @@ function T7Challenge(cfg){
       if(h>(S.bestHits[idx]||0)){S.bestHits[idx]=h;var newS=earned;if(newS>(S.scXP[idx]||0))S.scXP[idx]=newS;}
       if(done&&!S.cat[idx])S.cat[idx]=Date.now();
       var rateEq=done?5:h>0?3:1;
-      if(S.email)T7SB.upsert(S.email,S.name,cfg.moduleKey,cfg.title,idx,rateEq,earned,S.cat[idx]||Date.now(),S.sbTotal);
+      if(S.id){T7SB.addXP(S.id,earned,S.sbTotal);T7SB.recordAttempt(S.id,cfg.moduleKey,idx,rateEq,earned);}
     }else{
       earned=aXP(S.rate,d.xp);done=S.rate>=4;
       var prev=S.ratings[idx]||0,prevS=S.scXP[idx]||0,newS=cXP(S.rate,d.xp);
       if(newS>prevS)S.scXP[idx]=newS;
       if(S.rate>prev){S.ratings[idx]=S.rate;if(!S.cat[idx])S.cat[idx]=Date.now();}
-      if(S.email)T7SB.upsert(S.email,S.name,cfg.moduleKey,cfg.title,idx,S.rate,earned,S.cat[idx]||Date.now(),S.sbTotal);
+      if(S.id){T7SB.addXP(S.id,earned,S.sbTotal);T7SB.recordAttempt(S.id,cfg.moduleKey,idx,S.rate,earned);}
     }
     S.cumXP+=earned;updXP();save();
-    if(S.email)setTimeout(function(){T7SB.getTotalXP(S.email,function(t){S.sbTotal=t;updXP();});try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
+    if(S.id)setTimeout(function(){T7SB.getTotalXP(S.id,function(t){S.sbTotal=t;updXP();});try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
     var box=el('obox'),icon=el('oicon'),title=el('otitle'),sub=el('osub'),btns=el('obtns');
     el('oxp').textContent='+'+earned+' XP';el('oxpt').textContent='Gesamt: '+(typeof S.sbTotal==='number'?S.sbTotal:S.cumXP)+' XP';
     var ni=S.drill+1;
@@ -273,18 +284,27 @@ function T7Challenge(cfg){
     }else{if(S.mr&&S.mr.state!=='inactive')S.mr.stop();S.rec=false;el('recbtn').textContent='\u25CF Aufnahme';el('rectim').style.display='none';}
   }
   // Init player
-  function initPlayer(email,name){
-    S.email=email;S.inited=true;
+  function initPlayer(id,name){
+    S.id=id;S.inited=true;
     var parts=(name||'Spieler').trim().split(/\s+/);
     var ini=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():(name||'?').slice(0,2).toUpperCase();
     el('av').textContent=ini;S.name=parts[0]||'Spieler';
     load(name);
-    T7SB.getTotalXP(email,function(t){S.sbTotal=t;updXP();});
-    T7SB.getModuleXP(email,cfg.moduleKey,function(rows){
-      var best={};rows.forEach(function(r){var i=r.challenge_idx;if(!(i in best)||r.rating>best[i])best[i]=r.rating;});
-      var changed=false;Object.keys(best).forEach(function(i){var idx=parseInt(i);if(best[i]>=(S.ratings[idx]||0)){S.ratings[idx]=best[i];S.scXP[idx]=cXP(best[i],drills[idx]?drills[idx].xp:10);changed=true;}});
-      if(changed){save();updXP();updProg();refresh();}
-    });
+    if(id){
+      T7SB.getTotalXP(id,function(t){S.sbTotal=t;updXP();});
+      T7SB.getBestRatings(id,cfg.moduleKey,function(best){
+        var changed=false;
+        Object.keys(best).forEach(function(i){
+          var idx=parseInt(i),b=best[i];
+          if(b.rating>=(S.ratings[idx]||0)){
+            S.ratings[idx]=b.rating;
+            S.scXP[idx]=cXP(b.rating,drills[idx]?drills[idx].xp:10);
+            changed=true;
+          }
+        });
+        if(changed){save();updXP();updProg();refresh();}
+      });
+    }
     var ht=el('ht');if(ht&&cfg.heroText)ht.textContent='Hey '+S.name+'! '+cfg.heroText;
   }
   // Wire events
@@ -307,7 +327,7 @@ function T7Challenge(cfg){
     el('recbtn').addEventListener('click',toggleRec);
     el('camstop').addEventListener('click',function(){resetCam();el('skiprow').style.display='flex';show('camcard');});
     el('retrycam').addEventListener('click',resetCam);
-    window.addEventListener('t7xpupdate',function(){if(S.email)T7SB.getTotalXP(S.email,function(t){S.sbTotal=t;updXP();});});
+    window.addEventListener('t7xpupdate',function(){if(S.id)T7SB.getTotalXP(S.id,function(t){S.sbTotal=t;updXP();});});
   }
   // Build HTML
   function _html(){
@@ -380,7 +400,7 @@ function T7Challenge(cfg){
     '</div>';
   }
   wire();
-  T7Identity.resolve(function(email,name){initPlayer(email,name);});
+  T7Identity.resolve(function(id,name){if(id)initPlayer(id,name);});
 }
 
 /* ===========================================================
@@ -395,7 +415,7 @@ function T7Cert(cfg){
   var XMUL=[0,.2,.4,.6,.8,1];
   function aXP(r,max){return Math.round((XMUL[r]||0)*max);}
   function cXP(r,max){return r<4?0:Math.round((XMUL[r]||0)*max);}
-  var S={expanded:false,drill:-1,rate:0,ratings:drills.map(function(){return 0;}),scXP:drills.map(function(){return 0;}),cumXP:0,cat:{},sk:'t7_'+cfg.instanceKey+'_g',ms:null,mr:null,ch:[],rec:false,inited:false,name:'Spieler',sbTotal:null,email:null,submitted:false};
+  var S={expanded:false,drill:-1,rate:0,ratings:drills.map(function(){return 0;}),scXP:drills.map(function(){return 0;}),cumXP:0,cat:{},sk:'t7_'+cfg.instanceKey+'_g',ms:null,mr:null,ch:[],rec:false,inited:false,name:'Spieler',sbTotal:null,id:null,submitted:false};
   var cont=document.getElementById(cfg.containerId||'cert-container');if(!cont)return;
   cont.insertAdjacentHTML('beforeend',_html());
   function el(id){return document.getElementById('t7b-'+id+'-'+uid);}
@@ -461,9 +481,9 @@ function T7Cert(cfg){
     var earned=aXP(S.rate,d.xp),prevS=S.scXP[idx]||0,newS=cXP(S.rate,d.xp);
     S.cumXP+=earned;if(newS>prevS)S.scXP[idx]=newS;
     if(S.rate>prev){S.ratings[idx]=S.rate;if(!S.cat[idx])S.cat[idx]=Date.now();}
-    if(S.email)T7SB.upsert(S.email,S.name,cfg.instanceKey,cfg.title,idx,S.rate,earned,S.cat[idx]||Date.now(),S.sbTotal);
+    if(S.id){T7SB.addXP(S.id,earned,S.sbTotal);T7SB.recordAttempt(S.id,cfg.instanceKey,idx,S.rate,earned);}
     updXP();save();
-    if(S.email)setTimeout(function(){T7SB.getTotalXP(S.email,function(t){S.sbTotal=t;updXP();});try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
+    if(S.id)setTimeout(function(){T7SB.getTotalXP(S.id,function(t){S.sbTotal=t;updXP();});try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}},1500);
     var box=el('obox'),icon=el('oicon'),title=el('otitle'),sub=el('osub'),btns=el('obtns');
     el('oxp').textContent='+'+earned+' XP';el('oxpt').textContent='Gesamt: '+(typeof S.sbTotal==='number'?S.sbTotal:S.cumXP)+' XP';
     var ni=idx+1,ad=allDone();
@@ -489,21 +509,33 @@ function T7Cert(cfg){
   // Final-video submission is handled entirely by T7CertUpload (see t7-cert-upload.js).
   // No in-engine recording or email path remains.
   // Init player
-  function initPlayer(email,name){
-    S.email=email;S.inited=true;
+  function initPlayer(id,name){
+    S.id=id;S.inited=true;
     var parts=(name||'Spieler').trim().split(/\s+/);
     var ini=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():(name||'?').slice(0,2).toUpperCase();
     el('av').textContent=ini;S.name=parts[0]||'Spieler';
     load(name);
-    T7SB.getTotalXP(email,function(t){S.sbTotal=t;updXP();});
-    T7SB.getModuleXP(email,cfg.instanceKey,function(rows){
-      var best={};rows.forEach(function(r){var i=r.challenge_idx;if(!(i in best)||r.rating>best[i])best[i]=r.rating;});
-      var changed=false;Object.keys(best).forEach(function(i){var idx=parseInt(i);if(best[i]>=(S.ratings[idx]||0)){S.ratings[idx]=best[i];S.scXP[idx]=cXP(best[i],drills[idx]?drills[idx].xp:10);changed=true;}});
-      if(changed){save();updXP();updProg();refresh();}
-    });
-    T7SB.getCert(email,cfg.stars,function(cert){
-      if(cert){var wrap=document.querySelector('.t7b-wrap[data-uid="'+uid+'"]');if(wrap)wrap.classList.add('certified');}
-    });
+    if(id){
+      T7SB.getTotalXP(id,function(t){S.sbTotal=t;updXP();});
+      T7SB.getBestRatings(id,cfg.instanceKey,function(best){
+        var changed=false;
+        Object.keys(best).forEach(function(i){
+          var idx=parseInt(i),b=best[i];
+          if(b.rating>=(S.ratings[idx]||0)){
+            S.ratings[idx]=b.rating;
+            S.scXP[idx]=cXP(b.rating,drills[idx]?drills[idx].xp:10);
+            changed=true;
+          }
+        });
+        if(changed){save();updXP();updProg();refresh();}
+      });
+      T7SB.getStars(id,function(cert){
+        if(cert&&cert.stars&&parseInt(cert.stars,10)>=parseInt(cfg.stars,10)){
+          var wrap=document.querySelector('.t7b-wrap[data-uid="'+uid+'"]');if(wrap)wrap.classList.add('certified');
+          S.submitted=true;save();refresh();
+        }
+      });
+    }
     var ht=el('ht');if(ht&&cfg.heroText)ht.textContent='Hey '+S.name+'! '+cfg.heroText;
   }
   // Wire events
@@ -525,9 +557,10 @@ function T7Cert(cfg){
     window.addEventListener('t7cert-submitted',function(ev){
       if(ev&&ev.detail&&parseInt(ev.detail.stars,10)===parseInt(cfg.stars,10)){
         S.submitted=true;save();refresh();
+        if(S.id)T7SB.setStars(S.id,parseInt(cfg.stars,10));
       }
     });
-    window.addEventListener('t7xpupdate',function(){if(S.email)T7SB.getTotalXP(S.email,function(t){S.sbTotal=t;updXP();});});
+    window.addEventListener('t7xpupdate',function(){if(S.id)T7SB.getTotalXP(S.id,function(t){S.sbTotal=t;updXP();});});
   }
   // Build HTML
   function _html(){
@@ -570,10 +603,11 @@ function T7Cert(cfg){
     '</div>';
   }
   wire();
-  T7Identity.resolve(function(email,name){initPlayer(email,name);});
+  T7Identity.resolve(function(id,name){if(id)initPlayer(id,name);});
 }
 
-/* === SIDEBAR: FORTSCHRITT === */
+/* === SIDEBAR: FORTSCHRITT ===
+   Total XP + stars from player_stats; streak + weekly XP from drill_attempts. */
 function T7Fortschritt(containerId){
   var cont=document.getElementById(containerId);
   if(!cont)return;
@@ -588,7 +622,7 @@ function T7Fortschritt(containerId){
   function computeStreak(attempts){
     var weekSet={};
     (attempts||[]).forEach(function(row){
-      var ts=typeof row.attempted_at==='number'?row.attempted_at:parseInt(row.attempted_at)||0;
+      var ts=row.attempted_at?new Date(row.attempted_at).getTime():0;
       if(ts)weekSet[getWeekKey(new Date(ts))]=true;
     });
     var weeks=Object.keys(weekSet).sort().reverse();
@@ -609,26 +643,24 @@ function T7Fortschritt(containerId){
     startOfWeek.setDate(now.getDate()-((now.getDay()+6)%7));
     var t0=startOfWeek.getTime(),tw=0;
     (attempts||[]).forEach(function(row){
-      var raw=row.attempted_at;
-      var ts=typeof raw==='number'?raw:parseInt(raw)||0;
+      var ts=row.attempted_at?new Date(row.attempted_at).getTime():0;
       if(ts>=t0)tw+=Number(row.xp||0);
     });
     return tw;
   }
-  function render(email,name){
+  function render(id){
     Promise.all([
-      fetch(T7_SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(email)+'&select=total_xp',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}),
-      fetch(T7_SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(email)+'&select=attempted_at,xp&order=attempted_at.asc',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();})
-    ]).then(function(res){
-      var players=res[0]||[],attempts=res[1]||[];
-      var totalXP=players.length?Number(players[0].total_xp||0):0;
+      new Promise(function(res){T7SB.getStats(id,res);}),
+      new Promise(function(res){T7SB.getAllAttempts(id,res);})
+    ]).then(function(out){
+      var stats=out[0],attempts=out[1]||[];
+      if(!stats){cont.innerHTML='<div class="t7f-empty">Profil noch nicht angelegt.</div>';return;}
+      var dispName=stats.first_name||'Spieler';
+      var ini=dispName.slice(0,2).toUpperCase();
       var weekXP=getWeeklyXP(attempts);
       var streak=computeStreak(attempts);
-      var parts=(name||email||'?').trim().split(/\s+/);
-      var dispName=parts[0]||'Spieler';
-      var ini=parts.length>=2?(parts[0][0]+parts[parts.length-1][0]).toUpperCase():dispName.slice(0,2).toUpperCase();
       var daysHtml='';
-      for(var d=0;d<8;d++){daysHtml+='<div class="t7f-streak-day'+(d<streak?' on':'')+'"></div>';}
+      for(var d=0;d<8;d++)daysHtml+='<div class="t7f-streak-day'+(d<streak?' on':'')+'"></div>';
       cont.innerHTML=
         '<div class="t7f-hero">'+
           '<div class="t7f-hero-top">'+
@@ -637,56 +669,43 @@ function T7Fortschritt(containerId){
           '</div>'+
         '</div>'+
         '<div class="t7f-stat-row">'+
-          '<div class="t7f-stat-card"><div class="t7f-stat-num">'+totalXP.toLocaleString('de-AT')+'</div><div class="t7f-stat-label">Gesamt XP</div></div>'+
+          '<div class="t7f-stat-card"><div class="t7f-stat-num">'+stats.total_xp.toLocaleString('de-AT')+'</div><div class="t7f-stat-label">Gesamt XP</div></div>'+
           '<div class="t7f-stat-card"><div class="t7f-stat-num">+'+weekXP+'</div><div class="t7f-stat-label">Diese Woche</div></div>'+
         '</div>'+
         '<div class="t7f-streak"><div class="t7f-streak-val">'+streak+' Woche'+(streak===1?'':'n')+' Streak</div><div class="t7f-streak-days">'+daysHtml+'</div></div>';
-    }).catch(function(){cont.innerHTML='<div class="t7f-empty">Fehler beim Laden.</div>';});
+    });
   }
-  T7Identity.resolve(function(email,name){
-    if(!email){cont.innerHTML='<div class="t7f-empty">Kein Spieler erkannt.</div>';return;}
-    render(email,name);
+  T7Identity.resolve(function(id){
+    if(!id){cont.innerHTML='<div class="t7f-empty">Kein Spieler erkannt.</div>';return;}
+    render(id);
   });
-  window.addEventListener('t7xpupdate',function(){var id=T7Identity.get();if(id&&id.email)render(id.email,id.name);});
+  window.addEventListener('t7xpupdate',function(){var info=T7Identity.get();if(info&&info.id)render(info.id);});
 }
 
-/* === SIDEBAR: RANGLISTE === */
+/* === SIDEBAR: RANGLISTE ===
+   Top players by total_xp from player_stats (first_name joined from player_profiles). */
 function T7Rangliste(containerId){
   var cont=document.getElementById(containerId);if(!cont)return;
   var LIMIT=20,AC=[['#003d5c','#00E5FF'],['#064e3b','#34d399'],['#3b1e5f','#c4b5fd'],['#1e3a5f','#93c5fd'],['#7f1d1d','#fca5a5'],['#1c3a2e','#86efac'],['#4a1d2f','#f9a8d4'],['#1e3a1e','#bbf7d0'],['#2d2000','#fde68a'],['#1a1a3e','#a5b4fc']];
-  var allP=[],view='xp';
+  var allP=[];
   function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);}
   function ai(n){return n?(n.charCodeAt(0)+n.length)%AC.length:0;}
-  cont.innerHTML='<div class="rl-header"><div class="rl-title">\uD83C\uDFC6 Rangliste</div><div class="rl-sub">Top Members \u00b7 T7 Academy</div></div><div class="vt-wrap"><button class="vt-btn active" id="t7rl-xp-'+containerId+'">&#9889; XP Rangliste</button><button class="vt-btn" id="t7rl-wk-'+containerId+'">&#128197; Wochen Mitglied</button></div><div id="t7rl-list-'+containerId+'"><div class="rl-loading">Lade\u2026</div></div>';
+  cont.innerHTML='<div class="rl-header"><div class="rl-title">\uD83C\uDFC6 Rangliste</div><div class="rl-sub">Top Spieler \u00b7 T7 Academy</div></div><div id="t7rl-list-'+containerId+'"><div class="rl-loading">Lade\u2026</div></div>';
   var listEl=document.getElementById('t7rl-list-'+containerId);
-  var btnXP=document.getElementById('t7rl-xp-'+containerId);
-  var btnWk=document.getElementById('t7rl-wk-'+containerId);
-  function setView(v){view=v;btnXP.className='vt-btn'+(v==='xp'?' active':'');btnWk.className='vt-btn'+(v==='weeks'?' active':'');if(allP.length)renderList();}
-  btnXP.onclick=function(){setView('xp');};btnWk.onclick=function(){setView('weeks');};
   function renderList(){
-    var isW=view==='weeks';
-    var sorted=allP.slice().sort(function(a,b){return isW?b.weeks-a.weeks:b.xp-a.xp;});
     var med=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
-    listEl.innerHTML='<div class="rank-list">'+sorted.map(function(p,i){
-      var r=i+1,c=AC[ai(p.name)],val=isW?p.weeks+' Woche'+(p.weeks===1?'':'n'):(p.xp||0).toLocaleString('de-AT')+' XP';
-      return '<div class="rank-row"><div class="rank-num" style="color:'+(r===1?'#00E5FF':r===2?'rgba(200,200,220,.75)':r===3?'#FF9500':'rgba(255,255,255,.18)')+'">'+(r<=3?med[r-1]:r)+'</div><div class="r-avatar" style="background:'+c[0]+';color:'+c[1]+';border:2px solid '+(r===1?'#00E5FF':r===2?'rgba(200,200,220,.55)':r===3?'rgba(255,149,0,.55)':c[1]+'55')+'">'+ini(p.name)+'</div><div class="rank-name">'+p.name+'</div><div class="rank-val">'+val+'</div></div>';
+    listEl.innerHTML='<div class="rank-list">'+allP.map(function(p,i){
+      var r=i+1,c=AC[ai(p.name)],val=(p.xp||0).toLocaleString('de-AT')+' XP';
+      var starsBadge=p.stars?' <span style="margin-left:6px">\u2b50'+p.stars+'</span>':'';
+      return '<div class="rank-row"><div class="rank-num" style="color:'+(r===1?'#00E5FF':r===2?'rgba(200,200,220,.75)':r===3?'#FF9500':'rgba(255,255,255,.18)')+'">'+(r<=3?med[r-1]:r)+'</div><div class="r-avatar" style="background:'+c[0]+';color:'+c[1]+';border:2px solid '+(r===1?'#00E5FF':r===2?'rgba(200,200,220,.55)':r===3?'rgba(255,149,0,.55)':c[1]+'55')+'">'+ini(p.name)+'</div><div class="rank-name">'+p.name+starsBadge+'</div><div class="rank-val">'+val+'</div></div>';
     }).join('')+'</div>';
   }
   function load(){
-    var nowMs=Date.now();
-    Promise.all([
-      fetch(T7_SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit='+LIMIT,{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
-      fetch(T7_SB_URL+'/rest/v1/members?select=name,bm_joined_at&limit=200',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
-    ]).then(function(res){
-      var players=res[0]||[],members=res[1]||[];
-      var joinMap={};members.forEach(function(m){if(m.name&&m.bm_joined_at)joinMap[m.name]=m.bm_joined_at;});
-      allP=players.map(function(p){
-        var nm=p.player_name||'Unbekannt',jt=joinMap[nm]||null;
-        return{name:nm,xp:Number(p.total_xp||0),weeks:jt?Math.floor((nowMs-jt)/(7*86400000)):0};
-      });
+    T7SB.getLeaderboard(LIMIT,function(rows){
+      allP=rows;
       if(!allP.length){listEl.innerHTML='<div class="rl-loading">Noch keine Eintr\xe4ge.</div>';return;}
       renderList();
-    }).catch(function(){listEl.innerHTML='<div class="rl-loading">Fehler beim Laden.</div>';});
+    });
   }
   load();
   window.addEventListener('t7xpupdate',load);
@@ -697,7 +716,7 @@ function T7Rangliste(containerId){
 function T7Badge(containerId){
   var cont=document.getElementById(containerId);if(!cont)return;
   cont.innerHTML='<div class="t7f-loading">Lade\u2026</div>';
-  function starsHtml(n){return '\u2b50';}
+  function starsHtml(){return '\u2b50';}
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
   function showBadge(n,at,nm){
     cont.innerHTML='<div class="t7-cert">'+
@@ -706,23 +725,22 @@ function T7Badge(containerId){
       '<div class="t7-cert-brand">T7 Academy Zertifikat</div>'+
       '<div class="t7-cert-line"></div>'+
         '<div class="t7-cert-star-block">'+
-        (st.stars>1?'<div class="t7-cert-num">'+st.stars+'</div>':'')+
-        '<div class="t7-cert-stars">'+starsHtml(st.stars)+'</div>'+
+        (n>1?'<div class="t7-cert-num">'+n+'</div>':'')+
+        '<div class="t7-cert-stars">'+starsHtml()+'</div>'+
       '</div>'+
       '<div class="t7-cert-line"></div>'+
       (nm?'<div class="t7-cert-name">'+nm+'</div>':'')+
       '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong>'+(at?' \u00b7 '+fmtDate(at):'')+'</div>'+
     '</div>';
   }
-  function fetchBadge(email){
-    fetch(T7_SB_URL+'/rest/v1/certifications?player_email=eq.'+encodeURIComponent(email)+'&select=stars,awarded_at,player_name&order=stars.desc&limit=1',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}})
-    .then(function(r){return r.json();}).then(function(rows){
-      if(rows&&rows.length&&rows[0].stars)showBadge(rows[0].stars,rows[0].awarded_at,rows[0].player_name);
+  function fetchBadge(id){
+    T7SB.getStats(id,function(s){
+      if(s&&s.stars)showBadge(s.stars,s.stars_awarded_at,s.first_name);
       else cont.innerHTML='<div class="t7f-empty">Noch kein Zertifikat.</div>';
-    }).catch(function(){cont.innerHTML='<div class="t7f-empty">Fehler beim Laden.</div>';});
+    });
   }
-  T7Identity.resolve(function(email){if(email)fetchBadge(email);else cont.innerHTML='<div class="t7f-empty">Kein Spieler erkannt.</div>';});
-  window.addEventListener('t7xpupdate',function(){var id=T7Identity.get();if(id&&id.email)fetchBadge(id.email);});
+  T7Identity.resolve(function(id){if(id)fetchBadge(id);else cont.innerHTML='<div class="t7f-empty">Kein Spieler erkannt.</div>';});
+  window.addEventListener('t7xpupdate',function(){var info=T7Identity.get();if(info&&info.id)fetchBadge(info.id);});
 }
 
 /* === MOBILE BOTTOM SHEET (FAB + Fortschritt/Rangliste/Zertifikat) === */
@@ -754,50 +772,54 @@ function T7MobileSheet(){
   var wrap=document.createElement('div');wrap.innerHTML=sheetHTML;
   while(wrap.firstChild)document.body.appendChild(wrap.firstChild);
 
-  var st={open:false,tab:'fort',email:null,name:'Spieler',totalXP:0,weekXP:0,streak:0,joinedAt:null,joinedWeeks:0,stars:0,starsAt:null,players:[],joinMap:{},fortLoaded:false,rangLoaded:false,certLoaded:false};
+  var st={open:false,tab:'fort',id:null,name:'Spieler',totalXP:0,weekXP:0,streak:0,stars:0,starsAt:null,players:[],fortLoaded:false,rangLoaded:false,certLoaded:false};
   function $(id){return document.getElementById(id);}
-  function getWeekKey(d){var x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);var ys=new Date(Date.UTC(x.getUTCFullYear(),0,1));return x.getUTCFullYear()+'-W'+Math.ceil((((x-ys)/86400000)+1)/7);}
-  function calcStreak(att){var wk={};(att||[]).forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts)wk[getWeekKey(new Date(ts))]=true;});var now=new Date(),s=0;for(var i=0;i<52;i++){var k=getWeekKey(new Date(now-i*7*86400000));if(wk[k])s++;else if(i>0)break;}return s;}
-  function calcWeekXP(att){var now=new Date(),sw=new Date(now);sw.setHours(0,0,0,0);sw.setDate(now.getDate()-((now.getDay()+6)%7));var t0=sw.getTime(),xp=0;(att||[]).forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0;if(ts>=t0)xp+=Number(a.xp||0);});return xp;}
   function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
+  function getWeekKey(d){var x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);var ys=new Date(Date.UTC(x.getUTCFullYear(),0,1));return x.getUTCFullYear()+'-W'+Math.ceil((((x-ys)/86400000)+1)/7);}
+  function calcStreak(att){
+    var wk={};(att||[]).forEach(function(a){var ts=a.attempted_at?new Date(a.attempted_at).getTime():0;if(ts)wk[getWeekKey(new Date(ts))]=true;});
+    var weeks=Object.keys(wk).sort().reverse();if(!weeks.length)return 0;
+    var thisW=getWeekKey(new Date()),lastW=getWeekKey(new Date(Date.now()-7*86400000));
+    if(weeks[0]!==thisW&&weeks[0]!==lastW)return 0;
+    var s=1;
+    for(var i=1;i<weeks.length;i++){
+      var py=parseInt(weeks[i-1].split('-W')[0]),pw=parseInt(weeks[i-1].split('-W')[1]);
+      var cy=parseInt(weeks[i].split('-W')[0]),cw=parseInt(weeks[i].split('-W')[1]);
+      if((py===cy&&pw-cw===1)||(py-cy===1&&pw===1&&cw>=52))s++;else break;
+    }
+    return s;
+  }
+  function calcWeekXP(att){
+    var now=new Date(),sw=new Date(now);sw.setHours(0,0,0,0);sw.setDate(now.getDate()-((now.getDay()+6)%7));
+    var t0=sw.getTime(),xp=0;
+    (att||[]).forEach(function(a){var ts=a.attempted_at?new Date(a.attempted_at).getTime():0;if(ts>=t0)xp+=Number(a.xp||0);});
+    return xp;
+  }
 
   function loadFort(){
     Promise.all([
-      fetch(T7_SB_URL+'/rest/v1/players?player_email=eq.'+encodeURIComponent(st.email)+'&select=total_xp',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
-      fetch(T7_SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(st.email)+'&select=attempted_at,xp&order=attempted_at.asc',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
-      fetch(T7_SB_URL+'/rest/v1/members?email=eq.'+encodeURIComponent(st.email)+'&select=bm_joined_at&limit=1',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
-    ]).then(function(res){
-      st.totalXP=res[0]&&res[0].length?Number(res[0][0].total_xp||0):0;
-      st.weekXP=calcWeekXP(res[1]);
-      st.streak=calcStreak(res[1]);
-      st.joinedAt=res[2]&&res[2].length?res[2][0].bm_joined_at||null:null;
-      st.joinedWeeks=st.joinedAt?Math.floor((Date.now()-st.joinedAt)/(7*86400000)):0;
-      st.fortLoaded=true;updateFAB();
+      new Promise(function(res){T7SB.getStats(st.id,res);}),
+      new Promise(function(res){T7SB.getAllAttempts(st.id,res);})
+    ]).then(function(out){
+      var s=out[0],att=out[1]||[];
+      if(s){st.totalXP=s.total_xp;st.stars=s.stars||0;st.starsAt=s.stars_awarded_at;if(s.first_name)st.name=s.first_name;}
+      st.weekXP=calcWeekXP(att);st.streak=calcStreak(att);
+      st.fortLoaded=true;st.certLoaded=true;updateFAB();
       if(st.open&&st.tab==='fort')$('t7-sheet-content').innerHTML=renderFort();
+      if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();
     });
   }
   function loadRang(){
-    Promise.all([
-      fetch(T7_SB_URL+'/rest/v1/players?select=player_name,total_xp&order=total_xp.desc&limit=20',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
-      fetch(T7_SB_URL+'/rest/v1/members?select=name,bm_joined_at&limit=200',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
-    ]).then(function(res){
-      var jm={};(res[1]||[]).forEach(function(m){if(m.name&&m.bm_joined_at)jm[m.name]=m.bm_joined_at;});
-      st.joinMap=jm;st.players=(res[0]||[]).map(function(p){return{name:p.player_name||'Unbekannt',xp:Number(p.total_xp||0)};});
-      st.rangLoaded=true;
-      if(st.open&&st.tab==='rang')$('t7-sheet-content').innerHTML=renderRang('xp');
+    T7SB.getLeaderboard(20,function(rows){
+      st.players=rows;st.rangLoaded=true;
+      if(st.open&&st.tab==='rang')$('t7-sheet-content').innerHTML=renderRang();
     });
-  }
-  function loadCert(){
-    fetch(T7_SB_URL+'/rest/v1/certifications?player_email=eq.'+encodeURIComponent(st.email)+'&select=stars,awarded_at,player_name&order=stars.desc&limit=1',{headers:{apikey:T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY}}).then(function(r){return r.json();}).then(function(rows){
-      if(rows&&rows.length&&rows[0].stars){st.stars=rows[0].stars;st.starsAt=rows[0].awarded_at;}
-      st.certLoaded=true;updateFAB();
-      if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();
-    }).catch(function(){st.certLoaded=true;if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML='<div class="t7m-empty">Fehler beim Laden.</div>';});
   }
   function updateFAB(){
     $('t7-fab-xp').textContent=st.totalXP.toLocaleString('de-AT')+' XP';
-    $('t7-fab-streak').textContent=st.joinedWeeks+' Woche'+(st.joinedWeeks===1?'':'n');
+    $('t7-fab-streak').textContent=st.streak+' Woche'+(st.streak===1?'':'n');
     if(st.stars){$('t7-fab-stars-num').textContent=st.stars;$('t7-fab-stars').style.display='inline';$('t7-fab-stars-sep').style.display='inline';}
+    else{$('t7-fab-stars').style.display='none';$('t7-fab-stars-sep').style.display='none';}
   }
   function renderFort(){
     if(!st.fortLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
@@ -809,34 +831,30 @@ function T7MobileSheet(){
     '</div>'+
     '<div class="t7f-streak"><div class="t7f-streak-val">'+st.streak+' Woche'+(st.streak===1?'':'n')+' Streak</div><div class="t7f-streak-days">'+days+'</div></div>';
   }
-  function renderRang(mode){
+  function renderRang(){
     if(!st.rangLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
-    var isW=(mode==='weeks');
-    var items=st.players.map(function(p){var jt=st.joinMap[p.name]||null;return{name:p.name,xp:p.xp,weeks:jt?Math.floor((Date.now()-jt)/(7*86400000)):0};});
-    items.sort(function(a,b){return isW?b.weeks-a.weeks:b.xp-a.xp;});
-    var tabs='<div class="t7m-rl-tabs"><button class="t7m-rl-tab'+(isW?'':' active')+'" data-mode="xp" type="button">\u26a1 XP</button><button class="t7m-rl-tab'+(isW?' active':'')+'" data-mode="weeks" type="button">\ud83d\udcc5 Wochen</button></div>';
+    if(!st.players.length)return '<div class="t7m-empty">Noch keine Eintr\xe4ge.</div>';
     var med=['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
-    var firstName=(st.name||'').split(' ')[0];
-    var rows=items.map(function(p,i){
-      var r=i+1,isMe=firstName&&p.name.split(' ')[0]===firstName;
-      var val=isW?p.weeks+' Woche'+(p.weeks===1?'':'n'):p.xp.toLocaleString('de-AT')+' XP';
+    var rows=st.players.map(function(p,i){
+      var r=i+1,isMe=st.id&&p.id===st.id;
+      var val=p.xp.toLocaleString('de-AT')+' XP';
       var posCls=r===1?' gold':r===2?' silver':r===3?' bronze':'';
       return '<div class="t7m-rank'+(isMe?' me':'')+'"><div class="t7m-rank-pos'+posCls+'">'+(r<=3?med[r-1]:r)+'</div><div class="t7m-rank-av'+(isMe?' me':'')+'">'+ini(p.name)+'</div><div class="t7m-rank-name">'+p.name+'</div><div class="t7m-rank-val">'+val+'</div></div>';
     }).join('');
-    return tabs+'<div>'+rows+'</div>';
+    return '<div>'+rows+'</div>';
   }
   function renderCert(){
     if(!st.certLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
     if(!st.stars)return '<div class="t7m-empty">Noch kein Zertifikat. \u00dcbe weiter und reiche dein Final-Video ein!</div>';
-    function starsHtml(n){return '\u2b50';}
-    function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
+    function starsHtml(){return '\u2b50';}
+    function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:Date.parse(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
     return '<div class="t7-cert">'+
       '<div class="t7-cert-top"></div><div class="t7-cert-bottom"></div>'+
       '<div class="t7-cert-brand">T7 Academy Zertifikat</div>'+
       '<div class="t7-cert-line"></div>'+
       '<div class="t7-cert-star-block">'+
         '<div class="t7-cert-num">'+st.stars+'</div>'+
-        '<div class="t7-cert-stars">'+starsHtml(st.stars)+'</div>'+
+        '<div class="t7-cert-stars">'+starsHtml()+'</div>'+
       '</div>'+
       '<div class="t7-cert-line"></div>'+
       '<div class="t7-cert-name">'+(st.name||'Spieler')+'</div>'+
@@ -855,9 +873,9 @@ function T7MobileSheet(){
     renderActive();
   }
   function renderActive(){
-    if(st.tab==='fort'){if(!st.fortLoaded&&st.email)loadFort();$('t7-sheet-content').innerHTML=renderFort();}
-    else if(st.tab==='rang'){if(!st.rangLoaded)loadRang();$('t7-sheet-content').innerHTML=renderRang('xp');}
-    else{if(!st.certLoaded&&st.email)loadCert();$('t7-sheet-content').innerHTML=renderCert();}
+    if(st.tab==='fort'){if(!st.fortLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderFort();}
+    else if(st.tab==='rang'){if(!st.rangLoaded)loadRang();$('t7-sheet-content').innerHTML=renderRang();}
+    else{if(!st.certLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderCert();}
   }
 
   $('t7-fab').onclick=openSheet;
@@ -866,17 +884,16 @@ function T7MobileSheet(){
   $('t7-tab-fort').onclick=function(){switchTab('fort');};
   $('t7-tab-rang').onclick=function(){switchTab('rang');};
   $('t7-tab-cert').onclick=function(){switchTab('cert');};
-  $('t7-sheet-content').addEventListener('click',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('t7m-rl-tab')){$('t7-sheet-content').innerHTML=renderRang(t.dataset.mode);}});
   var ts=0,sheet=$('t7-sheet');
   sheet.addEventListener('touchstart',function(e){ts=e.touches[0].clientY;},{passive:true});
   sheet.addEventListener('touchend',function(e){if(e.changedTouches[0].clientY-ts>80)closeSheet();},{passive:true});
 
-  T7Identity.resolve(function(email,name){
-    if(!email)return;
-    st.email=email;st.name=name||(email.split('@')[0]);
-    loadFort();loadCert();
+  T7Identity.resolve(function(id,name){
+    if(!id)return;
+    st.id=id;st.name=name||'Spieler';
+    loadFort();
   });
-  window.addEventListener('t7xpupdate',function(){if(st.email){st.fortLoaded=false;loadFort();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
+  window.addEventListener('t7xpupdate',function(){if(st.id){st.fortLoaded=false;st.certLoaded=false;loadFort();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
 }
 
 /* === PUBLIC API === */
