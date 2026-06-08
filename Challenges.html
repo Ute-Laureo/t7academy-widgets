@@ -7,6 +7,131 @@
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
 <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css">
+<style>
+/* ===========================================================
+   PAGE-SPECIFIC STYLES (Challenges 4-tab structure)
+   Extends t7-base.css. Anything reused page-wide belongs in
+   the base; only the tab grid, builder UI and Monats/Builder
+   header styles live here.
+=========================================================== */
+
+/* ---- 4-Card category tab grid ---- */
+.ch-cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
+@media (max-width:880px){.ch-cat-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.ch-cat-grid{grid-template-columns:1fr}}
+
+.ch-cat{
+  --cat-color:#00E5FF;--cat-color2:#1f80ff;
+  position:relative;display:flex;flex-direction:column;gap:4px;align-items:flex-start;
+  padding:14px 14px 12px;border-radius:14px;cursor:pointer;text-align:left;
+  background:linear-gradient(135deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.55) 100%),var(--surface);
+  border:1.5px solid rgba(255,255,255,.06);
+  color:var(--text);font-family:'Open Sans',sans-serif;
+  transition:transform .15s, box-shadow .2s, border-color .2s;
+  overflow:hidden;
+}
+.ch-cat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cat-color) 40%,var(--cat-color) 60%,transparent);opacity:.7}
+.ch-cat::after{content:'';position:absolute;width:120px;height:120px;top:-50px;right:-30px;border-radius:50%;background:radial-gradient(circle,var(--cat-color) 0%,transparent 70%);opacity:.12;pointer-events:none}
+.ch-cat:hover{transform:translateY(-2px);border-color:var(--cat-color);box-shadow:0 6px 22px -8px var(--cat-color)}
+.ch-cat.active{border-color:var(--cat-color);box-shadow:0 0 0 1px var(--cat-color),0 8px 28px -10px var(--cat-color);background:linear-gradient(135deg,rgba(0,0,0,.2) 0%,rgba(0,0,0,.4) 100%),var(--surface)}
+.ch-cat.active::after{opacity:.22}
+
+.ch-cat-icon{font-size:24px;line-height:1;filter:drop-shadow(0 0 10px var(--cat-color))}
+.ch-cat-title{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:14px;font-weight:900;letter-spacing:-.01em;color:#fff;line-height:1.2;margin-top:4px;position:relative;z-index:1}
+.ch-cat-sub{font-size:10px;color:rgba(255,255,255,.55);line-height:1.4;position:relative;z-index:1}
+.ch-cat-count{margin-top:auto;padding-top:8px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cat-color);position:relative;z-index:1}
+
+.ch-cat-tech   {--cat-color:#00E5FF;--cat-color2:#1f80ff}
+.ch-cat-cert   {--cat-color:#FFD700;--cat-color2:#FF8C00}
+.ch-cat-build  {--cat-color:#A855F7;--cat-color2:#EC4899}
+.ch-cat-monats {--cat-color:#FF6B35;--cat-color2:#FF1744}
+
+[data-theme="light"] .ch-cat{background:linear-gradient(135deg,rgba(255,255,255,.6) 0%,rgba(255,255,255,.9) 100%),var(--surface);border-color:var(--border)}
+[data-theme="light"] .ch-cat-title{color:var(--text)}
+
+/* ---- Tab panel reveal ---- */
+.ch-panel{display:none}
+.ch-panel.active{display:flex}
+
+/* ---- Builder header (violet) ---- */
+.shb-wrap{position:relative;width:100%;overflow:hidden;border-radius:12px;padding:16px 18px 14px;margin-top:10px;
+  border:1.5px solid transparent;
+  background-image:linear-gradient(#080f1e,#080f1e),linear-gradient(135deg,#A855F7,#EC4899);
+  background-origin:border-box;background-clip:padding-box,border-box}
+.shb-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#A855F7 30%,#EC4899 70%,transparent);opacity:.85}
+.shb-orb1{position:absolute;width:180px;height:180px;top:-70px;right:-50px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,.12) 0%,transparent 70%);pointer-events:none}
+.shb-orb2{position:absolute;width:110px;height:110px;bottom:-45px;left:-25px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,.1) 0%,transparent 70%);pointer-events:none}
+.shb-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:44px;line-height:1;z-index:2;filter:drop-shadow(0 0 14px rgba(168,85,247,.5))}
+.shb-content{position:relative;z-index:1;padding-right:70px}
+.shb-title{font-family:'Open Sans',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.01em;color:#fff;margin-bottom:5px;white-space:nowrap}
+.shb-title span{color:#C084FC}
+.shb-intro{font-size:11px;color:rgba(255,255,255,.55);line-height:1.55;margin-top:10px;margin-bottom:10px}
+.shb-intro strong{color:#C084FC;font-weight:700}
+.shb-pills{display:flex;gap:6px;flex-wrap:wrap}
+.shb-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.4);border-radius:99px;padding:3px 10px;font-size:10px;font-weight:700;color:#C084FC;box-shadow:0 0 8px rgba(168,85,247,.18)}
+
+/* ---- Monats header (orange/red) ---- */
+.shm-wrap{position:relative;width:100%;overflow:hidden;border-radius:12px;padding:16px 18px 14px;margin-top:10px;
+  border:1.5px solid transparent;
+  background-image:linear-gradient(#080f1e,#080f1e),linear-gradient(135deg,#FF6B35,#FF1744);
+  background-origin:border-box;background-clip:padding-box,border-box}
+.shm-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#FF6B35 30%,#FF1744 70%,transparent);opacity:.85}
+.shm-orb1{position:absolute;width:180px;height:180px;top:-70px;right:-50px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.12) 0%,transparent 70%);pointer-events:none}
+.shm-orb2{position:absolute;width:110px;height:110px;bottom:-45px;left:-25px;border-radius:50%;background:radial-gradient(circle,rgba(255,23,68,.1) 0%,transparent 70%);pointer-events:none}
+.shm-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:44px;line-height:1;z-index:2;filter:drop-shadow(0 0 14px rgba(255,107,53,.5))}
+.shm-content{position:relative;z-index:1;padding-right:70px}
+.shm-title{font-family:'Open Sans',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.01em;color:#fff;margin-bottom:5px;white-space:nowrap}
+.shm-title span{color:#FF6B35}
+.shm-intro{font-size:11px;color:rgba(255,255,255,.55);line-height:1.55;margin-top:10px;margin-bottom:10px}
+.shm-intro strong{color:#FF6B35;font-weight:700}
+.shm-pills{display:flex;gap:6px;flex-wrap:wrap}
+.shm-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.4);border-radius:99px;padding:3px 10px;font-size:10px;font-weight:700;color:#FF6B35;box-shadow:0 0 8px rgba(255,107,53,.18)}
+
+/* ---- Builder filter UI ---- */
+.bf-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.bf-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.bf-label{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);min-width:110px}
+.bf-pills{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
+.bf-pill{
+  background:transparent;border:1px solid var(--border);
+  border-radius:99px;padding:5px 12px;font-size:11px;font-weight:700;
+  color:var(--text);cursor:pointer;transition:all .15s;font-family:'Open Sans',sans-serif;
+}
+.bf-pill:hover{border-color:#A855F7;color:#C084FC}
+.bf-pill.active{background:rgba(168,85,247,.15);border-color:#A855F7;color:#C084FC;box-shadow:0 0 0 1px rgba(168,85,247,.3)}
+.bf-search{flex:1;min-width:200px;background:transparent;border:1px solid var(--border);border-radius:99px;padding:8px 14px;font-size:12px;color:var(--text);font-family:'Open Sans',sans-serif}
+.bf-search:focus{outline:none;border-color:#A855F7}
+.bf-search::placeholder{color:var(--muted)}
+
+.bf-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap}
+.bf-count{font-size:12px;color:var(--muted);font-weight:600}
+.bf-count strong{color:#C084FC}
+.bf-btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.bf-build,.bf-reset{
+  background:linear-gradient(135deg,#A855F7,#EC4899);
+  border:none;border-radius:99px;padding:9px 18px;font-size:12px;font-weight:800;
+  color:#fff;cursor:pointer;font-family:'Open Sans',sans-serif;letter-spacing:.02em;
+  transition:all .15s;box-shadow:0 4px 14px -4px rgba(168,85,247,.6);
+}
+.bf-build:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px -4px rgba(168,85,247,.8)}
+.bf-build:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.bf-reset{background:transparent;border:1px solid var(--border);color:var(--muted);box-shadow:none}
+.bf-reset:hover{border-color:var(--text);color:var(--text)}
+
+/* Result preview grid (compact thumbnails before "start") */
+.bf-preview{display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px}
+.bf-preview.open{display:block}
+.bf-preview-title{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.bf-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.bf-vid{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:4px}
+.bf-vid-title{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bf-vid-meta{font-size:9px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+
+/* ---- Monats editor hint (visible only when section is empty) ---- */
+.monats-hint{background:rgba(255,107,53,.08);border:1px dashed rgba(255,107,53,.4);border-radius:10px;padding:14px;font-size:12px;color:rgba(255,255,255,.65);line-height:1.6}
+.monats-hint code{background:rgba(0,0,0,.4);padding:2px 6px;border-radius:4px;color:#FF6B35;font-size:11px}
+[data-theme="light"] .monats-hint{color:rgba(0,0,0,.7)}
+</style>
 </head>
 <body>
 
@@ -30,18 +155,50 @@
 <div class="hero">
   <div class="hero-text">
     <h1>Challenges. Zeige Deine <span>Skills!</span></h1>
-    <p>Schau dir die Videos an, &#252;be so oft du kannst &#8212; und bewerte dich <strong>ehrlich</strong>. Jeder Versuch bringt dich weiter. Du schaffst das!</p>
+    <p>Schau dir die Videos an, &uuml;be so oft du kannst &mdash; und bewerte dich <strong>ehrlich</strong>. Jeder Versuch bringt dich weiter. Du schaffst das!</p>
   </div>
   <div class="hero-image"></div>
 </div>
 
 <div class="ch-layout">
   <div class="ch-main">
-    <section class="ch-section">
+
+    <!-- ===== 4-CARD TAB GRID ===== -->
+    <div class="ch-cat-grid" id="catGrid">
+      <button class="ch-cat ch-cat-tech active" data-tab="technik" type="button">
+        <div class="ch-cat-icon">7&#65039;&#8419;</div>
+        <div class="ch-cat-title">Technikschule</div>
+        <div class="ch-cat-sub">Alle Technik &amp; Groundmoves Challenges</div>
+        <div class="ch-cat-count">7 Module</div>
+      </button>
+      <button class="ch-cat ch-cat-cert" data-tab="zertifikate" type="button">
+        <div class="ch-cat-icon">&#11088;</div>
+        <div class="ch-cat-title">Sterne-Zertifikate</div>
+        <div class="ch-cat-sub">Vom 1-Stern zum 5-Sterne Profi</div>
+        <div class="ch-cat-count">5 Zertifikate</div>
+      </button>
+      <button class="ch-cat ch-cat-build" data-tab="builder" type="button">
+        <div class="ch-cat-icon">&#128295;</div>
+        <div class="ch-cat-title">Bau dir deine eigene Challenge</div>
+        <div class="ch-cat-sub">Filter w&auml;hlen, Challenge starten</div>
+        <div class="ch-cat-count">Dynamisch</div>
+      </button>
+      <button class="ch-cat ch-cat-monats" data-tab="monats" type="button">
+        <div class="ch-cat-icon">&#128293;</div>
+        <div class="ch-cat-title">Challenge des Monats</div>
+        <div class="ch-cat-sub">Vom T7 Expert kuratiert</div>
+        <div class="ch-cat-count" id="monatsLabel">Juni 2026</div>
+      </button>
+    </div>
+
+    <!-- ===== PANEL 1: Technikschule ===== -->
+    <section class="ch-section ch-panel active" data-panel="technik">
       <div class="t7h-wrap">
         <div class="t7h-topline"></div>
-        <div class="t7h-content" style="padding-right:0">
-          <div class="t7h-title">T7 Academy <span>Challenges</span></div>
+        <div class="t7h-orb1"></div><div class="t7h-orb2"></div>
+        <div class="t7h-icon">7&#65039;&#8419;</div>
+        <div class="t7h-content">
+          <div class="t7h-title">T7 Academy <span>Technikschule</span></div>
           <div class="t7h-intro">Willkommen! Hier kannst du deine <strong>Fussballtechnik</strong> auf das n&auml;chste Level bringen. Schau dir die Videos an, &uuml;be so oft du kannst &mdash; und bewerte dich <strong>ehrlich</strong>. Jeder Versuch bringt dich weiter. <strong>Du schaffst das! &#128170;</strong></div>
           <div class="t7h-pills">
             <div class="t7h-pill">&#9889; XP sammeln</div>
@@ -52,10 +209,14 @@
       </div>
       <div class="widget-container" id="ch-container"></div>
     </section>
-    <section class="ch-section" style="margin-top:24px">
+
+    <!-- ===== PANEL 2: Zertifikate ===== -->
+    <section class="ch-section ch-panel" data-panel="zertifikate">
       <div class="shz-wrap">
         <div class="shz-topline"></div>
-        <div class="shz-content" style="padding-right:0">
+        <div class="shz-orb1"></div><div class="shz-orb2"></div>
+        <div class="shz-icon">&#11088;</div>
+        <div class="shz-content">
           <div class="shz-title">T7 Academy <span>Zertifikate</span></div>
           <div class="shz-intro">Vom <strong>1-Stern</strong> bis zum <strong>5-Sterne Zertifikat</strong> &mdash; zeige was du wirklich drauf hast. Reiche dein Final-Video ein und hol dir dein offizielles T7 Zertifikat!</div>
           <div class="shz-pills">
@@ -69,7 +230,100 @@
       </div>
       <div class="widget-container" id="cert-container"></div>
     </section>
+
+    <!-- ===== PANEL 3: Builder ===== -->
+    <section class="ch-section ch-panel" data-panel="builder">
+      <div class="shb-wrap">
+        <div class="shb-topline"></div>
+        <div class="shb-orb1"></div><div class="shb-orb2"></div>
+        <div class="shb-icon">&#128295;</div>
+        <div class="shb-content">
+          <div class="shb-title">Bau dir deine <span>eigene Challenge</span></div>
+          <div class="shb-intro">W&auml;hle deine <strong>Kriterien</strong> &mdash; Sterne, Position, Spieler oder Schwierigkeit &mdash; und wir bauen dir eine <strong>individuelle Challenge</strong> aus passenden Videos. Perfekt f&uuml;r dein Training!</div>
+          <div class="shb-pills">
+            <div class="shb-pill">&#127919; Nach Position</div>
+            <div class="shb-pill">&#128170; Nach Schwierigkeit</div>
+            <div class="shb-pill">&#127934; Nach Spieler</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter UI -->
+      <div class="bf-card">
+        <div class="bf-row">
+          <label class="bf-label">Sterne</label>
+          <div class="bf-pills" data-field="stars" id="bf-stars"><span style="font-size:11px;color:var(--muted)">Lade...</span></div>
+        </div>
+        <div class="bf-row">
+          <label class="bf-label">Sevens</label>
+          <div class="bf-pills" data-field="sevens" id="bf-sevens"><span style="font-size:11px;color:var(--muted)">Lade...</span></div>
+        </div>
+        <div class="bf-row">
+          <label class="bf-label">Position</label>
+          <div class="bf-pills" data-field="position">
+            <button class="bf-pill" data-val="defense"  type="button">&#128737;&#65039; Defense</button>
+            <button class="bf-pill" data-val="center"   type="button">&#9881;&#65039; Center</button>
+            <button class="bf-pill" data-val="wing"     type="button">&#8596;&#65039; Wing</button>
+            <button class="bf-pill" data-val="midfield" type="button">&#127919; Midfield</button>
+            <button class="bf-pill" data-val="offense"  type="button">&#9889; Offense</button>
+          </div>
+        </div>
+        <div class="bf-row">
+          <label class="bf-label">Schwierigkeit</label>
+          <div class="bf-pills" data-field="difficulty" id="bf-diff"><span class="bf-count" style="font-size:11px">Lade...</span></div>
+        </div>
+        <div class="bf-row">
+          <label class="bf-label">Kategorie</label>
+          <div class="bf-pills" data-field="category" id="bf-cat"><span class="bf-count" style="font-size:11px">Lade...</span></div>
+        </div>
+        <div class="bf-row">
+          <label class="bf-label">Spieler</label>
+          <div class="bf-pills" data-field="player" id="bf-player"><span class="bf-count" style="font-size:11px">Lade...</span></div>
+        </div>
+        <div class="bf-row">
+          <label class="bf-label">Titel suchen</label>
+          <input type="text" class="bf-search" id="bf-title" placeholder="z.B. Elastico, Rainbow, Samba...">
+        </div>
+        <div class="bf-actions">
+          <div class="bf-count" id="bf-count">&mdash; W&auml;hle Filter um Videos zu finden &mdash;</div>
+          <div class="bf-btnrow">
+            <button class="bf-reset" id="bf-reset" type="button">Filter zur&uuml;cksetzen</button>
+            <button class="bf-build" id="bf-build" type="button" disabled>Challenge starten &#9654;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview of matched videos (collapses once challenge started) -->
+      <div class="bf-preview" id="bf-preview">
+        <div class="bf-preview-title" id="bf-preview-title">Gefundene Videos</div>
+        <div class="bf-preview-grid" id="bf-preview-grid"></div>
+      </div>
+
+      <!-- Dynamic challenge widget renders here -->
+      <div class="widget-container" id="builder-container"></div>
+    </section>
+
+    <!-- ===== PANEL 4: Challenge des Monats ===== -->
+    <section class="ch-section ch-panel" data-panel="monats">
+      <div class="shm-wrap">
+        <div class="shm-topline"></div>
+        <div class="shm-orb1"></div><div class="shm-orb2"></div>
+        <div class="shm-icon">&#128293;</div>
+        <div class="shm-content">
+          <div class="shm-title">Challenge <span>des Monats</span></div>
+          <div class="shm-intro">Jeden Monat eine <strong>handverlesene Challenge</strong> vom T7 Academy Expert. Diesen Monat: <strong id="monatsName">&mdash;</strong>. Zeig was du drauf hast!</div>
+          <div class="shm-pills">
+            <div class="shm-pill">&#128293; Limited Time</div>
+            <div class="shm-pill">&#11088; Bonus XP</div>
+            <div class="shm-pill">&#127942; Expert-Pick</div>
+          </div>
+        </div>
+      </div>
+      <div class="widget-container" id="monats-container"></div>
+    </section>
+
   </div>
+
   <div class="ch-sidebar">
     <div class="sb-card">
       <div class="sb-label gold">&#11088; Sterne Zertifikat</div>
@@ -97,8 +351,16 @@
 
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-cert-upload.js?v=2"></script>
+<!-- Vimeo watch-time tracker (records progress to video_progress table) -->
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-vimeo-tracker.js"></script>
+<!-- Challenge des Monats loader (reads from Google Sheet, mounts into #monats-container) -->
+<script src="https://ute-laureo.github.io/t7academy-widgets/loadMonats.js"></script>
 
 <script>
+/* ============================================================
+   PANEL 1: TECHNIKSCHULE - all existing Technik/Groundmoves
+   challenges, rendered into #ch-container (engine default).
+============================================================ */
 T7.challenge({
   title:'Jonglierschule',badge:'7\uFE0F\u20E3',moduleKey:'jong',
   heroText:'4 Uebungen von einfach bis mittel. Zeige was du drauf hast!',
@@ -183,6 +445,10 @@ T7.challenge({
   ]
 });
 
+/* ============================================================
+   PANEL 2: ZERTIFIKATE - 1 to 5 star certificates,
+   rendered into #cert-container.
+============================================================ */
 T7.certificate({
   title:'1 Stern Zertifikat',badge:'\u2B50',instanceKey:'sz1',stars:1,
   heroText:'Zeige deine Skills und erhalte dein offizielles T7 Zertifikat!',
@@ -239,6 +505,370 @@ T7.certificate({
   ]
 });
 
+/* ============================================================
+   PANEL 4: CHALLENGE DES MONATS
+   ============================================================
+   This panel is now driven by loadMonats.js (loaded below),
+   which reads the monthly challenge from a Google Sheet.
+   See: https://ute-laureo.github.io/t7academy-widgets/loadMonats.js
+   To edit each month, the admin updates the published Google
+   Sheet - no code changes needed.
+============================================================ */
+
+/* ============================================================
+   PANEL 3: BUILDER - dynamic challenge from filters
+   ============================================================
+   - Loads distinct values for difficulty/category/player on init
+   - User picks filters -> Supabase query -> count + preview
+   - "Challenge starten" builds drills and mounts T7.challenge
+     into #builder-container with moduleKey 'builder'
+   - Re-building clears the container and overwrites the
+     local 'builder' state in localStorage (intentional v1)
+============================================================ */
+(function Builder(){
+  var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+  var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+  function hdr(){return{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};}
+
+  /* Selected filter state: each key holds a Set of selected values */
+  var state={
+    stars:new Set(),sevens:new Set(),position:new Set(),
+    difficulty:new Set(),category:new Set(),player:new Set(),
+    title:''
+  };
+  var lastMatches=[];  /* most recent fetched rows */
+
+  /* Parse vid + hash from a row. The videos.vimeo_code column holds either
+       "{id}"           - older rows, no hash (public video)
+       "{id}/{hash}"    - unlisted videos, hash appended after slash
+     vimeo_url is a secondary fallback. Returns {vid, hash}. */
+  function parseVidHash(row){
+    var vid='',hash='';
+    var code=row && row.vimeo_code ? String(row.vimeo_code).trim() : '';
+    if(code){
+      var parts=code.split('/');
+      vid=(parts[0]||'').trim();
+      if(parts[1])hash=parts[1].trim();
+    }
+    /* If we still have no hash, try parsing from vimeo_url */
+    if(!hash && row && row.vimeo_url){
+      var url=String(row.vimeo_url);
+      var m=url.match(/vimeo\.com\/(?:video\/)?\d+\/([a-zA-Z0-9]+)/);
+      if(m)hash=m[1];
+      else{
+        m=url.match(/[?&]h=([a-zA-Z0-9]+)/);
+        if(m)hash=m[1];
+      }
+    }
+    /* If we have no vid yet but url contains the id, recover it */
+    if(!vid && row && row.vimeo_url){
+      var m2=String(row.vimeo_url).match(/vimeo\.com\/(?:video\/)?(\d+)/);
+      if(m2)vid=m2[1];
+    }
+    return{vid:vid,hash:hash};
+  }
+
+  /* Pretty-print difficulty / category strings */
+  function clean(s){return (s==null?'':String(s)).trim();}
+
+  /* Populate one filter row with pills */
+  function fillPills(containerId, values, valueAsLabel){
+    var el=document.getElementById(containerId);
+    if(!el)return;
+    if(!values.length){el.innerHTML='<span style="font-size:11px;color:var(--muted)">Keine Daten</span>';return;}
+    el.innerHTML='';
+    values.forEach(function(v){
+      var b=document.createElement('button');
+      b.type='button';b.className='bf-pill';b.dataset.val=v;
+      b.textContent=valueAsLabel?v:v;
+      b.addEventListener('click',function(){togglePill(b);});
+      el.appendChild(b);
+    });
+  }
+
+  /* Toggle pill, update state, refresh query */
+  function togglePill(btn){
+    var row=btn.parentElement;
+    var field=row.dataset.field;
+    var val=btn.dataset.val;
+    if(!field||!val)return;
+    var set=state[field];
+    if(btn.classList.contains('active')){
+      btn.classList.remove('active');
+      set.delete(val);
+    }else{
+      btn.classList.add('active');
+      set.add(val);
+    }
+    refresh();
+  }
+
+  /* Build PostgREST query string from filter state */
+  function buildQuery(){
+    var q=[];
+    if(state.stars.size)q.push('stars=in.('+Array.from(state.stars).join(',')+')');
+    if(state.sevens.size)q.push('sevens=in.('+Array.from(state.sevens).join(',')+')');
+    /* position: each selected position is a column where value > 0; OR them */
+    if(state.position.size){
+      var orParts=Array.from(state.position).map(function(p){return p+'.gt.0';});
+      q.push('or=('+orParts.join(',')+')');
+    }
+    if(state.difficulty.size){
+      var diffs=Array.from(state.difficulty).map(function(v){return '"'+v+'"';}).join(',');
+      q.push('difficulty=in.('+diffs+')');
+    }
+    if(state.category.size){
+      var cats=Array.from(state.category).map(function(v){return '"'+v+'"';}).join(',');
+      q.push('category=in.('+cats+')');
+    }
+    /* Player: search across player_1/2/3 */
+    if(state.player.size){
+      var pl=Array.from(state.player);
+      var orPl=[];
+      pl.forEach(function(p){
+        var pe='"'+p+'"';
+        orPl.push('player_1.eq.'+pe,'player_2.eq.'+pe,'player_3.eq.'+pe);
+      });
+      q.push('or=('+orPl.join(',')+')');
+    }
+    if(state.title.trim()){
+      q.push('or=(title_DE.ilike.*'+encodeURIComponent(state.title.trim())+'*,title_EN.ilike.*'+encodeURIComponent(state.title.trim())+'*)');
+    }
+    /* Only videos that actually have a vimeo_code */
+    q.push('vimeo_code=not.is.null');
+    q.push('select=id,"title_DE","title_EN",vimeo_code,vimeo_url,stars,sevens,difficulty,category,player_1,player_2,player_3');
+    q.push('limit=30');
+    return q.join('&');
+  }
+
+  /* Has any filter at all? */
+  function anyFilter(){
+    return state.stars.size||state.sevens.size||state.position.size
+      ||state.difficulty.size||state.category.size||state.player.size
+      ||state.title.trim().length>0;
+  }
+
+  /* Re-query and update count + preview */
+  function refresh(){
+    var countEl=document.getElementById('bf-count');
+    var btn=document.getElementById('bf-build');
+    var prev=document.getElementById('bf-preview');
+    if(!anyFilter()){
+      countEl.innerHTML='&mdash; W&auml;hle Filter um Videos zu finden &mdash;';
+      btn.disabled=true;
+      prev.classList.remove('open');
+      lastMatches=[];
+      return;
+    }
+    countEl.textContent='Suche...';
+    btn.disabled=true;
+    fetch(SB_URL+'/rest/v1/videos?'+buildQuery(),{headers:hdr()})
+      .then(function(r){return r.json();})
+      .then(function(rows){
+        lastMatches=Array.isArray(rows)?rows:[];
+        if(!lastMatches.length){
+          countEl.innerHTML='Keine Videos gefunden &mdash; passe deine Filter an';
+          btn.disabled=true;
+          prev.classList.remove('open');
+          return;
+        }
+        countEl.innerHTML='<strong>'+lastMatches.length+'</strong> Video'+(lastMatches.length===1?'':'s')+' gefunden';
+        btn.disabled=false;
+        renderPreview(lastMatches);
+      })
+      .catch(function(e){
+        console.warn('[Builder] query failed',e);
+        countEl.textContent='Fehler beim Laden';
+        btn.disabled=true;
+      });
+  }
+
+  function renderPreview(rows){
+    var grid=document.getElementById('bf-preview-grid');
+    var prev=document.getElementById('bf-preview');
+    grid.innerHTML='';
+    rows.slice(0,12).forEach(function(r){
+      var d=document.createElement('div');
+      d.className='bf-vid';
+      var title=clean(r.title_DE)||clean(r.title_EN)||'Untitled';
+      var meta=[clean(r.difficulty),clean(r.category)].filter(Boolean).join(' \u00b7 ');
+      d.innerHTML='<div class="bf-vid-title">'+title+'</div><div class="bf-vid-meta">'+(meta||'&mdash;')+'</div>';
+      grid.appendChild(d);
+    });
+    var ttl=document.getElementById('bf-preview-title');
+    ttl.textContent='Gefundene Videos'+(rows.length>12?' (zeige erste 12 von '+rows.length+')':'');
+    prev.classList.add('open');
+  }
+
+  /* Reset filters */
+  document.getElementById('bf-reset').addEventListener('click',function(){
+    state={stars:new Set(),sevens:new Set(),position:new Set(),difficulty:new Set(),category:new Set(),player:new Set(),title:''};
+    document.querySelectorAll('.bf-pill.active').forEach(function(p){p.classList.remove('active');});
+    document.getElementById('bf-title').value='';
+    refresh();
+  });
+
+  /* Title search input */
+  document.getElementById('bf-title').addEventListener('input',function(e){
+    state.title=e.target.value||'';
+    /* debounce a bit */
+    clearTimeout(window.__bfTitleTimer);
+    window.__bfTitleTimer=setTimeout(refresh,300);
+  });
+
+  /* Static "Position" pills wire up immediately (stars/sevens get wired by fillStarPills) */
+  document.querySelectorAll('.bf-pills[data-field="position"] .bf-pill').forEach(function(p){
+    p.addEventListener('click',function(){togglePill(p);});
+  });
+
+  /* "Challenge starten" - build drills + mount widget */
+  document.getElementById('bf-build').addEventListener('click',function(){
+    if(!lastMatches.length)return;
+    var drills=lastMatches.slice(0,12).map(function(r,i){
+      var title=clean(r.title_DE)||clean(r.title_EN)||('Video '+(i+1));
+      var meta=[clean(r.difficulty),clean(r.category)].filter(Boolean).join(' - ')||'Custom Challenge';
+      var vh=parseVidHash(r);
+      if(!vh.vid||!vh.hash){console.warn('[Builder] Bad vimeo data for row:',r,'-> vid='+vh.vid+', hash='+vh.hash);}
+      return{
+        title:title,
+        eye:'Challenge '+String(i+1).padStart(2,'0'),
+        meta:meta,
+        vid:vh.vid,
+        hash:vh.hash,
+        type:'rate',
+        xp:10,
+        /* star:1 keeps every drill open from the start. The engine only auto-locks
+           drills with star>=2 behind completion of lower-star drills, which makes
+           no sense for a self-chosen builder challenge. */
+        star:1,
+        next: i===lastMatches.length-1?'Alle '+lastMatches.length+' Challenges gemeistert!':'Weiter zur naechsten Challenge!'
+      };
+    });
+
+    /* Clear container + local state, then mount fresh widget */
+    var c=document.getElementById('builder-container');
+    c.innerHTML='';
+    try{
+      /* Wipe any old 'builder' module state in localStorage so drills don't conflict */
+      Object.keys(localStorage).forEach(function(k){
+        if(k.indexOf('t7_builder_')===0)localStorage.removeItem(k);
+      });
+    }catch(e){}
+
+    T7.challenge({
+      containerId:'builder-container',
+      title:'Deine eigene Challenge',
+      badge:'\ud83d\udd27',
+      moduleKey:'builder',
+      heroText:drills.length+' Video'+(drills.length===1?'':'s')+' nach deinen Filtern. Schaffst du sie alle?',
+      unlockMsg:'',
+      drills:drills
+    });
+
+    /* Collapse the preview so the widget gets the spotlight */
+    document.getElementById('bf-preview').classList.remove('open');
+
+    /* Auto-expand the widget so the drill list is visible, but DON'T auto-open
+       the first video - the player should pick which drill to start.
+       The engine wires click handlers asynchronously (profile resolution etc),
+       so poll briefly until the toggle button appears. */
+    function autoOpen(){
+      var c=document.getElementById('builder-container');
+      if(!c)return;
+      var crb=c.querySelector('[id^="t7a-crb-"]');
+      if(crb)crb.click();
+    }
+    var tries=0;
+    var poll=setInterval(function(){
+      tries++;
+      var c=document.getElementById('builder-container');
+      var ready=c&&c.querySelector('[id^="t7a-crb-"]');
+      if(ready){clearInterval(poll);autoOpen();}
+      else if(tries>40){clearInterval(poll);}  /* give up after ~4s */
+    },100);
+
+    /* Smooth scroll to widget */
+    setTimeout(function(){
+      var el=document.getElementById('builder-container');
+      if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    },150);
+  });
+
+  /* Populate Stars, Sevens, difficulty, category, player from Supabase */
+  function loadDistinct(){
+    fetch(SB_URL+'/rest/v1/videos?select=stars,sevens,difficulty,category,player_1,player_2,player_3&vimeo_code=not.is.null',{headers:hdr()})
+      .then(function(r){return r.json();})
+      .then(function(rows){
+        if(!Array.isArray(rows))return;
+        var stars={},sevens={},diff={},cat={},pl={};
+        rows.forEach(function(r){
+          if(r.stars!=null) stars[String(r.stars)]=1;
+          if(r.sevens!=null) sevens[String(r.sevens)]=1;
+          var d=clean(r.difficulty);if(d)diff[d]=1;
+          var c=clean(r.category);if(c)cat[c]=1;
+          [r.player_1,r.player_2,r.player_3].forEach(function(p){var n=clean(p);if(n)pl[n]=1;});
+        });
+        var starSort=function(a,b){return Number(a)-Number(b);};
+        fillStarPills('bf-stars',Object.keys(stars).sort(starSort),'\u2B50');
+        fillStarPills('bf-sevens',Object.keys(sevens).sort(starSort),'7\uFE0F\u20E3');
+        fillPills('bf-diff',Object.keys(diff).sort(),true);
+        fillPills('bf-cat',Object.keys(cat).sort(),true);
+        fillPills('bf-player',Object.keys(pl).sort(),true);
+      })
+      .catch(function(e){
+        console.warn('[Builder] distinct fetch failed',e);
+        ['bf-stars','bf-sevens','bf-diff','bf-cat','bf-player'].forEach(function(id){
+          var el=document.getElementById(id);
+          if(el)el.innerHTML='<span style="font-size:11px;color:var(--muted)">Fehler beim Laden</span>';
+        });
+      });
+  }
+
+  /* Star-style pills: repeat the icon N times for value N (e.g. "*** 3") */
+  function fillStarPills(containerId, values, icon){
+    var el=document.getElementById(containerId);
+    if(!el)return;
+    if(!values.length){el.innerHTML='<span style="font-size:11px;color:var(--muted)">Keine Daten</span>';return;}
+    el.innerHTML='';
+    values.forEach(function(v){
+      var b=document.createElement('button');
+      b.type='button';b.className='bf-pill';b.dataset.val=v;
+      var n=Math.min(7,Math.max(1,Number(v)||1));
+      b.innerHTML=icon.repeat(n)+' '+v;
+      b.addEventListener('click',function(){togglePill(b);});
+      el.appendChild(b);
+    });
+  }
+
+  loadDistinct();
+})();
+
+/* ============================================================
+   TAB SWITCHING
+============================================================ */
+(function Tabs(){
+  var grid=document.getElementById('catGrid');
+  if(!grid)return;
+  grid.addEventListener('click',function(ev){
+    var btn=ev.target.closest('.ch-cat');
+    if(!btn)return;
+    var tab=btn.dataset.tab;
+    if(!tab)return;
+    /* toggle tab + panel */
+    document.querySelectorAll('.ch-cat').forEach(function(c){c.classList.toggle('active',c===btn);});
+    document.querySelectorAll('.ch-panel').forEach(function(p){
+      p.classList.toggle('active',p.dataset.panel===tab);
+    });
+    /* scroll grid into view on mobile so the panel below is visible */
+    if(window.innerWidth<880){
+      setTimeout(function(){grid.scrollIntoView({behavior:'smooth',block:'start'});},50);
+    }
+  });
+})();
+
+/* ============================================================
+   SIDEBAR + MOBILE SHEET + THEME TOGGLE (unchanged)
+============================================================ */
 T7Badge('badge-container');
 T7Fortschritt('fortschritt-container');
 T7Rangliste('rangliste-container');
