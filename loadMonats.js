@@ -40,7 +40,7 @@
 (function(){
   /* PASTE the published-to-web CSV URL of your Monats sheet here.
      Looks like: https://docs.google.com/spreadsheets/d/e/2PACX-1v.../pub?output=csv */
-  var CSV_URL = 'PASTE_PUBLISHED_CSV_URL_HERE';
+  var CSV_URL = 'var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1v.../pub?output=csv&gid=987654321&single=true';
   var MOUNT_ID = 'monats-container';
   var LABEL_ID = 'monatsLabel';
   var NAME_ID  = 'monatsName';
