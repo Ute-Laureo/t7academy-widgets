@@ -12,12 +12,12 @@
       For a multi-tab workbook, also add &gid=TAB_GID&single=true
       to target the specific tab.
    2. The sheet must have these column headers in row 1:
-         month_key | month_label | challenge_name | hero_text | drill_order | drill_title | drill_meta | vimeo_url | xp | published
+         month_key | month_label | challenge_name | hero_text | drill_order | drill_title | drill_meta | vimeo_url | xp | published | badge_emoji
 
       Each ROW is one drill. Rows that share the same month_key
       belong to the same month. The first row of a month supplies
-      the month_label / challenge_name / hero_text (copy these
-      values down across all rows of that month for safety).
+      the month_label / challenge_name / hero_text / badge_emoji
+      (copy these values down across all rows of that month for safety).
 
       Column reference:
       - month_key:      e.g. "2026-06" - groups rows into months,
@@ -33,6 +33,10 @@
                         https://vimeo.com/1130122092/9e2782b01e
       - xp:             XP per drill (optional, default 20)
       - published:      Leave blank or "yes" to show; "no" to hide
+      - badge_emoji:    Optional emoji shown as the widget badge,
+                        e.g. "🔥" or "⚽" or "🌟". Defaults to 🔥
+                        if blank. Read from the first row of the
+                        month only.
 
    The loader picks the newest published month_key, builds a
    T7.challenge() with the drills, and auto-expands the list so
@@ -150,6 +154,8 @@
     var monthLabel = head.month_label || monthKey;
     var name = head.challenge_name || 'Challenge des Monats';
     var hero = head.hero_text || ('Diesen Monat: ' + name + '. Zeig was du drauf hast!');
+    /* Optional emoji from the sheet (column "badge_emoji"); falls back to fire */
+    var badge = (head.badge_emoji || '').trim() || '\ud83d\udd25';
 
     var lbl = document.getElementById(LABEL_ID);
     var nm  = document.getElementById(NAME_ID);
@@ -186,7 +192,7 @@
       T7.challenge({
         containerId: MOUNT_ID,
         title: name,
-        badge: '\ud83d\udd25',
+        badge: badge,
         moduleKey: moduleKey,
         heroText: hero,
         unlockMsg: '',
