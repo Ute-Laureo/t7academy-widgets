@@ -54,16 +54,51 @@ var KID_MODULES = {
     drills:[
       {idx:0, title:'Surfer Side-Step',    emoji:'🏄',  meta:'3 Sterne', vid:'1124935347', hash:'c8977c5fb4', sticker:'🏄'},
       {idx:1, title:'Hollywood Elastico',  emoji:'⭐',  meta:'4 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🌟'}
+    ]},
+
+  /* === TRICK-PFAD JOURNEY (page 2: 10 unique stickers) ===
+     Progressive milestones, easy → harder. vid/hash are placeholders; swap with Supabase
+     ids later (you can extend hydrateDrillsFromSupabase to handle tier:'trickpath'). */
+  tp1: { tier:'trickpath', label:'Aufwärmen', emoji:'🏃', num:'Stufe 1',
+    drills:[
+      {idx:0, title:'Knie-Hoch',       emoji:'🦵', meta:'1 Stern',  vid:'1124934705', hash:'6a71a27daf', sticker:'🦵'},
+      {idx:1, title:'Beine-Strecken',  emoji:'🤸', meta:'1 Stern',  vid:'1124935347', hash:'c8977c5fb4', sticker:'🤸'}
+    ]},
+  tp2: { tier:'trickpath', label:'Ball-Freunde', emoji:'🤝', num:'Stufe 2',
+    drills:[
+      {idx:0, title:'Ball-Tippen',     emoji:'🐾', meta:'2 Sterne', vid:'1110048776', hash:'3990db7901', sticker:'🐾'},
+      {idx:1, title:'Innen-Aussen',    emoji:'🔄', meta:'2 Sterne', vid:'1111311105', hash:'b285a5a081', sticker:'🔄'}
+    ]},
+  tp3: { tier:'trickpath', label:'Speed-Kick', emoji:'💨', num:'Stufe 3',
+    drills:[
+      {idx:0, title:'Slalom-Lauf',     emoji:'🐍', meta:'2 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🐍'},
+      {idx:1, title:'Sprint-Schuss',   emoji:'💨', meta:'3 Sterne', vid:'1110029715', hash:'8757b6279f', sticker:'💨'}
+    ]},
+  tp4: { tier:'trickpath', label:'Geheimer Trick', emoji:'🎯', num:'Stufe 4',
+    drills:[
+      {idx:0, title:'Roulette',        emoji:'🎰', meta:'3 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'🎰'},
+      {idx:1, title:'Sohle-Drag',      emoji:'👟', meta:'2 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'👟'}
+    ]},
+  tp5: { tier:'trickpath', label:'Champion-Finale', emoji:'🌈', num:'Stufe 5',
+    drills:[
+      {idx:0, title:'Kombi-Magie',     emoji:'🎩', meta:'3 Sterne', vid:'1110049131', hash:'0944817493', sticker:'🎩'},
+      {idx:1, title:'Mega-Power',      emoji:'💪', meta:'4 Sterne', vid:'1125467352', hash:'30d35d6e70', sticker:'💪'}
     ]}
 };
-var STATION_ORDER = ['st1','st2','st3','st4','st5'];
-var STADIUM_ORDER = ['sd1','sd2','sd3','sd4','sd5'];
+var STATION_ORDER   = ['st1','st2','st3','st4','st5'];
+var TRICKPATH_ORDER = ['tp1','tp2','tp3','tp4','tp5'];
+var STADIUM_ORDER   = ['sd1','sd2','sd3','sd4','sd5'];
 var STATION_COLORS = {
   st1: ['#00E5FF','#0080FF'],
   st2: ['#FFD700','#FF8C00'],
   st3: ['#E4002B','#A30025'],
   st4: ['#3B82F6','#1E3A8A'],
   st5: ['#22C55E','#006847'],
+  tp1: ['#00E5FF','#0080FF'],
+  tp2: ['#FFD700','#FF8C00'],
+  tp3: ['#E4002B','#A30025'],
+  tp4: ['#3B82F6','#1E3A8A'],
+  tp5: ['#22C55E','#006847'],
   sd1: ['#E4002B','#A30025'],
   sd2: ['#00E5FF','#0080FF'],
   sd3: ['#22C55E','#006847'],
@@ -74,10 +109,11 @@ var TOTAL_STICKERS = 10;
 var TOTAL_STADIUM_STICKERS = 10;
 
 /* STICKER_PAGES — page-by-page sticker collection. Add new pages here as new
-   journeys ship. Active page shows as an elongated ellipse, others as dots. */
+   journeys ship. Each page contributes its own 10 stickers; no overall cap. */
 var STICKER_PAGES = [
-  { id:'base',    label:'Basis',   icon:'⚽',  stations: STATION_ORDER,  total: TOTAL_STICKERS },
-  { id:'stadium', label:'Stadien', icon:'🏟️', stations: STADIUM_ORDER,  total: TOTAL_STADIUM_STICKERS }
+  { id:'base',      label:'Spielplatz', stations: STATION_ORDER,    total: TOTAL_STICKERS },
+  { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER,  total: TOTAL_STICKERS },
+  { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,    total: TOTAL_STADIUM_STICKERS }
 ];
 var STATE = { email:null, name:'Champion', ratings:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
@@ -316,7 +352,6 @@ function countDone(modKey){ var c=0; KID_MODULES[modKey].drills.forEach(function
 /* === STICKERS === */
 function renderStickerPager(){
   var pager = document.getElementById('sticker-pager');
-  var labelEl = document.getElementById('sticker-pagelabel');
   if (!pager) return;
   var cur = STATE.stickerPage || 0;
   if (cur >= STICKER_PAGES.length) cur = 0;
@@ -326,11 +361,9 @@ function renderStickerPager(){
     html += '<button class="sp-dot' + (active ? ' is-active' : '') + '"' +
             ' data-page="' + idx + '" type="button" role="tab"' +
             ' aria-selected="' + (active ? 'true' : 'false') + '"' +
-            ' aria-label="' + p.label + '"' +
-            ' title="' + p.label + '">' + (active ? p.icon : '') + '</button>';
+            ' aria-label="' + p.label + '"></button>';
   });
   pager.innerHTML = html;
-  if (labelEl) labelEl.textContent = STICKER_PAGES[cur].label;
 
   // Bind clicks on the freshly rendered dots
   pager.querySelectorAll('[data-page]').forEach(function(btn){
@@ -387,7 +420,7 @@ function renderTrickpfad(){
   var path = document.getElementById('tp-path');
   if (!path) return;
   var nodes = [];
-  STATION_ORDER.forEach(function(mk){
+  TRICKPATH_ORDER.forEach(function(mk){
     KID_MODULES[mk].drills.forEach(function(d){ nodes.push({mod:mk, drill:d}); });
   });
   var nextIdx = -1;
