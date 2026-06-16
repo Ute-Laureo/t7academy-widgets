@@ -72,7 +72,14 @@ var STATION_COLORS = {
 };
 var TOTAL_STICKERS = 10;
 var TOTAL_STADIUM_STICKERS = 10;
-var STATE = { email:null, name:'Champion', ratings:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon' };
+
+/* STICKER_PAGES — page-by-page sticker collection. Add new pages here as new
+   journeys ship. Active page shows as an elongated ellipse, others as dots. */
+var STICKER_PAGES = [
+  { id:'base',    label:'Basis',   icon:'⚽',  stations: STATION_ORDER,  total: TOTAL_STICKERS },
+  { id:'stadium', label:'Stadien', icon:'🏟️', stations: STADIUM_ORDER,  total: TOTAL_STADIUM_STICKERS }
+];
+var STATE = { email:null, name:'Champion', ratings:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
 try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','marcy'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
 
@@ -307,23 +314,60 @@ function updatePlaygroundStation(modKey){
 function countDone(modKey){ var c=0; KID_MODULES[modKey].drills.forEach(function(d){ if((STATE.ratings[modKey+'_'+d.idx]||0)>=4) c++; }); return c; }
 
 /* === STICKERS === */
+function renderStickerPager(){
+  var pager = document.getElementById('sticker-pager');
+  var labelEl = document.getElementById('sticker-pagelabel');
+  if (!pager) return;
+  var cur = STATE.stickerPage || 0;
+  if (cur >= STICKER_PAGES.length) cur = 0;
+  var html = '';
+  STICKER_PAGES.forEach(function(p, idx){
+    var active = (idx === cur);
+    html += '<button class="sp-dot' + (active ? ' is-active' : '') + '"' +
+            ' data-page="' + idx + '" type="button" role="tab"' +
+            ' aria-selected="' + (active ? 'true' : 'false') + '"' +
+            ' aria-label="' + p.label + '"' +
+            ' title="' + p.label + '">' + (active ? p.icon : '') + '</button>';
+  });
+  pager.innerHTML = html;
+  if (labelEl) labelEl.textContent = STICKER_PAGES[cur].label;
+
+  // Bind clicks on the freshly rendered dots
+  pager.querySelectorAll('[data-page]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var idx = parseInt(btn.dataset.page, 10);
+      if (isNaN(idx) || idx === STATE.stickerPage) return;
+      STATE.stickerPage = idx;
+      renderStickers();
+      playTap();
+    });
+  });
+}
+
 function renderStickers(){
+  if (!STICKER_PAGES.length) return;
+  if (STATE.stickerPage == null || STATE.stickerPage >= STICKER_PAGES.length) STATE.stickerPage = 0;
+  var page = STICKER_PAGES[STATE.stickerPage];
+
+  renderStickerPager();
+
   var grid = document.getElementById('sticker-grid');
   var earnedStickers = [];
-  STATION_ORDER.forEach(function(mk){
-    KID_MODULES[mk].drills.forEach(function(d){
+  page.stations.forEach(function(mk){
+    var mod = KID_MODULES[mk];
+    if (!mod) return;
+    mod.drills.forEach(function(d){
       var key = mk + '_' + d.idx;
       if ((STATE.ratings[key] || 0) >= 4) earnedStickers.push(d.sticker);
     });
   });
   var html = '';
-  for (var i = 0; i < TOTAL_STICKERS; i++) {
+  for (var i = 0; i < page.total; i++) {
     var isEarned = i < earnedStickers.length;
     html += '<div class="sticker' + (isEarned ? ' earned' : '') + '">' + (isEarned ? earnedStickers[i] : '<span style="opacity:.3;font-size:18px">?</span>') + '</div>';
   }
   grid.innerHTML = html;
-  document.getElementById('sticker-count').textContent = earnedStickers.length + ' / ' + TOTAL_STICKERS + ' Sticker';
-  updateStadiumLockUI();
+  document.getElementById('sticker-count').textContent = earnedStickers.length + ' / ' + page.total + ' Sticker';
 }
 
 function countBaseStickers(){
@@ -337,28 +381,6 @@ function countBaseStickers(){
 }
 
 function isStadiumUnlocked(){ return countBaseStickers() >= TOTAL_STICKERS; }
-
-function renderStadiumStickers(){
-  var grid = document.getElementById('stadium-sticker-grid');
-  if (!grid) return;
-  var earnedStickers = [];
-  STADIUM_ORDER.forEach(function(mk){
-    KID_MODULES[mk].drills.forEach(function(d){
-      var key = mk + '_' + d.idx;
-      if ((STATE.ratings[key] || 0) >= 4) earnedStickers.push(d.sticker);
-    });
-  });
-  var html = '';
-  for (var i = 0; i < TOTAL_STADIUM_STICKERS; i++) {
-    var isEarned = i < earnedStickers.length;
-    html += '<div class="sticker' + (isEarned ? ' earned' : '') + '">' + (isEarned ? earnedStickers[i] : '<span style="opacity:.3;font-size:18px">?</span>') + '</div>';
-  }
-  grid.innerHTML = html;
-  var countEl = document.getElementById('stadium-sticker-count');
-  if (countEl) countEl.textContent = earnedStickers.length + ' / ' + TOTAL_STADIUM_STICKERS + ' Stadion-Sticker';
-}
-
-function updateStadiumLockUI(){ renderStadiumStickers(); }
 
 /* === TRICKPFAD === */
 function renderTrickpfad(){
