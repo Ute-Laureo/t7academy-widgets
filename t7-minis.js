@@ -523,14 +523,36 @@ function refreshFortschritt(){
 }
 
 function hydrateDrillsFromSupabase(){
-  // Pulls Vimeo IDs from the `videos` table in Supabase.
+  // Pulls Vimeo links from the `videos` table in Supabase.
+  // Schema:
+  //   - stars      (int2): difficulty rating
+  //   - vimeo_url  (text): full Vimeo URL (e.g. https://vimeo.com/1124934705/6a71a27daf)
   // For stadium drills (sd1-sd5), ONLY uses videos where stars === 3 or stars === 4.
-  // Each stadium drill's `meta` ('3 Sterne' / '4 Sterne') determines which star pool it draws from.
+  // Each stadium drill's `meta` ('3 Sterne' / '4 Sterne') decides which star pool it draws from.
   // The curated drill `title` from KID_MODULES is kept — only vid + hash are updated.
   var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
-  // Query: only stars 3 or 4 — done server-side so 1⭐/2⭐/5⭐ rows never enter the pool.
-  var URL = SB_URL + '/rest/v1/videos?select=*&stars=in.(3,4)';
+  // Filter server-side so 1⭐/2⭐/5⭐ rows never reach the browser.
+  var URL = SB_URL + '/rest/v1/videos?select=stars,vimeo_url&stars=in.(3,4)';
+
+  // Parse any Vimeo URL into {vid, hash}. Handles:
+  //   https://vimeo.com/{id}
+  //   https://vimeo.com/{id}/{hash}
+  //   https://vimeo.com/{id}?h={hash}
+  //   https://player.vimeo.com/video/{id}
+  //   https://player.vimeo.com/video/{id}?h={hash}
+  function parseVimeoUrl(url){
+    if (!url) return null;
+    var idM = String(url).match(/vimeo\.com\/(?:video\/)?(\d+)/);
+    if (!idM) return null;
+    var vid = idM[1], hash = '';
+    var pathM  = String(url).match(/vimeo\.com\/(?:video\/)?\d+\/([a-zA-Z0-9]+)/);
+    var queryM = String(url).match(/[?&]h=([a-zA-Z0-9]+)/);
+    if (pathM)  hash = pathM[1];
+    else if (queryM) hash = queryM[1];
+    return { vid: vid, hash: hash };
+  }
+
   fetch(URL, { headers: { apikey: SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } })
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(rows){
@@ -538,25 +560,20 @@ function hydrateDrillsFromSupabase(){
       console.warn('[T7] videos table returned no 3⭐/4⭐ rows — stadium drills will keep placeholders.');
       return;
     }
-    // Log columns once so any column-name mismatch is easy to spot in DevTools.
-    try { console.log('[T7] videos columns:', Object.keys(rows[0])); } catch(e){}
+    try { console.log('[T7] videos columns:', Object.keys(rows[0]), '| pool size:', rows.length); } catch(e){}
 
-    // Tolerant column-name accessors (covers common naming variants).
-    function getVid(row)   { return row.vimeo_id  || row.video_id  || row.vid  || ''; }
-    function getHash(row)  { return row.vimeo_hash || row.video_hash || row.hash || ''; }
-
-    // Split pool by stars; skip rows missing a vimeo id.
+    // Build 3⭐ and 4⭐ pools of parsed {vid, hash} objects, skipping unparseable URLs.
     var pool3 = [], pool4 = [];
     rows.forEach(function(r){
-      if (!getVid(r)) return;
-      if (r.stars === 3) pool3.push(r);
-      else if (r.stars === 4) pool4.push(r);
+      var parsed = parseVimeoUrl(r.vimeo_url);
+      if (!parsed) return;
+      if (r.stars === 3) pool3.push(parsed);
+      else if (r.stars === 4) pool4.push(parsed);
     });
 
     // Deterministic assignment: walk stadium drills in order, draw the next
-    // unused video from the matching star pool ("3 Sterne" → pool3, otherwise pool4).
-    var i3 = 0, i4 = 0;
-    var changed = false;
+    // unused video from the matching star pool.
+    var i3 = 0, i4 = 0, changed = false;
     STADIUM_ORDER.forEach(function(mk){
       var mod = KID_MODULES[mk];
       if (!mod) return;
@@ -567,10 +584,8 @@ function hydrateDrillsFromSupabase(){
         if (idx >= pool.length) return; // pool exhausted, keep placeholder
         var pick = pool[idx];
         if (wantsThree) i3++; else i4++;
-        var newVid   = String(getVid(pick));
-        var newHash  = String(getHash(pick));
-        if (newVid  && newVid  !== d.vid)  { d.vid  = newVid;  changed = true; }
-        if (newHash && newHash !== d.hash) { d.hash = newHash; changed = true; }
+        if (pick.vid  && pick.vid  !== d.vid)  { d.vid  = pick.vid;  changed = true; }
+        if (pick.hash !== d.hash) { d.hash = pick.hash; changed = true; }
         // Title is intentionally kept from KID_MODULES (the curated German drill names).
       });
     });
