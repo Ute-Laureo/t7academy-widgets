@@ -523,65 +523,61 @@ function refreshFortschritt(){
 }
 
 function hydrateDrillsFromSupabase(){
-  // Pulls real Vimeo IDs from Supabase and overrides the placeholders in KID_MODULES.
-  // For stadium drills (sd1-sd5), ONLY uses videos rated 3⭐ or 4⭐.
-  // *** ADJUST table name + column names below if your schema differs. ***
-  // Assumed schema: a table (called `challenges`) with columns:
-  //   module_key (text), challenge_idx (int), vimeo_id (text), vimeo_hash (text), title (text, optional), stars (int 1-5)
+  // Pulls Vimeo IDs from the `videos` table in Supabase.
+  // For stadium drills (sd1-sd5), ONLY uses videos where stars === 3 or stars === 4.
+  // Each stadium drill's `meta` ('3 Sterne' / '4 Sterne') determines which star pool it draws from.
+  // The curated drill `title` from KID_MODULES is kept — only vid + hash are updated.
   var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
-  var TABLE   = 'challenges';
-  var SELECT  = 'module_key,challenge_idx,vimeo_id,vimeo_hash,title,stars';
-  fetch(SB_URL + '/rest/v1/' + TABLE + '?select=' + SELECT, {
-    headers: { apikey: SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
-  })
+  // Query: only stars 3 or 4 — done server-side so 1⭐/2⭐/5⭐ rows never enter the pool.
+  var URL = SB_URL + '/rest/v1/videos?select=*&stars=in.(3,4)';
+  fetch(URL, { headers: { apikey: SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } })
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(rows){
-    if (!Array.isArray(rows)) return;
+    if (!Array.isArray(rows) || !rows.length) {
+      console.warn('[T7] videos table returned no 3⭐/4⭐ rows — stadium drills will keep placeholders.');
+      return;
+    }
+    // Log columns once so any column-name mismatch is easy to spot in DevTools.
+    try { console.log('[T7] videos columns:', Object.keys(rows[0])); } catch(e){}
+
+    // Tolerant column-name accessors (covers common naming variants).
+    function getVid(row)   { return row.vimeo_id  || row.video_id  || row.vid  || ''; }
+    function getHash(row)  { return row.vimeo_hash || row.video_hash || row.hash || ''; }
+
+    // Split pool by stars; skip rows missing a vimeo id.
+    var pool3 = [], pool4 = [];
+    rows.forEach(function(r){
+      if (!getVid(r)) return;
+      if (r.stars === 3) pool3.push(r);
+      else if (r.stars === 4) pool4.push(r);
+    });
+
+    // Deterministic assignment: walk stadium drills in order, draw the next
+    // unused video from the matching star pool ("3 Sterne" → pool3, otherwise pool4).
+    var i3 = 0, i4 = 0;
     var changed = false;
-
-    // Pass 1: exact match by module_key + challenge_idx
-    // For stadium drills, reject any row whose stars is not 3 or 4.
-    rows.forEach(function(row){
-      var mod = KID_MODULES[row.module_key];
-      if (!mod) return;
-      var d = mod.drills.find(function(x){ return x.idx === row.challenge_idx; });
-      if (!d) return;
-      if (mod.tier === 'stadium' && row.stars !== 3 && row.stars !== 4) return; // 3⭐/4⭐ only
-      if (row.vimeo_id   && String(row.vimeo_id)   !== d.vid)  { d.vid  = String(row.vimeo_id);   changed = true; }
-      if (row.vimeo_hash && String(row.vimeo_hash) !== d.hash) { d.hash = String(row.vimeo_hash); changed = true; }
-      if (row.title) d.title = row.title;
-    });
-
-    // Pass 2: fallback — any stadium drill still using a placeholder vid (i.e. a vid
-    // that's also used by a base-journey drill) gets a real 3⭐ or 4⭐ video from the
-    // wider pool, matched to its meta ("3 Sterne" → stars=3, "4 Sterne" → stars=4).
-    var basePlaceholderVids = {};
-    STATION_ORDER.forEach(function(mk){
-      KID_MODULES[mk].drills.forEach(function(d){ basePlaceholderVids[d.vid] = true; });
-    });
-    var poolUsed = {};
     STADIUM_ORDER.forEach(function(mk){
       var mod = KID_MODULES[mk];
+      if (!mod) return;
       mod.drills.forEach(function(d){
-        if (!basePlaceholderVids[d.vid]) return; // already a real (non-placeholder) stadium vid
-        var wantedStars = (d.meta && d.meta.indexOf('3') !== -1) ? 3 : 4;
-        var pick = rows.find(function(r){
-          return r.stars === wantedStars && r.vimeo_id && !poolUsed[r.vimeo_id];
-        });
-        if (pick) {
-          d.vid = String(pick.vimeo_id);
-          d.hash = pick.vimeo_hash ? String(pick.vimeo_hash) : '';
-          if (pick.title) d.title = pick.title;
-          poolUsed[pick.vimeo_id] = true;
-          changed = true;
-        }
+        var wantsThree = (d.meta && d.meta.indexOf('3') !== -1);
+        var pool = wantsThree ? pool3 : pool4;
+        var idx  = wantsThree ? i3 : i4;
+        if (idx >= pool.length) return; // pool exhausted, keep placeholder
+        var pick = pool[idx];
+        if (wantsThree) i3++; else i4++;
+        var newVid   = String(getVid(pick));
+        var newHash  = String(getHash(pick));
+        if (newVid  && newVid  !== d.vid)  { d.vid  = newVid;  changed = true; }
+        if (newHash && newHash !== d.hash) { d.hash = newHash; changed = true; }
+        // Title is intentionally kept from KID_MODULES (the curated German drill names).
       });
     });
 
     if (changed && STATE.curStation) renderStationView(STATE.curStation);
   })
-  .catch(function(err){ console.warn('[T7] hydrateDrillsFromSupabase failed — keeping placeholders. Check table/column names.', err); });
+  .catch(function(err){ console.warn('[T7] hydrateDrillsFromSupabase failed', err); });
 }
 
 function boot(email, name){
