@@ -385,22 +385,28 @@ function renderStickers(){
   renderStickerPager();
 
   var grid = document.getElementById('sticker-grid');
-  var earnedStickers = [];
+  var html = '', earnedCount = 0, slot = 0;
   page.stations.forEach(function(mk){
     var mod = KID_MODULES[mk];
     if (!mod) return;
     mod.drills.forEach(function(d){
+      if (slot >= page.total) return;
+      slot++;
       var key = mk + '_' + d.idx;
-      if ((STATE.ratings[key] || 0) >= 4) earnedStickers.push(d.sticker);
+      var earned = (STATE.ratings[key] || 0) >= 4;
+      if (earned) earnedCount++;
+      html += '<div class="sticker' + (earned ? ' earned' : '') + '">' +
+              (earned ? d.sticker : '<span style="opacity:.3;font-size:18px">?</span>') +
+              '</div>';
     });
   });
-  var html = '';
-  for (var i = 0; i < page.total; i++) {
-    var isEarned = i < earnedStickers.length;
-    html += '<div class="sticker' + (isEarned ? ' earned' : '') + '">' + (isEarned ? earnedStickers[i] : '<span style="opacity:.3;font-size:18px">?</span>') + '</div>';
+  // Pad with empty slots if data has fewer drills than page.total (defensive)
+  while (slot < page.total) {
+    html += '<div class="sticker"><span style="opacity:.3;font-size:18px">?</span></div>';
+    slot++;
   }
   grid.innerHTML = html;
-  document.getElementById('sticker-count').textContent = earnedStickers.length + ' / ' + page.total + ' Sticker';
+  document.getElementById('sticker-count').textContent = earnedCount + ' / ' + page.total + ' Sticker';
 }
 
 function countBaseStickers(){
