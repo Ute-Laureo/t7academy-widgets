@@ -180,6 +180,23 @@ document.querySelectorAll('[data-station]').forEach(function(btn){
   });
 });
 
+// Station back button: route to Stadien for stadium stations, Spielplatz for base stations.
+// Uses live STATE.curStation rather than a DOM attribute, so cache/timing can't break it.
+(function(){
+  var backBtn = document.getElementById('view-back-station');
+  if (!backBtn) return;
+  function go(e){
+    e.preventDefault();
+    e.stopPropagation();
+    var mk = STATE.curStation;
+    var isStadium = mk && KID_MODULES[mk] && KID_MODULES[mk].tier === 'stadium';
+    showView(isStadium ? 'stadien' : 'spielplatz');
+    playTap();
+  }
+  backBtn.addEventListener('click', go);
+  backBtn.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') go(e); });
+})();
+
 // Wire up sidebar avatar switcher
 document.querySelectorAll('.av-opt[data-av-pick]').forEach(function(btn){
   btn.addEventListener('click', function(e){
@@ -229,12 +246,10 @@ function renderStationView(modKey){
   var done = countDone(modKey), total = mod.drills.length;
   var isStadium = (mod.tier === 'stadium');
 
-  // Back button: stadium stations return to Stadien, base stations to Spielplatz
-  var backBtn = document.querySelector('#view-station .view-back');
-  if (backBtn) {
-    backBtn.dataset.goto = isStadium ? 'stadien' : 'spielplatz';
-    backBtn.textContent = isStadium ? '← Zu den Stadien' : '← Zum Spielplatz';
-  }
+  // Back button: stadium stations return to Stadien, base stations to Spielplatz.
+  // (Actual navigation is wired below via #view-back-station — we only update the label here.)
+  var backBtn = document.getElementById('view-back-station');
+  if (backBtn) backBtn.textContent = isStadium ? '← Zu den Stadien' : '← Zum Spielplatz';
 
   var hero = document.getElementById('station-hero');
   hero.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
@@ -509,13 +524,14 @@ function refreshFortschritt(){
 
 function hydrateDrillsFromSupabase(){
   // Pulls real Vimeo IDs from Supabase and overrides the placeholders in KID_MODULES.
+  // For stadium drills (sd1-sd5), ONLY uses videos rated 3⭐ or 4⭐.
   // *** ADJUST table name + column names below if your schema differs. ***
   // Assumed schema: a table (called `challenges`) with columns:
-  //   module_key (text), challenge_idx (int), vimeo_id (text), vimeo_hash (text), title (text, optional)
+  //   module_key (text), challenge_idx (int), vimeo_id (text), vimeo_hash (text), title (text, optional), stars (int 1-5)
   var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
   var TABLE   = 'challenges';
-  var SELECT  = 'module_key,challenge_idx,vimeo_id,vimeo_hash,title';
+  var SELECT  = 'module_key,challenge_idx,vimeo_id,vimeo_hash,title,stars';
   fetch(SB_URL + '/rest/v1/' + TABLE + '?select=' + SELECT, {
     headers: { apikey: SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
   })
@@ -523,15 +539,46 @@ function hydrateDrillsFromSupabase(){
   .then(function(rows){
     if (!Array.isArray(rows)) return;
     var changed = false;
+
+    // Pass 1: exact match by module_key + challenge_idx
+    // For stadium drills, reject any row whose stars is not 3 or 4.
     rows.forEach(function(row){
       var mod = KID_MODULES[row.module_key];
       if (!mod) return;
       var d = mod.drills.find(function(x){ return x.idx === row.challenge_idx; });
       if (!d) return;
+      if (mod.tier === 'stadium' && row.stars !== 3 && row.stars !== 4) return; // 3⭐/4⭐ only
       if (row.vimeo_id   && String(row.vimeo_id)   !== d.vid)  { d.vid  = String(row.vimeo_id);   changed = true; }
       if (row.vimeo_hash && String(row.vimeo_hash) !== d.hash) { d.hash = String(row.vimeo_hash); changed = true; }
       if (row.title) d.title = row.title;
     });
+
+    // Pass 2: fallback — any stadium drill still using a placeholder vid (i.e. a vid
+    // that's also used by a base-journey drill) gets a real 3⭐ or 4⭐ video from the
+    // wider pool, matched to its meta ("3 Sterne" → stars=3, "4 Sterne" → stars=4).
+    var basePlaceholderVids = {};
+    STATION_ORDER.forEach(function(mk){
+      KID_MODULES[mk].drills.forEach(function(d){ basePlaceholderVids[d.vid] = true; });
+    });
+    var poolUsed = {};
+    STADIUM_ORDER.forEach(function(mk){
+      var mod = KID_MODULES[mk];
+      mod.drills.forEach(function(d){
+        if (!basePlaceholderVids[d.vid]) return; // already a real (non-placeholder) stadium vid
+        var wantedStars = (d.meta && d.meta.indexOf('3') !== -1) ? 3 : 4;
+        var pick = rows.find(function(r){
+          return r.stars === wantedStars && r.vimeo_id && !poolUsed[r.vimeo_id];
+        });
+        if (pick) {
+          d.vid = String(pick.vimeo_id);
+          d.hash = pick.vimeo_hash ? String(pick.vimeo_hash) : '';
+          if (pick.title) d.title = pick.title;
+          poolUsed[pick.vimeo_id] = true;
+          changed = true;
+        }
+      });
+    });
+
     if (changed && STATE.curStation) renderStationView(STATE.curStation);
   })
   .catch(function(err){ console.warn('[T7] hydrateDrillsFromSupabase failed — keeping placeholders. Check table/column names.', err); });
