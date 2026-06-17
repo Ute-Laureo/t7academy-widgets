@@ -115,7 +115,7 @@ var STICKER_PAGES = [
   { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER,  total: TOTAL_STICKERS },
   { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,    total: TOTAL_STADIUM_STICKERS }
 ];
-var STATE = { email:null, name:'Champion', ratings:{}, gold:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
+var STATE = { email:null, name:'Champion', ratings:{}, gold:{}, completions:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
 try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','marcy'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
 
@@ -653,13 +653,17 @@ function resolveOutcome(rating){
   if (!d) return;
   var key = modKey + '_' + idx;
   var prev = STATE.ratings[key] || 0;
-  var wasAlreadyEarned = prev >= 4;
+  var completionsBefore = STATE.completions[key] || 0;
   if (rating > prev) STATE.ratings[key] = rating;
+  // Bump the completion counter on every successful run-through
+  if (rating >= 4) STATE.completions[key] = completionsBefore + 1;
 
-  // GOLD MASTERY: only awarded when a kid replays an already-earned drill
-  // and rates it 5 ("Super!"). First-round 5-ratings just earn blue.
+  // GOLD MASTERY: requires that this drill has already been completed AT LEAST
+  // ONCE before this current rating, and the current rating is 5 ("Super!").
+  // First-round 5-ratings just earn the regular blue sticker — gold has to be
+  // earned by coming back to the drill and rating it 5 a second time.
   var newGold = false;
-  if (wasAlreadyEarned && rating === 5 && !STATE.gold[key]) {
+  if (completionsBefore >= 1 && rating === 5 && !STATE.gold[key]) {
     STATE.gold[key] = true;
     newGold = true;
   }
@@ -673,7 +677,7 @@ function resolveOutcome(rating){
     setTimeout(refreshFortschritt, 1500);
   }
   if (rating >= 4) {
-    var wasNew = !wasAlreadyEarned;
+    var wasNew = completionsBefore === 0;
     document.getElementById('ksticker-reveal').textContent = d.sticker;
     if (wasNew && isChampion() && !hasSeenChampion()) {
       document.getElementById('ksuccess-title').textContent = '🏆 CHAMPION! 🏆';
@@ -749,8 +753,21 @@ function confettiBurst(){
   setTimeout(function(){ container.remove(); }, 3500);
 }
 
-function saveLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); localStorage.setItem(key, JSON.stringify({r:STATE.ratings, g:STATE.gold})); }catch(e){} }
-function loadLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); var raw=localStorage.getItem(key); if(raw){var d=JSON.parse(raw); if(d.r)STATE.ratings=d.r; if(d.g)STATE.gold=d.g;} }catch(e){} }
+function saveLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); localStorage.setItem(key, JSON.stringify({v:2, r:STATE.ratings, g:STATE.gold, c:STATE.completions})); }catch(e){} }
+function loadLocal(){ try{
+  var key = 't7kid_' + (STATE.name || 'guest').toLowerCase();
+  var raw = localStorage.getItem(key);
+  if (!raw) return;
+  var d = JSON.parse(raw);
+  if (d.r) STATE.ratings = d.r;
+  /* Gold + completions only honoured from v2 onwards. Older saves had a buggy
+     gold rule (rating===5 instantly counted), so we drop those flags on
+     upgrade and let kids re-earn gold properly with the new replay logic. */
+  if (d.v === 2) {
+    if (d.g) STATE.gold        = d.g;
+    if (d.c) STATE.completions = d.c;
+  }
+}catch(e){} }
 
 function hydrateFromSupabase(){
   if (!STATE.email || !window.T7SB) return;
