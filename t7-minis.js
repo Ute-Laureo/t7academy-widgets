@@ -351,7 +351,6 @@ function countDone(modKey){ var c=0; KID_MODULES[modKey].drills.forEach(function
 
 /* === STICKERS === */
 var STICKER_LAST_PAGE = 0;
-var STICKER_CUR_ANIM  = null;
 
 function renderStickerPager(){
   var pager = document.getElementById('sticker-pager');
@@ -412,41 +411,29 @@ function renderStickers(){
   }
   var newCountText = earnedCount + ' / ' + page.total + ' Sticker';
 
-  // Decide slide direction (forward = next page, backward = previous)
+  // Direction: positive = next page, negative = previous, 0 = initial / same page
   var direction = STATE.stickerPage > STICKER_LAST_PAGE ? 1 :
                   STATE.stickerPage < STICKER_LAST_PAGE ? -1 : 0;
   STICKER_LAST_PAGE = STATE.stickerPage;
 
-  // No direction change OR no Web Animations API → just swap content
-  if (direction === 0 || !grid.animate) {
-    grid.innerHTML = html;
-    countEl.textContent = newCountText;
-    return;
-  }
+  // Clear any leftover slide classes so the grid is in a known state
+  grid.classList.remove('sg-fresh-left','sg-fresh-right');
 
-  // Cancel any in-flight slide so rapid clicks don't pile up
-  if (STICKER_CUR_ANIM) { try { STICKER_CUR_ANIM.cancel(); } catch(e){} STICKER_CUR_ANIM = null; }
+  // Always write content + count immediately
+  grid.innerHTML = html;
+  countEl.textContent = newCountText;
 
-  var outX = direction > 0 ? -40 : 40;
-  var inX  = direction > 0 ? 40  : -40;
+  // No animation on initial render / in-place updates
+  if (direction === 0) return;
 
-  var outAnim = grid.animate(
-    [{ transform:'translateX(0)',                  opacity:1 },
-     { transform:'translateX(' + outX + 'px)',     opacity:0 }],
-    { duration:180, easing:'cubic-bezier(.4,0,.6,1)', fill:'forwards' }
-  );
-  STICKER_CUR_ANIM = outAnim;
-  outAnim.onfinish = function(){
-    grid.innerHTML = html;
-    countEl.textContent = newCountText;
-    var inAnim = grid.animate(
-      [{ transform:'translateX(' + inX + 'px)', opacity:0 },
-       { transform:'translateX(0)',             opacity:1 }],
-      { duration:240, easing:'cubic-bezier(.34,1.56,.64,1)' }
-    );
-    STICKER_CUR_ANIM = inAnim;
-    inAnim.onfinish = function(){ STICKER_CUR_ANIM = null; };
-  };
+  // Snap the grid offscreen (CSS class with transition:none), force a layout
+  // flush, then remove the class so the default transition animates it back
+  // into place.
+  var freshCls = direction > 0 ? 'sg-fresh-right' : 'sg-fresh-left';
+  grid.classList.add(freshCls);
+  // Force layout — this commits the snap so the next removal animates.
+  void grid.offsetWidth;
+  grid.classList.remove(freshCls);
 }
 
 function countBaseStickers(){
