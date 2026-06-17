@@ -417,17 +417,21 @@ function renderStickers(){
   var countEl = document.getElementById('sticker-count');
 
   // Build the new HTML + count for this page
-  var html = '', earnedCount = 0, slot = 0;
+  var html = '', earnedCount = 0, goldCount = 0, slot = 0;
   page.stations.forEach(function(mk){
     var mod = KID_MODULES[mk];
     if (!mod) return;
     mod.drills.forEach(function(d){
       if (slot >= page.total) return;
       slot++;
-      var key = mk + '_' + d.idx;
-      var earned = (STATE.ratings[key] || 0) >= 4;
+      var key    = mk + '_' + d.idx;
+      var rating = STATE.ratings[key] || 0;
+      var earned = rating >= 4;
+      var gold   = rating === 5;
       if (earned) earnedCount++;
-      html += '<div class="sticker' + (earned ? ' earned' : '') + '">' +
+      if (gold)   goldCount++;
+      var cls = 'sticker' + (earned ? ' earned' : '') + (gold ? ' gold' : '');
+      html += '<div class="' + cls + '">' +
               (earned ? d.sticker : '<span style="opacity:.3;font-size:18px">?</span>') +
               '</div>';
     });
@@ -438,7 +442,11 @@ function renderStickers(){
   }
 
   grid.innerHTML = html;
-  countEl.textContent = earnedCount + ' / ' + page.total + ' Sticker';
+  var goldSuffix = goldCount > 0 ? '  ·  ' + goldCount + ' ⭐ Gold' : '';
+  countEl.textContent = earnedCount + ' / ' + page.total + ' Sticker' + goldSuffix;
+
+  // Reveal/hide the Champion certificate button in the sidebar
+  refreshChampionBadge();
 }
 
 function countBaseStickers(){
@@ -452,6 +460,131 @@ function countBaseStickers(){
 }
 
 function isStadiumUnlocked(){ return countBaseStickers() >= TOTAL_STICKERS; }
+
+/* === CHAMPION + GOLD MODE ===
+   - Earned sticker  = rating >= 4   (existing)
+   - GOLD sticker    = rating === 5  (the "Super!" rating)
+   - Champion        = earned all stickers across all STICKER_PAGES
+   The ceremony fires once per kid (keyed by name), tracked in localStorage. */
+function countAllEarned(){
+  var c = 0;
+  STICKER_PAGES.forEach(function(p){
+    p.stations.forEach(function(mk){
+      var mod = KID_MODULES[mk]; if (!mod) return;
+      mod.drills.forEach(function(d){
+        if ((STATE.ratings[mk + '_' + d.idx] || 0) >= 4) c++;
+      });
+    });
+  });
+  return c;
+}
+function countAllGold(){
+  var c = 0;
+  STICKER_PAGES.forEach(function(p){
+    p.stations.forEach(function(mk){
+      var mod = KID_MODULES[mk]; if (!mod) return;
+      mod.drills.forEach(function(d){
+        if ((STATE.ratings[mk + '_' + d.idx] || 0) === 5) c++;
+      });
+    });
+  });
+  return c;
+}
+function totalStickersAcrossPages(){
+  var t = 0; STICKER_PAGES.forEach(function(p){ t += p.total; }); return t;
+}
+function isChampion(){ return countAllEarned() >= totalStickersAcrossPages(); }
+function isGoldChampion(){ return countAllGold() >= totalStickersAcrossPages(); }
+
+function championStorageKey(){ return 't7kid_champion_' + (STATE.name || 'guest').toLowerCase(); }
+function hasSeenChampion(){ try { return localStorage.getItem(championStorageKey()) === '1'; } catch(e){ return false; } }
+function markChampionSeen(){ try { localStorage.setItem(championStorageKey(), '1'); } catch(e){} }
+
+/* Deterministic reward code derived from email+name. Same kid always gets the
+   same code so it can be redeemed (and validated server-side later). */
+function generateRewardCode(){
+  var str = (STATE.email || '') + '|' + (STATE.name || 'CHAMPION');
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  var s = Math.abs(hash).toString(36).toUpperCase();
+  while (s.length < 8) s = '0' + s;
+  s = s.slice(-8);
+  return 'T7-' + s.slice(0, 4) + '-' + s.slice(4, 8);
+}
+
+function refreshChampionBadge(){
+  var row = document.getElementById('kf-champion-row');
+  if (!row) return;
+  row.style.display = isChampion() ? '' : 'none';
+}
+
+function maybeShowChampion(){
+  var kmodal  = document.getElementById('kmodal');
+  var cmodal  = document.getElementById('champion-modal');
+  if (kmodal && kmodal.classList.contains('open')) return;
+  if (cmodal && cmodal.classList.contains('open')) return;
+  if (isChampion() && !hasSeenChampion()) showChampionCeremony();
+}
+
+function showChampionCeremony(){
+  var modal = document.getElementById('champion-modal');
+  if (!modal) return;
+  document.getElementById('champion-name').textContent = STATE.name || 'Champion';
+  document.getElementById('champion-code').textContent = generateRewardCode();
+  modal.classList.add('open');
+  confettiBurst();
+  setTimeout(confettiBurst, 600);
+  setTimeout(confettiBurst, 1200);
+  playFanfare();
+  setTimeout(playFanfare, 800);
+}
+function hideChampionCeremony(){
+  var modal = document.getElementById('champion-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+function formatCertDate(){
+  var d = new Date();
+  var dd = String(d.getDate()).padStart(2, '0');
+  var mm = String(d.getMonth() + 1).padStart(2, '0');
+  return dd + '.' + mm + '.' + d.getFullYear();
+}
+
+function populateCertStickerWall(){
+  var wall = document.getElementById('cert-sticker-wall');
+  if (!wall) return;
+  var html = '';
+  STICKER_PAGES.forEach(function(p){
+    p.stations.forEach(function(mk){
+      var mod = KID_MODULES[mk]; if (!mod) return;
+      mod.drills.forEach(function(d){
+        var rating = STATE.ratings[mk + '_' + d.idx] || 0;
+        if (rating >= 4) {
+          var cls = 'cert-st' + (rating === 5 ? ' gold' : '');
+          html += '<div class="' + cls + '">' + d.sticker + '</div>';
+        }
+      });
+    });
+  });
+  wall.innerHTML = html;
+}
+
+function showCertificate(){
+  var modal = document.getElementById('certificate-modal');
+  if (!modal) return;
+  document.getElementById('cert-name').textContent = STATE.name || 'Champion';
+  document.getElementById('cert-date').textContent = formatCertDate();
+  document.getElementById('cert-code').textContent = generateRewardCode();
+  populateCertStickerWall();
+  modal.classList.add('open');
+}
+function hideCertificate(){
+  var modal = document.getElementById('certificate-modal');
+  if (modal) modal.classList.remove('open');
+}
 
 /* === TRICKPFAD === */
 function renderTrickpfad(){
@@ -529,10 +662,15 @@ function resolveOutcome(rating){
     setTimeout(refreshFortschritt, 1500);
   }
   if (rating >= 4) {
-    document.getElementById('ksuccess-title').textContent = rating === 5 ? 'WOW! Perfekt!' : 'Super gemacht!';
-    document.getElementById('ksticker-reveal').textContent = d.sticker;
     var wasNew = prev < 4;
-    document.getElementById('ksuccess-msg').textContent = wasNew ? 'Du hast einen neuen Sticker bekommen! 🌟' : 'Du wirst immer besser! 🎉';
+    document.getElementById('ksticker-reveal').textContent = d.sticker;
+    if (wasNew && isChampion() && !hasSeenChampion()) {
+      document.getElementById('ksuccess-title').textContent = '🏆 CHAMPION! 🏆';
+      document.getElementById('ksuccess-msg').textContent = 'Du hast ALLE 30 Sticker gesammelt! Wahnsinn!';
+    } else {
+      document.getElementById('ksuccess-title').textContent = rating === 5 ? 'WOW! Perfekt!' : 'Super gemacht!';
+      document.getElementById('ksuccess-msg').textContent = wasNew ? 'Du hast einen neuen Sticker bekommen! 🌟' : 'Du wirst immer besser! 🎉';
+    }
     showStep('success'); confettiBurst();
     if (wasNew) playFanfare();
   } else {
@@ -550,9 +688,34 @@ document.getElementById('kbtn-continue').onclick = function(){
   var nextIdx = STATE.curDrill + 1;
   var next = mod.drills.find(function(x){ return x.idx === nextIdx; });
   if (next) setTimeout(function(){ openDrill(STATE.curMod, nextIdx); }, 400);
+  else      setTimeout(maybeShowChampion, 600);
 };
 document.getElementById('kbtn-retry').onclick = function(){ showStep('watch'); playTap(); };
-document.getElementById('kbtn-skip').onclick = function(){ closeModal(); playTap(); };
+document.getElementById('kbtn-skip').onclick = function(){
+  closeModal(); playTap();
+  setTimeout(maybeShowChampion, 600);
+};
+
+/* Champion ceremony + certificate button wiring */
+(function(){
+  var champClose = document.getElementById('champion-close');
+  var champGo    = document.getElementById('champion-cta-go');
+  var champCert  = document.getElementById('champion-cta-cert');
+  var certBack   = document.getElementById('cert-back-btn');
+  var certPrint  = document.getElementById('cert-print-btn');
+  var kfChamp    = document.getElementById('kf-champion-btn');
+  if (champClose) champClose.onclick = function(){ hideChampionCeremony(); markChampionSeen(); playTap(); };
+  if (champGo)    champGo.onclick    = function(){ hideChampionCeremony(); markChampionSeen(); playTap(); };
+  if (champCert)  champCert.onclick  = function(){ markChampionSeen(); showCertificate(); playTap(); };
+  if (certBack)   certBack.onclick   = function(){ hideCertificate(); playTap(); };
+  if (certPrint)  certPrint.onclick  = function(){ window.print(); };
+  if (kfChamp)    kfChamp.onclick    = function(){ showCertificate(); playTap(); };
+  // Click-outside-to-close on champion overlay (but keep certificate explicit)
+  var champOv = document.getElementById('champion-modal');
+  if (champOv) champOv.addEventListener('click', function(e){
+    if (e.target.id === 'champion-modal') { hideChampionCeremony(); markChampionSeen(); }
+  });
+})();
 
 function confettiBurst(){
   var colors = ['#00E5FF','#0080FF','#FFD700','#E4002B','#22C55E','#FFFFFF'];
@@ -700,6 +863,9 @@ function boot(email, name){
   hydrateDrillsFromSupabase();
   hydrateFromSupabase();
   refreshFortschritt();
+  refreshChampionBadge();
+  // Returning champions who haven't seen the ceremony yet get it on load.
+  setTimeout(maybeShowChampion, 1200);
 }
 
 if (window.T7Identity) { T7Identity.resolve(function(email, name){ boot(email, name); }); }
