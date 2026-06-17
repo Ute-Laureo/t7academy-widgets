@@ -61,7 +61,7 @@ var KID_MODULES = {
      ids later (you can extend hydrateDrillsFromSupabase to handle tier:'trickpath'). */
   tp1: { tier:'trickpath', label:'Aufwärmen', emoji:'🏃', num:'Stufe 1',
     drills:[
-      {idx:0, title:'Knie-Hoch',       emoji:'🦵', meta:'1 Stern',  vid:'1124934705', hash:'6a71a27daf', sticker:'🦵'},
+      {idx:0, title:'Knie-Hoch',       emoji:'🦘', meta:'1 Stern',  vid:'1124934705', hash:'6a71a27daf', sticker:'🦘'},
       {idx:1, title:'Beine-Strecken',  emoji:'🤸', meta:'1 Stern',  vid:'1124935347', hash:'c8977c5fb4', sticker:'🤸'}
     ]},
   tp2: { tier:'trickpath', label:'Ball-Freunde', emoji:'🤝', num:'Stufe 2',
@@ -76,13 +76,13 @@ var KID_MODULES = {
     ]},
   tp4: { tier:'trickpath', label:'Geheimer Trick', emoji:'🎯', num:'Stufe 4',
     drills:[
-      {idx:0, title:'Roulette',        emoji:'🎰', meta:'3 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'🎰'},
+      {idx:0, title:'Roulette',        emoji:'🌀', meta:'3 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'🌀'},
       {idx:1, title:'Sohle-Drag',      emoji:'👟', meta:'2 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'👟'}
     ]},
   tp5: { tier:'trickpath', label:'Champion-Finale', emoji:'🌈', num:'Stufe 5',
     drills:[
       {idx:0, title:'Kombi-Magie',     emoji:'🎩', meta:'3 Sterne', vid:'1110049131', hash:'0944817493', sticker:'🎩'},
-      {idx:1, title:'Mega-Power',      emoji:'💪', meta:'4 Sterne', vid:'1125467352', hash:'30d35d6e70', sticker:'💪'}
+      {idx:1, title:'Mega-Power',      emoji:'🦁', meta:'4 Sterne', vid:'1125467352', hash:'30d35d6e70', sticker:'🦁'}
     ]}
 };
 var STATION_ORDER   = ['st1','st2','st3','st4','st5'];
@@ -351,22 +351,50 @@ function countDone(modKey){ var c=0; KID_MODULES[modKey].drills.forEach(function
 
 /* === STICKERS === */
 
+/* Per-page tab metadata (icon + short label + color shown in the tab UI).
+   Colors map to the same red/blue/green identities used on the landing cards.
+   Falls back to p.label if a page id isn't listed here. */
+var STICKER_TAB_META = {
+  base:      { icon:'⚽',  short:'Spielplatz', color:'red'   },
+  trickpath: { icon:'🏁',  short:'Trick-Pfad', color:'blue'  },
+  stadium:   { icon:'🏟️', short:'Stadien',    color:'green' }
+};
+
+function countPageEarned(page){
+  var n = 0;
+  page.stations.forEach(function(mk){
+    var mod = KID_MODULES[mk]; if (!mod) return;
+    mod.drills.forEach(function(d){
+      if ((STATE.ratings[mk + '_' + d.idx] || 0) >= 4) n++;
+    });
+  });
+  return Math.min(n, page.total);
+}
+
 function renderStickerPager(){
   var pager = document.getElementById('sticker-pager');
   if (!pager) return;
   var cur = STATE.stickerPage || 0;
   if (cur >= STICKER_PAGES.length) cur = 0;
+
   var html = '';
   STICKER_PAGES.forEach(function(p, idx){
     var active = (idx === cur);
-    html += '<button class="sp-dot' + (active ? ' is-active' : '') + '"' +
+    var meta   = STICKER_TAB_META[p.id] || { icon:'⭐', short:p.label, color:'blue' };
+    var earned = countPageEarned(p);
+    html += '<button class="sp-tab' + (active ? ' is-active' : '') + '"' +
+            ' data-color="' + meta.color + '"' +
             ' data-page="' + idx + '" type="button" role="tab"' +
             ' aria-selected="' + (active ? 'true' : 'false') + '"' +
-            ' aria-label="' + p.label + '"></button>';
+            ' aria-label="' + p.label + ' (' + earned + ' von ' + p.total + ')">' +
+              '<span class="sp-tab-icon">' + meta.icon + '</span>' +
+              '<span class="sp-tab-label">' + meta.short + '</span>' +
+              '<span class="sp-tab-count">' + earned + '/' + p.total + '</span>' +
+            '</button>';
   });
   pager.innerHTML = html;
 
-  // Bind clicks on the freshly rendered dots
+  // Bind clicks on the freshly rendered tabs
   pager.querySelectorAll('[data-page]').forEach(function(btn){
     btn.addEventListener('click', function(){
       var idx = parseInt(btn.dataset.page, 10);
