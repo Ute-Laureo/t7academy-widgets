@@ -350,6 +350,9 @@ function updatePlaygroundStation(modKey){
 function countDone(modKey){ var c=0; KID_MODULES[modKey].drills.forEach(function(d){ if((STATE.ratings[modKey+'_'+d.idx]||0)>=4) c++; }); return c; }
 
 /* === STICKERS === */
+var STICKER_LAST_PAGE = 0;
+var STICKER_CUR_ANIM  = null;
+
 function renderStickerPager(){
   var pager = document.getElementById('sticker-pager');
   if (!pager) return;
@@ -384,7 +387,10 @@ function renderStickers(){
 
   renderStickerPager();
 
-  var grid = document.getElementById('sticker-grid');
+  var grid    = document.getElementById('sticker-grid');
+  var countEl = document.getElementById('sticker-count');
+
+  // Build the new HTML + count for this page
   var html = '', earnedCount = 0, slot = 0;
   page.stations.forEach(function(mk){
     var mod = KID_MODULES[mk];
@@ -400,13 +406,47 @@ function renderStickers(){
               '</div>';
     });
   });
-  // Pad with empty slots if data has fewer drills than page.total (defensive)
   while (slot < page.total) {
     html += '<div class="sticker"><span style="opacity:.3;font-size:18px">?</span></div>';
     slot++;
   }
-  grid.innerHTML = html;
-  document.getElementById('sticker-count').textContent = earnedCount + ' / ' + page.total + ' Sticker';
+  var newCountText = earnedCount + ' / ' + page.total + ' Sticker';
+
+  // Decide slide direction (forward = next page, backward = previous)
+  var direction = STATE.stickerPage > STICKER_LAST_PAGE ? 1 :
+                  STATE.stickerPage < STICKER_LAST_PAGE ? -1 : 0;
+  STICKER_LAST_PAGE = STATE.stickerPage;
+
+  // No direction change OR no Web Animations API → just swap content
+  if (direction === 0 || !grid.animate) {
+    grid.innerHTML = html;
+    countEl.textContent = newCountText;
+    return;
+  }
+
+  // Cancel any in-flight slide so rapid clicks don't pile up
+  if (STICKER_CUR_ANIM) { try { STICKER_CUR_ANIM.cancel(); } catch(e){} STICKER_CUR_ANIM = null; }
+
+  var outX = direction > 0 ? -40 : 40;
+  var inX  = direction > 0 ? 40  : -40;
+
+  var outAnim = grid.animate(
+    [{ transform:'translateX(0)',                  opacity:1 },
+     { transform:'translateX(' + outX + 'px)',     opacity:0 }],
+    { duration:180, easing:'cubic-bezier(.4,0,.6,1)', fill:'forwards' }
+  );
+  STICKER_CUR_ANIM = outAnim;
+  outAnim.onfinish = function(){
+    grid.innerHTML = html;
+    countEl.textContent = newCountText;
+    var inAnim = grid.animate(
+      [{ transform:'translateX(' + inX + 'px)', opacity:0 },
+       { transform:'translateX(0)',             opacity:1 }],
+      { duration:240, easing:'cubic-bezier(.34,1.56,.64,1)' }
+    );
+    STICKER_CUR_ANIM = inAnim;
+    inAnim.onfinish = function(){ STICKER_CUR_ANIM = null; };
+  };
 }
 
 function countBaseStickers(){
