@@ -115,7 +115,7 @@ var STICKER_PAGES = [
   { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER,  total: TOTAL_STICKERS },
   { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,    total: TOTAL_STADIUM_STICKERS }
 ];
-var STATE = { email:null, name:'Champion', ratings:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
+var STATE = { email:null, name:'Champion', ratings:{}, gold:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
 try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','marcy'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
 
@@ -427,7 +427,7 @@ function renderStickers(){
       var key    = mk + '_' + d.idx;
       var rating = STATE.ratings[key] || 0;
       var earned = rating >= 4;
-      var gold   = rating === 5;
+      var gold   = !!(STATE.gold && STATE.gold[key]);
       if (earned) earnedCount++;
       if (gold)   goldCount++;
       var cls = 'sticker' + (earned ? ' earned' : '') + (gold ? ' gold' : '');
@@ -462,8 +462,9 @@ function countBaseStickers(){
 function isStadiumUnlocked(){ return countBaseStickers() >= TOTAL_STICKERS; }
 
 /* === CHAMPION + GOLD MODE ===
-   - Earned sticker  = rating >= 4   (existing)
-   - GOLD sticker    = rating === 5  (the "Super!" rating)
+   - Earned sticker  = rating >= 4   (existing — first-round earn)
+   - GOLD mastery    = a SECOND rating of 5 on an already-earned drill
+                       (see resolveOutcome). First-round 5 still earns blue.
    - Champion        = earned all stickers across all STICKER_PAGES
    The ceremony fires once per kid (keyed by name), tracked in localStorage. */
 function countAllEarned(){
@@ -484,7 +485,7 @@ function countAllGold(){
     p.stations.forEach(function(mk){
       var mod = KID_MODULES[mk]; if (!mod) return;
       mod.drills.forEach(function(d){
-        if ((STATE.ratings[mk + '_' + d.idx] || 0) === 5) c++;
+        if (STATE.gold && STATE.gold[mk + '_' + d.idx]) c++;
       });
     });
   });
@@ -561,9 +562,10 @@ function populateCertStickerWall(){
     p.stations.forEach(function(mk){
       var mod = KID_MODULES[mk]; if (!mod) return;
       mod.drills.forEach(function(d){
-        var rating = STATE.ratings[mk + '_' + d.idx] || 0;
+        var key    = mk + '_' + d.idx;
+        var rating = STATE.ratings[key] || 0;
         if (rating >= 4) {
-          var cls = 'cert-st' + (rating === 5 ? ' gold' : '');
+          var cls = 'cert-st' + ((STATE.gold && STATE.gold[key]) ? ' gold' : '');
           html += '<div class="' + cls + '">' + d.sticker + '</div>';
         }
       });
@@ -651,7 +653,16 @@ function resolveOutcome(rating){
   if (!d) return;
   var key = modKey + '_' + idx;
   var prev = STATE.ratings[key] || 0;
+  var wasAlreadyEarned = prev >= 4;
   if (rating > prev) STATE.ratings[key] = rating;
+
+  // GOLD MASTERY: only awarded when a kid replays an already-earned drill
+  // and rates it 5 ("Super!"). First-round 5-ratings just earn blue.
+  var newGold = false;
+  if (wasAlreadyEarned && rating === 5 && !STATE.gold[key]) {
+    STATE.gold[key] = true;
+    newGold = true;
+  }
   saveLocal();
   if (STATE.email && window.T7SB) {
     var moduleLabel = KID_MODULES[modKey].label;
@@ -662,17 +673,20 @@ function resolveOutcome(rating){
     setTimeout(refreshFortschritt, 1500);
   }
   if (rating >= 4) {
-    var wasNew = prev < 4;
+    var wasNew = !wasAlreadyEarned;
     document.getElementById('ksticker-reveal').textContent = d.sticker;
     if (wasNew && isChampion() && !hasSeenChampion()) {
       document.getElementById('ksuccess-title').textContent = '🏆 CHAMPION! 🏆';
       document.getElementById('ksuccess-msg').textContent = 'Du hast ALLE 30 Sticker gesammelt! Wahnsinn!';
+    } else if (newGold) {
+      document.getElementById('ksuccess-title').textContent = '⭐ GOLD-STICKER! ⭐';
+      document.getElementById('ksuccess-msg').textContent = 'Du hast diesen Trick gemeistert! Gold ist deins! 🌟';
     } else {
       document.getElementById('ksuccess-title').textContent = rating === 5 ? 'WOW! Perfekt!' : 'Super gemacht!';
       document.getElementById('ksuccess-msg').textContent = wasNew ? 'Du hast einen neuen Sticker bekommen! 🌟' : 'Du wirst immer besser! 🎉';
     }
     showStep('success'); confettiBurst();
-    if (wasNew) playFanfare();
+    if (wasNew || newGold) playFanfare();
   } else {
     showStep('tryagain');
   }
@@ -735,8 +749,8 @@ function confettiBurst(){
   setTimeout(function(){ container.remove(); }, 3500);
 }
 
-function saveLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); localStorage.setItem(key, JSON.stringify({r:STATE.ratings})); }catch(e){} }
-function loadLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); var raw=localStorage.getItem(key); if(raw){var d=JSON.parse(raw); if(d.r)STATE.ratings=d.r;} }catch(e){} }
+function saveLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); localStorage.setItem(key, JSON.stringify({r:STATE.ratings, g:STATE.gold})); }catch(e){} }
+function loadLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); var raw=localStorage.getItem(key); if(raw){var d=JSON.parse(raw); if(d.r)STATE.ratings=d.r; if(d.g)STATE.gold=d.g;} }catch(e){} }
 
 function hydrateFromSupabase(){
   if (!STATE.email || !window.T7SB) return;
