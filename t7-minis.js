@@ -350,7 +350,6 @@ function updatePlaygroundStation(modKey){
 function countDone(modKey){ var c=0; KID_MODULES[modKey].drills.forEach(function(d){ if((STATE.ratings[modKey+'_'+d.idx]||0)>=4) c++; }); return c; }
 
 /* === STICKERS === */
-var STICKER_LAST_PAGE = 0;
 
 function renderStickerPager(){
   var pager = document.getElementById('sticker-pager');
@@ -409,31 +408,9 @@ function renderStickers(){
     html += '<div class="sticker"><span style="opacity:.3;font-size:18px">?</span></div>';
     slot++;
   }
-  var newCountText = earnedCount + ' / ' + page.total + ' Sticker';
 
-  // Direction: positive = next page, negative = previous, 0 = initial / same page
-  var direction = STATE.stickerPage > STICKER_LAST_PAGE ? 1 :
-                  STATE.stickerPage < STICKER_LAST_PAGE ? -1 : 0;
-  STICKER_LAST_PAGE = STATE.stickerPage;
-
-  // Clear any leftover slide classes so the grid is in a known state
-  grid.classList.remove('sg-fresh-left','sg-fresh-right');
-
-  // Always write content + count immediately
   grid.innerHTML = html;
-  countEl.textContent = newCountText;
-
-  // No animation on initial render / in-place updates
-  if (direction === 0) return;
-
-  // Snap the grid offscreen (CSS class with transition:none), force a layout
-  // flush, then remove the class so the default transition animates it back
-  // into place.
-  var freshCls = direction > 0 ? 'sg-fresh-right' : 'sg-fresh-left';
-  grid.classList.add(freshCls);
-  // Force layout — this commits the snap so the next removal animates.
-  void grid.offsetWidth;
-  grid.classList.remove(freshCls);
+  countEl.textContent = earnedCount + ' / ' + page.total + ' Sticker';
 }
 
 function countBaseStickers(){
