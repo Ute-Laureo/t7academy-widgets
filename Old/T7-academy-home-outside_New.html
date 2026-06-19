@@ -41,52 +41,23 @@
             --lp-muted: rgba(255,255,255,0.65);
             --lp-faint: rgba(255,255,255,0.4);
             --lp-rule: rgba(255,255,255,0.08);
-            --lp-section-y: clamp(40px, 5vw, 68px);
-            --lp-wrap: 1200px;^
+            --lp-section-y: clamp(72px, 9vw, 120px);
+            --lp-wrap: 1200px;
             --lp-narrow: 880px;
         }
-
-        /* ===== LIGHT MODE — proper light, deeper accents ===== */
         body[data-theme="light"] {
-            background: #E8EDF3 !important;
-            --text: #0F172A;
-            --accent: #00e0ff;
-            --lp-gold: #ca8309;
-            --lp-red: #BE123C;
-            --lp-green: #199848;
-            --lp-brazil: #cda609;
-            --lp-muted: rgba(15,23,42,0.72);
-            --lp-faint: rgba(15,23,42,0.48);
-            --lp-rule: rgba(15,23,42,0.08);
-        }
-        body[data-theme="light"] .topnav {
-            background: #FFFFFF !important;
-            border-bottom-color: rgba(15,23,42,0.08) !important;
-        }
-        body[data-theme="light"] .nav-cta-secondary {
-            border-color: rgba(8,145,178,0.4);
-            background: rgba(8,145,178,0.05);
-        }
-        body[data-theme="light"] .nav-cta-secondary:hover {
-            background: rgba(8,145,178,0.12);
-            border-color: rgba(8,145,178,0.6);
-        }
-        /* Theory freestyle card hardcodes electric cyan — override for light */
-        body[data-theme="light"] .lp-theory-card.t-freestyle { --theory-c1: #0891B2; }
-        /* Challenges custom green needs to darken for light */
-        body[data-theme="light"] .lp-prog.p-challenges { --p-c: #15803D; }
-        /* Hero image overlay was tuned for dark — soften for light */
-        body[data-theme="light"] .lp-hero-image::after {
-            background: linear-gradient(90deg, rgba(232,237,243,0.55) 0%, rgba(232,237,243,0.15) 30%, transparent 60%) !important;
+            --lp-muted: rgba(13,21,40,0.65);
+            --lp-faint: rgba(13,21,40,0.4);
+            --lp-rule: rgba(13,21,40,0.08);
         }
 
-        .lp-wrap { max-width: none; margin: 0; padding: 0 clamp(24px, 5vw, 64px); }
-        .lp-section { padding: var(--lp-section-y) 0 !important; position: relative; }
+        .lp-wrap { max-width: var(--lp-wrap); margin: 0 auto; padding: 0 24px; }
+        .lp-section { padding: var(--lp-section-y) 0; position: relative; }
         .lp-section + .lp-section { border-top: 1px solid var(--lp-rule); }
 
         .lp-eye {
             font-family: 'Antonio', 'Open Sans', sans-serif;
-            font-weight: 600; font-size: 14px;
+            font-weight: 600; font-size: 13px;
             letter-spacing: 0.22em; text-transform: uppercase;
             color: var(--accent); margin-bottom: 14px;
             display: inline-flex; align-items: center; gap: 10px;
@@ -110,7 +81,7 @@
             max-width: 640px;
         }
 
-        /* ===== HERO ===== */
+        /* ===== HERO (refined) ===== */
         .lp-hero {
             position: relative; overflow: hidden;
             border-bottom: 1px solid var(--lp-rule);
@@ -154,21 +125,19 @@
         }
         .lp-hero p strong { color: var(--text); font-weight: 700; }
         .lp-hero-stats {
-            display: flex; gap: 40px; flex-wrap: wrap;
+            display: flex; gap: 32px; flex-wrap: wrap;
             padding-top: 24px; border-top: 1px solid var(--lp-rule);
-            max-width: 560px;
+            max-width: 520px;
         }
         .lp-hero-stat { display: flex; flex-direction: column; }
         .lp-hero-stat-num {
             font-family: 'Antonio', sans-serif;
-            font-weight: 600;
-            font-size: clamp(38px, 3.8vw, 48px);
-            line-height: 1;
-            color: var(--lp-gold); margin-bottom: 8px;
+            font-weight: 600; font-size: 32px; line-height: 1;
+            color: var(--lp-gold); margin-bottom: 4px;
         }
         .lp-hero-stat-label {
-            font-size: 12px; font-weight: 700;
-            letter-spacing: 0.14em; text-transform: uppercase;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase;
             color: var(--lp-faint);
         }
         .lp-hero-image {
@@ -185,29 +154,18 @@
             .lp-hero-text { padding: 48px 24px; }
         }
 
-        /* ===== ALUMNI ===== */
-        .lp-alumni-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: clamp(40px, 6vw, 80px);
-            align-items: center;
-        }
-        .lp-alumni-head { max-width: 100%; }
-        @media (max-width: 880px) {
-            .lp-alumni-grid {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-        }
+        /* ===== SIGNATURE: ALUMNI LINEAGE ===== */
+        .lp-alumni { padding-top: calc(var(--lp-section-y) * 0.85); padding-bottom: calc(var(--lp-section-y) * 0.85); }
+        .lp-alumni-head { max-width: var(--lp-narrow); margin-bottom: 56px; }
         .alumni-roll {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
             font-weight: 900;
             line-height: 1;
             display: flex; flex-wrap: wrap;
             align-items: baseline;
-            column-gap: 0.4em; row-gap: 0.35em;
+            column-gap: 0.4em; row-gap: 0.25em;
             letter-spacing: -0.02em;
-            font-size: clamp(22px, 3.2vw, 42px);
+            font-size: clamp(28px, 6.2vw, 78px);
         }
         .alumni-name {
             color: var(--text);
@@ -219,18 +177,19 @@
             display: block;
             font-family: 'Antonio', 'Open Sans', sans-serif;
             font-weight: 400;
-            font-size: 0.25em;
+            font-size: 0.18em;
             letter-spacing: 0.16em;
             text-transform: uppercase;
             color: var(--lp-faint);
-            margin-top: 0.5em;
+            margin-top: 0.4em;
             line-height: 1;
         }
+        /* Variation across names — the signature collage */
         .alumni-name.c1 { color: var(--accent); }
         .alumni-name.c2 { color: var(--lp-gold); }
         .alumni-name.c3 { font-family: 'Fraunces', 'Garet W05 Bold', serif; font-style: italic; font-weight: 700; }
-        .alumni-name.size-sm { font-size: 0.95em; }
-        .alumni-name.size-md { font-size: 0.95em; }
+        .alumni-name.size-sm { font-size: 0.62em; }
+        .alumni-name.size-md { font-size: 0.82em; }
         .alumni-dot {
             color: var(--lp-gold);
             font-weight: 400;
@@ -241,40 +200,139 @@
             display: inline-block;
         }
 
-        /* ===== THEORY ===== */
+        .alumni-caption {
+            margin-top: 56px;
+            padding-top: 28px;
+            border-top: 1px solid var(--lp-rule);
+            font-family: 'Fraunces', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: clamp(17px, 1.8vw, 22px);
+            line-height: 1.4;
+            color: var(--text);
+            max-width: 680px;
+        }
+        .alumni-caption::before {
+            content: '“';
+            font-size: 2em; line-height: 0;
+            color: var(--lp-gold);
+            margin-right: 6px;
+            vertical-align: -0.2em;
+        }
+
+        /* ===== STAT MOMENT ===== */
+        .lp-stat-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: end;
+            gap: clamp(20px, 4vw, 60px);
+            margin: 40px 0 32px;
+        }
+        @media (max-width: 720px) {
+            .lp-stat-row { grid-template-columns: 1fr; gap: 24px; }
+            .lp-stat-vs { display: none; }
+        }
+        .lp-stat-block {
+            position: relative;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--lp-rule);
+        }
+        .lp-stat-block.hero {
+            border-bottom-color: var(--accent);
+        }
+        .lp-stat-num {
+            font-family: 'Antonio', sans-serif;
+            font-weight: 600;
+            font-size: clamp(72px, 14vw, 180px);
+            line-height: 0.85;
+            letter-spacing: -0.04em;
+            color: var(--lp-faint);
+        }
+        .lp-stat-block.hero .lp-stat-num {
+            color: var(--accent);
+            background: linear-gradient(180deg, var(--accent) 0%, #0080FF 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .lp-stat-suffix {
+            font-family: 'Antonio', sans-serif;
+            font-weight: 500;
+            font-size: 0.4em;
+            color: var(--lp-faint);
+            vertical-align: 0.3em;
+            margin-left: 0.05em;
+        }
+        .lp-stat-block.hero .lp-stat-suffix {
+            color: var(--accent);
+            -webkit-text-fill-color: var(--accent);
+        }
+        .lp-stat-label {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px; font-weight: 600;
+            color: var(--text); margin-top: 14px;
+            line-height: 1.45;
+        }
+        .lp-stat-block.hero .lp-stat-label { color: var(--text); }
+        .lp-stat-vs {
+            font-family: 'Fraunces', serif;
+            font-style: italic; font-weight: 600;
+            font-size: clamp(20px, 2vw, 28px);
+            color: var(--lp-gold);
+            padding-bottom: 30px;
+        }
+        .lp-stat-caption {
+            font-size: clamp(15px, 1.3vw, 17px);
+            color: var(--lp-muted); line-height: 1.6;
+            max-width: 680px; margin-top: 20px;
+        }
+        .lp-stat-source {
+            font-family: 'Antonio', sans-serif;
+            font-size: 11px; font-weight: 500;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--lp-faint);
+            margin-top: 18px;
+        }
+
+        /* ===== THEORY (refined) ===== */
         .lp-theory-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-top: 12px;
+            gap: 24px;
+            margin-top: 48px;
         }
         @media (max-width: 880px) { .lp-theory-grid { grid-template-columns: 1fr; } }
         .lp-theory-card {
-            background: transparent;
-            padding: 12px 4px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 36px clamp(24px, 3vw, 36px) 32px;
             position: relative;
-            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .lp-theory-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--theory-c1), var(--theory-c2));
         }
         .lp-theory-card.t-freestyle { --theory-c1: #00E5FF; --theory-c2: #A855F7; }
         .lp-theory-card.t-street    { --theory-c1: var(--lp-brazil); --theory-c2: var(--lp-green); }
         .lp-theory-num {
             font-family: 'Antonio', sans-serif;
-            font-weight: 500; font-size: 14px;
-            letter-spacing: 0.16em; text-transform: uppercase;
-            color: var(--theory-c1);
-            margin-bottom: 14px;
+            font-weight: 500; font-size: 13px;
+            letter-spacing: 0.22em; text-transform: uppercase;
+            color: var(--theory-c1); margin-bottom: 22px;
+            display: flex; align-items: center; gap: 10px;
         }
-        .lp-theory-icon {
-            font-size: 40px; line-height: 1;
-            margin-bottom: 14px;
+        .lp-theory-num::before {
+            content: ''; width: 24px; height: 1px; background: var(--theory-c1);
         }
         .lp-theory-h {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
             font-weight: 900;
-            font-size: 22px;
-            line-height: 1.2;
-            letter-spacing: -0.005em;
-            color: var(--text); margin-bottom: 8px;
+            font-size: clamp(26px, 2.6vw, 34px);
+            line-height: 1.05; letter-spacing: -0.01em;
+            color: var(--text); margin-bottom: 6px;
         }
         .lp-theory-h em {
             font-family: 'Fraunces', serif;
@@ -283,47 +341,51 @@
         }
         .lp-theory-tags {
             font-family: 'Antonio', sans-serif;
-            font-weight: 500; font-size: 12px;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            color: var(--lp-faint);
-            margin-bottom: 14px;
+            font-weight: 500; font-size: 13px;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--lp-muted); margin-bottom: 22px;
         }
         .lp-theory-body {
-            font-size: 14px; color: var(--lp-muted);
-            line-height: 1.55; margin-bottom: 18px;
+            font-size: 15px; color: var(--lp-muted);
+            line-height: 1.65; margin-bottom: 22px;
         }
         .lp-theory-body strong { color: var(--text); font-weight: 700; }
         .lp-theory-pull {
             border-left: 3px solid var(--theory-c1);
-            padding: 4px 0 4px 14px;
-            margin: 0 0 18px;
+            padding: 4px 0 4px 16px;
+            margin: 22px 0;
             font-family: 'Fraunces', serif;
             font-style: italic; font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
             color: var(--text);
             line-height: 1.4;
         }
-        .lp-theory-vids { display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+        .lp-theory-vids { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
         .lp-theory-vid {
             display: flex; align-items: center; gap: 12px;
-            padding: 8px 0;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
             text-decoration: none;
-            transition: transform 0.18s;
-            border-bottom: 1px solid var(--lp-rule);
+            transition: all 0.18s;
         }
-        .lp-theory-vid:last-child { border-bottom: none; }
-        .lp-theory-vid:hover { transform: translateX(3px); }
+        .lp-theory-vid:hover {
+            background: rgba(0,229,255,0.08);
+            border-color: rgba(0,229,255,0.4);
+            transform: translateX(3px);
+        }
         .lp-theory-play {
-            width: 26px; height: 26px; border-radius: 50%;
+            width: 30px; height: 30px; border-radius: 50%;
             background: var(--theory-c1); color: #000;
             display: flex; align-items: center; justify-content: center;
-            font-size: 10px; flex-shrink: 0;
+            font-size: 11px; flex-shrink: 0;
         }
-        .lp-theory-vl { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+        .lp-theory-vl { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
         .lp-theory-vm {
             font-family: 'Antonio', sans-serif;
-            font-size: 11px; font-weight: 500;
-            letter-spacing: 0.12em; text-transform: uppercase;
+            font-size: 12px; font-weight: 500;
+            letter-spacing: 0.1em; text-transform: uppercase;
             color: var(--lp-faint);
         }
 
@@ -332,36 +394,33 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 18px;
-            margin-top: 12px;
+            margin-top: 48px;
             position: relative;
         }
         @media (max-width: 880px) { .lp-how-grid { grid-template-columns: 1fr; } }
         .lp-how-step {
-            background: transparent;
-            padding: 12px 4px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px 24px 24px;
             position: relative;
-            display: flex; flex-direction: column;
         }
-        .lp-how-step.s-1 { --s-c: var(--accent); }
-        .lp-how-step.s-2 { --s-c: var(--lp-gold); }
-        .lp-how-step.s-3 { --s-c: var(--lp-green); }
-        .lp-how-eye {
+        .lp-how-num {
             font-family: 'Antonio', sans-serif;
-            font-weight: 500; font-size: 14px;
-            letter-spacing: 0.16em; text-transform: uppercase;
-            color: var(--s-c);
-            margin-bottom: 14px;
+            font-weight: 600;
+            font-size: 56px; line-height: 0.9;
+            color: var(--accent);
+            letter-spacing: -0.03em;
+            margin-bottom: 4px;
         }
-        .lp-how-icon {
-            font-size: 40px; line-height: 1;
-            margin-bottom: 14px;
-        }
+        .lp-how-step:nth-child(2) .lp-how-num { color: var(--lp-gold); }
+        .lp-how-step:nth-child(3) .lp-how-num { color: var(--lp-green); }
         .lp-how-step-h {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
             font-weight: 900;
             font-size: 22px;
             color: var(--text);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .lp-how-step-body {
             font-size: 14px; color: var(--lp-muted);
@@ -369,29 +428,40 @@
         }
         .lp-how-step-body strong { color: var(--text); }
 
-        /* ===== PROGRAMS ===== */
+        /* ===== PROGRAMS (Dein Weg, upgraded with 4) ===== */
         .lp-prog-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-top: 12px;
+            gap: 16px;
+            margin-top: 48px;
         }
         @media (max-width: 1000px) { .lp-prog-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 560px) { .lp-prog-grid { grid-template-columns: 1fr; } }
-
         .lp-prog {
-            background: transparent;
-            padding: 12px 4px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px 22px 26px;
             text-decoration: none;
             position: relative;
-            transition: transform 0.2s;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
             display: flex; flex-direction: column;
         }
-        .lp-prog:hover { transform: translateY(-2px); }
+        .lp-prog::after {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: var(--p-c);
+        }
+        .lp-prog:hover {
+            transform: translateY(-4px);
+            border-color: var(--p-c);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--p-c) inset;
+        }
         .lp-prog.p-minis      { --p-c: var(--lp-red); }
         .lp-prog.p-sevens     { --p-c: var(--accent); }
         .lp-prog.p-sterne     { --p-c: var(--lp-gold); }
-        .lp-prog.p-challenges { --p-c: #1bcb26; }
+        .lp-prog.p-challenges { --p-c: var(--lp-street); }
         .lp-prog-age {
             font-family: 'Antonio', sans-serif;
             font-weight: 500; font-size: 12px;
@@ -430,49 +500,82 @@
         }
         .lp-prog-link::after { content: ' →'; }
 
+        /* ===== FOR WHOM ===== */
+        .lp-aud-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+            margin-top: 48px;
+        }
+        @media (max-width: 880px) { .lp-aud-grid { grid-template-columns: 1fr; } }
+        .lp-aud {
+            padding: 30px 26px 28px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        .lp-aud-emoji {
+            font-size: 38px; line-height: 1;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        .lp-aud-age {
+            font-family: 'Antonio', sans-serif;
+            font-weight: 500; font-size: 12px;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        .lp-aud-h {
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: var(--text); margin-bottom: 12px;
+            line-height: 1.15;
+        }
+        .lp-aud-body {
+            font-size: 14px; color: var(--lp-muted);
+            line-height: 1.6; margin-bottom: 18px;
+        }
+        .lp-aud-tag {
+            font-family: 'Antonio', sans-serif;
+            font-weight: 600; font-size: 12px;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--text);
+            padding: 4px 10px;
+            background: rgba(0,229,255,0.12);
+            border: 1px solid rgba(0,229,255,0.3);
+            border-radius: 99px;
+            display: inline-block;
+        }
+
         /* ===== CLOSER ===== */
         .lp-closer {
+            text-align: center;
             background: linear-gradient(180deg, transparent 0%, rgba(0,229,255,0.04) 100%);
         }
-        .lp-closer-grid {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: clamp(40px, 6vw, 80px);
-            align-items: center;
-        }
-        @media (max-width: 880px) {
-            .lp-closer-grid {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
-        }
+        .lp-closer .lp-eye { justify-content: center; }
         .lp-closer .lp-title {
             font-size: clamp(32px, 5vw, 56px);
-            max-width: 700px;
-            margin-bottom: 18px;
+            max-width: 700px; margin: 0 auto 18px;
         }
         .lp-closer-sub {
             font-size: clamp(16px, 1.4vw, 19px);
             color: var(--lp-muted); line-height: 1.55;
-            max-width: 580px;
-            margin-bottom: 0;
+            max-width: 580px; margin: 0 auto 36px;
         }
         .lp-closer-ctas {
-            display: flex; flex-direction: column;
+            display: inline-flex; flex-wrap: wrap; justify-content: center;
             gap: 14px;
-            align-items: stretch;
-        }
-        @media (max-width: 880px) {
-            .lp-closer-ctas { align-items: flex-start; }
         }
         .lp-closer-cta {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
             font-weight: 700; font-size: 16px;
-            padding: 16px 28px; border-radius: 10px;
+            padding: 14px 28px; border-radius: 10px;
             text-decoration: none; transition: all 0.18s;
-            display: inline-flex; align-items: center; justify-content: center;
-            gap: 10px;
-            text-align: center;
+            display: inline-flex; align-items: center; gap: 10px;
         }
         .lp-closer-primary {
             background: var(--accent); color: #000;
@@ -484,12 +587,6 @@
             border: 1px solid rgba(0,229,255,0.25);
         }
         .lp-closer-secondary:hover { background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.5); }
-        body[data-theme="light"] .lp-closer-secondary {
-            background: rgba(8,145,178,0.05); border-color: rgba(8,145,178,0.4);
-        }
-        body[data-theme="light"] .lp-closer-secondary:hover {
-            background: rgba(8,145,178,0.12); border-color: rgba(8,145,178,0.6);
-        }
     </style>
 </head>
 <body data-theme="dark">
@@ -515,7 +612,7 @@
             <div class="lp-hero-text">
                 <div class="lp-hero-eye">T7 Academy</div>
                 <h1>Werde <em>Eins</em> mit dem <em>Ball.</em> Dominiere das <em>Spiel</em>.</h1>
-                <p>Freestyle und Streetsoccer haben <strong>Ronaldinho, Neymar, Messi und Yamal</strong> geformt — lange bevor sie ein Stadion betraten. Wir bringen genau dieses Fundament zu dir nach Hause. Zehn Minuten am Tag für dein Techniktraining.</p>
+                <p>Freestyle und Streetsoccer haben <strong>Ronaldinho, Neymar, Messi und Yamal</strong> geformt — lange bevor sie ein Stadion betraten. Wir bringen genau dieses Fundament zu dir nach Hause. Zehn Minuten am Tag.</p>
                 <div class="lp-hero-stats">
                     <div class="lp-hero-stat">
                         <div class="lp-hero-stat-num">10 Min.</div>
@@ -538,29 +635,49 @@
     <!-- SIGNATURE: ALUMNI LINEAGE -->
     <section class="lp-section lp-alumni">
         <div class="lp-wrap">
-            <div class="lp-alumni-grid">
-                <div class="lp-alumni-head">
-                    <div class="lp-eye">Unsere Überzeugung</div>
-                    <h2 class="lp-title">Fussball-Legenden, die <span class="accent">Geschichte</span> schrieben.</h2>
-                    <p class="lp-sub">Ihre Technik kommt von tausenden Stunden mit dem Ball — zu Hause in Hinterhöfen, auf der Strasse, auf Beton und auf dem Fußballplatz. Diese Spielweise verbindet die Grössten.</p>
-                </div>
+            <div class="lp-alumni-head">
+                <div class="lp-eye">Unsere Überzeugung</div>
+                <h2 class="lp-title">Fussball-Legenden, die <span class="accent">Geschichte</span> schrieben.</h2>
+                <p class="lp-sub">Ihre Technik kommt von tausenden Stunden mit dem Ball am Fuss — zu Hause in Hinterhöfen, auf der Strasse, auf Beton. Diese Spielweise verbindet die Grössten.</p>
+            </div>
 
-                <div class="alumni-roll" aria-label="Freestyle und Streetsoccer haben sie geprägt">
-                    <span class="alumni-name c2 size-md">Ronaldinho<span class="place">Porto Alegre · 🇧🇷</span></span>
-                    <span class="alumni-dot">●</span>
-                    <span class="alumni-name size-md">Neymar<span class="place">Mogi · 🇧🇷</span></span>
-                    <span class="alumni-dot">●</span>
-                    <span class="alumni-name c1 size-md">Díaz<span class="place">Barrancas · 🇨🇴</span></span>
-                    <span class="alumni-dot">●</span>
-                    <span class="alumni-name c3 size-md">Messi<span class="place">Rosario · 🇦🇷</span></span>
-                    <span class="alumni-dot">●</span>
-                    <span class="alumni-name c2 size-md">Yamal<span class="place">Mataró · 🇪🇸</span></span>
-                    <span class="alumni-dot">●</span>
-                    <span class="alumni-name size-sm">Doué<span class="place">Angers · 🇫🇷</span></span>
-                    <span class="alumni-dot">●</span>
-                    <span class="alumni-name c1 size-md">Cherki<span class="place">Lyon · 🇫🇷</span></span>
-                    <span class="alumni-dot">●</span>
-                    <span class="alumni-name c3 size-sm">Olise<span class="place">Hayes · 🇬🇧</span></span>
+            <div class="alumni-roll" aria-label="Freestyle und Streetsoccer haben sie geprägt">
+                <span class="alumni-name c1">Pelé<span class="place">Bauru · 🇧🇷</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name size-md">Maradona<span class="place">Villa Fiorito · 🇦🇷</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name c2">Ronaldinho<span class="place">Porto Alegre · 🇧🇷</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name c3 size-md">Zidane<span class="place">La Castellane · 🇫🇷</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name">Neymar<span class="place">Mogi · 🇧🇷</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name c3">Messi<span class="place">Rosario · 🇦🇷</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name c1 size-md">Vinícius<span class="place">São Gonçalo · 🇧🇷</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name c2 size-md">Yamal<span class="place">Mataró · 🇪🇸</span></span>
+                <span class="alumni-dot">●</span>
+                <span class="alumni-name size-sm">Doué<span class="place">Angers · 🇫🇷</span></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- STAT DRAMATIST -->
+    <section class="lp-section lp-stat">
+        <div class="lp-wrap">
+            <div class="lp-eye">Der Unterschied</div>
+            <h2 class="lp-title">Eine Stunde Freestyle und Street potenziert deine <span class="gold">Woche</span> im Vereinstraining.</h2>
+
+            <div class="lp-stat-row">
+                <div class="lp-stat-block hero">
+                    <div class="lp-stat-num">200<span class="lp-stat-suffix">+</span></div>
+                    <div class="lp-stat-label">Ballaktionen pro Stunde im Streetsoccer.<br>Annahme, Mitnahme, Trick, Pass, Schuss — alles, was den Unterschied macht.</div>
+                </div>
+                <div class="lp-stat-vs">vs.</div>
+                <div class="lp-stat-block">
+                    <div class="lp-stat-num">~50</div>
+                    <div class="lp-stat-label">Ballaktionen pro Stunde in klassischem Vereinstraining.<br>Mehr Stehen, Warten, viel Coaching, weniger Wiederholung.</div>
                 </div>
             </div>
         </div>
@@ -571,7 +688,7 @@
         <div class="lp-wrap">
             <div class="lp-eye">Die Theorie</div>
             <h2 class="lp-title">Zwei Maschinen, ein <span class="accent">Motor</span>.</h2>
-            <p class="lp-sub">Freestyle ist das Technik-Werkzeug für deine ultimative Ballkontrolle. <br/>Street macht das Spiel zu deiner Sprache.</p>
+            <p class="lp-sub">Freestyle ist das Technik-Werkzeug für deine ultimative Ballkontrolle. Street macht das Spiel zu deiner Sprache.</p>
 
             <div class="lp-theory-grid">
                 <div class="lp-theory-card t-freestyle">
@@ -621,24 +738,24 @@
     <section class="lp-section lp-how">
         <div class="lp-wrap">
             <div class="lp-eye">Wie es funktioniert</div>
-            <h2 class="lp-title">Drei Schritte. <span class="accent">Tag für Tag.</span></h2>
+            <h2 class="lp-title">Drei Schritte. <span class="accent">Jeden Tag.</span></h2>
             <p class="lp-sub">Jede Wiederholung zählt.</p>
 
             <div class="lp-how-grid">
-                <div class="lp-how-step s-1">
-                    <div class="lp-how-eye">Schritt 01</div>
-                    <h3 class="lp-how-step-h">Zusehen</h3>
-                    <p class="lp-how-step-body">Ein <strong>kurzes Video</strong> von deinem Profi-Coach. Der Trick wird Schritt für Schritt gezeigt — kein langes Reden, keine Theorie. Nur das, was du gleich nachmachst.</p>
+                <div class="lp-how-step">
+                    <div class="lp-how-num">01</div>
+                    <h3 class="lp-how-step-h">Schauen</h3>
+                    <p class="lp-how-step-body">Ein <strong>kurzes Video</strong> mit einem Profi-Coach. Der Trick wird Schritt für Schritt gezeigt — kein langes Reden, keine Theorie. Nur das, was du gleich nachmachst.</p>
                 </div>
-                <div class="lp-how-step s-2">
-                    <div class="lp-how-eye">Schritt 02</div>
+                <div class="lp-how-step">
+                    <div class="lp-how-num">02</div>
                     <h3 class="lp-how-step-h">Üben</h3>
-                    <p class="lp-how-step-body"><strong>10 Minuten</strong> im Garten, Park oder Wohnzimmer. Allein, mit Eltern, mit Freunden. Zuerst langsam, dann schnell. Fehler sind kein Problem und wichtig. <strong>Hauptsache: viele Ball-Berührungen.</strong></p>
+                    <p class="lp-how-step-body"><strong>10 Minuten</strong> in Garten, Park oder Wohnzimmer. Allein, mit Eltern, mit Freunden. Zuerst langsam, dann schnell. Fehler sind erlaubt und wichtig. Hauptsache: viele Berührungen.</p>
                 </div>
-                <div class="lp-how-step s-3">
-                    <div class="lp-how-eye">Schritt 03</div>
+                <div class="lp-how-step">
+                    <div class="lp-how-num">03</div>
                     <h3 class="lp-how-step-h">Sammeln</h3>
-                    <p class="lp-how-step-body">Selbst bewerten, <strong>Sticker und XP</strong> sammeln, Sterne Zertifikat beim Experten holen. Dein <strong>Fortschritt wird erkennbar</strong>, mit mehr Können und viel Spielfreude bleibst du motiviert.</p>
+                    <p class="lp-how-step-body">Selbst bewerten, <strong>Sticker</strong> einsammeln, Sterne Zertifikat beim Experten holen. Dein Fortschritt wird erkennbar, mit Spass bleibst du motiviert.</p>
                 </div>
             </div>
         </div>
@@ -647,9 +764,9 @@
     <!-- PROGRAMS -->
     <section class="lp-section lp-prog">
         <div class="lp-wrap">
-            <div class="lp-eye">Der Weg</div>
-            <h2 class="lp-title">Deine Academy. <span class="gold">Dein Ziel.</span></h2>
-            <p class="lp-sub">Werde der beste Fussball-Spieler der Du sein kannst. Baue dir deinen eigenen Trainingsplan um die Technik zu erlernen.</p>
+            <div class="lp-eye">Dein Pfad</div>
+            <h2 class="lp-title">Vier Programme. <span class="gold">Ein Ziel.</span></h2>
+            <p class="lp-sub">Such dir das Programm aus, das zu deinem Alter und Niveau passt. Du kannst auch mehrere parallel laufen lassen — die anderen machen das auch.</p>
 
             <div class="lp-prog-grid">
                 <a class="lp-prog p-minis" href="https://www.laureo.at/minis/">
@@ -665,7 +782,7 @@
                     <div class="lp-prog-icon">7️⃣</div>
                     <div class="lp-prog-h">Sevens</div>
                     <div class="lp-prog-tag">Technik-Fundament</div>
-                    <p class="lp-prog-desc">Pass, Schuss, Ballannahme, Mitnahme. Die Basis-Skills, die jeder Spieler beherrschen muss — Ballkontrolle und Spiel werden plötzlich einfach.</p>
+                    <p class="lp-prog-desc">Pass, Schuss, Ballannahme, Mitnahme. Die sieben Basis-Skills, die jeder Spieler beherrschen muss — bevor irgendwas anderes Sinn ergibt.</p>
                     <div class="lp-prog-link">Zu den Sevens</div>
                 </a>
                 <a class="lp-prog p-sterne" href="https://www.laureo.at/sterne/">
@@ -673,7 +790,7 @@
                     <div class="lp-prog-icon">🌟</div>
                     <div class="lp-prog-h">Sterne</div>
                     <div class="lp-prog-tag">Finten · Tricks · Skills</div>
-                    <p class="lp-prog-desc">Starte mit 1- und 2-Sterne-Tricks. Arbeite dich hoch bis zu den 5-Sterne-Tricks der Profis.</p>
+                    <p class="lp-prog-desc">Starte mit 1- und 2-Sterne-Tricks. Arbeite dich hoch bis zu den 5-Sterne-Finten der Profis. Jeder Stern, den du holst, bleibt für immer.</p>
                     <div class="lp-prog-link">Zu den Sternen</div>
                 </a>
                 <a class="lp-prog p-challenges" href="https://www.laureo.at/challenges/">
@@ -681,27 +798,55 @@
                     <div class="lp-prog-icon">🔥</div>
                     <div class="lp-prog-h">Challenges</div>
                     <div class="lp-prog-tag">Tägliche Herausforderungen · XP-Rangliste</div>
-                    <p class="lp-prog-desc">Sammle XP und werde XP-Weltmeister, sichere dir dein Sterne Zertifikat vom Experten — beweise, dass du wirklich übst.</p>
+                    <p class="lp-prog-desc">Sammle XP und werde XP-Weltmeister, sichere dir dein Sterne Zertifikat vom Experten — und beweise, dass du wirklich übst.</p>
                     <div class="lp-prog-link">Zu den Challenges</div>
                 </a>
             </div>
         </div>
     </section>
 
+    <!-- FOR WHOM -->
+    <section class="lp-section lp-aud">
+        <div class="lp-wrap">
+            <div class="lp-eye">Für wen</div>
+            <h2 class="lp-title">Die Strasse kennt <span class="accent">keine Liga</span>.</h2>
+            <p class="lp-sub">Du musst nicht im Verein sein. Mit viel Übung wirst du zum Fußball-Talent.</p>
+
+            <div class="lp-aud-grid">
+                <div class="lp-aud">
+                    <div class="lp-aud-emoji">🧒</div>
+                    <div class="lp-aud-age">4 — 10 Jahre</div>
+                    <h3 class="lp-aud-h">Für Kids</h3>
+                    <p class="lp-aud-body">Das Wichtigste in den ersten Jahren ist Spass mit dem Ball. Bei den Minis lernen Kinder spielerisch mit drei Mascots — Schritt für Schritt, ohne Druck, mit Belohnung in jedem Schritt.</p>
+                    <span class="lp-aud-tag">→ Start bei Minis</span>
+                </div>
+                <div class="lp-aud">
+                    <div class="lp-aud-emoji">⚡</div>
+                    <div class="lp-aud-age">8 — 17 Jahre</div>
+                    <h3 class="lp-aud-h">Für ambitionierte Spieler</h3>
+                    <p class="lp-aud-body">Sevens für die Technik. Sterne für die Tricks. Challenges für deine Motivation am Ball zu bleiben.</p>
+                    <span class="lp-aud-tag">→ Start bei Sevens oder Sternen</span>
+                </div>
+                <div class="lp-aud">
+                    <div class="lp-aud-emoji">👨‍👩‍👦</div>
+                    <div class="lp-aud-age">Eltern</div>
+                    <h3 class="lp-aud-h">Für Eltern</h3>
+                    <p class="lp-aud-body">Übe mit deinem Kind. Du musst selbst kein Fußballer sein — die Videos zeigen alles. Eine der wenigen Sachen, die ihr zehn Minuten am Tag gemeinsam machen könnt.</p>
+                    <span class="lp-aud-tag">→ Gemeinsam starten</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- CLOSER -->
     <section class="lp-section lp-closer">
         <div class="lp-wrap">
-            <div class="lp-closer-grid">
-                <div class="lp-closer-text">
-                    <div class="lp-eye">Bereit?</div>
-                    <h2 class="lp-title">Zehn Minuten am Tag.<br>Starte deine <span class="gold">Fussball-Karriere</span> heute.</h2>
-                    <p class="lp-closer-sub">Magst Du zuerst prüfen, ob die Academy für dich passt. Dann lass dir ein paar Tricks zeigen. <br> Nicht länger warten? Dann starte sofort mit deinem Weg in der Academy.</p>
-                </div>
-                <div class="lp-closer-ctas">
-                    <a href="https://www.laureo.at/subscription" class="lp-closer-cta lp-closer-primary">Sofort die Academy starten →</a>
-                    <a href="https://www.laureo.at/challenges/" class="lp-closer-cta lp-closer-secondary">Zeige mir zuerst ein paar Videos</a>
-                </div>
+            <div class="lp-eye">Bereit?</div>
+            <h2 class="lp-title">Zehn Minuten am Tag.<br>Eine <span class="gold">Karriere</span> Vorsprung.</h2>
+            <p class="lp-closer-sub">Schau dir kostenlos ein paar Tricks an, um zu sehen, ob's für dich passt. Oder starte sofort mit deinem Weg in der Academy — dein Kind kann heute anfangen.</p>
+            <div class="lp-closer-ctas">
+                <a href="https://www.laureo.at/challenges/" class="lp-closer-cta lp-closer-secondary">Zuerst Tricks anschauen</a>
+                <a href="https://www.laureo.at/subscription" class="lp-closer-cta lp-closer-primary">Sofort starten →</a>
             </div>
         </div>
     </section>
