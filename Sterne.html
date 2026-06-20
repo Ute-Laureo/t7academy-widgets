@@ -1,14 +1,11 @@
-<!DOCTYPE html>
-<html lang="de" data-theme="dark">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sterne – T7 Academy</title>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
 <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
-</head>
-<body>
+
+
 
 <!-- TOP NAV -->
 <nav class="topnav">
@@ -31,16 +28,16 @@
 <!-- HERO -->
 <div class="hero">
   <div class="hero-text">
-    <h1>Sterne. Zeige Deine <span>Skills!</span></h1>
+    <h1>Sterne. Zeige Deine <em>Skills!</em></h1>
     <p>Schaue dir die Videos genau an. Übe zuerst langsam und dann schnell — immer rechts und links. Sei ehrlich mit Dir und Deiner Community!</p>
   </div>
-  <div class="hero-image"></div>
+  <div class="hero-image hero-stars"></div>
 </div>
 
 <!-- CONTROLS -->
 <div class="controls">
   <div class="search-wrap">
-    <span class="search-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"/><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+    <span class="search-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.8"></circle><line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line></svg></span>
     <input type="text" id="searchInput" placeholder="Suche Dein Sterne-Video…">
   </div>
   <div class="pill-filters">
@@ -72,8 +69,8 @@
       <div class="pill-dropdown" id="pillDrop3">
         <button class="pill-option active" data-personal="all">Alle</button>
         <div class="pill-divider"></div>
-        <button class="pill-option" data-personal="liked"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Liked</button>
-        <button class="pill-option" data-personal="vorgemerkt"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>Vorgemerkt</button>
+        <button class="pill-option" data-personal="liked"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>Liked</button>
+        <button class="pill-option" data-personal="vorgemerkt"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>Vorgemerkt</button>
       </div>
     </div>
   </div>
@@ -320,5 +317,3 @@ window.addEventListener('scroll',function(){
 });
 })();
 </script>
-</body>
-</html>
