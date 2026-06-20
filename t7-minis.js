@@ -21,7 +21,7 @@ var KID_MODULES = {
       {idx:0, title:'La Croqueta', emoji:'🐙', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'🏆'},
       {idx:1, title:'Seven', emoji:'🦊', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'⚡'}
     ]},
-  st5: { tier:'base', label:'Marcys Ballkontrolle', emoji:'🤹', num:'Station 5',
+  st5: { tier:'base', label:'Leyas Ballkontrolle', emoji:'🤹', num:'Station 5',
     drills:[
       {idx:0, title:'Spann Balancieren', emoji:'🐧', meta:'mittel', vid:'1110049131', hash:'0944817493', sticker:'👑'},
       {idx:1, title:'Jonglieren Freestyle', emoji:'🦄', meta:'schwierig', vid:'1125467352', hash:'30d35d6e70', sticker:'🎁'}
@@ -117,13 +117,13 @@ var STICKER_PAGES = [
 ];
 var STATE = { email:null, name:'Champion', ratings:{}, gold:{}, completions:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
-try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','marcy'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
+try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','leya'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
 
 /* --- AVATARS --- */
 var AVATARS = {
   keon:  { name:'Keon',  emoji:'🐆', species:'Der Gepard', img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png',  alt:'Keon der Gepard' },
   coco:  { name:'Coco',  emoji:'🦎', species:'Der Gecko',  img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png',  alt:'Coco der Gecko' },
-  marcy: { name:'Marcy', emoji:'🦊', species:'Der Fuchs',  img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Marcy_Avatar.png', alt:'Marcy der Fuchs' }
+  leya: { name:'Leya', emoji:'🦊', species:'Der Fuchs',  img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Leya_Avatar.png', alt:'Leya der Panther' }
 };
 function applyAvatar(key){
   var a = AVATARS[key]; if (!a) return;
@@ -296,7 +296,7 @@ function renderStationView(modKey){
 
   var hero = document.getElementById('station-hero');
   hero.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
-  var ownerKey = ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'marcy'})[modKey] || 'keon';
+  var ownerKey = ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'leya'})[modKey] || 'keon';
   var ownerAv = AVATARS[ownerKey];
   var stImg = document.getElementById('station-emoji');
   if (isStadium) {

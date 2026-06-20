@@ -1,14 +1,11 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T7 Academy — Freestyle &amp; Streetsoccer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Antonio:wght@400;500;600;700&family=Fraunces:ital,wght@1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
     <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
     <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
     <style>
-        /* ===== TOP NAV CTAs (preserved exactly as-is) ===== */
+        /* ===== TOP NAV CTAs ===== */
         .nav-ctas { display: flex; align-items: center; gap: 12px; }
         .nav-cta {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
@@ -37,16 +34,13 @@
             --lp-red: #E4002B;
             --lp-green: #22C55E;
             --lp-brazil: #F7DC1F;
-            --lp-street: #FF8C00;
             --lp-muted: rgba(255,255,255,0.65);
             --lp-faint: rgba(255,255,255,0.4);
             --lp-rule: rgba(255,255,255,0.08);
             --lp-section-y: clamp(40px, 5vw, 68px);
-            --lp-wrap: 1200px;^
-            --lp-narrow: 880px;
         }
 
-        /* ===== LIGHT MODE — proper light, deeper accents ===== */
+        /* ===== LIGHT MODE ===== */
         body[data-theme="light"] {
             background: #E8EDF3 !important;
             --text: #0F172A;
@@ -64,23 +58,27 @@
             border-bottom-color: rgba(15,23,42,0.08) !important;
         }
         body[data-theme="light"] .nav-cta-secondary {
-            border-color: rgba(8,145,178,0.4);
             background: rgba(8,145,178,0.05);
+            border-color: rgba(8,145,178,0.4);
         }
         body[data-theme="light"] .nav-cta-secondary:hover {
             background: rgba(8,145,178,0.12);
             border-color: rgba(8,145,178,0.6);
         }
-        /* Theory freestyle card hardcodes electric cyan — override for light */
         body[data-theme="light"] .lp-theory-card.t-freestyle { --theory-c1: #0891B2; }
-        /* Challenges custom green needs to darken for light */
         body[data-theme="light"] .lp-prog.p-challenges { --p-c: #15803D; }
-        /* Hero image overlay was tuned for dark — soften for light */
         body[data-theme="light"] .lp-hero-image::after {
             background: linear-gradient(90deg, rgba(232,237,243,0.55) 0%, rgba(232,237,243,0.15) 30%, transparent 60%) !important;
         }
+        body[data-theme="light"] .lp-closer-secondary {
+            background: rgba(8,145,178,0.05); border-color: rgba(8,145,178,0.4);
+        }
+        body[data-theme="light"] .lp-closer-secondary:hover {
+            background: rgba(8,145,178,0.12); border-color: rgba(8,145,178,0.6);
+        }
 
-        .lp-wrap { max-width: none; margin: 0; padding: 0 clamp(24px, 5vw, 64px); }
+        /* ===== LAYOUT PRIMITIVES ===== */
+        .lp-wrap { margin: 0; padding: 0 clamp(24px, 5vw, 64px); }
         .lp-section { padding: var(--lp-section-y) 0 !important; position: relative; }
         .lp-section + .lp-section { border-top: 1px solid var(--lp-rule); }
 
@@ -192,12 +190,8 @@
             gap: clamp(40px, 6vw, 80px);
             align-items: center;
         }
-        .lp-alumni-head { max-width: 100%; }
         @media (max-width: 880px) {
-            .lp-alumni-grid {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
+            .lp-alumni-grid { grid-template-columns: 1fr; gap: 40px; }
         }
         .alumni-roll {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
@@ -228,8 +222,11 @@
         }
         .alumni-name.c1 { color: var(--accent); }
         .alumni-name.c2 { color: var(--lp-gold); }
-        .alumni-name.c3 { font-family: 'Fraunces', 'Garet W05 Bold', serif; font-style: italic; font-weight: 700; }
-        .alumni-name.size-sm { font-size: 0.95em; }
+        .alumni-name.c3 {
+            font-family: 'Fraunces', 'Garet W05 Bold', serif;
+            font-style: italic; font-weight: 700;
+        }
+        .alumni-name.size-sm,
         .alumni-name.size-md { font-size: 0.95em; }
         .alumni-dot {
             color: var(--lp-gold);
@@ -262,10 +259,6 @@
             font-weight: 500; font-size: 14px;
             letter-spacing: 0.16em; text-transform: uppercase;
             color: var(--theory-c1);
-            margin-bottom: 14px;
-        }
-        .lp-theory-icon {
-            font-size: 40px; line-height: 1;
             margin-bottom: 14px;
         }
         .lp-theory-h {
@@ -352,10 +345,6 @@
             color: var(--s-c);
             margin-bottom: 14px;
         }
-        .lp-how-icon {
-            font-size: 40px; line-height: 1;
-            margin-bottom: 14px;
-        }
         .lp-how-step-h {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
             font-weight: 900;
@@ -378,7 +367,6 @@
         }
         @media (max-width: 1000px) { .lp-prog-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 560px) { .lp-prog-grid { grid-template-columns: 1fr; } }
-
         .lp-prog {
             background: transparent;
             padding: 12px 4px 24px;
@@ -441,10 +429,8 @@
             align-items: center;
         }
         @media (max-width: 880px) {
-            .lp-closer-grid {
-                grid-template-columns: 1fr;
-                gap: 32px;
-            }
+            .lp-closer-grid { grid-template-columns: 1fr; gap: 32px; }
+            .lp-closer-ctas { align-items: flex-start; }
         }
         .lp-closer .lp-title {
             font-size: clamp(32px, 5vw, 56px);
@@ -461,9 +447,6 @@
             display: flex; flex-direction: column;
             gap: 14px;
             align-items: stretch;
-        }
-        @media (max-width: 880px) {
-            .lp-closer-ctas { align-items: flex-start; }
         }
         .lp-closer-cta {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
@@ -484,17 +467,11 @@
             border: 1px solid rgba(0,229,255,0.25);
         }
         .lp-closer-secondary:hover { background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.5); }
-        body[data-theme="light"] .lp-closer-secondary {
-            background: rgba(8,145,178,0.05); border-color: rgba(8,145,178,0.4);
-        }
-        body[data-theme="light"] .lp-closer-secondary:hover {
-            background: rgba(8,145,178,0.12); border-color: rgba(8,145,178,0.6);
-        }
     </style>
-</head>
-<body data-theme="dark">
 
-    <!-- TOP NAV (preserved) -->
+
+
+    <!-- TOP NAV -->
     <nav class="topnav">
         <div class="nav-logo">
             <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
@@ -535,13 +512,13 @@
         </div>
     </section>
 
-    <!-- SIGNATURE: ALUMNI LINEAGE -->
+    <!-- ALUMNI -->
     <section class="lp-section lp-alumni">
         <div class="lp-wrap">
             <div class="lp-alumni-grid">
                 <div class="lp-alumni-head">
                     <div class="lp-eye">Unsere Überzeugung</div>
-                    <h2 class="lp-title">Fussball-Legenden, die <span class="accent">Geschichte</span> schrieben.</h2>
+                    <h2 class="lp-title">Die Superstars von heute und <span class="accent">morgen.</span></h2>
                     <p class="lp-sub">Ihre Technik kommt von tausenden Stunden mit dem Ball — zu Hause in Hinterhöfen, auf der Strasse, auf Beton und auf dem Fußballplatz. Diese Spielweise verbindet die Grössten.</p>
                 </div>
 
@@ -570,8 +547,8 @@
     <section class="lp-section lp-theory">
         <div class="lp-wrap">
             <div class="lp-eye">Die Theorie</div>
-            <h2 class="lp-title">Zwei Maschinen, ein <span class="accent">Motor</span>.</h2>
-            <p class="lp-sub">Freestyle ist das Technik-Werkzeug für deine ultimative Ballkontrolle. <br/>Street macht das Spiel zu deiner Sprache.</p>
+            <h2 class="lp-title">Zwei Maschinen. Ein <span class="accent">Motor</span>.</h2>
+            <p class="lp-sub">Freestyle ist das Technik-Werkzeug für deine ultimative Ballkontrolle. <br>Street macht das Spiel zu deiner Sprache.</p>
 
             <div class="lp-theory-grid">
                 <div class="lp-theory-card t-freestyle">
@@ -627,7 +604,7 @@
             <div class="lp-how-grid">
                 <div class="lp-how-step s-1">
                     <div class="lp-how-eye">Schritt 01</div>
-                    <h3 class="lp-how-step-h">Zusehen</h3>
+                    <h3 class="lp-how-step-h">Anschauen</h3>
                     <p class="lp-how-step-body">Ein <strong>kurzes Video</strong> von deinem Profi-Coach. Der Trick wird Schritt für Schritt gezeigt — kein langes Reden, keine Theorie. Nur das, was du gleich nachmachst.</p>
                 </div>
                 <div class="lp-how-step s-2">
@@ -688,7 +665,6 @@
         </div>
     </section>
 
-
     <!-- CLOSER -->
     <section class="lp-section lp-closer">
         <div class="lp-wrap">
@@ -709,20 +685,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tog = document.getElementById('themeToggle');
-            if (tog) {
-                let theme = localStorage.getItem('t7_theme') || 'dark';
+            if (!tog) return;
+            let theme = localStorage.getItem('t7_theme') || 'dark';
+            const apply = () => {
                 document.documentElement.setAttribute('data-theme', theme);
                 document.body.setAttribute('data-theme', theme);
                 tog.innerHTML = theme === 'dark' ? '☾' : '☀';
-                tog.addEventListener('click', function() {
-                    theme = theme === 'dark' ? 'light' : 'dark';
-                    document.documentElement.setAttribute('data-theme', theme);
-                    document.body.setAttribute('data-theme', theme);
-                    localStorage.setItem('t7_theme', theme);
-                    tog.innerHTML = theme === 'dark' ? '☾' : '☀';
-                });
-            }
+            };
+            apply();
+            tog.addEventListener('click', () => {
+                theme = theme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('t7_theme', theme);
+                apply();
+            });
         });
     </script>
-</body>
-</html>

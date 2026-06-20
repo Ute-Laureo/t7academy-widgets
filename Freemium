@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T7 Academy — Freemium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Antonio:wght@400;500;600;700&family=Fraunces:ital,wght@1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+    <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        /* ===== TOP NAV CTAs ===== */
+        .nav-ctas { display: flex; align-items: center; gap: 12px; }
+        .nav-cta {
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-size: 15px; font-weight: 700;
+            padding: 10px 22px; border-radius: 8px;
+            text-decoration: none; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .nav-cta-primary { background: var(--accent); color: #000; margin-left: 40px; }
+        .nav-cta-secondary {
+            background: rgba(255,255,255,0.08); color: var(--text);
+            border: 1px solid rgba(0,229,255,0.25);
+        }
+        .nav-cta-secondary:hover { background: rgba(0,229,255,0.12); border-color: rgba(0,229,255,0.5); }
+        .nav-cta-primary:hover { background: #1ce6ff; box-shadow: 0 0 24px rgba(0,229,255,0.4); }
+        @media (max-width: 1100px) {
+            .nav-cta-secondary { display: none; }
+            .nav-cta-primary { margin-left: 0; }
+        }
+
+        /* ===== LANDING-PAGE TOKENS ===== */
+        :root {
+            --lp-gold: #FFD700;
+            --lp-red: #E4002B;
+            --lp-green: #22C55E;
+            --lp-brazil: #F7DC1F;
+            --lp-muted: rgba(255,255,255,0.65);
+            --lp-faint: rgba(255,255,255,0.4);
+            --lp-rule: rgba(255,255,255,0.08);
+            --lp-section-y: clamp(40px, 5vw, 68px);
+        }
+
+        /* ===== LIGHT MODE ===== */
+        body[data-theme="light"] {
+            background: #E8EDF3 !important;
+            --text: #0F172A;
+            --accent: #00e0ff;
+            --lp-gold: #ca8309;
+            --lp-red: #BE123C;
+            --lp-green: #199848;
+            --lp-brazil: #cda609;
+            --lp-muted: rgba(15,23,42,0.72);
+            --lp-faint: rgba(15,23,42,0.48);
+            --lp-rule: rgba(15,23,42,0.08);
+        }
+        body[data-theme="light"] .topnav {
+            background: #FFFFFF !important;
+            border-bottom-color: rgba(15,23,42,0.08) !important;
+        }
+        body[data-theme="light"] .nav-cta-secondary {
+            background: rgba(8,145,178,0.05);
+            border-color: rgba(8,145,178,0.4);
+        }
+        body[data-theme="light"] .nav-cta-secondary:hover {
+            background: rgba(8,145,178,0.12);
+            border-color: rgba(8,145,178,0.6);
+        }
+        body[data-theme="light"] .lp-hero-image::after {
+            background: linear-gradient(90deg, rgba(232,237,243,0.55) 0%, rgba(232,237,243,0.15) 30%, transparent 60%) !important;
+        }
+        body[data-theme="light"] .lp-closer-secondary {
+            background: rgba(8,145,178,0.05); border-color: rgba(8,145,178,0.4);
+        }
+        body[data-theme="light"] .lp-closer-secondary:hover {
+            background: rgba(8,145,178,0.12); border-color: rgba(8,145,178,0.6);
+        }
+
+        /* ===== LAYOUT PRIMITIVES ===== */
+        .lp-wrap { margin: 0; padding: 0 clamp(24px, 5vw, 64px); }
+        .lp-section { padding: var(--lp-section-y) 0 !important; position: relative; }
+        .lp-section + .lp-section { border-top: 1px solid var(--lp-rule); }
+
+        .lp-eye {
+            font-family: 'Antonio', 'Open Sans', sans-serif;
+            font-weight: 600; font-size: 14px;
+            letter-spacing: 0.22em; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 14px;
+            display: inline-flex; align-items: center; gap: 10px;
+        }
+        .lp-eye::before {
+            content: ''; display: inline-block;
+            width: 28px; height: 1px; background: var(--accent);
+        }
+        .lp-title {
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-weight: 900; line-height: 1.04;
+            font-size: clamp(30px, 4.4vw, 52px);
+            letter-spacing: -0.01em;
+            color: var(--text); margin-bottom: 16px;
+        }
+        .lp-title .accent { color: var(--accent); }
+        .lp-title .gold   { color: var(--lp-gold); }
+        .lp-sub {
+            font-size: clamp(15px, 1.4vw, 18px);
+            color: var(--lp-muted); line-height: 1.6;
+            max-width: 720px;
+        }
+
+        /* ===== HERO ===== */
+        .lp-hero {
+            position: relative; overflow: hidden;
+            border-bottom: 1px solid var(--lp-rule);
+        }
+        .lp-hero-grid {
+            display: grid; grid-template-columns: 1.05fr 1fr;
+            min-height: 480px;
+        }
+        .lp-hero-text {
+            padding: 72px clamp(24px, 5vw, 64px);
+            display: flex; flex-direction: column; justify-content: center;
+            position: relative; z-index: 2;
+        }
+        .lp-hero-eye {
+            font-family: 'Antonio', 'Open Sans', sans-serif;
+            font-weight: 600; font-size: 14px;
+            letter-spacing: 0.24em; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 22px;
+            display: inline-flex; align-items: center; gap: 12px;
+        }
+        .lp-hero-eye::before { content: ''; width: 36px; height: 1px; background: var(--accent); }
+        .lp-hero h1 {
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-weight: 900;
+            font-size: clamp(36px, 5.2vw, 60px);
+            line-height: 1.02;
+            letter-spacing: -0.018em;
+            color: var(--text); margin-bottom: 18px;
+        }
+        .lp-hero h1 em {
+            font-family: 'Fraunces', 'Garet W05 Bold', serif;
+            font-style: italic; font-weight: 700;
+            color: var(--accent); padding-right: 0.08em;
+        }
+        .lp-hero p {
+            font-size: clamp(15px, 1.4vw, 18px);
+            line-height: 1.55; color: var(--lp-muted);
+            max-width: 520px; margin-bottom: 26px;
+        }
+        .lp-hero-image {
+            background: url('https://ute-laureo.github.io/t7academy-widgets/Assets/Challenges_Hero_Pic.png') center/cover no-repeat;
+            position: relative;
+        }
+        .lp-hero-image::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, rgba(8,15,30,0.65) 0%, rgba(8,15,30,0.15) 30%, transparent 60%);
+        }
+        @media (max-width: 880px) {
+            .lp-hero-grid { grid-template-columns: 1fr; min-height: auto; }
+            .lp-hero-image { height: 240px; order: -1; }
+            .lp-hero-text { padding: 40px 24px; }
+        }
+
+        /* ===== NAME SETUP + PLAYER STATS ===== */
+        .name-setup {
+            display: flex; gap: 10px;
+            max-width: 480px;
+            margin-top: 6px;
+        }
+        .name-input {
+            flex: 1;
+            padding: 13px 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(0,229,255,0.3);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.18s, background 0.18s;
+        }
+        .name-input:focus { border-color: var(--accent); background: rgba(255,255,255,0.08); }
+        .name-input::placeholder { color: var(--lp-faint); }
+        body[data-theme="light"] .name-input {
+            background: rgba(8,145,178,0.05);
+            border-color: rgba(8,145,178,0.4);
+        }
+        body[data-theme="light"] .name-input:focus {
+            border-color: var(--accent);
+            background: rgba(8,145,178,0.08);
+        }
+        .name-save {
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-weight: 700; font-size: 15px;
+            padding: 13px 22px;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            cursor: pointer;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .name-save:hover { background: #1ce6ff; box-shadow: 0 0 24px rgba(0,229,255,0.4); }
+
+        .player-stats {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .xp-badge {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 12px 22px;
+            background: rgba(255,215,0,0.08);
+            border: 1px solid rgba(255,215,0,0.35);
+            border-radius: 10px;
+        }
+        body[data-theme="light"] .xp-badge {
+            background: rgba(202,131,9,0.08);
+            border-color: rgba(202,131,9,0.4);
+        }
+        .xp-num {
+            font-family: 'Antonio', sans-serif;
+            font-weight: 600;
+            font-size: 32px;
+            line-height: 1;
+            color: var(--lp-gold);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .xp-num.pop { transform: scale(1.25); }
+        .xp-label {
+            font-family: 'Antonio', sans-serif;
+            font-weight: 600; font-size: 12px;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--lp-faint);
+        }
+        .change-name {
+            background: none;
+            border: none;
+            color: var(--lp-muted);
+            font-family: 'Open Sans', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: rgba(127,127,127,0.4);
+            text-underline-offset: 3px;
+            padding: 0;
+        }
+        .change-name:hover { color: var(--text); }
+
+        /* ===== VIDEO GRID ===== */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+            margin-top: 16px;
+        }
+        @media (max-width: 1100px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 680px)  { .video-grid { grid-template-columns: 1fr; } }
+
+        .video-card { display: flex; flex-direction: column; gap: 12px; }
+        .video-thumb {
+            display: block;
+            position: relative;
+            aspect-ratio: 16/9;
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            overflow: hidden;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        body[data-theme="light"] .video-thumb { background: rgba(15,23,42,0.06); }
+        .video-thumb:hover { transform: translateY(-2px); }
+        .video-thumb img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+        .video-thumb-placeholder {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, rgba(0,229,255,0.18), rgba(168,85,247,0.18));
+            font-size: 52px;
+            color: rgba(255,255,255,0.7);
+        }
+        body[data-theme="light"] .video-thumb-placeholder {
+            background: linear-gradient(135deg, rgba(8,145,178,0.18), rgba(168,85,247,0.12));
+            color: rgba(15,23,42,0.45);
+        }
+        .video-duration {
+            position: absolute; bottom: 8px; right: 8px;
+            background: rgba(0,0,0,0.75);
+            color: white;
+            font-family: 'Antonio', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 3px 7px;
+            border-radius: 4px;
+        }
+        .video-meta { padding: 0 2px; display: flex; flex-direction: column; gap: 6px; }
+        .video-tag {
+            font-family: 'Antonio', sans-serif;
+            font-size: 11px; font-weight: 500;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            color: var(--accent);
+        }
+        .video-title {
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-weight: 900; font-size: 16px;
+            color: var(--text);
+            line-height: 1.3;
+            margin: 0;
+        }
+        .xp-btn {
+            align-self: flex-start;
+            margin-top: 4px;
+            font-family: 'Antonio', sans-serif;
+            font-weight: 500; font-size: 12px;
+            letter-spacing: 0.14em; text-transform: uppercase;
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 7px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .xp-btn:hover:not(.done) { background: rgba(0,229,255,0.1); }
+        .xp-btn.done {
+            background: rgba(34,197,94,0.12);
+            color: var(--lp-green);
+            border-color: rgba(34,197,94,0.4);
+            cursor: default;
+        }
+        body[data-theme="light"] .xp-btn.done {
+            background: rgba(25,152,72,0.1);
+            color: var(--lp-green);
+            border-color: rgba(25,152,72,0.4);
+        }
+
+        .grid-status {
+            padding: 32px 0;
+            color: var(--lp-muted);
+            font-size: 14px;
+        }
+        .grid-status.error { color: var(--lp-red); }
+
+        /* ===== CLOSER ===== */
+        .lp-closer {
+            background: linear-gradient(180deg, transparent 0%, rgba(0,229,255,0.04) 100%);
+        }
+        .lp-closer-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: clamp(40px, 6vw, 80px);
+            align-items: center;
+        }
+        @media (max-width: 880px) {
+            .lp-closer-grid { grid-template-columns: 1fr; gap: 32px; }
+            .lp-closer-ctas { align-items: flex-start; }
+        }
+        .lp-closer .lp-title {
+            font-size: clamp(28px, 4.4vw, 48px);
+            max-width: 700px;
+            margin-bottom: 18px;
+        }
+        .lp-closer-sub {
+            font-size: clamp(16px, 1.4vw, 19px);
+            color: var(--lp-muted); line-height: 1.55;
+            max-width: 580px;
+            margin-bottom: 0;
+        }
+        .lp-closer-ctas { display: flex; flex-direction: column; gap: 14px; align-items: stretch; }
+        .lp-closer-cta {
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-weight: 700; font-size: 16px;
+            padding: 16px 28px; border-radius: 10px;
+            text-decoration: none; transition: all 0.18s;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 10px;
+            text-align: center;
+        }
+        .lp-closer-primary {
+            background: var(--accent); color: #000;
+            box-shadow: 0 8px 24px rgba(0,229,255,0.35);
+        }
+        .lp-closer-primary:hover { background: #1ce6ff; transform: translateY(-2px); }
+        .lp-closer-secondary {
+            background: rgba(255,255,255,0.06); color: var(--text);
+            border: 1px solid rgba(0,229,255,0.25);
+        }
+        .lp-closer-secondary:hover { background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.5); }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <!-- TOP NAV -->
+    <nav class="topnav">
+        <div class="nav-logo">
+            <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+        </div>
+        <div class="nav-ctas">
+            <a href="/" class="nav-cta nav-cta-secondary">Zur Startseite</a>
+            <a href="https://www.laureo.at/subscription" class="nav-cta nav-cta-primary">Direkt zur T7 Academy</a>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="lp-hero">
+        <div class="lp-hero-grid">
+            <div class="lp-hero-text">
+                <div class="lp-hero-eye">T7 Academy · Freemium</div>
+                <h1>Willkommen<span id="greetingName">!</span></h1>
+                <p id="welcomeMsg">Erzähl mir deinen Namen — dann zeige ich dir deine ersten Tricks.</p>
+
+                <!-- shown if no name -->
+                <div class="name-setup" id="nameSetup">
+                    <input class="name-input" id="nameInput" type="text" placeholder="Dein Name" maxlength="30" autocomplete="given-name">
+                    <button class="name-save" id="nameSave">Los geht's →</button>
+                </div>
+
+                <!-- shown once name is set -->
+                <div class="player-stats" id="playerStats" hidden>
+                    <div class="xp-badge">
+                        <span class="xp-num" id="xpNum">0</span>
+                        <span class="xp-label">XP gesammelt</span>
+                    </div>
+                    <button class="change-name" id="changeName">Nicht <span id="nameDisplay">…</span>? Name ändern</button>
+                </div>
+            </div>
+            <div class="lp-hero-image" aria-hidden="true"></div>
+        </div>
+    </section>
+
+    <!-- SECTION 1: STARS 1—3 -->
+    <section class="lp-section">
+        <div class="lp-wrap">
+            <div class="lp-eye">Sterne 1 — 3</div>
+            <h2 class="lp-title">Deine ersten <span class="accent">Tricks</span>.</h2>
+            <p class="lp-sub" data-name-template="{name}, starte mit den klassischen Freestyle-Tricks. Drei Sterne sind dein erstes Ziel.">Starte mit den klassischen Freestyle-Tricks. Drei Sterne sind dein erstes Ziel.</p>
+            <div class="video-grid" id="grid-stars"><div class="grid-status">Lädt…</div></div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: SEVENS 1—2 -->
+    <section class="lp-section">
+        <div class="lp-wrap">
+            <div class="lp-eye">Sevens · Level 1 — 2</div>
+            <h2 class="lp-title">Das Technik-<span class="accent">Fundament</span>.</h2>
+            <p class="lp-sub" data-name-template="Pass, Schuss, Annahme — die Skills, die du jedes Spiel brauchst, {name}.">Pass, Schuss, Annahme — die Skills, die du jedes Spiel brauchst.</p>
+            <div class="video-grid" id="grid-sevens"><div class="grid-status">Lädt…</div></div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: CHALLENGES (Stars 4—5 + Sevens 3) -->
+    <section class="lp-section">
+        <div class="lp-wrap">
+            <div class="lp-eye">Challenges</div>
+            <h2 class="lp-title" data-name-template="Bereit für mehr, {name}?">Bereit für mehr?</h2>
+            <p class="lp-sub">Die harten Tricks: 4- und 5-Sterne Freestyle, plus Sevens Level 3. Schaffst du sie?</p>
+            <div class="video-grid" id="grid-challenges"><div class="grid-status">Lädt…</div></div>
+        </div>
+    </section>
+
+    <!-- CLOSER -->
+    <section class="lp-section lp-closer">
+        <div class="lp-wrap">
+            <div class="lp-closer-grid">
+                <div class="lp-closer-text">
+                    <div class="lp-eye">Bereit für mehr?</div>
+                    <h2 class="lp-title" data-name-template="{name}, du hast die Basics drauf. Jetzt die volle <span class='gold'>Academy</span>.">Du hast die Basics. Jetzt die volle <span class="gold">Academy</span>.</h2>
+                    <p class="lp-closer-sub">Über 200 Tricks. Sterne-Zertifikat vom Experten. Tägliche Challenges mit XP-Rangliste. Alles, was du brauchst, um wirklich gut zu werden.</p>
+                </div>
+                <div class="lp-closer-ctas">
+                    <a href="https://www.laureo.at/subscription" class="lp-closer-cta lp-closer-primary">Jetzt Academy starten →</a>
+                    <a href="/" class="lp-closer-cta lp-closer-secondary">Mehr über T7</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // ===== SUPABASE CONFIG =====
+        // TODO: paste your project URL + anon (public) key here
+        const SUPABASE_URL     = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+
+        // ===== STORAGE KEYS =====
+        const KEY_NAME = 't7_freemium_player_name';
+        const KEY_XP   = 't7_freemium_xp';
+        const KEY_DONE = 't7_freemium_completed';
+        const XP_PER_TRICK = 25;
+
+        // ===== STATE (localStorage wrapper) =====
+        const State = {
+            getName() { return localStorage.getItem(KEY_NAME) || ''; },
+            setName(name) { localStorage.setItem(KEY_NAME, name); },
+            clearName() { localStorage.removeItem(KEY_NAME); },
+            getXP() { return parseInt(localStorage.getItem(KEY_XP) || '0', 10); },
+            addXP(n) {
+                const next = this.getXP() + n;
+                localStorage.setItem(KEY_XP, String(next));
+                return next;
+            },
+            getDone() {
+                try { return new Set(JSON.parse(localStorage.getItem(KEY_DONE) || '[]')); }
+                catch { return new Set(); }
+            },
+            markDone(id) {
+                const done = this.getDone();
+                if (done.has(id)) return false;
+                done.add(id);
+                localStorage.setItem(KEY_DONE, JSON.stringify([...done]));
+                return true;
+            }
+        };
+
+        // ===== SUPABASE CLIENT (or null if not configured) =====
+        let sb = null;
+        if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // ===== MOCK DATA (used until Supabase config is filled in) =====
+        const MOCK = {
+            stars: [
+                { id: 'm-s1', title: 'Around the World', stars: 1, sevens: null, duration_sec: 180, video_url: '#' },
+                { id: 'm-s2', title: 'Toe Bounce',       stars: 1, sevens: null, duration_sec: 150, video_url: '#' },
+                { id: 'm-s3', title: 'Knee Catch',        stars: 2, sevens: null, duration_sec: 210, video_url: '#' },
+                { id: 'm-s4', title: 'Hop the Ball',      stars: 3, sevens: null, duration_sec: 240, video_url: '#' }
+            ],
+            sevens: [
+                { id: 'm-v1', title: 'Pass mit Innenseite',   stars: null, sevens: 1, duration_sec: 165, video_url: '#' },
+                { id: 'm-v2', title: 'Ballannahme & Mitnahme', stars: null, sevens: 1, duration_sec: 195, video_url: '#' },
+                { id: 'm-v3', title: 'Schussbewegung',         stars: null, sevens: 2, duration_sec: 230, video_url: '#' }
+            ],
+            challenges: [
+                { id: 'm-c1', title: 'Hocus Pocus',            stars: 4, sevens: null, duration_sec: 280, video_url: '#' },
+                { id: 'm-c2', title: 'Around the World Double', stars: 5, sevens: null, duration_sec: 360, video_url: '#' },
+                { id: 'm-c3', title: 'Sevens Schuss-Trick',     stars: null, sevens: 3, duration_sec: 300, video_url: '#' }
+            ]
+        };
+
+        // ===== DATA FETCH =====
+        async function fetchSection(key) {
+            if (!sb) return MOCK[key];
+            try {
+                let q;
+                if (key === 'stars') {
+                    q = sb.from('videos').select('*').eq('freemium', true).in('stars', [1, 2, 3]);
+                } else if (key === 'sevens') {
+                    q = sb.from('videos').select('*').eq('freemium', true).in('sevens', [1, 2]);
+                } else { // challenges
+                    q = sb.from('videos').select('*').eq('freemium', true)
+                        .or('stars.in.(4,5),sevens.eq.3');
+                }
+                const { data, error } = await q;
+                if (error) throw error;
+                return data || [];
+            } catch (err) {
+                console.error('[freemium] supabase fetch failed for', key, err);
+                return null; // null signals error so UI can show it
+            }
+        }
+
+        // ===== RENDERING =====
+        const fmtDuration = sec => {
+            if (!sec) return '';
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m}:${String(s).padStart(2, '0')}`;
+        };
+
+        const tagFor = v => {
+            if (v.stars != null)  return `${v.stars} Sterne`;
+            if (v.sevens != null) return `Sevens · Level ${v.sevens}`;
+            return '';
+        };
+
+        function videoCardHTML(v, done) {
+            const isDone = done.has(v.id);
+            const thumb = v.thumbnail_url
+                ? `<img src="${v.thumbnail_url}" alt="${v.title}" loading="lazy">`
+                : `<div class="video-thumb-placeholder">▶</div>`;
+            const duration = v.duration_sec ? `<span class="video-duration">${fmtDuration(v.duration_sec)}</span>` : '';
+            const btn = isDone
+                ? `<button class="xp-btn done" disabled>✓ Geschafft</button>`
+                : `<button class="xp-btn" data-id="${v.id}">+${XP_PER_TRICK} XP — Geübt!</button>`;
+            return `
+                <div class="video-card">
+                    <a class="video-thumb" href="${v.video_url || '#'}" target="_blank" rel="noopener">
+                        ${thumb}
+                        ${duration}
+                    </a>
+                    <div class="video-meta">
+                        <div class="video-tag">${tagFor(v)}</div>
+                        <h3 class="video-title">${v.title || 'Ohne Titel'}</h3>
+                        ${btn}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function renderGrid(key, gridId) {
+            const grid = document.getElementById(gridId);
+            const videos = await fetchSection(key);
+            if (videos === null) {
+                grid.innerHTML = `<div class="grid-status error">Konnte Videos nicht laden. Bitte später erneut versuchen.</div>`;
+                return;
+            }
+            if (!videos.length) {
+                grid.innerHTML = `<div class="grid-status">Noch keine Videos in dieser Sektion.</div>`;
+                return;
+            }
+            const done = State.getDone();
+            grid.innerHTML = videos.map(v => videoCardHTML(v, done)).join('');
+            grid.querySelectorAll('.xp-btn:not(.done)').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    if (!State.markDone(id)) return;
+                    State.addXP(XP_PER_TRICK);
+                    btn.classList.add('done');
+                    btn.disabled = true;
+                    btn.innerHTML = '✓ Geschafft';
+                    updateXP(true);
+                });
+            });
+        }
+
+        // ===== UI: name + XP =====
+        function updateName() {
+            const name = State.getName();
+            const setup     = document.getElementById('nameSetup');
+            const stats     = document.getElementById('playerStats');
+            const greetTail = document.getElementById('greetingName');
+            const welcome   = document.getElementById('welcomeMsg');
+            const display   = document.getElementById('nameDisplay');
+
+            if (name) {
+                setup.hidden = true;
+                stats.hidden = false;
+                greetTail.textContent = `, ${name}!`;
+                welcome.textContent = `Schön, dass du da bist. Schau dir die Videos an und sammle XP — alles gratis.`;
+                display.textContent = name;
+            } else {
+                setup.hidden = false;
+                stats.hidden = true;
+                greetTail.textContent = '!';
+                welcome.textContent = `Erzähl mir deinen Namen — dann zeige ich dir deine ersten Tricks.`;
+            }
+
+            // any element with data-name-template gets {name} substituted (or "Spieler" as fallback)
+            const fallback = name || 'Spieler';
+            document.querySelectorAll('[data-name-template]').forEach(el => {
+                el.innerHTML = el.dataset.nameTemplate.replace(/\{name\}/g, fallback);
+            });
+        }
+
+        function updateXP(animate = false) {
+            const el = document.getElementById('xpNum');
+            el.textContent = State.getXP();
+            if (animate) {
+                el.classList.remove('pop');
+                // force reflow so the animation restarts
+                void el.offsetWidth;
+                el.classList.add('pop');
+                setTimeout(() => el.classList.remove('pop'), 280);
+            }
+        }
+
+        // ===== THEME TOGGLE =====
+        function initThemeToggle() {
+            const tog = document.getElementById('themeToggle');
+            if (!tog) return;
+            let theme = localStorage.getItem('t7_theme') || 'dark';
+            const apply = () => {
+                document.documentElement.setAttribute('data-theme', theme);
+                document.body.setAttribute('data-theme', theme);
+                tog.innerHTML = theme === 'dark' ? '☾' : '☀';
+            };
+            apply();
+            tog.addEventListener('click', () => {
+                theme = theme === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('t7_theme', theme);
+                apply();
+            });
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            updateName();
+            updateXP();
+
+            document.getElementById('nameSave').addEventListener('click', () => {
+                const input = document.getElementById('nameInput');
+                const name = input.value.trim();
+                if (!name) return;
+                State.setName(name);
+                input.value = '';
+                updateName();
+            });
+            document.getElementById('nameInput').addEventListener('keydown', e => {
+                if (e.key === 'Enter') document.getElementById('nameSave').click();
+            });
+            document.getElementById('changeName').addEventListener('click', () => {
+                State.clearName();
+                updateName();
+                document.getElementById('nameInput').focus();
+            });
+
+            renderGrid('stars', 'grid-stars');
+            renderGrid('sevens', 'grid-sevens');
+            renderGrid('challenges', 'grid-challenges');
+        });
+    </script>
+</body>
+</html>
