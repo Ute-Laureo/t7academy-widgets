@@ -10,10 +10,6 @@
   --text:#e8f4ff;--muted:rgba(232,244,255,.45);
   --nav-bg:#0a1628;--nav-border:rgba(0,229,255,.15);
   --card-title-bg:var(--surface2);--card-title-text:var(--text);
-  /* Landing-page tokens (shared across home + child pages) */
-  --lp-gold:#FFD700;--lp-red:#E4002B;--lp-green:#22C55E;--lp-brazil:#F7DC1F;
-  --lp-muted:rgba(255,255,255,.65);--lp-faint:rgba(255,255,255,.4);
-  --lp-rule:rgba(255,255,255,.08);--lp-section-y:clamp(40px,5vw,68px);
 }
 [data-theme="light"],body[data-theme="light"]{
   --bg:#f0f4f8;--surface:#ffffff;--surface2:#e2e8f0;
@@ -22,10 +18,6 @@
   --nav-bg:#ffffff;--nav-border:rgba(0,100,180,.15);
   --card-title-bg:var(--surface2);--card-title-text:var(--text);
   --search-bg:#ffffff;--btn-ghost-color:rgba(13,21,40,.5);
-  /* Landing-page tokens — light variants */
-  --lp-gold:#ca8309;--lp-red:#BE123C;--lp-green:#199848;--lp-brazil:#cda609;
-  --lp-muted:rgba(15,23,42,.72);--lp-faint:rgba(15,23,42,.48);
-  --lp-rule:rgba(15,23,42,.08);--lp-section-y:clamp(40px,5vw,68px);
 }
 
 /* Hide WordPress page title */
@@ -121,10 +113,6 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 .hero h1{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:36px;font-weight:900;color:#000;line-height:1.1;margin-bottom:10px;}
 .hero h1 span{color:#fff;}
-/* Italic Fraunces accent — mirrors lp-hero h1 em treatment from the home page.
-   Kept white because the Challenges/Sterne/Sevens hero panel uses a cyan ground
-   where var(--accent) would clash with the background. */
-.hero h1 em{font-family:'Fraunces','Garet W05 Bold',serif;font-style:italic;font-weight:700;color:#fff;padding-right:.04em;}
 .hero p{font-size:16px;color:rgba(0,0,0,.7);line-height:1.6;}
 .hero-image{background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Challenges_Hero_Pic.png') center/cover no-repeat;}
 .hero-image.hero-stars{background-image:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Stars_Hero_Pic.png');}
@@ -390,40 +378,6 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 
 
 /* ============================================================
-   LANDING-PAGE PRIMITIVES — shared section-header building blocks.
-   Promoted from T7_Academy_Home (outside layout) so any page can
-   use lp-eye / lp-title / lp-sub / lp-wrap / lp-section. Tokens
-   live on the theme blocks at the top of this file.
-   ============================================================ */
-.lp-wrap{margin:0;padding:0 clamp(24px,5vw,64px);}
-.lp-section{padding:var(--lp-section-y) 0 !important;position:relative;}
-.lp-section + .lp-section{border-top:1px solid var(--lp-rule);}
-.lp-eye{
-  font-family:'Antonio','Open Sans',sans-serif;
-  font-weight:600;font-size:14px;
-  letter-spacing:.22em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:14px;
-  display:inline-flex;align-items:center;gap:10px;
-}
-.lp-eye::before{content:'';display:inline-block;width:28px;height:1px;background:var(--accent);}
-.lp-title{
-  font-family:'Garet W05 Bold','Open Sans',sans-serif;
-  font-weight:900;line-height:1.04;
-  font-size:clamp(30px,4.4vw,52px);
-  letter-spacing:-.01em;
-  color:var(--text);margin-bottom:16px;
-}
-.lp-title .accent{color:var(--accent);}
-.lp-title .gold{color:var(--lp-gold);}
-.lp-sub{
-  font-size:clamp(15px,1.4vw,18px);
-  color:var(--lp-muted);line-height:1.6;
-  max-width:640px;
-}
-
-
-
-/* ============================================================
    CHALLENGES PAGE — extracted from Challenges.html
    ============================================================ */
 
@@ -541,7 +495,6 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .hero-text{background:#00E5FF;padding:36px 28px;display:flex;flex-direction:column;justify-content:center}
 .hero h1{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:36px;font-weight:900;color:#000;line-height:1.1;margin-bottom:10px}
 .hero h1 span{color:#fff}
-.hero h1 em{font-family:'Fraunces','Garet W05 Bold',serif;font-style:italic;font-weight:700;color:#fff;padding-right:.04em}
 .hero p{font-size:16px;color:rgba(0,0,0,.7);line-height:1.6}
 .hero-image{background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Challenges_Hero_Pic.png') center/cover no-repeat}
 .hero-image.hero-stars{background-image:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Stars_Hero_Pic.png')}
