@@ -70,13 +70,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .topnav.nav-shrunk .nav-logo img{height:30px;}
 .topnav.nav-shrunk .nav-link{font-size:12px;padding:6px 10px;}
 .topnav.nav-shrunk .nav-logo,.topnav.nav-shrunk .nav-right{height:50px;}
-@media(max-width:520px){
-  .topnav{padding:0 16px;flex-wrap:wrap;}
-  .nav-logo{height:56px;display:flex;align-items:center;flex:1;}
-  .nav-right{height:56px;display:flex;align-items:center;order:1;}
-  .nav-links{width:100%;order:2;padding:4px 0 8px;border-top:1px solid var(--nav-border);flex-wrap:wrap;}
-  .nav-link{font-size:11px;padding:5px 10px;}
-}
+/* Topnav mobile-stack rules consolidated further down (search for @media(max-width:720px)) */
 /* Mobile dark mode contrast boosts (cards only — search/pills already
    carry the right contrast at all viewports). */
 @media(max-width:520px){
@@ -608,12 +602,18 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .theme-toggle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all .15s}
 .theme-toggle:hover{color:var(--text);border-color:var(--accent)}
 .nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#1800ad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#000;cursor:pointer}
-@media(max-width:520px){.topnav{padding:0 16px;flex-wrap:wrap}.nav-logo{height:56px;flex:1}.nav-right{height:56px;order:1}.nav-links{width:100%;order:2;padding:4px 0 8px;border-top:1px solid var(--nav-border);flex-wrap:wrap}.nav-link{font-size:11px;padding:5px 10px}}
+/* Topnav: controlled stacked layout for everything narrower than ~720px.
+   Without this, items naturally flex-wrap somewhere between 520-720px and the
+   nav grows tall. Mobile (≤520px) gets the tighter pass below. */
+@media(max-width:720px){.topnav{padding:0 18px;flex-wrap:wrap;min-height:auto}.nav-logo{height:56px;flex:1}.nav-right{height:56px;order:1}.nav-links{width:100%;order:2;padding:4px 0 8px;border-top:1px solid var(--nav-border);flex-wrap:wrap;justify-content:center;gap:4px}.nav-link{font-size:12px;padding:6px 12px}}
+@media(max-width:520px){.topnav{padding:0 16px}.nav-link{font-size:11px;padding:5px 10px}}
 /* .hero rules removed here — see the primary .hero block earlier in this file. */
 .ch-layout.ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:24px;padding:20px 20px 40px!important;background:var(--bg);align-items:start}
 .ch-main{min-width:0;display:flex;flex-direction:column;gap:14px}
 .ch-sidebar{min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:80px;height:fit-content;align-self:start;margin-top:10px}
-@media(max-width:960px){.ch-layout{grid-template-columns:1fr}.ch-sidebar{position:static}}
+/* Match the doubled-class specificity of the main .ch-layout rule above —
+   otherwise this media query loses and the layout never collapses to one column. */
+@media(max-width:960px){.ch-layout.ch-layout{grid-template-columns:1fr;padding:16px 16px 32px!important}.ch-sidebar{position:static}}
 .ch-section{display:flex;flex-direction:column;gap:10px}
 /* Fine-line section divider: visually splits the tab strip (.ch-cat-grid)
    from the active panel content, in the same spirit as lp-section + lp-section. */
@@ -889,7 +889,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 @media(max-width:767px){
   /* Hide sidebar on mobile, full-width main */
   .ch-sidebar{display:none}
-  .ch-layout{grid-template-columns:1fr;padding:16px 12px 90px}
+  .ch-layout.ch-layout{grid-template-columns:1fr;padding:16px 12px 90px!important}
   /* FAB + sheet visible on mobile */
   #t7-fab{display:flex}
   #t7-sheet-overlay,#t7-sheet{display:block}
