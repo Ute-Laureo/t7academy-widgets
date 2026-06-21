@@ -175,9 +175,9 @@ body[data-theme="light"] .hero-image::after{
 }
 
 /* CONTROLS */
-.controls{padding:clamp(40px,5vw,64px) clamp(20px,5vw,40px) clamp(20px,2.5vw,28px)!important;border-bottom:none;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
+.controls.controls{padding:clamp(40px,5vw,64px) clamp(20px,5vw,40px) clamp(20px,2.5vw,28px)!important;border-bottom:none;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
 .search-wrap{position:relative;width:50%;min-width:280px;}
-.grid{padding:clamp(32px,4vw,52px) clamp(20px,5vw,40px) clamp(40px,5vw,60px)!important;}
+.grid.grid{padding:clamp(32px,4vw,52px) clamp(20px,5vw,40px) clamp(40px,5vw,60px)!important;}
 .search-wrap input{
   width:100%;padding:10px 18px 10px 40px;
   background:rgba(255,255,255,.06);
@@ -610,7 +610,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#1800ad);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#000;cursor:pointer}
 @media(max-width:520px){.topnav{padding:0 16px;flex-wrap:wrap}.nav-logo{height:56px;flex:1}.nav-right{height:56px;order:1}.nav-links{width:100%;order:2;padding:4px 0 8px;border-top:1px solid var(--nav-border);flex-wrap:wrap}.nav-link{font-size:11px;padding:5px 10px}}
 /* .hero rules removed here — see the primary .hero block earlier in this file. */
-.ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:24px;padding:20px 20px 40px;background:var(--bg);align-items:start}
+.ch-layout.ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:24px;padding:20px 20px 40px!important;background:var(--bg);align-items:start}
 .ch-main{min-width:0;display:flex;flex-direction:column;gap:14px}
 .ch-sidebar{min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:80px;height:fit-content;align-self:start;margin-top:10px}
 @media(max-width:960px){.ch-layout{grid-template-columns:1fr}.ch-sidebar{position:static}}
