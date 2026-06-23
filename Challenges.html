@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="de" data-theme="dark">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Challenges - T7 Academy</title>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
 <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css">
 <style>
@@ -55,7 +52,7 @@
 
 /* ---- Builder header (violet) ---- */
 .shb-wrap{position:relative;width:100%;overflow:hidden;border-radius:12px;padding:16px 18px 14px;margin-top:10px;
-  border:1.5px solid transparent;
+  border:1px solid transparent;
   background-image:linear-gradient(#080f1e,#080f1e),linear-gradient(135deg,#A855F7,#EC4899);
   background-origin:border-box;background-clip:padding-box,border-box}
 .shb-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#A855F7 30%,#EC4899 70%,transparent);opacity:.85}
@@ -72,7 +69,7 @@
 
 /* ---- Monats header (orange/red) ---- */
 .shm-wrap{position:relative;width:100%;overflow:hidden;border-radius:12px;padding:16px 18px 14px;margin-top:10px;
-  border:1.5px solid transparent;
+  border:1px solid transparent;
   background-image:linear-gradient(#080f1e,#080f1e),linear-gradient(135deg,#FF6B35,#FF1744);
   background-origin:border-box;background-clip:padding-box,border-box}
 .shm-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#FF6B35 30%,#FF1744 70%,transparent);opacity:.85}
@@ -132,8 +129,8 @@
 .monats-hint code{background:rgba(0,0,0,.4);padding:2px 6px;border-radius:4px;color:#FF6B35;font-size:11px}
 [data-theme="light"] .monats-hint{color:rgba(0,0,0,.7)}
 </style>
-</head>
-<body>
+
+
 
 <nav class="topnav">
   <div class="nav-logo">
@@ -147,15 +144,15 @@
     <a href="https://www.laureo.at/minis/" class="nav-link active">Minis</a>
   </div>
   <div class="nav-right">
-    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">&#9790;</button>
+    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
     <div class="nav-avatar" id="navAvatar">?</div>
   </div>
 </nav>
 
 <div class="hero">
   <div class="hero-text">
-    <h1>Challenges. Werde <span>XP Weltmeister!</span> Hol dir dein <span>Sterne-Zertifikat!</span></h1>
-    <p>Schau dir die Videos an, &uuml;be so oft du kannst &mdash; und bewerte dich <strong>ehrlich</strong>. Jeder Versuch bringt dich weiter. Du schaffst das!</p>
+    <h1>Challenges. <em>Sammle XP!</em></h1>
+    <p>Schau dir die Videos an, übe so oft du kannst — und bewerte dich <strong>ehrlich</strong>. Jeder Versuch bringt dich weiter. Du schaffst das!</p>
   </div>
   <div class="hero-image"></div>
 </div>
@@ -166,25 +163,25 @@
     <!-- ===== 4-CARD TAB GRID ===== -->
     <div class="ch-cat-grid" id="catGrid">
       <button class="ch-cat ch-cat-tech active" data-tab="technik" type="button">
-        <div class="ch-cat-icon">7&#65039;&#8419;</div>
+        <div class="ch-cat-icon">7️⃣</div>
         <div class="ch-cat-title">Technikschule</div>
         <div class="ch-cat-sub">Alle Technik &amp; Groundmoves Challenges</div>
         <div class="ch-cat-count">7 Module</div>
       </button>
       <button class="ch-cat ch-cat-cert" data-tab="zertifikate" type="button">
-        <div class="ch-cat-icon">&#11088;</div>
+        <div class="ch-cat-icon">⭐</div>
         <div class="ch-cat-title">Sterne-Zertifikate</div>
         <div class="ch-cat-sub">Vom 1-Stern zum 5-Sterne Profi</div>
         <div class="ch-cat-count">5 Zertifikate</div>
       </button>
       <button class="ch-cat ch-cat-build" data-tab="builder" type="button">
-        <div class="ch-cat-icon">&#128295;</div>
+        <div class="ch-cat-icon">🔧</div>
         <div class="ch-cat-title">Bau dir deine eigene Challenge</div>
-        <div class="ch-cat-sub">Filter w&auml;hlen, Challenge starten</div>
+        <div class="ch-cat-sub">Filter wählen, Challenge starten</div>
         <div class="ch-cat-count">Dynamisch</div>
       </button>
       <button class="ch-cat ch-cat-monats" data-tab="monats" type="button">
-        <div class="ch-cat-icon">&#128293;</div>
+        <div class="ch-cat-icon">🔥</div>
         <div class="ch-cat-title">Challenge des Monats</div>
         <div class="ch-cat-sub">Vom T7 Expert kuratiert</div>
         <div class="ch-cat-count" id="monatsLabel">Juni 2026</div>
@@ -196,14 +193,14 @@
       <div class="t7h-wrap">
         <div class="t7h-topline"></div>
         <div class="t7h-orb1"></div><div class="t7h-orb2"></div>
-        <div class="t7h-icon">7&#65039;&#8419;</div>
+        <div class="t7h-icon">7️⃣</div>
         <div class="t7h-content">
           <div class="t7h-title">T7 Academy <span>Technikschule</span></div>
-          <div class="t7h-intro">Willkommen! Hier kannst du deine <strong>Fussballtechnik</strong> auf das n&auml;chste Level bringen. Schau dir die Videos an, &uuml;be so oft du kannst &mdash; und bewerte dich <strong>ehrlich</strong>. Jeder Versuch bringt dich weiter. <strong>Du schaffst das! &#128170;</strong></div>
+          <div class="t7h-intro">Willkommen! Hier kannst du deine <strong>Fussballtechnik</strong> auf das nächste Level bringen. Schau dir die Videos an, übe so oft du kannst — und bewerte dich <strong>ehrlich</strong>. Jeder Versuch bringt dich weiter. <strong>Du schaffst das! 💪</strong></div>
           <div class="t7h-pills">
-            <div class="t7h-pill">&#9889; XP sammeln</div>
-            <div class="t7h-pill">&#128293; Wochen-Streak aufbauen</div>
-            <div class="t7h-pill">&#127942; Rangliste erklimmen</div>
+            <div class="t7h-pill">⚡ XP sammeln</div>
+            <div class="t7h-pill">🔥 Wochen-Streak aufbauen</div>
+            <div class="t7h-pill">🏆 Rangliste erklimmen</div>
           </div>
         </div>
       </div>
@@ -215,16 +212,16 @@
       <div class="shz-wrap">
         <div class="shz-topline"></div>
         <div class="shz-orb1"></div><div class="shz-orb2"></div>
-        <div class="shz-icon">&#11088;</div>
+        <div class="shz-icon">⭐</div>
         <div class="shz-content">
           <div class="shz-title">T7 Academy <span>Zertifikate</span></div>
-          <div class="shz-intro">Vom <strong>1-Stern</strong> bis zum <strong>5-Sterne Zertifikat</strong> &mdash; zeige was du wirklich drauf hast. Reiche dein Final-Video ein und hol dir dein offizielles T7 Zertifikat!</div>
+          <div class="shz-intro">Vom <strong>1-Stern</strong> bis zum <strong>5-Sterne Zertifikat</strong> — zeige was du wirklich drauf hast. Reiche dein Final-Video ein und hol dir dein offizielles T7 Zertifikat!</div>
           <div class="shz-pills">
-            <div class="shz-pill">&#11088; 1-Stern</div>
-            <div class="shz-pill">&#11088;&#11088; 2-Sterne</div>
-            <div class="shz-pill">&#11088;&#11088;&#11088; 3-Sterne</div>
-            <div class="shz-pill">&#11088;&#11088;&#11088;&#11088; 4-Sterne</div>
-            <div class="shz-pill">&#11088;&#11088;&#11088;&#11088;&#11088; 5-Sterne</div>
+            <div class="shz-pill">⭐ 1-Stern</div>
+            <div class="shz-pill">⭐⭐ 2-Sterne</div>
+            <div class="shz-pill">⭐⭐⭐ 3-Sterne</div>
+            <div class="shz-pill">⭐⭐⭐⭐ 4-Sterne</div>
+            <div class="shz-pill">⭐⭐⭐⭐⭐ 5-Sterne</div>
           </div>
         </div>
       </div>
@@ -236,14 +233,14 @@
       <div class="shb-wrap">
         <div class="shb-topline"></div>
         <div class="shb-orb1"></div><div class="shb-orb2"></div>
-        <div class="shb-icon">&#128295;</div>
+        <div class="shb-icon">🔧</div>
         <div class="shb-content">
           <div class="shb-title">Bau dir deine <span>eigene Challenge</span></div>
-          <div class="shb-intro">W&auml;hle deine <strong>Kriterien</strong> &mdash; Sterne, Position, Spieler oder Schwierigkeit &mdash; und wir bauen dir eine <strong>individuelle Challenge</strong> aus passenden Videos. Perfekt f&uuml;r dein Training!</div>
+          <div class="shb-intro">Wähle deine <strong>Kriterien</strong> — Sterne, Position, Spieler oder Schwierigkeit — und wir bauen dir eine <strong>individuelle Challenge</strong> aus passenden Videos. Perfekt für dein Training!</div>
           <div class="shb-pills">
-            <div class="shb-pill">&#127919; Nach Position</div>
-            <div class="shb-pill">&#128170; Nach Schwierigkeit</div>
-            <div class="shb-pill">&#127934; Nach Spieler</div>
+            <div class="shb-pill">🎯 Nach Position</div>
+            <div class="shb-pill">💪 Nach Schwierigkeit</div>
+            <div class="shb-pill">🎾 Nach Spieler</div>
           </div>
         </div>
       </div>
@@ -261,11 +258,11 @@
         <div class="bf-row">
           <label class="bf-label">Position</label>
           <div class="bf-pills" data-field="position">
-            <button class="bf-pill" data-val="defense"  type="button">&#128737;&#65039; Defense</button>
-            <button class="bf-pill" data-val="center"   type="button">&#9881;&#65039; Center</button>
-            <button class="bf-pill" data-val="wing"     type="button">&#8596;&#65039; Wing</button>
-            <button class="bf-pill" data-val="midfield" type="button">&#127919; Midfield</button>
-            <button class="bf-pill" data-val="offense"  type="button">&#9889; Offense</button>
+            <button class="bf-pill" data-val="defense" type="button">🛡️ Defense</button>
+            <button class="bf-pill" data-val="center" type="button">⚙️ Center</button>
+            <button class="bf-pill" data-val="wing" type="button">↔️ Wing</button>
+            <button class="bf-pill" data-val="midfield" type="button">🎯 Midfield</button>
+            <button class="bf-pill" data-val="offense" type="button">⚡ Offense</button>
           </div>
         </div>
         <div class="bf-row">
@@ -285,10 +282,10 @@
           <input type="text" class="bf-search" id="bf-title" placeholder="z.B. Elastico, Rainbow, Samba...">
         </div>
         <div class="bf-actions">
-          <div class="bf-count" id="bf-count">&mdash; W&auml;hle Filter um Videos zu finden &mdash;</div>
+          <div class="bf-count" id="bf-count">— Wähle Filter um Videos zu finden —</div>
           <div class="bf-btnrow">
-            <button class="bf-reset" id="bf-reset" type="button">Filter zur&uuml;cksetzen</button>
-            <button class="bf-build" id="bf-build" type="button" disabled>Challenge starten &#9654;</button>
+            <button class="bf-reset" id="bf-reset" type="button">Filter zurücksetzen</button>
+            <button class="bf-build" id="bf-build" type="button" disabled="">Challenge starten ▶</button>
           </div>
         </div>
       </div>
@@ -308,14 +305,14 @@
       <div class="shm-wrap">
         <div class="shm-topline"></div>
         <div class="shm-orb1"></div><div class="shm-orb2"></div>
-        <div class="shm-icon">&#128293;</div>
+        <div class="shm-icon">🔥</div>
         <div class="shm-content">
           <div class="shm-title">Challenge <span>des Monats</span></div>
-          <div class="shm-intro">Jeden Monat eine <strong>handverlesene Challenge</strong> vom T7 Academy Expert. Diesen Monat: <strong id="monatsName">&mdash;</strong>. Zeig was du drauf hast!</div>
+          <div class="shm-intro">Jeden Monat eine <strong>handverlesene Challenge</strong> vom T7 Academy Expert. Diesen Monat: <strong id="monatsName">—</strong>. Zeig was du drauf hast!</div>
           <div class="shm-pills">
-            <div class="shm-pill">&#128293; Limited Time</div>
-            <div class="shm-pill">&#11088; Bonus XP</div>
-            <div class="shm-pill">&#127942; Expert-Pick</div>
+            <div class="shm-pill">🔥 Limited Time</div>
+            <div class="shm-pill">⭐ Bonus XP</div>
+            <div class="shm-pill">🏆 Expert-Pick</div>
           </div>
         </div>
       </div>
@@ -326,27 +323,27 @@
 
   <div class="ch-sidebar">
     <div class="sb-card">
-      <div class="sb-label gold">&#11088; Sterne Zertifikat</div>
+      <div class="sb-label gold">⭐ Sterne Zertifikat</div>
       <div id="badge-container"></div>
     </div>
     <div class="sb-card">
-      <div class="sb-label">&#9889; Fortschritt</div>
+      <div class="sb-label">⚡ Fortschritt</div>
       <div id="fortschritt-container"></div>
     </div>
     <div class="sb-card">
-      <div class="sb-label">&#127942; Rangliste</div>
+      <div class="sb-label">🏆 Rangliste</div>
       <div id="rangliste-container"></div>
     </div>
   </div>
 </div>
 
 <div class="t7-overlay" id="t7-id-overlay" style="display:none">
-  <div style="font-size:44px">&#9917;</div>
+  <div style="font-size:44px">⚽</div>
   <h2>Willkommen bei T7 Academy!</h2>
   <p>Gib deinen Vornamen ein, um deine Fortschritte zu speichern.</p>
   <input id="t7-id-input" type="text" placeholder="Dein Vorname" autocomplete="given-name">
   <div class="ov-hint" id="t7-id-hint"></div>
-  <button onclick="T7Identity._submit()">Los geht's &#10024;</button>
+  <button onclick="T7Identity._submit()">Los geht's ✨</button>
 </div>
 
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
@@ -899,5 +896,3 @@ T7MobileSheet();
   }
 })();
 </script>
-</body>
-</html>
