@@ -3,7 +3,7 @@
 <title>Sevens – T7 Academy</title>
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Antonio:wght@400;500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;display=swap" rel="stylesheet">
 <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
-<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=5">
 
 
 
@@ -83,6 +83,7 @@
     <button class="modal-back" id="modalBack">Zurück</button>
     <div class="video-wrap" id="modalVideo"></div>
     <div class="modal-title-bar"><div class="modal-title" id="modalTitle"></div></div>
+    <div class="modal-subtitles" id="modalSubtitles" style="display:none"></div>
     <div class="modal-meta" id="modalMeta"></div>
     <div id="modalDesc"></div>
   </div>
@@ -125,9 +126,33 @@ function diffClass(d){return d==='Einfach'?'easy':d==='Mittel'?'medium':d==='Sch
 function starsLabel(n){return Array(n+1).join('⭐');}
 function sevensLabel(n){return Array(n+1).join('7️⃣');}
 
+// Convert a JSONB value (array | JSON-string | scalar | null) into a clean array of strings
+function asArray(v){
+  if(v==null)return[];
+  var arr=v;
+  if(typeof v==='string'){
+    var t=v.trim();
+    if(!t)return[];
+    if(t.charAt(0)==='['||t.charAt(0)==='{'){
+      try{arr=JSON.parse(t);}catch(e){arr=[t];}
+    }else{arr=[t];}
+  }
+  if(!Array.isArray(arr))arr=[arr];
+  return arr.map(function(x){return x==null?'':String(x).trim();}).filter(function(x){return x.length>0;});
+}
+function firstOf(v){var a=asArray(v);return a.length?a[0]:'';}
+function subtitleHTML(v,cls){
+  var sw=firstOf(v.so_what),ug=firstOf(v.ultimate_goal);
+  var p='';
+  if(sw)p+='<span class="vsub-so-what">'+sw+'</span>';
+  if(sw)if(ug)p+='<span class="vsub-arrow" aria-hidden="true">→</span>';
+  if(ug)p+='<span class="vsub-goal">'+ug+'</span>';
+  return '<div class="'+(cls||'card-subtitles')+'">'+p+'</div>';
+}
+
 function load(){
   // Fetch sorted by category/difficulty: use nr.asc as secondary fallback within same difficulty
-  fetch(SB_URL+'/rest/v1/videos?sevens=not.is.null&vimeo_code=not.is.null&select=id,title_DE,vimeo_code,sevens,category,difficulty,description&order=category.asc,nr.asc',{
+  fetch(SB_URL+'/rest/v1/videos?sevens=not.is.null&vimeo_code=not.is.null&select=id,title_DE,vimeo_code,sevens,category,difficulty,description,so_what,ultimate_goal&order=category.asc,nr.asc',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();})
   .then(function(rows){allVideos=rows||[];updateAvailableOptions();render();})
@@ -200,9 +225,12 @@ function render(){
         '<div class="play-icon"></div>'+
       '</div>'+
       '<div class="card-title-bar" onclick="openVideo('+i+')">'+
-        '<div class="card-title">'+v.title_DE+'</div>'+
+        '<div class="card-title-row">'+
+          '<div class="card-title">'+v.title_DE+'</div>'+
+          (v.sevens?'<span class="card-cat">'+sevensLabel(v.sevens)+' '+v.sevens+' Seven'+(v.sevens>1?'s':'')+'</span>':'')+
+        '</div>'+
         '<div class="card-sub">'+
-          '<span class="card-cat">'+(v.sevens?sevensLabel(v.sevens)+' '+v.sevens+' Seven'+(v.sevens>1?'s':''):'')+'</span>'+
+          subtitleHTML(v,'card-subtitles')+
           (diff?'<span class="card-diff-inline '+diff+'">'+v.difficulty+'</span>':'')+
         '</div>'+
       '</div>'+
@@ -321,6 +349,20 @@ window.openVideo=function(idx){
   var v=(window._filteredVideos||allVideos)[idx];if(!v)return;
   var modal=document.getElementById('modal');
   document.getElementById('modalTitle').textContent=v.title_DE;
+  // so_what → ultimate_goal row under the title
+  var subsEl=document.getElementById('modalSubtitles');
+  var swM=firstOf(v.so_what),ugM=firstOf(v.ultimate_goal);
+  if(swM||ugM){
+    var sp='';
+    if(swM)sp+='<span class="vsub-so-what">'+swM+'</span>';
+    if(swM)if(ugM)sp+='<span class="vsub-arrow" aria-hidden="true">→</span>';
+    if(ugM)sp+='<span class="vsub-goal">'+ugM+'</span>';
+    subsEl.innerHTML=sp;
+    subsEl.style.display='';
+  }else{
+    subsEl.innerHTML='';
+    subsEl.style.display='none';
+  }
   var videoEl=document.getElementById('modalVideo');
   if(v.vimeo_code){
     var parts=v.vimeo_code.split('/');

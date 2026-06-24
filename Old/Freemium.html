@@ -465,11 +465,29 @@
             color: rgba(15,23,42,0.45);
         }
         .video-meta { padding: 0 2px; display: flex; flex-direction: column; gap: 6px; }
+        /* Title + tag on one row, baseline-aligned; tag stays on the right and never wraps. */
+        .video-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .video-title-row .video-title { flex: 1 1 auto; min-width: 0; margin: 0; }
+        .video-title-row .video-tag { flex: 0 0 auto; }
         .video-tag {
-            font-family: 'Antonio', sans-serif;
-            font-size: 11px; font-weight: 500;
-            letter-spacing: 0.16em; text-transform: uppercase;
-            color: var(--accent);
+            font-family: 'Open Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,229,255,0.25);
+            background: rgba(0,229,255,0.06);
+            white-space: nowrap;
+        }
+        body[data-theme="light"] .video-tag {
+            background: rgba(8,145,178,0.06);
+            border-color: rgba(8,145,178,0.25);
         }
         .video-title {
             font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
@@ -514,8 +532,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Antonio', sans-serif;
-            font-weight: 700;
+            font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+            font-weight: 900;
             font-size: 22px;
             color: var(--lp-gold);
             box-shadow: 0 0 20px rgba(255,215,0,0.18);
@@ -634,13 +652,29 @@
             gap: 4px;
             min-width: 0;
         }
+        /* Title + tag on one row, baseline-aligned; tag stays on the right and never wraps. */
+        .skill-node-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .skill-node-title-row .skill-node-title { flex: 1 1 auto; min-width: 0; margin: 0; }
+        .skill-node-title-row .skill-node-tag { flex: 0 0 auto; }
         .skill-node-tag {
-            font-family: 'Antonio', sans-serif;
+            font-family: 'Open Sans', sans-serif;
             font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: var(--lp-gold);
+            font-weight: 700;
+            color: var(--text);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,215,0,0.35);
+            background: rgba(255,215,0,0.08);
+            white-space: nowrap;
+        }
+        body[data-theme="light"] .skill-node-tag {
+            background: rgba(202,131,9,0.08);
+            border-color: rgba(202,131,9,0.4);
         }
         .skill-node-title {
             font-family: 'Garet W05 Bold', sans-serif;
@@ -657,11 +691,9 @@
             flex-wrap: wrap;
         }
         .skill-btn {
-            font-family: 'Antonio', sans-serif;
-            font-weight: 600;
-            font-size: 12px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
             padding: 8px 14px;
             border-radius: 6px;
             border: none;
@@ -725,14 +757,12 @@
         /* Not-practiced label becomes the prominent gold pill */
         .skill-node:not(.practiced) .skill-node-count {
             color: var(--lp-gold);
-            font-family: 'Antonio', sans-serif;
+            font-family: 'Open Sans', sans-serif;
             font-weight: 700;
-            font-size: 11px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            font-size: 12px;
             background: rgba(255,215,0,0.12);
             border: 1px solid rgba(255,215,0,0.45);
-            padding: 6px 11px;
+            padding: 5px 11px;
             border-radius: 99px;
             margin-left: 0;
         }
@@ -747,10 +777,9 @@
         }
 
         .skill-node-count {
-            font-family: 'Antonio', sans-serif;
+            font-family: 'Open Sans', sans-serif;
             font-size: 12px;
             color: var(--lp-faint);
-            letter-spacing: 0.06em;
             margin-left: 6px;
         }
         .skill-node.practiced .skill-node-count {
@@ -814,8 +843,8 @@
         .xp-fly {
             position: fixed;
             z-index: 99999;
-            font-family: 'Antonio', sans-serif;
-            font-weight: 700;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 800;
             font-size: 22px;
             color: var(--lp-gold);
             text-shadow: 0 0 16px rgba(255,215,0,0.8);
@@ -890,14 +919,19 @@
             margin-bottom: 4px;
         }
         .fm-meta-tag {
-            font-family: 'Antonio', sans-serif;
-            font-size: 11px; font-weight: 500;
-            letter-spacing: 0.12em; text-transform: uppercase;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
             padding: 4px 10px;
             border-radius: 999px;
             background: rgba(0,229,255,0.1);
             border: 1px solid rgba(0,229,255,0.3);
             color: var(--accent);
+        }
+        body[data-theme="light"] .fm-meta-tag {
+            background: rgba(8,145,178,0.08);
+            border-color: rgba(8,145,178,0.3);
+            color: #0891B2;
         }
 
         /* ===== CLOSER ===== */
@@ -1053,25 +1087,27 @@
         /* ===== PER-VIDEO SUBTITLES (so_what → ultimate_goal) =====
            Shown under each video title in the grid and skill nodes, and below the
            modal title when a video is opened. Inherits the cyan accent in normal
-           sections and gold inside the challenge section. */
+           sections and gold inside the challenge section.
+           Uses the same Open Sans + Fraunces italic pattern as the Sterne/Sevens cards
+           — so_what reuses the hero <em> italic style, ultimate_goal is plain body text. */
         .video-subtitles,
         .skill-node-subtitles {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
-            font-family: 'Antonio', 'Open Sans', sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            gap: 6px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 13px;
+            line-height: 1.3;
             color: var(--lp-muted);
             margin-top: 2px;
         }
         .skill-node-subtitles { margin: 0 0 8px; }
         .vsub-so-what {
-            color: var(--accent);
+            font-family: 'Fraunces', 'Garet W05 Bold', serif;
+            font-style: italic;
             font-weight: 700;
+            color: var(--accent);
         }
         body[data-theme="light"] .vsub-so-what { color: #0891B2; }
         .lp-section-challenge .vsub-so-what,
@@ -1083,8 +1119,7 @@
         }
         .vsub-arrow {
             color: var(--lp-faint);
-            font-weight: 700;
-            font-size: 13px;
+            font-weight: 600;
         }
 
         /* ===== MODAL: subtitle row + playerhint Ablauf block ===== */
@@ -1093,15 +1128,13 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            font-family: 'Antonio', 'Open Sans', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.10em;
-            text-transform: uppercase;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.4;
             color: var(--lp-muted);
             margin: -4px 0 12px;
         }
-        .fm-modal-subtitles .vsub-arrow { font-size: 15px; }
+        .fm-modal-subtitles .vsub-arrow { font-size: 18px; }
 
         .fm-modal-hint {
             margin-top: 18px;
@@ -1115,11 +1148,9 @@
             border-left-color: #0891B2;
         }
         .fm-hint-label {
-            font-family: 'Antonio', 'Open Sans', sans-serif;
-            font-size: 11px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 13px;
             font-weight: 700;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
             color: var(--accent);
             margin-bottom: 8px;
         }
@@ -1472,12 +1503,15 @@
                 : `<div class="video-thumb-placeholder">▶</div>`;
             const safeTitle = titleOf(v).replace(/"/g, '&quot;');
             const subtitles = subtitleHTML(v, { cls: 'video-subtitles' });
+            const tag = tagFor(v);
             return `
                 <div class="video-card">
                     <a class="video-thumb" href="#" data-vid="${v.id}" aria-label="${safeTitle}">${thumbInner}</a>
                     <div class="video-meta">
-                        <div class="video-tag">${tagFor(v)}</div>
-                        <h3 class="video-title">${titleOf(v)}</h3>
+                        <div class="video-title-row">
+                            <h3 class="video-title">${titleOf(v)}</h3>
+                            ${tag ? `<div class="video-tag">${tag}</div>` : ''}
+                        </div>
                         ${subtitles}
                     </div>
                 </div>`;
@@ -1510,8 +1544,10 @@
                             <div class="skill-node-play-overlay"></div>
                         </div>
                         <div class="skill-node-content">
-                            <div class="skill-node-tag">${tagFor(v)}</div>
-                            <h3 class="skill-node-title">${titleOf(v)}</h3>
+                            <div class="skill-node-title-row">
+                                <h3 class="skill-node-title">${titleOf(v)}</h3>
+                                ${tagFor(v) ? `<div class="skill-node-tag">${tagFor(v)}</div>` : ''}
+                            </div>
                             ${subtitles}
                             <div class="skill-node-actions">
                                 <button class="skill-btn skill-btn-watch" data-vid="${v.id}" type="button">▶ Ansehen</button>
