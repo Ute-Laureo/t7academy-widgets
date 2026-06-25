@@ -21,7 +21,7 @@ var KID_MODULES = {
       {idx:0, title:'La Croqueta', emoji:'🐙', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'🏆'},
       {idx:1, title:'Seven', emoji:'🦊', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'⚡'}
     ]},
-  st5: { tier:'base', label:'Marcys Ballkontrolle', emoji:'🤹', num:'Station 5',
+  st5: { tier:'base', label:'Leyas Ballkontrolle', emoji:'🤹', num:'Station 5',
     drills:[
       {idx:0, title:'Spann Balancieren', emoji:'🐧', meta:'mittel', vid:'1110049131', hash:'0944817493', sticker:'👑'},
       {idx:1, title:'Jonglieren Freestyle', emoji:'🦄', meta:'schwierig', vid:'1125467352', hash:'30d35d6e70', sticker:'🎁'}
@@ -115,15 +115,15 @@ var STICKER_PAGES = [
   { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER,  total: TOTAL_STICKERS },
   { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,    total: TOTAL_STADIUM_STICKERS }
 ];
-var STATE = { email:null, name:'Champion', ratings:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
+var STATE = { email:null, name:'Champion', ratings:{}, gold:{}, completions:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
-try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','marcy'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
+try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','leya'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
 
 /* --- AVATARS --- */
 var AVATARS = {
   keon:  { name:'Keon',  emoji:'🐆', species:'Der Gepard', img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png',  alt:'Keon der Gepard' },
   coco:  { name:'Coco',  emoji:'🦎', species:'Der Gecko',  img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png',  alt:'Coco der Gecko' },
-  marcy: { name:'Marcy', emoji:'🦊', species:'Der Fuchs',  img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Marcy_Avatar.png', alt:'Marcy der Fuchs' }
+  leya: { name:'Leya', emoji:'🐈‍⬛', species:'Der Panther',  img:'https://ute-laureo.github.io/t7academy-widgets/Assets/Leya_Avatar.png', alt:'Leya der Panther' }
 };
 function applyAvatar(key){
   var a = AVATARS[key]; if (!a) return;
@@ -296,7 +296,7 @@ function renderStationView(modKey){
 
   var hero = document.getElementById('station-hero');
   hero.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
-  var ownerKey = ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'marcy'})[modKey] || 'keon';
+  var ownerKey = ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'leya'})[modKey] || 'keon';
   var ownerAv = AVATARS[ownerKey];
   var stImg = document.getElementById('station-emoji');
   if (isStadium) {
@@ -427,7 +427,7 @@ function renderStickers(){
       var key    = mk + '_' + d.idx;
       var rating = STATE.ratings[key] || 0;
       var earned = rating >= 4;
-      var gold   = rating === 5;
+      var gold   = !!(STATE.gold && STATE.gold[key]);
       if (earned) earnedCount++;
       if (gold)   goldCount++;
       var cls = 'sticker' + (earned ? ' earned' : '') + (gold ? ' gold' : '');
@@ -462,8 +462,9 @@ function countBaseStickers(){
 function isStadiumUnlocked(){ return countBaseStickers() >= TOTAL_STICKERS; }
 
 /* === CHAMPION + GOLD MODE ===
-   - Earned sticker  = rating >= 4   (existing)
-   - GOLD sticker    = rating === 5  (the "Super!" rating)
+   - Earned sticker  = rating >= 4   (existing — first-round earn)
+   - GOLD mastery    = a SECOND rating of 5 on an already-earned drill
+                       (see resolveOutcome). First-round 5 still earns blue.
    - Champion        = earned all stickers across all STICKER_PAGES
    The ceremony fires once per kid (keyed by name), tracked in localStorage. */
 function countAllEarned(){
@@ -484,7 +485,7 @@ function countAllGold(){
     p.stations.forEach(function(mk){
       var mod = KID_MODULES[mk]; if (!mod) return;
       mod.drills.forEach(function(d){
-        if ((STATE.ratings[mk + '_' + d.idx] || 0) === 5) c++;
+        if (STATE.gold && STATE.gold[mk + '_' + d.idx]) c++;
       });
     });
   });
@@ -561,9 +562,10 @@ function populateCertStickerWall(){
     p.stations.forEach(function(mk){
       var mod = KID_MODULES[mk]; if (!mod) return;
       mod.drills.forEach(function(d){
-        var rating = STATE.ratings[mk + '_' + d.idx] || 0;
+        var key    = mk + '_' + d.idx;
+        var rating = STATE.ratings[key] || 0;
         if (rating >= 4) {
-          var cls = 'cert-st' + (rating === 5 ? ' gold' : '');
+          var cls = 'cert-st' + ((STATE.gold && STATE.gold[key]) ? ' gold' : '');
           html += '<div class="' + cls + '">' + d.sticker + '</div>';
         }
       });
@@ -651,7 +653,20 @@ function resolveOutcome(rating){
   if (!d) return;
   var key = modKey + '_' + idx;
   var prev = STATE.ratings[key] || 0;
+  var completionsBefore = STATE.completions[key] || 0;
   if (rating > prev) STATE.ratings[key] = rating;
+  // Bump the completion counter on every successful run-through
+  if (rating >= 4) STATE.completions[key] = completionsBefore + 1;
+
+  // GOLD MASTERY: requires that this drill has already been completed AT LEAST
+  // ONCE before this current rating, and the current rating is 5 ("Super!").
+  // First-round 5-ratings just earn the regular blue sticker — gold has to be
+  // earned by coming back to the drill and rating it 5 a second time.
+  var newGold = false;
+  if (completionsBefore >= 1 && rating === 5 && !STATE.gold[key]) {
+    STATE.gold[key] = true;
+    newGold = true;
+  }
   saveLocal();
   if (STATE.email && window.T7SB) {
     var moduleLabel = KID_MODULES[modKey].label;
@@ -662,17 +677,20 @@ function resolveOutcome(rating){
     setTimeout(refreshFortschritt, 1500);
   }
   if (rating >= 4) {
-    var wasNew = prev < 4;
+    var wasNew = completionsBefore === 0;
     document.getElementById('ksticker-reveal').textContent = d.sticker;
     if (wasNew && isChampion() && !hasSeenChampion()) {
       document.getElementById('ksuccess-title').textContent = '🏆 CHAMPION! 🏆';
       document.getElementById('ksuccess-msg').textContent = 'Du hast ALLE 30 Sticker gesammelt! Wahnsinn!';
+    } else if (newGold) {
+      document.getElementById('ksuccess-title').textContent = '⭐ GOLD-STICKER! ⭐';
+      document.getElementById('ksuccess-msg').textContent = 'Du hast diesen Trick gemeistert! Gold ist deins! 🌟';
     } else {
       document.getElementById('ksuccess-title').textContent = rating === 5 ? 'WOW! Perfekt!' : 'Super gemacht!';
       document.getElementById('ksuccess-msg').textContent = wasNew ? 'Du hast einen neuen Sticker bekommen! 🌟' : 'Du wirst immer besser! 🎉';
     }
     showStep('success'); confettiBurst();
-    if (wasNew) playFanfare();
+    if (wasNew || newGold) playFanfare();
   } else {
     showStep('tryagain');
   }
@@ -735,8 +753,21 @@ function confettiBurst(){
   setTimeout(function(){ container.remove(); }, 3500);
 }
 
-function saveLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); localStorage.setItem(key, JSON.stringify({r:STATE.ratings})); }catch(e){} }
-function loadLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); var raw=localStorage.getItem(key); if(raw){var d=JSON.parse(raw); if(d.r)STATE.ratings=d.r;} }catch(e){} }
+function saveLocal(){ try{ var key='t7kid_'+(STATE.name||'guest').toLowerCase(); localStorage.setItem(key, JSON.stringify({v:2, r:STATE.ratings, g:STATE.gold, c:STATE.completions})); }catch(e){} }
+function loadLocal(){ try{
+  var key = 't7kid_' + (STATE.name || 'guest').toLowerCase();
+  var raw = localStorage.getItem(key);
+  if (!raw) return;
+  var d = JSON.parse(raw);
+  if (d.r) STATE.ratings = d.r;
+  /* Gold + completions only honoured from v2 onwards. Older saves had a buggy
+     gold rule (rating===5 instantly counted), so we drop those flags on
+     upgrade and let kids re-earn gold properly with the new replay logic. */
+  if (d.v === 2) {
+    if (d.g) STATE.gold        = d.g;
+    if (d.c) STATE.completions = d.c;
+  }
+}catch(e){} }
 
 function hydrateFromSupabase(){
   if (!STATE.email || !window.T7SB) return;

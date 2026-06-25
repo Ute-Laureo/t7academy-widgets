@@ -14,11 +14,14 @@
   .site-content,.entry,.post,.page{padding:0.5px!important;margin:0!important}
   body.page .site-main{padding:0.5px!important;margin:0!important}
 
-  /* === Theme vars === */
+  /* === Theme vars ===
+     Light mode uses #0080FF as the working accent (better contrast on the
+     light grey body than the pastel #00E5FF) — the cyan still appears in
+     gradients and dark-mode borders so the colour scheme is preserved. */
   [data-theme="dark"],body[data-theme="dark"]{--bg:#080f1e;--surface:#0d1528;--surface2:#1a2640;--border:rgba(0,229,255,.12);--accent:#00E5FF;--text:#e8f4ff;--muted:rgba(232,244,255,.45);--nav-bg:#0a1628;--nav-border:rgba(0,229,255,.15)}
-  [data-theme="light"],body[data-theme="light"]{--bg:#f0f4f8;--surface:#fff;--surface2:#e2e8f0;--border:rgba(0,100,180,.15);--accent:#00E5FF;--text:#0d1528;--muted:rgba(13,21,40,.5);--nav-bg:#fff;--nav-border:rgba(0,100,180,.15)}
+  [data-theme="light"],body[data-theme="light"]{--bg:#E8EDF3;--surface:#fff;--surface2:#e2e8f0;--border:rgba(0,100,180,.25);--accent:#0080FF;--text:#0d1528;--muted:rgba(13,21,40,.6);--nav-bg:#fff;--nav-border:rgba(0,100,180,.18)}
   html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
-  [data-theme="light"] body,body[data-theme="light"]{background:#dde6f0!important}
+  [data-theme="light"] body,body[data-theme="light"]{background:#E8EDF3!important}
 
   /* === Top nav === */
   .topnav{position:sticky;top:0;z-index:300;background:var(--nav-bg);border-bottom:1px solid var(--nav-border);padding:0 24px;min-height:72px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:min-height .25s,padding .25s}
@@ -44,9 +47,10 @@
   .hero p{font-size:16px;color:rgba(255,255,255,.97);line-height:1.55;position:relative;z-index:1;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.3)}
   .hero p strong{color:#FFD700;text-shadow:0 1px 4px rgba(0,0,0,.4)}
   .hero-image{background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Minis_Hero_Pic.png') center/cover no-repeat;position:relative;overflow:hidden}
-  .hero-overlay-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50%;max-width:200px;height:auto;z-index:2;pointer-events:none}
+  .hero-overlay-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:62%;max-width:260px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5)) drop-shadow(0 0 32px rgba(255,215,0,.45));animation:heroAvatarFloat 4s ease-in-out infinite}
+  @keyframes heroAvatarFloat{0%,100%{transform:translate(-50%,-50%) rotate(-2deg)}50%{transform:translate(-50%,-54%) rotate(2deg)}}
   @keyframes wiggle{0%,90%,100%{transform:rotate(0)}93%{transform:rotate(-6deg)}96%{transform:rotate(6deg)}}
-  @media(max-width:600px){.hero{grid-template-columns:1fr;min-height:auto}.hero-image{height:220px;order:-1}.hero-text{order:1}.hero h1{font-size:30px}.hero-overlay-avatar{max-width:150px}}
+  @media(max-width:600px){.hero{grid-template-columns:1fr;min-height:auto}.hero-image{height:240px;order:-1}.hero-text{order:1}.hero h1{font-size:30px}.hero-overlay-avatar{max-width:180px;width:55%}}
 
   /* === ch-layout === */
   .ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:24px;padding:20px 20px 60px;background:var(--bg);align-items:start}
@@ -184,12 +188,12 @@
   .pg-st-name{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(10px,1.7vw,12px);color:#0a1530;line-height:1.05;padding:0 8px}
   .pg-st-count{font-family:'Fredoka',sans-serif;font-weight:700;font-size:10px;color:rgba(8,15,30,.7);margin-top:3px;background:rgba(255,255,255,.4);padding:1px 7px;border-radius:99px}
 
-  /* === STATION FOCUSED VIEW === */
+  /* === Station focused view (hero avatar bumped 96→110px for stronger presence) === */
   .station-hero{position:relative;display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--st-c1,#FFD700),var(--st-c2,#FF8C00));border-radius:24px;padding:22px 24px;margin-bottom:18px;overflow:hidden;box-shadow:0 10px 32px rgba(0,0,0,.25)}
   .station-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25) 0%,transparent 70%);pointer-events:none}
   .station-hero::after{content:'';position:absolute;bottom:-30px;left:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.15) 0%,transparent 70%);pointer-events:none}
-  .station-avatar{width:96px;height:96px;border-radius:50%;object-fit:cover;flex-shrink:0;position:relative;z-index:1;box-shadow:0 8px 22px rgba(0,0,0,.28)}
-  .station-stadium-badge{width:96px;height:96px;border-radius:50%;flex-shrink:0;position:relative;z-index:1;background:rgba(8,15,30,.45);border:3px solid rgba(255,215,0,.75);display:flex;align-items:center;justify-content:center;font-size:48px;box-shadow:0 8px 22px rgba(0,0,0,.28),inset 0 2px 0 rgba(255,255,255,.15);filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+  .station-avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;flex-shrink:0;position:relative;z-index:1;box-shadow:0 8px 22px rgba(0,0,0,.32),0 0 0 4px rgba(255,255,255,.18);background:rgba(255,255,255,.1)}
+  .station-stadium-badge{width:110px;height:110px;border-radius:50%;flex-shrink:0;position:relative;z-index:1;background:rgba(8,15,30,.45);border:3px solid rgba(255,215,0,.75);display:flex;align-items:center;justify-content:center;font-size:54px;box-shadow:0 8px 22px rgba(0,0,0,.28),inset 0 2px 0 rgba(255,255,255,.15);filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
   .station-info{position:relative;z-index:1;flex:1;min-width:0}
   .station-num{font-family:'Fredoka',sans-serif;font-size:10px;font-weight:700;color:rgba(10,21,48,.65);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
   .station-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:24px;color:#0a1530;line-height:1.15}
@@ -242,21 +246,24 @@
   .tp-node.tp-right .tp-badge{right:auto;left:-7px}
   .tp-node.tp-done .tp-badge{color:#34D399;border-color:#34D399}
 
-  /* === Sidebar cards === */
-  .sb-card{background:var(--surface);border:1.5px solid #00E5FF;border-radius:12px;padding:18px}
-  [data-theme="light"] .sb-card{background:#fff}
-  .sb-card-stickers{background:linear-gradient(135deg,rgba(0,229,255,.22) 0%,rgba(0,128,255,.16) 100%)}
-  [data-theme="light"] .sb-card-stickers{background:linear-gradient(135deg,rgba(0,128,255,.16) 0%,rgba(0,229,255,.12) 100%)}
-  .sb-card-prog{background:linear-gradient(135deg,rgba(0,229,255,.1) 0%,rgba(0,128,255,.08) 100%)}
-  [data-theme="light"] .sb-card-prog{background:linear-gradient(135deg,rgba(0,128,255,.1) 0%,rgba(0,229,255,.06) 100%)}
+  /* === Sidebar cards ===
+     Background blends with the page in both modes — the cyan border and
+     internal accents (avatars, sticker pops, gold labels) provide all the
+     visual definition. */
+  .sb-card{background:transparent;border:1.5px solid #00E5FF;border-radius:12px;padding:18px}
+  [data-theme="light"] .sb-card{background:transparent;border-color:#0080FF}
+  .sb-card-stickers{background:transparent}
+  [data-theme="light"] .sb-card-stickers{background:transparent}
+  .sb-card-prog{background:transparent}
+  [data-theme="light"] .sb-card-prog{background:transparent}
   .sb-label{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;border-bottom:2px solid var(--accent);padding-bottom:10px}
   [data-theme="light"] .sb-label{color:#0080FF;border-bottom-color:#0080FF}
   .sb-label.gold{color:#FFD700;border-bottom-color:#FFD700}
   [data-theme="light"] .sb-label.gold{color:#FF8C00;border-bottom-color:#FF8C00}
 
-  .yip-card{text-align:center;background:linear-gradient(135deg,rgba(0,229,255,.18) 0%,rgba(0,128,255,.14) 100%);position:relative;overflow:hidden}
-  .yip-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(0,229,255,.22),transparent 55%);pointer-events:none}
-  [data-theme="light"] .yip-card{background:linear-gradient(135deg,rgba(0,128,255,.12) 0%,rgba(0,229,255,.08) 100%)}
+  .yip-card{text-align:center;background:transparent;position:relative;overflow:hidden}
+  /* Inner cyan glow removed — the avatars themselves now carry the visual punch. */
+  [data-theme="light"] .yip-card{background:transparent}
   .yip-img{width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid transparent;background:linear-gradient(#0d1528,#0d1528) padding-box,linear-gradient(135deg,#00E5FF,#0080FF,#FFD700) border-box;box-shadow:0 0 28px rgba(0,229,255,.45),0 0 40px rgba(0,128,255,.22);margin:0 auto 10px;display:block;animation:bobMini 3.5s ease-in-out infinite;position:relative}
   [data-theme="light"] .yip-img{background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#00E5FF,#0080FF,#FFD700) border-box}
   .yip-greeting{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:4px;position:relative;z-index:1}
@@ -368,6 +375,34 @@
   .t7-overlay .ov-hint{font-size:13px;color:rgba(0,229,255,.8);min-height:22px;margin-bottom:12px}
   .t7-overlay button{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a1530;font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;padding:13px 32px;border-radius:16px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(255,180,0,.5);transition:transform .15s}
   .t7-overlay button:hover{transform:scale(1.05)}
+
+  /* === AVATAR PROMINENCE ADDITIONS ===
+     Small, visible avatar appearances threaded through the page so the
+     chosen avatar feels like a constant companion. Every image uses the
+     class `av-img` so applyAvatar() swaps the src/alt on selection. */
+
+  /* Banner mascot — sits in the kh-wrap top-right, peeking over the orb. */
+  .kh-mascot{position:absolute;top:50%;right:14px;transform:translateY(-50%);width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid #FFD700;box-shadow:0 4px 14px rgba(255,180,0,.4),0 0 0 2px rgba(0,229,255,.25);background:rgba(0,0,0,.15);z-index:2;animation:bobMini 3.5s ease-in-out infinite}
+  [data-theme="light"] .kh-mascot{box-shadow:0 4px 14px rgba(255,140,0,.35),0 0 0 2px rgba(0,128,255,.25);background:rgba(255,255,255,.5)}
+  .kh-wrap .kh-content{padding-right:80px}
+  @media(max-width:520px){.kh-mascot{width:52px;height:52px;right:10px}.kh-wrap .kh-content{padding-right:66px}}
+
+  /* Landing-card mascot — peeking from the top-right of each landing card. */
+  .lc-mascot{position:absolute;top:14px;right:14px;width:54px;height:54px;border-radius:50%;object-fit:cover;border:3px solid #FFD700;box-shadow:0 4px 14px rgba(255,180,0,.45);background:rgba(0,0,0,.15);z-index:2;animation:bobMini 3.5s ease-in-out infinite;pointer-events:none}
+  [data-theme="light"] .lc-mascot{box-shadow:0 4px 14px rgba(255,140,0,.35);background:#fff}
+  .landing-card.lc-trickpfad .lc-mascot{border-color:#00E5FF;box-shadow:0 4px 14px rgba(0,180,255,.4)}
+  [data-theme="light"] .landing-card.lc-trickpfad .lc-mascot{border-color:#0080FF;box-shadow:0 4px 14px rgba(0,128,255,.35)}
+  .landing-card.lc-stadien .lc-mascot{border-color:#22C55E;box-shadow:0 4px 14px rgba(34,197,94,.4)}
+
+  /* Playground centre — repurpose the existing .pg-center skeleton (its CSS
+     was already defined but no element was rendered there). Now the chosen
+     avatar greets the user from the middle of the station ring. */
+  .pg-center-avatar{width:62%;height:62%;border-radius:50%;object-fit:cover;animation:bobMini 3s ease-in-out infinite;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .pg-center{cursor:default}
+
+  /* Speech-bubble mascots — slightly larger and brighter so dialogue feels
+     more "from the avatar" than a decorative thumbnail. */
+  .speech-mascot-img{width:68px;height:68px}
   </style>
 
 
@@ -412,6 +447,7 @@
           <div class="kh-topline"></div>
           <div class="kh-orb1"></div>
           <div class="kh-orb2"></div>
+          <img class="kh-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
           <div class="kh-content">
             <div class="kh-title">T7 <span>Minis Academy</span></div>
             <div class="kh-intro"><span data-av-name="">Keon</span> zeigt dir die <strong>coolsten Tricks</strong>! Schau das Video an, probiere es selbst — und sammle <strong>Punkte und Sticker</strong>! Jeder Versuch zählt. 🎉</div>
@@ -431,6 +467,7 @@
             <div class="landing-grid">
 
               <div class="landing-card lc-spielplatz" data-goto="spielplatz" role="button" tabindex="0">
+                <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
                 <div class="lc-eye">🦁 5 Stationen</div>
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
                   <div>
@@ -456,6 +493,7 @@
               </div>
 
               <div class="landing-card lc-trickpfad" data-goto="trickpfad" role="button" tabindex="0">
+                <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
                 <div class="lc-eye" style="color:rgba(0,229,255,.85)">🛤️ Dein Weg</div>
                 <div>
                   <div class="lc-emoji">🏁</div>
@@ -483,6 +521,7 @@
               </div>
 
               <div class="landing-card lc-stadien" data-goto="stadien" role="button" tabindex="0">
+                <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
                 <div class="lc-eye" style="color:rgba(255,215,0,.95)">✈️ Bonus-Reise</div>
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
                   <div>
@@ -490,7 +529,7 @@
                     <div class="lc-title" style="margin-top:8px">Stadien</div>
                   </div>
                 </div>
-                <div class="lc-desc"><strong style="color:#FFD700">Lass uns zu den weltberühmten Stadien reisen!</strong> Schwerere 3⭐ und 4⭐ Tricks warten auf dich.</div>
+                <div class="lc-desc"><strong style="color:#FFD700">Lass uns zu den weltberühmten Stadien reisen!</strong> Schwerere 2⭐ und 3⭐ Tricks warten auf dich.</div>
                 <div class="lc-preview">
                   <div class="lc-stadia-row">
                     <div class="lc-stadium-mini" style="--st-c1:#E4002B;--st-c2:#A30025">🍁</div>
@@ -502,7 +541,7 @@
                 </div>
                 <div class="lc-pills">
                   <div class="kh-pill p-gold">5 Stadien</div>
-                  <div class="kh-pill p-cyan">3⭐ &amp; 4⭐ Tricks</div>
+                  <div class="kh-pill p-cyan">2⭐ &amp; 3⭐ Tricks</div>
                 </div>
                 <button class="lc-cta" type="button">Reise starten →</button>
               </div>
@@ -517,10 +556,13 @@
             <div class="pt-section-title">Wähle eine Station</div>
             <div class="pg-circle">
               <div class="pg-ring"></div>
+              <div class="pg-center">
+                <img class="pg-center-avatar av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+              </div>
               <button class="pg-station pg-pos-1" data-station="st1" type="button">
                 <div class="pg-st-num">#1</div>
                 <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="">
-                <div class="pg-st-name">Keons Sitdowns</div>
+                <div class="pg-st-name">Keons Sitz-Tricks</div>
                 <div class="pg-st-count" data-proglabel="st1">0/2</div>
               </button>
               <button class="pg-station pg-pos-2" data-station="st2" type="button">
@@ -538,7 +580,7 @@
               <button class="pg-station pg-pos-4" data-station="st4" type="button">
                 <div class="pg-st-num">#4</div>
                 <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png" alt="">
-                <div class="pg-st-name">Cocos Dribbling</div>
+                <div class="pg-st-name">Cocos Dribbeln</div>
                 <div class="pg-st-count" data-proglabel="st4">0/2</div>
               </button>
               <button class="pg-station pg-pos-5" data-station="st5" type="button">
