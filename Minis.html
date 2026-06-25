@@ -1,786 +1,838 @@
 <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minis - T7 Academy</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Open+Sans:wght@600;700;800&amp;family=Garet+W05+Bold&amp;display=swap" rel="stylesheet">
-  <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
-  <style>
-  *{box-sizing:border-box;margin:0;padding:0}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minis - T7 Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Open+Sans:wght@600;700;800&amp;family=Antonio:wght@500;600;700&amp;family=Fraunces:ital,wght@1,600;1,700&amp;family=Garet+W05+Bold&amp;display=swap" rel="stylesheet">
+<link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
 
-  /* === WordPress reset === */
-  .wp-block-post-title,h1.entry-title,.page-title,.entry-header,.wp-block-group .wp-block-heading:first-child{display:none!important}
-  .wp-block-html{width:calc(100vw - 1px)!important;position:relative!important;left:50%!important;right:50%!important;margin-left:calc(-50vw + 0.5px)!important;margin-right:calc(-50vw + 0.5px)!important;max-width:calc(100vw - 1px)!important}
-  .entry-content,.wp-block-post-content,.is-layout-constrained>*{max-width:100%!important;padding:0.5px!important;margin:0!important}
-  .wp-site-blocks,.wp-block-group,.is-layout-flow,.is-layout-constrained{padding:0.5px!important;margin:0!important}
-  .site-content,.entry,.post,.page{padding:0.5px!important;margin:0!important}
-  body.page .site-main{padding:0.5px!important;margin:0!important}
+/* === WordPress reset === */
+.wp-block-post-title,h1.entry-title,.page-title,.entry-header,.wp-block-group .wp-block-heading:first-child{display:none!important}
+.wp-block-html{width:calc(100vw - 1px)!important;position:relative!important;left:50%!important;right:50%!important;margin-left:calc(-50vw + 0.5px)!important;margin-right:calc(-50vw + 0.5px)!important;max-width:calc(100vw - 1px)!important}
+.entry-content,.wp-block-post-content,.is-layout-constrained>*{max-width:100%!important;padding:0.5px!important;margin:0!important}
+.wp-site-blocks,.wp-block-group,.is-layout-flow,.is-layout-constrained{padding:0.5px!important;margin:0!important}
+.site-content,.entry,.post,.page{padding:0.5px!important;margin:0!important}
+body.page .site-main{padding:0.5px!important;margin:0!important}
 
-  /* === Theme vars ===
-     Light mode uses #0080FF as the working accent (better contrast on the
-     light grey body than the pastel #00E5FF) — the cyan still appears in
-     gradients and dark-mode borders so the colour scheme is preserved. */
-  [data-theme="dark"],body[data-theme="dark"]{--bg:#080f1e;--surface:#0d1528;--surface2:#1a2640;--border:rgba(0,229,255,.12);--accent:#00E5FF;--text:#e8f4ff;--muted:rgba(232,244,255,.45);--nav-bg:#0a1628;--nav-border:rgba(0,229,255,.15)}
-  [data-theme="light"],body[data-theme="light"]{--bg:#E8EDF3;--surface:#fff;--surface2:#e2e8f0;--border:rgba(0,100,180,.25);--accent:#0080FF;--text:#0d1528;--muted:rgba(13,21,40,.6);--nav-bg:#fff;--nav-border:rgba(0,100,180,.18)}
-  html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
-  [data-theme="light"] body,body[data-theme="light"]{background:#E8EDF3!important}
+/* === THEME TOKENS — aligned with t7-outside.css ===
+   --accent-text is the "darker cyan" the brand sheet uses on white surfaces
+   for legible UI text (the bright #00e0ff is not readable on white). */
+[data-theme="dark"],body[data-theme="dark"]{
+  --bg:#080f1e;--surface:#0d1528;--surface2:#1a2640;
+  --border:rgba(0,229,255,.12);
+  --accent:#00E5FF;--accent2:#1f80ff;--accent3:#1800ad;--accent-text:#00E5FF;
+  --text:#e8f4ff;--muted:rgba(232,244,255,.45);
+  --nav-bg:rgba(10,22,40,.72);--nav-border:rgba(255,255,255,.08);
+  --lp-gold:#FFD700;--lp-gold-deep:#e9a900;
+  --lp-red:#E4002B;--lp-green:#22C55E;--lp-brazil:#F7DC1F;
+  --lp-muted:rgba(255,255,255,.65);--lp-faint:rgba(255,255,255,.4);
+  --lp-rule:rgba(255,255,255,.08);
+}
+[data-theme="light"],body[data-theme="light"]{
+  --bg:#E8EDF3;--surface:#FFFFFF;--surface2:#E2E8F0;
+  --border:rgba(15,23,42,.08);
+  --accent:#00e0ff;--accent2:#1f80ff;--accent3:#1800ad;--accent-text:#0891B2;
+  --text:#0F172A;--muted:rgba(15,23,42,.72);
+  --nav-bg:rgba(255,255,255,.92);--nav-border:rgba(15,23,42,.08);
+  --lp-gold:#ca8309;--lp-gold-deep:#a06a08;
+  --lp-red:#BE123C;--lp-green:#199848;--lp-brazil:#cda609;
+  --lp-muted:rgba(15,23,42,.72);--lp-faint:rgba(15,23,42,.48);
+  --lp-rule:rgba(15,23,42,.08);
+}
 
-  /* === Top nav === */
-  .topnav{position:sticky;top:0;z-index:300;background:var(--nav-bg);border-bottom:1px solid var(--nav-border);padding:0 24px;min-height:72px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:min-height .25s,padding .25s}
-  .nav-logo{display:flex;align-items:center}
-  .nav-logo img{height:48px;width:auto;transition:height .25s}
-  .nav-links{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-  .nav-link{padding:10px 18px;border-radius:8px;font-size:15px;font-weight:700;font-family:'Garet W05 Bold','Open Sans',sans-serif;color:var(--muted);cursor:pointer;letter-spacing:.04em;text-decoration:none;transition:all .15s}
-  .nav-link:hover{color:var(--text);background:rgba(128,128,128,.1)}
-  .nav-link.active{color:#00E5FF;background:rgba(0,229,255,.14)}
-  .nav-right{display:flex;align-items:center;gap:10px}
-  .theme-toggle,.mute-toggle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all .15s}
-  .theme-toggle:hover,.mute-toggle:hover{color:var(--text);border-color:var(--accent)}
-  .mute-toggle.muted{opacity:.5}
-  @media(max-width:520px){.topnav{padding:0 16px;flex-wrap:wrap}.nav-logo{height:56px;flex:1}.nav-right{height:56px;order:1}.nav-links{width:100%;order:2;padding:4px 0 8px;border-top:1px solid var(--nav-border);flex-wrap:wrap}.nav-link{font-size:11px;padding:5px 10px}}
+html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
+[data-theme="light"] body,body[data-theme="light"]{background:#E8EDF3!important}
 
-  /* === HERO === */
-  .hero{display:grid;grid-template-columns:1fr 1fr;min-height:260px;border-bottom:1px solid var(--nav-border);overflow:hidden}
-  .hero-text{background:linear-gradient(135deg,#00E5FF 0%,#0080FF 22%,#1E3A8A 40%,#22C55E 62%,#FFD700 82%,#E4002B 100%);padding:36px 28px;display:flex;flex-direction:column;justify-content:center;position:relative}
-  .hero-text::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.25),transparent 50%),radial-gradient(circle at 10% 80%,rgba(255,255,255,.18),transparent 45%);pointer-events:none}
-  .hero-eye{font-family:'Fredoka',sans-serif;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.92);margin-bottom:10px;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.3)}
-  .hero h1{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:38px;font-weight:900;color:#fff;line-height:1.05;margin-bottom:12px;position:relative;z-index:1;text-shadow:0 3px 12px rgba(0,0,0,.35)}
-  .hero h1 span{color:#FFD700;text-shadow:0 3px 14px rgba(0,0,0,.45),0 0 24px rgba(255,215,0,.6);display:inline-block;animation:wiggle 3s ease-in-out infinite}
-  .hero p{font-size:16px;color:rgba(255,255,255,.97);line-height:1.55;position:relative;z-index:1;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.3)}
-  .hero p strong{color:#FFD700;text-shadow:0 1px 4px rgba(0,0,0,.4)}
-  .hero-image{background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Minis_Hero_Pic.png') center/cover no-repeat;position:relative;overflow:hidden}
-  .hero-overlay-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:62%;max-width:260px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 12px 28px rgba(0,0,0,.5)) drop-shadow(0 0 32px rgba(255,215,0,.45));animation:heroAvatarFloat 4s ease-in-out infinite}
-  @keyframes heroAvatarFloat{0%,100%{transform:translate(-50%,-50%) rotate(-2deg)}50%{transform:translate(-50%,-54%) rotate(2deg)}}
-  @keyframes wiggle{0%,90%,100%{transform:rotate(0)}93%{transform:rotate(-6deg)}96%{transform:rotate(6deg)}}
-  @media(max-width:600px){.hero{grid-template-columns:1fr;min-height:auto}.hero-image{height:240px;order:-1}.hero-text{order:1}.hero h1{font-size:30px}.hero-overlay-avatar{max-width:180px;width:55%}}
+/* === TOP NAV (matches t7-outside) === */
+.topnav{position:sticky;top:0;z-index:300;background:var(--nav-bg);border-bottom:1px solid var(--nav-border);padding:0 24px;min-height:72px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:min-height .25s,padding .25s}
+.nav-logo{display:flex;align-items:center}
+.nav-logo img{height:48px;width:auto;transition:height .25s}
+.nav-links{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.nav-link{padding:10px 18px;border-radius:8px;font-family:'Antonio','Open Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);cursor:pointer;text-decoration:none;transition:all .15s}
+.nav-link:hover{color:var(--text);background:rgba(128,128,128,.08)}
+.nav-link.active{color:var(--accent-text);background:rgba(0,229,255,.12)}
+[data-theme="light"] .nav-link.active{background:rgba(8,145,178,.10)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.theme-toggle,.mute-toggle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);transition:all .15s}
+.theme-toggle:hover,.mute-toggle:hover{color:var(--text);border-color:var(--accent)}
+.mute-toggle.muted{opacity:.5}
+@media(max-width:520px){.topnav{padding:0 16px;flex-wrap:wrap}.nav-logo{height:56px;flex:1}.nav-right{height:56px;order:1}.nav-links{width:100%;order:2;padding:4px 0 8px;border-top:1px solid var(--nav-border);flex-wrap:wrap}.nav-link{font-size:11px;padding:5px 10px;letter-spacing:.12em}}
 
-  /* === ch-layout === */
-  .ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:24px;padding:20px 20px 60px;background:var(--bg);align-items:start}
-  .ch-main{min-width:0;display:flex;flex-direction:column;gap:14px}
-  .ch-sidebar{min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:80px;height:fit-content;align-self:start;margin-top:10px}
-  @media(max-width:960px){.ch-layout{grid-template-columns:1fr;padding:16px 14px 100px}.ch-sidebar{position:static}}
-  .ch-section{display:flex;flex-direction:column;gap:12px}
+/* === HERO — t7-outside pattern: dark text panel + image with gradient overlay === */
+.hero{position:relative;display:grid;grid-template-columns:1.05fr 1fr;min-height:420px;border-bottom:1px solid var(--lp-rule);overflow:hidden;background:var(--bg)}
+.hero-text{padding:56px clamp(24px,4vw,56px);display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.hero-eye{font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent-text);margin-bottom:20px;display:inline-flex;align-items:center;gap:12px}
+.hero-eye::before{content:'';width:32px;height:2px;background:var(--accent-text);border-radius:2px}
+.hero h1{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(34px,5vw,56px);line-height:1.04;letter-spacing:-.01em;color:var(--text);margin-bottom:20px}
+.hero h1 .accent{font-family:'Fraunces','Fredoka',serif;font-style:italic;font-weight:700;color:var(--accent-text);padding-right:.04em}
+.hero p{font-size:clamp(15px,1.3vw,18px);line-height:1.6;color:var(--lp-muted);max-width:520px;font-weight:500}
+.hero p strong{color:var(--lp-red);font-weight:700}
+.hero-image{position:relative;background:url('https://ute-laureo.github.io/t7academy-widgets/Assets/Minis_Hero_Pic.png') center/cover no-repeat;overflow:hidden}
+.hero-image::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,15,30,.7) 0%,rgba(8,15,30,.2) 30%,transparent 60%)}
+[data-theme="light"] .hero-image::after{background:linear-gradient(90deg,rgba(232,237,243,.6) 0%,rgba(232,237,243,.15) 30%,transparent 60%)}
+.hero-overlay-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:62%;max-width:260px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 8px 22px rgba(0,0,0,.45))}
+/* Hero stats row — t7-outside .lp-hero-stats pattern, kid-friendly */
+.hero-stats{display:flex;gap:clamp(20px,3vw,40px);flex-wrap:wrap;padding-top:24px;margin-top:28px;border-top:1px solid var(--lp-rule);max-width:560px}
+.hero-stat{display:flex;flex-direction:column;gap:6px}
+.hero-stat-num{font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:clamp(28px,3.4vw,40px);line-height:1;color:var(--lp-gold)}
+.hero-stat-label{font-family:'Antonio','Open Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--lp-faint)}
+@media(max-width:880px){.hero{grid-template-columns:1fr;min-height:auto}.hero-image{height:240px;order:-1}.hero-text{padding:40px 22px}.hero h1{font-size:32px}.hero-overlay-avatar{max-width:180px;width:55%}.hero-stats{gap:24px;padding-top:20px;margin-top:22px}}
 
-  /* === Banner === */
-  .kh-wrap{position:relative;width:100%;overflow:hidden;border-radius:12px;padding:16px 18px 14px;margin-top:10px;border:1.5px solid #FFD700;background:#080f1e}
-  [data-theme="light"] .kh-wrap{background:#fff}
-  .kh-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00E5FF 20%,#FFD700 50%,#E4002B 80%,transparent);opacity:.95}
-  .kh-orb1{position:absolute;width:180px;height:180px;top:-70px;right:-50px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.18) 0%,transparent 70%);pointer-events:none}
-  .kh-orb2{position:absolute;width:130px;height:130px;bottom:-45px;left:-25px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.12) 0%,transparent 70%);pointer-events:none}
-  .kh-content{position:relative;z-index:1}
-  .kh-title{font-family:'Open Sans',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.01em;color:#fff;margin-bottom:5px}
-  [data-theme="light"] .kh-title{color:#0d1528}
-  .kh-title span{background:linear-gradient(135deg,#00E5FF,#0080FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .kh-intro{font-size:11px;color:rgba(255,255,255,.65);line-height:1.55;margin-top:10px;margin-bottom:10px}
-  [data-theme="light"] .kh-intro{color:rgba(13,21,40,.7)}
-  .kh-intro strong{color:#FFD700;font-weight:700}
-  [data-theme="light"] .kh-intro strong{color:#FF8C00}
-  .kh-pills{display:flex;gap:6px;flex-wrap:wrap}
-  .kh-pill{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3px 10px;font-size:10px;font-weight:700}
-  .kh-pill.p-gold{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.4);color:#FFD700;box-shadow:0 0 8px rgba(255,215,0,.18)}
-  .kh-pill.p-pink{background:rgba(228,0,43,.12);border:1px solid rgba(228,0,43,.45);color:#FF5566;box-shadow:0 0 8px rgba(228,0,43,.18)}
-  .kh-pill.p-cyan{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.4);color:#00E5FF;box-shadow:0 0 8px rgba(0,229,255,.18)}
-  [data-theme="light"] .kh-pill.p-gold{color:#FF8C00;background:rgba(255,140,0,.08);border-color:rgba(255,140,0,.4)}
-  [data-theme="light"] .kh-pill.p-pink{color:#C8102E;background:rgba(200,16,46,.08);border-color:rgba(200,16,46,.4)}
-  [data-theme="light"] .kh-pill.p-cyan{color:#0080FF;background:rgba(0,128,255,.08);border-color:rgba(0,128,255,.4)}
+/* === LAYOUT === */
+.ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:28px;padding:32px clamp(20px,3vw,40px) 80px;background:var(--bg);align-items:start}
+.ch-main{min-width:0;display:flex;flex-direction:column;gap:18px}
+.ch-sidebar{min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:88px;height:fit-content;align-self:start}
+@media(max-width:960px){.ch-layout{grid-template-columns:1fr;padding:20px 16px 100px}.ch-sidebar{position:static}}
+.ch-section{display:flex;flex-direction:column;gap:16px}
 
-  /* === VIEW SYSTEM === */
-  .views{position:relative}
-  .view{display:none}
-  .view.active{display:block;animation:viewIn .4s cubic-bezier(.34,1.56,.64,1)}
-  @keyframes viewIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
-  .view-back{display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,.08);border:2px solid rgba(255,215,0,.35);color:#FFD700;padding:9px 18px;border-radius:99px;font-family:'Fredoka',sans-serif;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:14px;transition:all .15s}
-  [data-theme="light"] .view-back{color:#FF8C00;background:rgba(255,140,0,.08);border-color:rgba(255,140,0,.4)}
-  .view-back:hover{background:rgba(255,215,0,.18);border-color:#FFD700;transform:translateX(-4px)}
-  [data-theme="light"] .view-back:hover{background:rgba(255,140,0,.18);border-color:#FF8C00}
+/* === BANNER (Keon greeting) === */
+.kh-wrap{position:relative;width:100%;overflow:hidden;border-radius:14px;padding:20px 22px 18px;border:1px solid var(--lp-rule);background:rgba(0,229,255,.04)}
+[data-theme="light"] .kh-wrap{background:#fff;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.kh-topline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--accent-text) 20%,var(--lp-gold) 50%,var(--accent-text) 80%,transparent 100%)}
+.kh-orb1,.kh-orb2{display:none}
+.kh-content{position:relative;z-index:1;padding-right:80px}
+.kh-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.01em;color:var(--text);margin-bottom:6px}
+.kh-title span{color:var(--accent-text)}
+.kh-intro{font-size:13px;color:var(--lp-muted);line-height:1.55;margin-top:8px;margin-bottom:12px;font-weight:500}
+.kh-intro strong{color:var(--lp-gold);font-weight:700}
+.kh-pills{display:flex;gap:6px;flex-wrap:wrap}
+.kh-pill{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:4px 11px;font-family:'Open Sans',sans-serif;font-size:11px;font-weight:700;background:transparent;border:1px solid currentColor;letter-spacing:.02em}
+.kh-pill.p-gold{color:var(--lp-gold)}
+.kh-pill.p-pink{color:var(--lp-red)}
+.kh-pill.p-cyan{color:var(--accent-text)}
+.kh-mascot{position:absolute;top:50%;right:16px;transform:translateY(-50%);width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:rgba(0,0,0,.1);z-index:2}
+[data-theme="light"] .kh-mascot{border-color:var(--accent-text);background:#fff}
+@media(max-width:520px){.kh-mascot{width:52px;height:52px;right:12px}.kh-content{padding-right:66px}}
 
-  /* === LANDING CARDS === */
-  .landing-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
-  @media(max-width:760px){.landing-grid{grid-template-columns:1fr}}
-  .landing-card{position:relative;background:#0d1528;border:2px solid var(--border);border-radius:22px;padding:24px 22px;cursor:pointer;overflow:hidden;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;display:flex;flex-direction:column;gap:14px;min-height:300px}
-  [data-theme="light"] .landing-card{background:#fff}
-  .landing-card.lc-spielplatz{border-color:#E4002B}
-  .landing-card.lc-trickpfad{border-color:#3B82F6}
-  .landing-card::before{content:'';position:absolute;top:-60px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,0,.18) 0%,transparent 70%);pointer-events:none}
-  .landing-card.lc-trickpfad::before{background:radial-gradient(circle,rgba(0,229,255,.18) 0%,transparent 70%)}
-  .landing-card:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 16px 40px rgba(255,180,0,.25)}
-  .landing-card.lc-trickpfad:hover{box-shadow:0 16px 40px rgba(0,180,255,.25)}
-  .lc-eye{font-family:'Fredoka',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,215,0,.85);position:relative;z-index:1}
-  .lc-emoji{font-size:54px;line-height:1;animation:bobMini 3.5s ease-in-out infinite;display:inline-block;filter:drop-shadow(0 4px 12px rgba(255,180,0,.4));position:relative;z-index:1}
-  .lc-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:26px;color:var(--text);line-height:1.1;position:relative;z-index:1}
-  .lc-desc{font-size:13px;color:var(--muted);line-height:1.55;position:relative;z-index:1;font-weight:500}
-  .lc-preview{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:flex-start;padding:6px 0;min-height:50px}
-  .lc-mini-circle{display:flex;align-items:center;justify-content:center;gap:-6px;position:relative;height:46px;width:100%}
-  .lc-mini-station{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid rgba(8,15,30,.85);box-shadow:0 4px 10px rgba(0,0,0,.3);position:absolute;animation:miniFloat 4s ease-in-out infinite}
-  [data-theme="light"] .lc-mini-station{border-color:#fff}
-  .lc-mini-station:nth-child(1){left:0;background:linear-gradient(135deg,#00E5FF,#0080FF);animation-delay:0s}
-  .lc-mini-station:nth-child(2){left:50px;background:linear-gradient(135deg,#FFD700,#FF8C00);animation-delay:.3s}
-  .lc-mini-station:nth-child(3){left:100px;background:linear-gradient(135deg,#E4002B,#A30025);animation-delay:.6s}
-  .lc-mini-station:nth-child(4){left:150px;background:linear-gradient(135deg,#3B82F6,#1E3A8A);animation-delay:.9s}
-  .lc-mini-station:nth-child(5){left:200px;background:linear-gradient(135deg,#22C55E,#006847);animation-delay:1.2s}
-  @keyframes miniFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-  .lc-mini-path{display:flex;align-items:center;gap:8px;width:100%}
-  .lc-mini-dot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#00E5FF,#0080FF);box-shadow:0 0 12px rgba(0,229,255,.55);position:relative;flex-shrink:0}
-  .lc-mini-dot.done{background:linear-gradient(135deg,#34D399,#22C55E);box-shadow:0 0 14px rgba(52,211,153,.55)}
-  .lc-mini-dot.star{background:linear-gradient(135deg,#FFD700,#FF8C00);box-shadow:0 0 16px rgba(255,180,0,.6)}
-  .lc-mini-dot.star::after{content:'⭐';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px}
-  .lc-mini-line{flex:1;height:2px;background:repeating-linear-gradient(to right,rgba(0,229,255,.6) 0,rgba(0,229,255,.6) 4px,transparent 4px,transparent 8px);min-width:6px}
-  .lc-pills{display:flex;gap:6px;flex-wrap:wrap;position:relative;z-index:1}
-  .lc-cta{align-self:flex-start;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a1530;padding:12px 22px;border-radius:99px;font-family:'Fredoka',sans-serif;font-weight:700;font-size:14px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(255,180,0,.4);transition:transform .15s;position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px}
-  .lc-cta:hover{transform:scale(1.05)}
+/* === VIEW SYSTEM === */
+.views{position:relative}
+.view{display:none}
+.view.active{display:block;animation:viewIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes viewIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.view-back{display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,255,.10);border:1.5px solid rgba(0,229,255,.45);color:var(--accent-text);padding:9px 18px;border-radius:99px;font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;margin-bottom:16px;transition:all .15s}
+[data-theme="light"] .view-back{background:rgba(8,145,178,.08);border-color:rgba(8,145,178,.50)}
+.view-back:hover{background:rgba(0,229,255,.18);border-color:var(--accent);box-shadow:0 4px 14px rgba(0,229,255,.15);transform:translateX(-3px)}
+[data-theme="light"] .view-back:hover{background:rgba(8,145,178,.16);border-color:var(--accent-text);box-shadow:0 4px 14px rgba(8,145,178,.18)}
 
-  /* === Stadien landing card (spans full width below the 2 base cards) === */
-  .landing-card.lc-stadien{grid-column:1 / -1;border-color:#22C55E;min-height:auto}
-  .landing-card.lc-stadien::before{background:radial-gradient(circle,rgba(34,197,94,.22) 0%,transparent 70%)}
-  .lc-stadia-row{display:flex;gap:10px;justify-content:center;padding:10px 0}
-  .lc-stadium-mini{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,var(--st-c1),var(--st-c2));border:2px solid rgba(8,15,30,.85);box-shadow:0 4px 10px rgba(0,0,0,.3);animation:miniFloat 4s ease-in-out infinite}
-  [data-theme="light"] .lc-stadium-mini{border-color:#fff}
-  .lc-stadium-mini:nth-child(1){animation-delay:0s}
-  .lc-stadium-mini:nth-child(2){animation-delay:.2s}
-  .lc-stadium-mini:nth-child(3){animation-delay:.4s}
-  .lc-stadium-mini:nth-child(4){animation-delay:.6s}
-  .lc-stadium-mini:nth-child(5){animation-delay:.8s}
+/* Section headers === */
+.pt-section-eye{font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent-text);margin-bottom:10px;display:inline-flex;align-items:center;gap:10px;padding:0 4px}
+.pt-section-eye::before{content:'';width:28px;height:1px;background:var(--accent-text)}
+.pt-section-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(22px,3vw,30px);color:var(--text);line-height:1.1;padding:0 4px;margin-bottom:18px;letter-spacing:-.01em}
+.pt-section-title em{font-family:'Fraunces','Fredoka',serif;font-style:italic;font-weight:700;color:var(--accent-text);padding-right:.04em}
 
-  /* Stadien landing card uses base .landing-card hover/styling — no locked state */
+/* === LANDING CARDS — overview-card pattern from t7-outside === */
+.landing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px}
+@media(max-width:760px){.landing-grid{grid-template-columns:1fr}}
+.landing-card{position:relative;background:rgba(255,255,255,.03);border:1px solid var(--lp-rule);border-radius:16px;padding:26px 24px;cursor:pointer;overflow:hidden;transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;gap:14px;min-height:300px;text-decoration:none;color:inherit}
+[data-theme="light"] .landing-card{background:#FFFFFF;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.landing-card:hover{transform:translateY(-3px);border-color:rgba(0,229,255,.45);background:rgba(0,229,255,.04);box-shadow:0 10px 30px rgba(0,229,255,.10)}
+[data-theme="light"] .landing-card:hover{background:#FFFFFF;border-color:rgba(8,145,178,.55);box-shadow:0 10px 26px rgba(8,145,178,.14)}
+.landing-card.lc-spielplatz:hover{border-color:rgba(228,0,43,.45);background:rgba(228,0,43,.04);box-shadow:0 10px 30px rgba(228,0,43,.12)}
+[data-theme="light"] .landing-card.lc-spielplatz:hover{border-color:rgba(190,18,60,.55);box-shadow:0 10px 26px rgba(190,18,60,.14);background:#fff}
+.landing-card.lc-stadien:hover{border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.04);box-shadow:0 10px 30px rgba(34,197,94,.12)}
+[data-theme="light"] .landing-card.lc-stadien:hover{border-color:rgba(25,152,72,.55);box-shadow:0 10px 26px rgba(25,152,72,.14);background:#fff}
 
-  /* === Stadien view === */
-  .stadia-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:8px}
-  .stadium-card{position:relative;background:linear-gradient(135deg,var(--st-c1) 0%,var(--st-c2) 100%);border:none;border-radius:18px;padding:18px 14px 14px;color:#fff;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Fredoka',sans-serif;box-shadow:0 8px 22px rgba(0,0,0,.3);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;overflow:hidden}
-  .stadium-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(255,255,255,.22),transparent 55%);pointer-events:none}
-  .stadium-card::after{content:'';position:absolute;inset:0;border-radius:18px;border:2px solid rgba(255,215,0,.45);pointer-events:none}
-  .stadium-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 14px 32px rgba(0,0,0,.4)}
-  .stadium-flag{font-size:18px;line-height:1;position:relative;z-index:1}
-  .stadium-emoji{font-size:38px;line-height:1;position:relative;z-index:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
-  .stadium-name{font-weight:700;font-size:14px;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.4);position:relative;z-index:1;line-height:1.15}
-  .stadium-city{font-size:11px;color:rgba(255,255,255,.85);font-weight:500;position:relative;z-index:1}
-  .stadium-count{margin-top:4px;background:rgba(8,15,30,.45);border:1px solid rgba(255,215,0,.5);color:#FFD700;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;position:relative;z-index:1}
+.lc-eye{font-family:'Antonio','Open Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-text);position:relative;z-index:1}
+/* Big muted step number — t7-outside .overview-step pattern */
+.lc-step{font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:28px;color:var(--accent-text);line-height:1;opacity:.55;position:relative;z-index:1;margin-bottom:-4px}
+.lc-spielplatz .lc-step{color:var(--lp-red)}
+.lc-stadien .lc-step{color:var(--lp-gold);opacity:.75}
+/* Bonus tier badge for Stadien */
+.lc-bonus-badge{position:absolute;top:16px;left:16px;display:inline-flex;align-items:center;gap:5px;font-family:'Antonio','Open Sans',sans-serif;font-weight:700;font-size:10px;letter-spacing:.20em;text-transform:uppercase;color:var(--lp-gold);background:rgba(255,215,0,.10);border:1px solid rgba(255,215,0,.45);padding:5px 11px;border-radius:99px;z-index:2}
+[data-theme="light"] .lc-bonus-badge{background:rgba(202,131,9,.10);border-color:rgba(202,131,9,.50)}
+.lc-spielplatz .lc-eye{color:var(--lp-red)}
+.lc-trickpfad .lc-eye{color:var(--accent-text)}
+.lc-stadien .lc-eye{color:var(--lp-green)}
+.lc-emoji{font-size:54px;line-height:1;display:inline-block;position:relative;z-index:1}
+.lc-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:28px;color:var(--text);line-height:1.1;position:relative;z-index:1;letter-spacing:-.01em}
+.lc-title em{font-family:'Fraunces','Fredoka',serif;font-style:italic;font-weight:700;color:var(--accent-text);padding-right:.04em}
+.lc-spielplatz .lc-title em{color:var(--lp-red)}
+.lc-stadien .lc-title em{color:var(--lp-green)}
+.lc-desc{font-size:14px;color:var(--lp-muted);line-height:1.55;position:relative;z-index:1;font-weight:500}
+.lc-desc strong{font-weight:700}
+.lc-preview{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:flex-start;padding:6px 0;min-height:50px}
+.lc-mini-circle{display:flex;align-items:center;gap:0;position:relative;height:46px;width:100%}
+.lc-mini-station{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--surface);box-shadow:0 2px 6px rgba(0,0,0,.18);position:absolute}
+[data-theme="light"] .lc-mini-station{border-color:#fff}
+.lc-mini-station:nth-child(1){left:0;background:var(--accent)}
+.lc-mini-station:nth-child(2){left:48px;background:var(--accent)}
+.lc-mini-station:nth-child(3){left:96px;background:var(--accent)}
+.lc-mini-station:nth-child(4){left:144px;background:var(--accent)}
+.lc-mini-station:nth-child(5){left:192px;background:var(--lp-gold-deep)}
+[data-theme="light"] .lc-mini-station:nth-child(1),
+[data-theme="light"] .lc-mini-station:nth-child(2),
+[data-theme="light"] .lc-mini-station:nth-child(3),
+[data-theme="light"] .lc-mini-station:nth-child(4){background:var(--accent-text)}
+.lc-mini-path{display:flex;align-items:center;gap:8px;width:100%}
+.lc-mini-dot{width:18px;height:18px;border-radius:50%;background:var(--accent-text);position:relative;flex-shrink:0;opacity:.45}
+.lc-mini-dot.done{background:var(--lp-green);opacity:1}
+.lc-mini-dot.star{background:var(--lp-gold);opacity:1}
+.lc-mini-dot.star::after{content:'⭐';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.lc-mini-line{flex:1;height:0;border-top:2px dashed var(--lp-rule);min-width:6px}
+.lc-pills{display:flex;gap:6px;flex-wrap:wrap;position:relative;z-index:1}
+.lc-cta{align-self:flex-start;padding:12px 22px;border-radius:99px;font-family:'Fredoka',sans-serif;font-weight:700;font-size:14px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#000;box-shadow:0 4px 14px rgba(0,229,255,.25)}
+[data-theme="light"] .lc-cta{background:var(--accent-text);color:#fff;box-shadow:0 4px 14px rgba(8,145,178,.30)}
+.lc-spielplatz .lc-cta{background:var(--lp-red);color:#fff;box-shadow:0 4px 14px rgba(228,0,43,.30)}
+.lc-stadien .lc-cta{background:var(--lp-green);color:#fff;box-shadow:0 4px 14px rgba(34,197,94,.30)}
+[data-theme="light"] .lc-stadien .lc-cta{box-shadow:0 4px 14px rgba(25,152,72,.30)}
+.lc-cta:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 6px 20px rgba(0,229,255,.4)}
+.lc-spielplatz .lc-cta:hover{box-shadow:0 6px 20px rgba(228,0,43,.4)}
+.lc-stadien .lc-cta:hover{box-shadow:0 6px 20px rgba(34,197,94,.4)}
+.lc-mascot{position:absolute;top:16px;right:16px;width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:rgba(0,0,0,.1);z-index:2;pointer-events:none}
+[data-theme="light"] .lc-mascot{border-color:var(--accent-text);background:#fff}
+.landing-card.lc-spielplatz .lc-mascot{border-color:var(--lp-red)}
+.landing-card.lc-stadien .lc-mascot{border-color:var(--lp-green)}
 
-  /* === Sticker pager (active = elongated ellipse, inactive = larger dots) === */
-  .sticker-pager{display:flex;gap:8px;justify-content:center;align-items:center;margin:8px 0 4px;min-height:18px;flex-wrap:wrap}
-  .sp-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.28);border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:transparent;transition:width .3s cubic-bezier(.34,1.56,.64,1),background .25s,color .25s,box-shadow .25s,transform .15s;flex-shrink:0}
-  [data-theme="light"] .sp-dot{background:rgba(10,21,48,.22)}
-  .sp-dot:hover:not(.is-active){background:rgba(0,229,255,.55);transform:scale(1.12)}
-  [data-theme="light"] .sp-dot:hover:not(.is-active){background:rgba(0,128,255,.55)}
-  .sp-dot:active{transform:scale(.92)}
-  .sp-dot.is-active{width:44px;border-radius:99px;background:linear-gradient(135deg,#00E5FF,#0080FF);box-shadow:0 3px 10px rgba(0,229,255,.45);color:#0a1530;cursor:default}
-  .sp-dot.is-active:hover{transform:none}
+/* Stadien landing card spans both columns */
+.landing-card.lc-stadien{grid-column:1 / -1;min-height:auto}
+.lc-stadia-row{display:flex;gap:10px;justify-content:center;padding:10px 0}
+.lc-stadium-mini{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--st-c,var(--accent-text));border:2px solid var(--surface);box-shadow:0 2px 6px rgba(0,0,0,.18)}
+[data-theme="light"] .lc-stadium-mini{border-color:#fff}
 
-  /* === Section headers (reused in views) === */
-  .pt-section-eye{font-family:'Fredoka',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,215,0,.75);margin-bottom:2px;padding:0 4px}
-  .pt-section-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:22px;color:var(--text);line-height:1.1;padding:0 4px;margin-bottom:14px}
+/* === STADIEN VIEW === */
+.stadia-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-top:8px}
+.stadium-card{position:relative;background:var(--st-c,var(--accent-text));color:var(--st-text,#fff);border:none;border-radius:18px;padding:20px 14px 16px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Fredoka',sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;overflow:hidden}
+.stadium-card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.28)}
+.stadium-flag{font-size:18px;line-height:1;position:relative;z-index:1}
+.stadium-emoji{font-size:38px;line-height:1;position:relative;z-index:1}
+.stadium-name{font-weight:700;font-size:15px;color:inherit;position:relative;z-index:1;line-height:1.15;letter-spacing:-.005em}
+.stadium-city{font-family:'Antonio','Open Sans',sans-serif;font-size:11px;color:inherit;opacity:.85;font-weight:500;position:relative;z-index:1;letter-spacing:.12em;text-transform:uppercase}
+.stadium-count{margin-top:4px;background:rgba(0,0,0,.22);color:inherit;font-family:'Open Sans',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;position:relative;z-index:1}
+.stadium-card[data-st-text="dark"] .stadium-count{background:rgba(255,255,255,.4)}
 
-  /* === PLAYGROUND CIRCLE (larger now since full-width) === */
-  .pg-circle{position:relative;width:100%;aspect-ratio:1/1;max-width:480px;margin:8px auto 0;background:radial-gradient(circle at center,rgba(0,229,255,.08) 0%,rgba(255,215,0,.05) 35%,transparent 70%);border-radius:50%}
-  .pg-ring{position:absolute;inset:18%;border:2px dashed rgba(255,215,0,.25);border-radius:50%;pointer-events:none;animation:ringSpin 60s linear infinite}
-  @keyframes ringSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-  .pg-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28%;aspect-ratio:1/1;border-radius:50%;background:linear-gradient(135deg,#001F3F 0%,#1E3A8A 30%,#0080FF 65%,#00E5FF 100%);border:3px solid #FFD700;box-shadow:0 0 0 2px rgba(255,215,0,.3),0 8px 24px rgba(255,180,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:2;pointer-events:none}
-  .pg-center-emoji{font-size:32px;line-height:1;animation:bobMini 3s ease-in-out infinite}
-  .pg-center-label{font-family:'Fredoka',sans-serif;font-weight:700;font-size:10px;color:#FFD700;letter-spacing:.04em;line-height:1.1;margin-top:4px}
-  .pg-station{position:absolute;width:32%;aspect-ratio:1/1;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,var(--st-c1,#FFD700),var(--st-c2,#FF8C00));padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 0 3px rgba(8,15,30,.85);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;z-index:3;font-family:'Fredoka',sans-serif;overflow:hidden}
-  [data-theme="light"] .pg-station{box-shadow:0 6px 18px rgba(0,0,0,.2),0 0 0 3px #fff}
-  .pg-station:hover{transform:scale(1.08);box-shadow:0 12px 28px rgba(0,229,255,.55),0 0 0 3px rgba(8,15,30,.85)}
-  .pg-pos-1{--st-c1:#00E5FF;--st-c2:#0080FF;top:0;left:34%}
-  .pg-pos-2{--st-c1:#FFD700;--st-c2:#FF8C00;top:23.5%;left:66.3%}
-  .pg-pos-3{--st-c1:#E4002B;--st-c2:#A30025;top:61.5%;left:54%}
-  .pg-pos-4{--st-c1:#3B82F6;--st-c2:#1E3A8A;top:61.5%;left:14%}
-  .pg-pos-5{--st-c1:#22C55E;--st-c2:#006847;top:23.5%;left:1.7%}
-  .pg-st-num{position:absolute;top:7%;left:50%;transform:translateX(-50%);font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(15px,2.6vw,20px);color:rgba(8,15,30,.75);letter-spacing:.04em;line-height:1}
-  .pg-st-emoji{font-size:clamp(24px,5.5vw,32px);line-height:1;margin-bottom:3px}
-  .pg-st-avatar{width:clamp(40px,9vw,56px);height:clamp(40px,9vw,56px);border-radius:50%;object-fit:cover;background:transparent;margin-bottom:4px}
-  .pg-st-name{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(10px,1.7vw,12px);color:#0a1530;line-height:1.05;padding:0 8px}
-  .pg-st-count{font-family:'Fredoka',sans-serif;font-weight:700;font-size:10px;color:rgba(8,15,30,.7);margin-top:3px;background:rgba(255,255,255,.4);padding:1px 7px;border-radius:99px}
+/* === Sticker page tabs (rendered by JS as .sp-tab with data-color) === */
+.sticker-pager{display:flex;gap:6px;justify-content:center;align-items:stretch;margin:6px 0 12px;flex-wrap:wrap}
+.sp-tab{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:99px;border:1.5px solid var(--lp-rule);background:rgba(255,255,255,.03);font-family:'Fredoka','Open Sans',sans-serif;font-weight:600;font-size:12px;color:var(--lp-muted);cursor:pointer;transition:all .18s;line-height:1;white-space:nowrap}
+[data-theme="light"] .sp-tab{background:#F8FAFC;border-color:rgba(15,23,42,.10)}
+.sp-tab:hover:not(.is-active){border-color:var(--accent);color:var(--text);transform:translateY(-1px)}
+[data-theme="light"] .sp-tab:hover:not(.is-active){border-color:var(--accent-text)}
+.sp-tab-icon{font-size:14px;line-height:1}
+.sp-tab-label{font-weight:700;letter-spacing:-.005em}
+.sp-tab-count{font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;background:rgba(255,255,255,.08);padding:2px 7px;border-radius:99px;color:inherit}
+[data-theme="light"] .sp-tab-count{background:rgba(15,23,42,.06)}
 
-  /* === Station focused view (hero avatar bumped 96→110px for stronger presence) === */
-  .station-hero{position:relative;display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--st-c1,#FFD700),var(--st-c2,#FF8C00));border-radius:24px;padding:22px 24px;margin-bottom:18px;overflow:hidden;box-shadow:0 10px 32px rgba(0,0,0,.25)}
-  .station-hero::before{content:'';position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25) 0%,transparent 70%);pointer-events:none}
-  .station-hero::after{content:'';position:absolute;bottom:-30px;left:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.15) 0%,transparent 70%);pointer-events:none}
-  .station-avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;flex-shrink:0;position:relative;z-index:1;box-shadow:0 8px 22px rgba(0,0,0,.32),0 0 0 4px rgba(255,255,255,.18);background:rgba(255,255,255,.1)}
-  .station-stadium-badge{width:110px;height:110px;border-radius:50%;flex-shrink:0;position:relative;z-index:1;background:rgba(8,15,30,.45);border:3px solid rgba(255,215,0,.75);display:flex;align-items:center;justify-content:center;font-size:54px;box-shadow:0 8px 22px rgba(0,0,0,.28),inset 0 2px 0 rgba(255,255,255,.15);filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
-  .station-info{position:relative;z-index:1;flex:1;min-width:0}
-  .station-num{font-family:'Fredoka',sans-serif;font-size:10px;font-weight:700;color:rgba(10,21,48,.65);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
-  .station-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:24px;color:#0a1530;line-height:1.15}
-  .station-meta{font-family:'Fredoka',sans-serif;font-size:13px;color:rgba(10,21,48,.75);font-weight:600;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
-  .station-meta-pill{background:rgba(255,255,255,.35);padding:3px 10px;border-radius:99px;backdrop-filter:blur(4px)}
-  .drills-list{display:flex;flex-direction:column;gap:14px;background:#080f1e;border:1.5px solid #00E5FF;border-radius:16px;padding:24px}
-  [data-theme="light"] .drills-list{background:#fff}
-  .drills-list-label{font-family:'Fredoka',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,229,255,.85);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-  [data-theme="light"] .drills-list-label{color:#0080FF}
-  .drills-list-label::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.22)}
-  #drills-list-target{display:flex;flex-direction:column;gap:20px}
+/* Active tab — solid filled pill in its theme color */
+.sp-tab.is-active{color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(0,0,0,.18);cursor:default;transform:none}
+.sp-tab.is-active .sp-tab-count{background:rgba(0,0,0,.22);color:#fff}
 
-  /* === Drill row === */
-  .prow{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);border-radius:16px;padding:18px;cursor:pointer;transition:all .15s;min-height:76px}
-  [data-theme="light"] .prow{background:rgba(13,21,40,.04);border-color:rgba(13,21,40,.1)}
-  .prow:hover{border-color:#00E5FF;transform:translateX(4px);box-shadow:0 0 0 1px #00E5FF}
-  .prow.pdone{background:linear-gradient(90deg,rgba(52,211,153,.16),rgba(52,211,153,.04));border-color:#34D399}
-  .prow-emoji{font-size:34px;flex-shrink:0;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.1));display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,215,0,.3)}
-  .prow.pdone .prow-emoji{background:linear-gradient(135deg,rgba(52,211,153,.3),rgba(6,182,212,.2));border-color:#34D399}
-  .prow-body{flex:1;min-width:0}
-  .prow-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:var(--text);line-height:1.2}
-  .prow-meta{font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-  .prow-badge{font-size:24px;flex-shrink:0}
+/* Per-page theming via data-color */
+.sp-tab[data-color="red"]{color:var(--lp-red)}
+.sp-tab[data-color="red"]:hover:not(.is-active){border-color:var(--lp-red);color:var(--lp-red)}
+.sp-tab[data-color="red"].is-active{background:var(--lp-red);color:#fff;box-shadow:0 3px 10px rgba(228,0,43,.30)}
 
-  /* === TRICKPFAD VIEW === */
-  .tp-wrap{position:relative;background:radial-gradient(circle at center,rgba(0,229,255,.08) 0%,rgba(255,215,0,.05) 35%,transparent 70%);border:none;border-radius:20px;padding:18px 12px;margin:8px auto 0;max-width:480px}
-  [data-theme="light"] .tp-wrap{background:radial-gradient(circle at center,rgba(0,128,255,.06) 0%,rgba(255,140,0,.04) 35%,transparent 70%)}
-  .tp-start,.tp-end{font-family:'Fredoka',sans-serif;font-weight:700;font-size:14px;text-align:center;padding:10px 18px;border-radius:99px;margin:0 auto;width:fit-content}
-  .tp-start{background:linear-gradient(135deg,#00E5FF,#0080FF);color:#fff;margin-bottom:10px;box-shadow:0 4px 14px rgba(0,229,255,.4)}
-  .tp-end{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a1530;margin-top:10px;opacity:.5;box-shadow:0 4px 14px rgba(255,180,0,.25)}
-  .tp-end.tp-end-done{opacity:1}
-  .tp-path{position:relative;padding:10px 0}
-  .tp-path::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:3px;background:repeating-linear-gradient(to bottom,#FFD700 0,#FFD700 8px,transparent 8px,transparent 16px);transform:translateX(-50%);opacity:.4}
-  .tp-node{position:relative;display:flex;align-items:center;gap:10px;margin:8px 0;cursor:pointer;width:48%;padding:10px 12px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);border-radius:14px;transition:transform .15s,border-color .15s}
-  [data-theme="light"] .tp-node{background:rgba(13,21,40,.04);border-color:rgba(13,21,40,.1)}
-  .tp-node:hover{border-color:#FFD700;transform:scale(1.03)}
-  .tp-node.tp-left{margin-right:auto;flex-direction:row}
-  .tp-node.tp-right{margin-left:auto;flex-direction:row-reverse;text-align:right}
-  .tp-node.tp-done{background:linear-gradient(135deg,rgba(52,211,153,.18),rgba(52,211,153,.05));border-color:#34D399}
-  .tp-node.tp-star{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.1));border-color:#FFD700}
-  .tp-node.tp-next{border-color:#FFD700;animation:tpPulse 2s ease-in-out infinite}
-  @keyframes tpPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.5)}50%{box-shadow:0 0 0 6px rgba(255,215,0,0)}}
-  .tp-emoji{font-size:24px;line-height:1;flex-shrink:0;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.1));display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,215,0,.3)}
-  .tp-node.tp-done .tp-emoji{background:linear-gradient(135deg,rgba(52,211,153,.3),rgba(6,182,212,.2));border-color:#34D399}
-  .tp-body{min-width:0;flex:1}
-  .tp-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:13px;color:var(--text);line-height:1.15}
-  .tp-meta{font-size:10px;color:var(--muted);margin-top:2px;font-weight:600;text-transform:uppercase}
-  .tp-badge{position:absolute;top:-7px;right:-7px;font-size:13px;width:24px;height:24px;border-radius:50%;background:#0d1528;border:2px solid #FFD700;display:flex;align-items:center;justify-content:center;color:#FFD700;font-family:'Fredoka',sans-serif;font-weight:700}
-  [data-theme="light"] .tp-badge{background:#fff}
-  .tp-node.tp-right .tp-badge{right:auto;left:-7px}
-  .tp-node.tp-done .tp-badge{color:#34D399;border-color:#34D399}
+.sp-tab[data-color="blue"]{color:var(--accent-text)}
+.sp-tab[data-color="blue"]:hover:not(.is-active){border-color:var(--accent-text);color:var(--accent-text)}
+.sp-tab[data-color="blue"].is-active{background:var(--accent-text);color:#fff;box-shadow:0 3px 10px rgba(8,145,178,.30)}
 
-  /* === Sidebar cards ===
-     Background blends with the page in both modes — the cyan border and
-     internal accents (avatars, sticker pops, gold labels) provide all the
-     visual definition. */
-  .sb-card{background:transparent;border:1.5px solid #00E5FF;border-radius:12px;padding:18px}
-  [data-theme="light"] .sb-card{background:transparent;border-color:#0080FF}
-  .sb-card-stickers{background:transparent}
-  [data-theme="light"] .sb-card-stickers{background:transparent}
-  .sb-card-prog{background:transparent}
-  [data-theme="light"] .sb-card-prog{background:transparent}
-  .sb-label{font-family:'Garet W05 Bold','Open Sans',sans-serif;font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;border-bottom:2px solid var(--accent);padding-bottom:10px}
-  [data-theme="light"] .sb-label{color:#0080FF;border-bottom-color:#0080FF}
-  .sb-label.gold{color:#FFD700;border-bottom-color:#FFD700}
-  [data-theme="light"] .sb-label.gold{color:#FF8C00;border-bottom-color:#FF8C00}
+.sp-tab[data-color="green"]{color:var(--lp-green)}
+.sp-tab[data-color="green"]:hover:not(.is-active){border-color:var(--lp-green);color:var(--lp-green)}
+.sp-tab[data-color="green"].is-active{background:var(--lp-green);color:#fff;box-shadow:0 3px 10px rgba(34,197,94,.30)}
 
-  .yip-card{text-align:center;background:transparent;position:relative;overflow:hidden}
-  /* Inner cyan glow removed — the avatars themselves now carry the visual punch. */
-  [data-theme="light"] .yip-card{background:transparent}
-  .yip-img{width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid transparent;background:linear-gradient(#0d1528,#0d1528) padding-box,linear-gradient(135deg,#00E5FF,#0080FF,#FFD700) border-box;box-shadow:0 0 28px rgba(0,229,255,.45),0 0 40px rgba(0,128,255,.22);margin:0 auto 10px;display:block;animation:bobMini 3.5s ease-in-out infinite;position:relative}
-  [data-theme="light"] .yip-img{background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#00E5FF,#0080FF,#FFD700) border-box}
-  .yip-greeting{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:4px;position:relative;z-index:1}
-  .yip-sub{font-size:11px;color:var(--muted);font-weight:500;line-height:1.5;position:relative;z-index:1}
+/* === PLAYGROUND CIRCLE === */
+.pg-circle{position:relative;width:100%;aspect-ratio:1/1;max-width:480px;margin:8px auto 0;border-radius:50%}
+.pg-ring{position:absolute;inset:18%;border:1px dashed rgba(0,229,255,.3);border-radius:50%;pointer-events:none}
+[data-theme="light"] .pg-ring{border-color:rgba(8,145,178,.3)}
+.pg-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28%;aspect-ratio:1/1;border-radius:50%;background:linear-gradient(135deg,#1a2540 0%,#0b1220 100%);border:2px solid var(--accent);box-shadow:0 4px 14px rgba(0,229,255,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:2;pointer-events:none;overflow:hidden}
+[data-theme="light"] .pg-center{background:linear-gradient(135deg,#FFFFFF 0%,#F0FBFF 100%);border-color:var(--accent-text);box-shadow:0 4px 14px rgba(8,145,178,.25)}
+.pg-center-avatar{width:78%;height:78%;border-radius:50%;object-fit:cover}
+.pg-station{position:absolute;width:32%;aspect-ratio:1/1;border-radius:50%;border:none;cursor:pointer;background:var(--accent-text);padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.22);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;z-index:3;font-family:'Fredoka',sans-serif;overflow:hidden}
+.pg-station:hover{transform:scale(1.05);box-shadow:0 10px 24px rgba(0,0,0,.28)}
+.pg-pos-1{top:0;left:34%}
+.pg-pos-2{top:23.5%;left:66.3%}
+.pg-pos-3{top:61.5%;left:54%}
+.pg-pos-4{top:61.5%;left:14%}
+.pg-pos-5{top:23.5%;left:1.7%;background:var(--lp-gold-deep)}
+.pg-st-num{position:absolute;top:7%;left:50%;transform:translateX(-50%);font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:clamp(13px,2.2vw,17px);color:rgba(255,255,255,.85);letter-spacing:.12em;line-height:1}
+.pg-st-emoji{font-size:clamp(24px,5.5vw,32px);line-height:1;margin-bottom:3px}
+.pg-st-avatar{width:clamp(40px,9vw,56px);height:clamp(40px,9vw,56px);border-radius:50%;object-fit:cover;background:transparent;margin-bottom:4px;border:2px solid rgba(255,255,255,.4)}
+.pg-st-name{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(10px,1.7vw,12px);color:#fff;line-height:1.05;padding:0 8px}
+.pg-st-count{font-family:'Open Sans',sans-serif;font-weight:700;font-size:10px;color:rgba(255,255,255,.95);margin-top:3px;background:rgba(0,0,0,.28);padding:1px 8px;border-radius:99px}
 
-  .sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow:hidden;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s}
-  .sticker-grid.sg-fresh-left{transform:translateX(-40px);opacity:0;transition:none}
-  .sticker-grid.sg-fresh-right{transform:translateX(40px);opacity:0;transition:none}
-  @media (prefers-reduced-motion:reduce){.sticker-grid{transition:none}}
-  .sticker{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(0,229,255,.04);border:2px dashed rgba(0,229,255,.18);position:relative;transition:all .3s}
-  [data-theme="light"] .sticker{background:rgba(0,128,255,.05);border-color:rgba(0,128,255,.22)}
-  .sticker.earned{background:linear-gradient(135deg,#001F3F 0%,#1E3A8A 30%,#0080FF 65%,#00E5FF 100%);border:2px solid #FFD700;box-shadow:0 0 0 1px rgba(255,215,0,.35),0 3px 14px rgba(255,180,0,.4),inset 0 1px 0 rgba(255,255,255,.15);animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
-  [data-theme="light"] .sticker.earned{background:linear-gradient(135deg,#0080FF 0%,#3B82F6 50%,#00E5FF 100%);border-color:#FF8C00;box-shadow:0 0 0 1px rgba(255,140,0,.45),0 3px 14px rgba(255,140,0,.35),inset 0 1px 0 rgba(255,255,255,.2)}
-  .sticker.earned::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.25),transparent 55%);border-radius:12px;pointer-events:none}
-  @keyframes pop{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
-  .sticker-count{font-family:'Fredoka',sans-serif;text-align:center;margin-top:10px;font-size:13px;font-weight:600;color:#FFD700}
-  [data-theme="light"] .sticker-count{color:#FF8C00}
+/* === STATION VIEW === */
+.station-hero{position:relative;display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--accent2) 0%,var(--accent3) 100%);border-radius:18px;padding:24px;margin-bottom:18px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.station-avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;flex-shrink:0;position:relative;z-index:1;box-shadow:0 4px 14px rgba(0,0,0,.30);background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.3)}
+.station-stadium-badge{width:110px;height:110px;border-radius:50%;flex-shrink:0;position:relative;z-index:1;background:rgba(0,0,0,.25);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:54px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.station-info{position:relative;z-index:1;flex:1;min-width:0}
+.station-num{font-family:'Antonio','Open Sans',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.80);letter-spacing:.22em;text-transform:uppercase;margin-bottom:6px}
+.station-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:26px;color:#fff;line-height:1.15;letter-spacing:-.01em}
+.station-meta{font-family:'Open Sans',sans-serif;font-size:12px;color:rgba(255,255,255,.85);font-weight:700;margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.station-meta-pill{background:rgba(255,255,255,.20);padding:4px 11px;border-radius:99px;color:#fff;letter-spacing:.02em}
+.drills-list{display:flex;flex-direction:column;gap:14px;background:transparent;border:1px solid var(--lp-rule);border-radius:16px;padding:24px}
+[data-theme="light"] .drills-list{background:#fff;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.drills-list-label{font-family:'Antonio','Open Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-text);margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.drills-list-label::after{content:'';flex:1;height:1px;background:var(--lp-rule)}
+#drills-list-target{display:flex;flex-direction:column;gap:14px}
 
-  .kf-hero{background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.22);border-radius:10px;padding:10px;text-align:center}
-  [data-theme="light"] .kf-hero{background:rgba(0,128,255,.06);border-color:rgba(0,128,255,.25)}
-  .kf-pname{font-family:'Fredoka',sans-serif;font-weight:700;font-size:15px;color:var(--text)}
-  .kf-sub{font-size:9px;color:var(--muted);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-  .kf-stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:10px}
-  .kf-stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:10px 6px;text-align:center}
-  [data-theme="light"] .kf-stat-card{background:#EFF6FF;border-color:rgba(0,128,255,.12)}
-  .kf-stat-num{font-family:'Fredoka',sans-serif;font-weight:700;font-size:18px;color:#00E5FF;line-height:1.1}
-  [data-theme="light"] .kf-stat-num{color:#0080FF}
-  .kf-stat-label{font-size:9px;color:var(--muted);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+/* === Drill row === */
+.prow{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.03);border:1px solid var(--lp-rule);border-radius:14px;padding:18px;cursor:pointer;transition:all .15s;min-height:76px}
+[data-theme="light"] .prow{background:#F8FAFC;border-color:rgba(15,23,42,.08)}
+.prow:hover{border-color:rgba(0,229,255,.5);background:rgba(0,229,255,.04);transform:translateX(4px)}
+[data-theme="light"] .prow:hover{border-color:rgba(8,145,178,.5);background:rgba(8,145,178,.04)}
+.prow.pdone{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.5)}
+[data-theme="light"] .prow.pdone{background:rgba(25,152,72,.06);border-color:rgba(25,152,72,.5)}
+.prow-emoji{font-size:32px;flex-shrink:0;width:54px;height:54px;border-radius:50%;background:rgba(0,229,255,.10);display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,229,255,.30)}
+[data-theme="light"] .prow-emoji{background:rgba(8,145,178,.08);border-color:rgba(8,145,178,.30)}
+.prow.pdone .prow-emoji{background:rgba(34,197,94,.12);border-color:var(--lp-green)}
+.prow-body{flex:1;min-width:0}
+.prow-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:var(--text);line-height:1.2}
+.prow-meta{font-family:'Antonio','Open Sans',sans-serif;font-size:11px;color:var(--lp-faint);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.14em}
+.prow-badge{font-size:24px;flex-shrink:0}
 
-  @keyframes bobMini{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-3px) rotate(2deg)}}
+/* === TRICKPFAD === */
+.tp-wrap{position:relative;background:transparent;border:1px solid var(--lp-rule);border-radius:18px;padding:20px 14px;margin:8px auto 0;max-width:520px}
+[data-theme="light"] .tp-wrap{background:#fff;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.tp-start,.tp-end{font-family:'Fredoka',sans-serif;font-weight:700;font-size:14px;text-align:center;padding:10px 20px;border-radius:99px;margin:0 auto;width:fit-content}
+.tp-start{background:var(--accent);color:#0a1530;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,229,255,.30)}
+[data-theme="light"] .tp-start{background:var(--accent-text);color:#fff;box-shadow:0 4px 14px rgba(8,145,178,.30)}
+.tp-end{background:var(--lp-gold);color:#1a1500;margin-top:12px;opacity:.5;box-shadow:0 4px 14px rgba(255,215,0,.20)}
+[data-theme="light"] .tp-end{background:var(--lp-gold-deep);color:#fff;box-shadow:0 4px 14px rgba(160,106,8,.25)}
+.tp-end.tp-end-done{opacity:1}
+.tp-path{position:relative;padding:12px 0}
+.tp-path::before{content:'';position:absolute;left:50%;top:12px;bottom:12px;width:0;border-left:2px dashed rgba(0,229,255,.35);transform:translateX(-50%)}
+[data-theme="light"] .tp-path::before{border-left-color:rgba(8,145,178,.35)}
+.tp-node{position:relative;display:flex;align-items:center;gap:10px;margin:10px 0;cursor:pointer;width:48%;padding:12px 14px;background:rgba(255,255,255,.03);border:1px solid var(--lp-rule);border-radius:14px;transition:transform .15s,border-color .15s,background .15s}
+[data-theme="light"] .tp-node{background:#F8FAFC;border-color:rgba(15,23,42,.08)}
+.tp-node:hover{border-color:var(--accent);transform:scale(1.02);background:rgba(0,229,255,.04)}
+[data-theme="light"] .tp-node:hover{border-color:var(--accent-text);background:rgba(8,145,178,.04)}
+.tp-node.tp-left{margin-right:auto;flex-direction:row}
+.tp-node.tp-right{margin-left:auto;flex-direction:row-reverse;text-align:right}
+.tp-node.tp-done{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.5)}
+[data-theme="light"] .tp-node.tp-done{background:rgba(25,152,72,.06);border-color:rgba(25,152,72,.5)}
+.tp-node.tp-star{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.5)}
+[data-theme="light"] .tp-node.tp-star{background:rgba(202,131,9,.08);border-color:rgba(202,131,9,.5)}
+.tp-node.tp-next{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,229,255,.18)}
+[data-theme="light"] .tp-node.tp-next{border-color:var(--accent-text);box-shadow:0 0 0 2px rgba(8,145,178,.18)}
+.tp-emoji{font-size:24px;line-height:1;flex-shrink:0;width:44px;height:44px;border-radius:50%;background:rgba(0,229,255,.10);display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,229,255,.30)}
+[data-theme="light"] .tp-emoji{background:rgba(8,145,178,.08);border-color:rgba(8,145,178,.30)}
+.tp-node.tp-done .tp-emoji{background:rgba(34,197,94,.12);border-color:var(--lp-green)}
+.tp-body{min-width:0;flex:1}
+.tp-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:13px;color:var(--text);line-height:1.15}
+.tp-meta{font-family:'Antonio','Open Sans',sans-serif;font-size:10px;color:var(--lp-faint);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.14em}
+.tp-badge{position:absolute;top:-7px;right:-7px;font-size:11px;width:24px;height:24px;border-radius:50%;background:var(--surface);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;color:var(--accent-text);font-family:'Antonio',sans-serif;font-weight:700}
+[data-theme="light"] .tp-badge{background:#fff;color:var(--accent-text);border-color:var(--accent-text)}
+.tp-node.tp-right .tp-badge{right:auto;left:-7px}
+.tp-node.tp-done .tp-badge{color:var(--lp-green);border-color:var(--lp-green)}
 
-  /* === DRILL MODAL === */
-  .kmodal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;animation:fadeIn .25s}
-  .kmodal-overlay.open{display:flex}
-  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  .kmodal{background:var(--bg);border:4px solid #FFD700;border-radius:24px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;position:relative;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
-  [data-theme="light"] .kmodal{background:#fff}
-  @keyframes popIn{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
-  .kmodal-close{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:24px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1}
-  [data-theme="light"] .kmodal-close{background:rgba(13,21,40,.1);color:#0a1530}
-  .kmodal-close:hover{transform:rotate(90deg);transition:transform .2s}
-  .kmodal-content{padding:28px 24px 24px}
-  .kmodal-step{display:none}
-  .kmodal-step.active{display:block;animation:fadeIn .3s}
-  .kmodal-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:24px;color:var(--text);margin-bottom:6px;text-align:center;line-height:1.1}
-  .kmodal-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px;font-weight:500}
-  .kembed{position:relative;padding-bottom:56.25%;height:0;border-radius:16px;overflow:hidden;background:#000;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-  .kembed iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
-  .speech-with-mascot{display:flex;gap:10px;align-items:flex-start;margin:14px 0}
-  .speech-mascot-img{width:60px;height:60px;border-radius:50%;object-fit:cover;flex-shrink:0;border:3px solid #FFD700;box-shadow:0 4px 12px rgba(255,180,0,.35)}
-  .speech{flex:1;position:relative;background:#fff;color:#0a1530;border-radius:18px;padding:12px 16px;font-family:'Fredoka',sans-serif;font-size:14px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15)}
-  .speech::before{content:'';position:absolute;left:-10px;top:18px;width:0;height:0;border-right:12px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent}
-  .speech strong{color:#FF8C00;font-weight:700}
+/* === SIDEBAR CARDS === */
+.sb-card{background:rgba(255,255,255,.03);border:1px solid var(--lp-rule);border-radius:14px;padding:20px}
+[data-theme="light"] .sb-card{background:#fff;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.sb-label{font-family:'Antonio','Open Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-text);margin-bottom:16px;border-bottom:1px solid var(--lp-rule);padding-bottom:12px;display:flex;align-items:center;gap:8px}
+.sb-label.gold{color:var(--lp-gold)}
 
-  .krate-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
-  @media(min-width:480px){.krate-grid{grid-template-columns:repeat(4,1fr)}}
-  .krate{background:rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.18);border-radius:18px;padding:16px 8px;text-align:center;cursor:pointer;transition:all .15s;min-height:100px;display:flex;flex-direction:column;justify-content:center;align-items:center}
-  [data-theme="light"] .krate{background:#FFF9E6;border-color:rgba(13,21,40,.15)}
-  .krate:hover{transform:translateY(-3px) scale(1.03);border-color:#FFD700}
-  .krate-emoji{font-size:42px;line-height:1;margin-bottom:6px}
-  .krate-label{font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:var(--text)}
-  .krate.sel{transform:scale(1.05)}
-  .krate.sel-thumbsdown{background:rgba(255,107,107,.2);border-color:#FF6B6B;box-shadow:0 0 18px rgba(255,107,107,.4)}
-  .krate.sel-thinking{background:rgba(255,180,0,.2);border-color:#FFB400;box-shadow:0 0 18px rgba(255,180,0,.4)}
-  .krate.sel-thumbsup{background:rgba(52,211,153,.2);border-color:#34D399;box-shadow:0 0 18px rgba(52,211,153,.4)}
-  .krate.sel-star{background:linear-gradient(135deg,rgba(255,215,0,.25),rgba(255,140,0,.15));border-color:#FFD700;box-shadow:0 0 26px rgba(255,215,0,.5)}
+.yip-card{text-align:center;position:relative;overflow:hidden}
+.yip-img{width:140px;height:140px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);margin:0 auto 10px;display:block;background:var(--surface);position:relative}
+[data-theme="light"] .yip-img{border-color:var(--accent-text);background:#fff}
+.yip-greeting{font-family:'Fredoka',sans-serif;font-weight:700;font-size:18px;color:var(--text);margin-bottom:4px;position:relative;z-index:1;letter-spacing:-.005em}
+.yip-sub{font-size:12px;color:var(--lp-muted);font-weight:500;line-height:1.5;position:relative;z-index:1}
 
-  .kbig-btn{display:block;width:100%;background:linear-gradient(135deg,#00E5FF,#0080FF);color:#fff;font-family:'Fredoka',sans-serif;font-weight:700;font-size:18px;padding:16px;border-radius:18px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(0,180,255,.4);transition:transform .15s;margin-top:8px}
-  .kbig-btn:hover{transform:scale(1.02)}
-  .kbig-btn.gold{background:linear-gradient(135deg,#FFD700,#FF8C00);box-shadow:0 6px 18px rgba(255,180,0,.45);color:#0a1530}
+.sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;overflow:hidden;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+.sticker-grid.sg-fresh-left{transform:translateX(-40px);opacity:0;transition:none}
+.sticker-grid.sg-fresh-right{transform:translateX(40px);opacity:0;transition:none}
+@media (prefers-reduced-motion:reduce){.sticker-grid{transition:none}}
+.sticker{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,.03);border:1px dashed var(--lp-rule);position:relative;transition:all .3s}
+[data-theme="light"] .sticker{background:#F8FAFC;border-color:rgba(15,23,42,.10)}
+.sticker.earned{background:linear-gradient(135deg,rgba(0,229,255,.15) 0%,rgba(31,128,255,.10) 100%);border:1px solid var(--accent);box-shadow:0 2px 10px rgba(0,229,255,.22);animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+[data-theme="light"] .sticker.earned{background:linear-gradient(135deg,rgba(8,145,178,.10) 0%,rgba(31,128,255,.08) 100%);border-color:var(--accent-text);box-shadow:0 2px 10px rgba(8,145,178,.20)}
+@keyframes pop{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+.sticker-count{font-family:'Fredoka','Open Sans',sans-serif;text-align:center;margin:4px 0 12px;font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.01em;line-height:1.1}
+.sticker-count::before{content:'';display:block;width:36px;height:2px;background:linear-gradient(90deg,var(--accent-text) 0%,var(--lp-gold) 100%);margin:0 auto 8px;border-radius:2px}
 
-  .ksuccess{text-align:center;padding:16px 0}
-  .ksuccess-mascot{width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid #FFD700;box-shadow:0 0 30px rgba(255,180,0,.5);margin:0 auto 12px;display:block;animation:popBig .6s cubic-bezier(.34,1.56,.64,1)}
-  @keyframes popBig{0%{transform:scale(0) rotate(-180deg)}60%{transform:scale(1.3) rotate(20deg)}100%{transform:scale(1) rotate(0)}}
-  .ksuccess-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:30px;color:#FFD700;margin-bottom:8px;text-shadow:0 0 24px rgba(255,215,0,.5)}
-  .ksuccess-msg{font-size:15px;color:var(--text);margin-bottom:16px;font-weight:500;line-height:1.4}
-  .ksticker-reveal{display:flex;width:110px;height:110px;border-radius:28px;background:linear-gradient(135deg,#001F3F 0%,#1E3A8A 30%,#0080FF 65%,#00E5FF 100%);border:3px solid #FFD700;align-items:center;justify-content:center;font-size:72px;margin:0 auto 16px;box-shadow:0 0 0 2px rgba(255,215,0,.3),0 0 40px rgba(255,180,0,.6),inset 0 2px 0 rgba(255,255,255,.15);animation:popBig .6s cubic-bezier(.34,1.56,.64,1) .2s both;position:relative}
-  .ksticker-reveal::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.2),transparent 60%);border-radius:25px;pointer-events:none}
+.kf-hero{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.22);border-radius:10px;padding:12px;text-align:center}
+[data-theme="light"] .kf-hero{background:rgba(202,131,9,.06);border-color:rgba(202,131,9,.30)}
+.kf-pname{font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;color:var(--text);letter-spacing:-.005em}
+.kf-sub{font-family:'Antonio','Open Sans',sans-serif;font-size:9px;color:var(--lp-faint);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.16em}
+.kf-stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.kf-stat-card{background:rgba(255,255,255,.03);border:1px solid var(--lp-rule);border-radius:10px;padding:12px 6px;text-align:center}
+[data-theme="light"] .kf-stat-card{background:#F8FAFC;border-color:rgba(15,23,42,.08)}
+.kf-stat-num{font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:22px;color:var(--lp-gold);line-height:1.1}
+.kf-stat-label{font-family:'Antonio','Open Sans',sans-serif;font-size:9px;color:var(--lp-faint);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.14em}
 
-  .confetti-container{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
-  .confetti-piece{position:absolute;width:10px;height:14px;animation:confettiFall 2.5s linear forwards}
-  @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(110vh) rotate(720deg)}}
+/* === DRILL MODAL === */
+.kmodal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px;animation:fadeIn .25s}
+.kmodal-overlay.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.kmodal{background:var(--bg);border:1px solid var(--lp-rule);border-radius:18px;max-width:560px;width:100%;max-height:92vh;overflow-y:auto;position:relative;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+[data-theme="light"] .kmodal{background:#fff;border-color:rgba(15,23,42,.12)}
+@keyframes popIn{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.kmodal-close{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.10);border:none;color:var(--text);font-size:24px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1}
+[data-theme="light"] .kmodal-close{background:rgba(15,23,42,.06);color:var(--text)}
+.kmodal-close:hover{transform:rotate(90deg);transition:transform .2s}
+.kmodal-content{padding:30px 26px 26px}
+.kmodal-step{display:none}
+.kmodal-step.active{display:block;animation:fadeIn .3s}
+.kmodal-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:24px;color:var(--text);margin-bottom:6px;text-align:center;line-height:1.1;letter-spacing:-.005em}
+.kmodal-sub{font-size:13px;color:var(--lp-muted);text-align:center;margin-bottom:18px;font-weight:500}
+.kembed{position:relative;padding-bottom:56.25%;height:0;border-radius:14px;overflow:hidden;background:#000;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.30)}
+.kembed iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.speech-with-mascot{display:flex;gap:10px;align-items:flex-start;margin:14px 0}
+.speech-mascot-img{width:68px;height:68px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--accent)}
+[data-theme="light"] .speech-mascot-img{border-color:var(--accent-text)}
+.speech{flex:1;position:relative;background:#fff;color:#0a1530;border-radius:16px;padding:13px 16px;font-family:'Fredoka',sans-serif;font-size:14px;font-weight:500;box-shadow:0 2px 10px rgba(0,0,0,.12);line-height:1.45}
+.speech::before{content:'';position:absolute;left:-10px;top:18px;width:0;height:0;border-right:12px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent}
+.speech strong{color:var(--accent-text);font-weight:700}
 
-  .ktryagain{text-align:center;padding:16px 0}
+.krate-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+@media(min-width:480px){.krate-grid{grid-template-columns:repeat(4,1fr)}}
+.krate{background:rgba(255,255,255,.04);border:1px solid var(--lp-rule);border-radius:16px;padding:18px 8px;text-align:center;cursor:pointer;transition:all .15s;min-height:104px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+[data-theme="light"] .krate{background:#F8FAFC;border-color:rgba(15,23,42,.08)}
+.krate:hover{transform:translateY(-2px);border-color:var(--accent)}
+[data-theme="light"] .krate:hover{border-color:var(--accent-text)}
+.krate-emoji{font-size:44px;line-height:1;margin-bottom:6px}
+.krate-label{font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:var(--text)}
+.krate.sel{transform:scale(1.04)}
+.krate.sel-thumbsdown{background:rgba(228,0,43,.10);border-color:var(--lp-red)}
+.krate.sel-thinking{background:rgba(255,215,0,.10);border-color:var(--lp-gold)}
+.krate.sel-thumbsup{background:rgba(34,197,94,.12);border-color:var(--lp-green)}
+.krate.sel-star{background:rgba(0,229,255,.14);border-color:var(--accent);box-shadow:0 0 14px rgba(0,229,255,.30)}
+[data-theme="light"] .krate.sel-star{background:rgba(8,145,178,.10);border-color:var(--accent-text);box-shadow:0 0 14px rgba(8,145,178,.25)}
 
-  /* === AVATAR SWITCHER (sidebar) === */
-  .av-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;position:relative;z-index:1}
-  .av-opt{background:transparent;border:none;padding:8px 2px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;border-radius:14px;transition:transform .2s,background .2s;font-family:inherit}
-  .av-opt:hover{transform:translateY(-2px);background:rgba(255,255,255,.06)}
-  [data-theme="light"] .av-opt:hover{background:rgba(13,21,40,.04)}
-  .av-opt img{width:78px;height:78px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);transition:all .25s;display:block}
-  [data-theme="light"] .av-opt img{border-color:rgba(13,21,40,.12);background:rgba(13,21,40,.04)}
-  .av-opt-name{font-family:'Fredoka',sans-serif;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.02em;transition:color .2s,font-weight .2s}
-  .av-opt.selected img{border-color:#00E5FF;box-shadow:0 0 0 2px rgba(0,229,255,.35),0 6px 18px rgba(0,229,255,.45);transform:scale(1.1);animation:bobMini 3.5s ease-in-out infinite}
-  .av-opt.selected .av-opt-name{color:#00E5FF;font-weight:700}
-  [data-theme="light"] .av-opt.selected img{border-color:#0080FF;box-shadow:0 0 0 2px rgba(0,128,255,.3),0 6px 18px rgba(0,128,255,.35)}
-  [data-theme="light"] .av-opt.selected .av-opt-name{color:#0080FF}
-  /* When the picker is moved above the hero on small screens */
-  .yip-card.is-mobile-top{margin:14px 14px 0;border-radius:14px}
-  .yip-card.is-mobile-top .yip-greeting,
-  .yip-card.is-mobile-top .yip-sub{display:none}
+.kbig-btn{display:block;width:100%;background:var(--accent);color:#0a1530;font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;padding:16px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,229,255,.30);transition:transform .15s,box-shadow .15s;margin-top:8px;letter-spacing:-.005em}
+[data-theme="light"] .kbig-btn{background:var(--accent-text);color:#fff;box-shadow:0 4px 14px rgba(8,145,178,.30)}
+.kbig-btn:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 6px 20px rgba(0,229,255,.40)}
+[data-theme="light"] .kbig-btn:hover{box-shadow:0 6px 20px rgba(8,145,178,.40)}
+.kbig-btn.gold{background:linear-gradient(135deg,var(--lp-gold) 0%,var(--lp-gold-deep) 100%);color:#1a1500;box-shadow:0 4px 14px rgba(255,215,0,.30)}
+[data-theme="light"] .kbig-btn.gold{color:#fff;box-shadow:0 4px 14px rgba(202,131,9,.30)}
+.kbig-btn.gold:hover{box-shadow:0 6px 20px rgba(255,215,0,.40)}
 
-  .t7-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#0a1530,#1e3a8a);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
-  .t7-overlay-mascot{width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid #FFD700;box-shadow:0 0 24px rgba(255,180,0,.5);margin-bottom:8px}
-  .t7-overlay h2{font-family:'Fredoka',sans-serif;font-size:26px;font-weight:700;color:#fff;margin:14px 0 8px}
-  .t7-overlay p{font-size:15px;color:rgba(255,255,255,.7);max-width:320px;margin-bottom:24px;line-height:1.5}
-  .t7-overlay input{width:100%;max-width:280px;background:rgba(255,255,255,.12);border:3px solid rgba(0,229,255,.5);border-radius:16px;padding:14px;color:#fff;font-family:'Fredoka',sans-serif;font-size:20px;font-weight:600;text-align:center;outline:none;margin-bottom:10px}
-  .t7-overlay input:focus{border-color:#00E5FF}
-  .t7-overlay .ov-hint{font-size:13px;color:rgba(0,229,255,.8);min-height:22px;margin-bottom:12px}
-  .t7-overlay button{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#0a1530;font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;padding:13px 32px;border-radius:16px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(255,180,0,.5);transition:transform .15s}
-  .t7-overlay button:hover{transform:scale(1.05)}
+.ksuccess{text-align:center;padding:16px 0}
+.ksuccess-mascot{width:110px;height:110px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);margin:0 auto 12px;display:block}
+[data-theme="light"] .ksuccess-mascot{border-color:var(--accent-text)}
+@keyframes popBig{0%{transform:scale(0) rotate(-180deg)}60%{transform:scale(1.3) rotate(20deg)}100%{transform:scale(1) rotate(0)}}
+.ksuccess-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:32px;color:var(--accent-text);margin-bottom:8px;letter-spacing:-.01em}
+.ksuccess-msg{font-size:15px;color:var(--text);margin-bottom:18px;font-weight:500;line-height:1.45}
+.ksticker-reveal{display:flex;width:110px;height:110px;border-radius:28px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);border:2px solid var(--accent);align-items:center;justify-content:center;font-size:72px;margin:0 auto 16px;box-shadow:0 6px 20px rgba(0,229,255,.40);animation:popBig .6s cubic-bezier(.34,1.56,.64,1) .2s both;position:relative}
+[data-theme="light"] .ksticker-reveal{background:linear-gradient(135deg,var(--accent-text) 0%,var(--accent2) 100%);border-color:var(--accent-text);box-shadow:0 6px 20px rgba(8,145,178,.35)}
 
-  /* === AVATAR PROMINENCE ADDITIONS ===
-     Small, visible avatar appearances threaded through the page so the
-     chosen avatar feels like a constant companion. Every image uses the
-     class `av-img` so applyAvatar() swaps the src/alt on selection. */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+.confetti-piece{position:absolute;width:10px;height:14px;animation:confettiFall 2.5s linear forwards}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(110vh) rotate(720deg)}}
 
-  /* Banner mascot — sits in the kh-wrap top-right, peeking over the orb. */
-  .kh-mascot{position:absolute;top:50%;right:14px;transform:translateY(-50%);width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid #FFD700;box-shadow:0 4px 14px rgba(255,180,0,.4),0 0 0 2px rgba(0,229,255,.25);background:rgba(0,0,0,.15);z-index:2;animation:bobMini 3.5s ease-in-out infinite}
-  [data-theme="light"] .kh-mascot{box-shadow:0 4px 14px rgba(255,140,0,.35),0 0 0 2px rgba(0,128,255,.25);background:rgba(255,255,255,.5)}
-  .kh-wrap .kh-content{padding-right:80px}
-  @media(max-width:520px){.kh-mascot{width:52px;height:52px;right:10px}.kh-wrap .kh-content{padding-right:66px}}
+.ktryagain{text-align:center;padding:16px 0}
 
-  /* Landing-card mascot — peeking from the top-right of each landing card. */
-  .lc-mascot{position:absolute;top:14px;right:14px;width:54px;height:54px;border-radius:50%;object-fit:cover;border:3px solid #FFD700;box-shadow:0 4px 14px rgba(255,180,0,.45);background:rgba(0,0,0,.15);z-index:2;animation:bobMini 3.5s ease-in-out infinite;pointer-events:none}
-  [data-theme="light"] .lc-mascot{box-shadow:0 4px 14px rgba(255,140,0,.35);background:#fff}
-  .landing-card.lc-trickpfad .lc-mascot{border-color:#00E5FF;box-shadow:0 4px 14px rgba(0,180,255,.4)}
-  [data-theme="light"] .landing-card.lc-trickpfad .lc-mascot{border-color:#0080FF;box-shadow:0 4px 14px rgba(0,128,255,.35)}
-  .landing-card.lc-stadien .lc-mascot{border-color:#22C55E;box-shadow:0 4px 14px rgba(34,197,94,.4)}
+/* === AVATAR SWITCHER === */
+.av-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px;position:relative;z-index:1}
+.av-opt{background:transparent;border:none;padding:8px 2px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;border-radius:14px;transition:transform .2s,background .2s;font-family:inherit}
+.av-opt:hover{background:rgba(255,255,255,.05)}
+[data-theme="light"] .av-opt:hover{background:rgba(15,23,42,.04)}
+.av-opt img{width:78px;height:78px;border-radius:50%;object-fit:cover;border:2px solid var(--lp-rule);background:rgba(255,255,255,.04);transition:border-color .2s,box-shadow .2s,transform .2s;display:block}
+[data-theme="light"] .av-opt img{border-color:rgba(15,23,42,.12);background:rgba(15,23,42,.04)}
+.av-opt-name{font-family:'Fredoka',sans-serif;font-size:13px;font-weight:600;color:var(--lp-muted);letter-spacing:-.005em;transition:color .2s,font-weight .2s}
+.av-opt.selected img{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,229,255,.25);transform:scale(1.06)}
+.av-opt.selected .av-opt-name{color:var(--accent-text);font-weight:700}
+[data-theme="light"] .av-opt.selected img{border-color:var(--accent-text);box-shadow:0 0 0 2px rgba(8,145,178,.20)}
+.yip-card.is-mobile-top{margin:14px 14px 0;border-radius:14px}
+.yip-card.is-mobile-top .yip-greeting,
+.yip-card.is-mobile-top .yip-sub{display:none}
 
-  /* Playground centre — repurpose the existing .pg-center skeleton (its CSS
-     was already defined but no element was rendered there). Now the chosen
-     avatar greets the user from the middle of the station ring. */
-  .pg-center-avatar{width:62%;height:62%;border-radius:50%;object-fit:cover;animation:bobMini 3s ease-in-out infinite;box-shadow:0 4px 14px rgba(0,0,0,.35)}
-  .pg-center{cursor:default}
-
-  /* Speech-bubble mascots — slightly larger and brighter so dialogue feels
-     more "from the avatar" than a decorative thumbnail. */
-  .speech-mascot-img{width:68px;height:68px}
-  </style>
+/* === NAME OVERLAY === */
+.t7-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,var(--accent2) 0%,var(--accent3) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+.t7-overlay-mascot{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);margin-bottom:8px;box-shadow:0 4px 18px rgba(0,0,0,.30)}
+.t7-overlay h2{font-family:'Fredoka',sans-serif;font-size:28px;font-weight:700;color:#fff;margin:14px 0 8px;letter-spacing:-.01em}
+.t7-overlay p{font-size:15px;color:rgba(255,255,255,.88);max-width:340px;margin-bottom:24px;line-height:1.5;font-weight:500}
+.t7-overlay input{width:100%;max-width:280px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.40);border-radius:14px;padding:14px;color:#fff;font-family:'Fredoka',sans-serif;font-size:20px;font-weight:600;text-align:center;outline:none;margin-bottom:10px;letter-spacing:-.005em}
+.t7-overlay input::placeholder{color:rgba(255,255,255,.55)}
+.t7-overlay input:focus{border-color:#fff;background:rgba(255,255,255,.20)}
+.t7-overlay .ov-hint{font-size:13px;color:rgba(255,255,255,.88);min-height:22px;margin-bottom:12px;font-weight:500}
+.t7-overlay button{background:#fff;color:var(--accent3);font-family:'Fredoka',sans-serif;font-weight:700;font-size:17px;padding:13px 32px;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);transition:transform .15s;letter-spacing:-.005em}
+.t7-overlay button:hover{transform:translateY(-2px) scale(1.04)}
+</style>
 
 
-  <!-- === TOP NAV === -->
-  <nav class="topnav">
-    <div class="nav-logo">
-      <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
-    </div>
-    <div class="nav-links">
-      <a href="https://www.laureo.at/" class="nav-link">Home</a>
-      <a href="https://www.laureo.at/sterne/" class="nav-link">Sterne</a>
-      <a href="https://www.laureo.at/sevens/" class="nav-link">Sevens</a>
-      <a href="https://www.laureo.at/challenges/" class="nav-link">Challenges</a>
-      <a href="#" class="nav-link active">Minis</a>
-    </div>
-    <div class="nav-right">
-      <button class="mute-toggle" id="muteBtn" title="Ton an/aus">🔊</button>
-      <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
-    </div>
-  </nav>
+<!-- === TOP NAV === -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+  </div>
+  <div class="nav-links">
+    <a href="https://www.laureo.at/" class="nav-link">Home</a>
+    <a href="https://www.laureo.at/sterne/" class="nav-link">Sterne</a>
+    <a href="https://www.laureo.at/sevens/" class="nav-link">Sevens</a>
+    <a href="https://www.laureo.at/challenges/" class="nav-link">Challenges</a>
+    <a href="#" class="nav-link active">Minis</a>
+  </div>
+  <div class="nav-right">
+    <button class="mute-toggle" id="muteBtn" title="Ton an/aus">🔊</button>
+    <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
+  </div>
+</nav>
 
-  <!-- === HERO === -->
-  <div class="hero">
-    <div class="hero-text">
-      <div class="hero-eye"><span data-av-emoji="">🦁</span> T7 Minis Academy</div>
-      <h1>Hi! Ich bin <span data-av-name="">Keon</span>!</h1>
-      <p>Komm, wir lernen <strong>coole Fussball-Tricks</strong>! Du schaust ein Video, übst, und sammelst <strong>Punkte und Sticker</strong>. 🌟</p>
-    </div>
-    <div class="hero-image">
-      <img class="hero-overlay-avatar av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+<!-- === HERO === -->
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-eye"><span data-av-emoji="">🦁</span> T7 Minis Academy</div>
+    <h1>Hi! Ich bin <span class="accent" data-av-name="">Keon</span>!</h1>
+    <p>Komm, wir lernen <strong>coole Fussball-Tricks</strong>! Du schaust ein Video, übst, und sammelst <strong>Punkte und Sticker</strong>. 🌟</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">Stationen</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">1</div><div class="hero-stat-label">Trickpfad</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">Stadien</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">30</div><div class="hero-stat-label">Sticker</div></div>
     </div>
   </div>
+  <div class="hero-image">
+    <img class="hero-overlay-avatar av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+  </div>
+</div>
 
-  <!-- === MAIN LAYOUT === -->
-  <div class="ch-layout">
+<!-- === MAIN LAYOUT === -->
+<div class="ch-layout">
 
-    <div class="ch-main">
-      <section class="ch-section">
+  <div class="ch-main">
+    <section class="ch-section">
 
-        <!-- Banner -->
-        <div class="kh-wrap">
-          <div class="kh-topline"></div>
-          <div class="kh-orb1"></div>
-          <div class="kh-orb2"></div>
-          <img class="kh-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-          <div class="kh-content">
-            <div class="kh-title">T7 <span>Minis Academy</span></div>
-            <div class="kh-intro"><span data-av-name="">Keon</span> zeigt dir die <strong>coolsten Tricks</strong>! Schau das Video an, probiere es selbst — und sammle <strong>Punkte und Sticker</strong>! Jeder Versuch zählt. 🎉</div>
-            <div class="kh-pills">
-              <div class="kh-pill p-gold">⭐ Punkte und Sticker sammeln</div>
-              <div class="kh-pill p-pink"><span data-av-emoji="">🦁</span> Mit <span data-av-name="">Keon</span> lernen</div>
-              <div class="kh-pill p-cyan">🎉 Spass haben</div>
-            </div>
+      <!-- Banner -->
+      <div class="kh-wrap">
+        <div class="kh-topline"></div>
+        <div class="kh-orb1"></div>
+        <div class="kh-orb2"></div>
+        <img class="kh-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+        <div class="kh-content">
+          <div class="kh-title">T7 <span>Minis Academy</span></div>
+          <div class="kh-intro"><span data-av-name="">Keon</span> zeigt dir die <strong>coolsten Tricks</strong>! Schau das Video an, probiere es selbst — und sammle <strong>Punkte und Sticker</strong>! Jeder Versuch zählt. 🎉</div>
+          <div class="kh-pills">
+            <div class="kh-pill p-gold">⭐ Punkte und Sticker sammeln</div>
+            <div class="kh-pill p-pink"><span data-av-emoji="">🦁</span> Mit <span data-av-name="">Keon</span> lernen</div>
+            <div class="kh-pill p-cyan">🎉 Spass haben</div>
           </div>
         </div>
+      </div>
 
-        <!-- === VIEW SYSTEM === -->
-        <div class="views">
+      <!-- === VIEW SYSTEM === -->
+      <div class="views">
 
-          <!-- VIEW 1: LANDING -->
-          <div class="view view-landing active" id="view-landing">
-            <div class="landing-grid">
+        <!-- VIEW 1: LANDING -->
+        <div class="view view-landing active" id="view-landing">
+          <div class="landing-grid">
 
-              <div class="landing-card lc-spielplatz" data-goto="spielplatz" role="button" tabindex="0">
-                <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-                <div class="lc-eye">🦁 5 Stationen</div>
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-                  <div>
-                    <div class="lc-emoji">⚽</div>
-                    <div class="lc-title" style="margin-top:8px">Spielplatz</div>
-                  </div>
-                </div>
-                <div class="lc-desc">Such dir eine Station aus und lerne <strong style="color:#FFD700">coole Tricks</strong> mit <span data-av-name="">Keon</span>!</div>
-                <div class="lc-preview">
-                  <div class="lc-mini-circle">
-                    <div class="lc-mini-station">⚽</div>
-                    <div class="lc-mini-station">🇧🇷</div>
-                    <div class="lc-mini-station">👣</div>
-                    <div class="lc-mini-station">✨</div>
-                    <div class="lc-mini-station">🤹</div>
-                  </div>
-                </div>
-                <div class="lc-pills">
-                  <div class="kh-pill p-gold">5 Stationen</div>
-                  <div class="kh-pill p-pink">10 Tricks</div>
-                </div>
-                <button class="lc-cta" type="button">Los geht's! →</button>
-              </div>
-
-              <div class="landing-card lc-trickpfad" data-goto="trickpfad" role="button" tabindex="0">
-                <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-                <div class="lc-eye" style="color:rgba(0,229,255,.85)">🛤️ Dein Weg</div>
+            <div class="landing-card lc-spielplatz" data-goto="spielplatz" role="button" tabindex="0">
+              <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+              <div class="lc-step">01</div>
+              <div class="lc-eye">🦁 5 Stationen</div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
                 <div>
-                  <div class="lc-emoji">🏁</div>
-                  <div class="lc-title" style="margin-top:8px">Trick-Pfad</div>
-                </div>
-                <div class="lc-desc">Lerne <strong style="color:#00E5FF">Schritt für Schritt</strong> — vom ersten Trick bis zum grossen Ziel!</div>
-                <div class="lc-preview">
-                  <div class="lc-mini-path">
-                    <div class="lc-mini-dot done"></div>
-                    <div class="lc-mini-line"></div>
-                    <div class="lc-mini-dot done"></div>
-                    <div class="lc-mini-line"></div>
-                    <div class="lc-mini-dot"></div>
-                    <div class="lc-mini-line"></div>
-                    <div class="lc-mini-dot"></div>
-                    <div class="lc-mini-line"></div>
-                    <div class="lc-mini-dot star"></div>
-                  </div>
-                </div>
-                <div class="lc-pills">
-                  <div class="kh-pill p-cyan">10 Schritte</div>
-                  <div class="kh-pill p-gold">Bis ans Ziel</div>
-                </div>
-                <button class="lc-cta" type="button">Pfad starten →</button>
-              </div>
-
-              <div class="landing-card lc-stadien" data-goto="stadien" role="button" tabindex="0">
-                <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-                <div class="lc-eye" style="color:rgba(255,215,0,.95)">✈️ Bonus-Reise</div>
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-                  <div>
-                    <div class="lc-emoji">🏟️</div>
-                    <div class="lc-title" style="margin-top:8px">Stadien</div>
-                  </div>
-                </div>
-                <div class="lc-desc"><strong style="color:#FFD700">Lass uns zu den weltberühmten Stadien reisen!</strong> Schwerere 2⭐ und 3⭐ Tricks warten auf dich.</div>
-                <div class="lc-preview">
-                  <div class="lc-stadia-row">
-                    <div class="lc-stadium-mini" style="--st-c1:#E4002B;--st-c2:#A30025">🍁</div>
-                    <div class="lc-stadium-mini" style="--st-c1:#00E5FF;--st-c2:#0080FF">🏔️</div>
-                    <div class="lc-stadium-mini" style="--st-c1:#22C55E;--st-c2:#006847">🌶️</div>
-                    <div class="lc-stadium-mini" style="--st-c1:#3B82F6;--st-c2:#1E3A8A">🗽</div>
-                    <div class="lc-stadium-mini" style="--st-c1:#FFD700;--st-c2:#FF8C00">🌴</div>
-                  </div>
-                </div>
-                <div class="lc-pills">
-                  <div class="kh-pill p-gold">5 Stadien</div>
-                  <div class="kh-pill p-cyan">2⭐ &amp; 3⭐ Tricks</div>
-                </div>
-                <button class="lc-cta" type="button">Reise starten →</button>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- VIEW 2: SPIELPLATZ -->
-          <div class="view view-spielplatz" id="view-spielplatz">
-            <button class="view-back" data-goto="landing" type="button">← Zurück</button>
-            <div class="pt-section-eye"><span data-av-emoji="">🦁</span> Spielplatz</div>
-            <div class="pt-section-title">Wähle eine Station</div>
-            <div class="pg-circle">
-              <div class="pg-ring"></div>
-              <div class="pg-center">
-                <img class="pg-center-avatar av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-              </div>
-              <button class="pg-station pg-pos-1" data-station="st1" type="button">
-                <div class="pg-st-num">#1</div>
-                <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="">
-                <div class="pg-st-name">Keons Sitz-Tricks</div>
-                <div class="pg-st-count" data-proglabel="st1">0/2</div>
-              </button>
-              <button class="pg-station pg-pos-2" data-station="st2" type="button">
-                <div class="pg-st-num">#2</div>
-                <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="">
-                <div class="pg-st-name">Keons Ballkontrolle</div>
-                <div class="pg-st-count" data-proglabel="st2">0/2</div>
-              </button>
-              <button class="pg-station pg-pos-3" data-station="st3" type="button">
-                <div class="pg-st-num">#3</div>
-                <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png" alt="">
-                <div class="pg-st-name">Cocos 1 gegen 1</div>
-                <div class="pg-st-count" data-proglabel="st3">0/2</div>
-              </button>
-              <button class="pg-station pg-pos-4" data-station="st4" type="button">
-                <div class="pg-st-num">#4</div>
-                <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png" alt="">
-                <div class="pg-st-name">Cocos Dribbeln</div>
-                <div class="pg-st-count" data-proglabel="st4">0/2</div>
-              </button>
-              <button class="pg-station pg-pos-5" data-station="st5" type="button">
-                <div class="pg-st-num">#5</div>
-                <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Leya_Avatar.png" alt="">
-                <div class="pg-st-name">Leyas Ballkontrolle</div>
-                <div class="pg-st-count" data-proglabel="st5">0/2</div>
-              </button>
-            </div>
-          </div>
-
-          <!-- VIEW 3: STATION FOCUSED -->
-          <div class="view view-station" id="view-station">
-            <button class="view-back" id="view-back-station" type="button">← Zum Spielplatz</button>
-            <div class="station-hero" id="station-hero">
-              <img class="station-avatar" id="station-emoji" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="">
-              <div class="station-info">
-                <div class="station-num" id="station-num">Station 1</div>
-                <div class="station-title" id="station-title">Loading…</div>
-                <div class="station-meta">
-                  <div class="station-meta-pill" id="station-count">0/2 geschafft</div>
-                  <div class="station-meta-pill" id="station-trickcount">2 Tricks</div>
+                  <div class="lc-emoji">⚽</div>
+                  <div class="lc-title" style="margin-top:8px">Spielplatz</div>
                 </div>
               </div>
+              <div class="lc-desc">Such dir eine Station aus und lerne <strong style="color:var(--lp-red)">coole Tricks</strong> mit <span data-av-name="">Keon</span>!</div>
+              <div class="lc-preview">
+                <div class="lc-mini-circle">
+                  <div class="lc-mini-station">⚽</div>
+                  <div class="lc-mini-station">🇧🇷</div>
+                  <div class="lc-mini-station">👣</div>
+                  <div class="lc-mini-station">✨</div>
+                  <div class="lc-mini-station">🤹</div>
+                </div>
+              </div>
+              <div class="lc-pills">
+                <div class="kh-pill p-gold">5 Stationen</div>
+                <div class="kh-pill p-pink">10 Tricks</div>
+              </div>
+              <button class="lc-cta" type="button">Los geht's! →</button>
             </div>
-            <div class="drills-list">
-              <div class="drills-list-label">Wähle einen Trick</div>
-              <div id="drills-list-target"></div>
+
+            <div class="landing-card lc-trickpfad" data-goto="trickpfad" role="button" tabindex="0">
+              <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+              <div class="lc-step">02</div>
+              <div class="lc-eye">🛤️ Dein Weg</div>
+              <div>
+                <div class="lc-emoji">🏁</div>
+                <div class="lc-title" style="margin-top:8px">Trick-<em>Pfad</em></div>
+              </div>
+              <div class="lc-desc">Lerne <strong style="color:var(--accent-text)">Schritt für Schritt</strong> — vom ersten Trick bis zum grossen Ziel!</div>
+              <div class="lc-preview">
+                <div class="lc-mini-path">
+                  <div class="lc-mini-dot done"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot done"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot"></div>
+                  <div class="lc-mini-line"></div>
+                  <div class="lc-mini-dot star"></div>
+                </div>
+              </div>
+              <div class="lc-pills">
+                <div class="kh-pill p-cyan">10 Schritte</div>
+                <div class="kh-pill p-gold">Bis ans Ziel</div>
+              </div>
+              <button class="lc-cta" type="button">Pfad starten →</button>
             </div>
-          </div>
 
-          <!-- VIEW 4: TRICKPFAD -->
-          <div class="view view-trickpfad" id="view-trickpfad">
-            <button class="view-back" data-goto="landing" type="button">← Zurück</button>
-            <div class="pt-section-eye">🛤️ Trick-Pfad</div>
-            <div class="pt-section-title">Schritt für Schritt</div>
-            <div class="tp-wrap">
-              <div class="tp-start">Los geht's!</div>
-              <div class="tp-path" id="tp-path"></div>
-              <div class="tp-end" id="tp-end">Ziel</div>
+            <div class="landing-card lc-stadien" data-goto="stadien" role="button" tabindex="0">
+              <div class="lc-bonus-badge">⭐ Bonus</div>
+              <img class="lc-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+              <div class="lc-eye" style="margin-top:32px">✈️ Bonus-Reise</div>
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div>
+                  <div class="lc-emoji">🏟️</div>
+                  <div class="lc-title" style="margin-top:8px">Stadien</div>
+                </div>
+              </div>
+              <div class="lc-desc"><strong style="color:var(--lp-green)">Lass uns zu den weltberühmten Stadien reisen!</strong> Schwerere 2⭐ und 3⭐ Tricks warten auf dich.</div>
+              <div class="lc-preview">
+                <div class="lc-stadia-row">
+                  <div class="lc-stadium-mini" style="--st-c:var(--lp-red)">🍁</div>
+                  <div class="lc-stadium-mini" style="--st-c:#00BCD4">🏔️</div>
+                  <div class="lc-stadium-mini" style="--st-c:var(--lp-green)">🌶️</div>
+                  <div class="lc-stadium-mini" style="--st-c:var(--accent2)">🗽</div>
+                  <div class="lc-stadium-mini" style="--st-c:var(--lp-brazil)">🌴</div>
+                </div>
+              </div>
+              <div class="lc-pills">
+                <div class="kh-pill p-gold">5 Stadien</div>
+                <div class="kh-pill p-cyan">2⭐ &amp; 3⭐ Tricks</div>
+              </div>
+              <button class="lc-cta" type="button">Reise starten →</button>
             </div>
-          </div>
 
-          <!-- VIEW 5: STADIEN -->
-          <div class="view view-stadien" id="view-stadien">
-            <button class="view-back" data-goto="landing" type="button">← Zurück</button>
-            <div class="pt-section-eye">✈️ Bonus-Reise</div>
-            <div class="pt-section-title">Lass uns zu den weltberühmten Stadien reisen</div>
-            <div class="stadia-grid">
-              <button class="stadium-card" data-station="sd1" type="button" style="--st-c1:#E4002B;--st-c2:#A30025">
-                <div class="stadium-flag">🇨🇦</div>
-                <div class="stadium-emoji">🍁</div>
-                <div class="stadium-name">BMO Field</div>
-                <div class="stadium-city">Toronto</div>
-                <div class="stadium-count" data-proglabel="sd1">0/2</div>
-              </button>
-              <button class="stadium-card" data-station="sd2" type="button" style="--st-c1:#00E5FF;--st-c2:#0080FF">
-                <div class="stadium-flag">🇨🇦</div>
-                <div class="stadium-emoji">🏔️</div>
-                <div class="stadium-name">BC Place</div>
-                <div class="stadium-city">Vancouver</div>
-                <div class="stadium-count" data-proglabel="sd2">0/2</div>
-              </button>
-              <button class="stadium-card" data-station="sd3" type="button" style="--st-c1:#22C55E;--st-c2:#006847">
-                <div class="stadium-flag">🇲🇽</div>
-                <div class="stadium-emoji">🌶️</div>
-                <div class="stadium-name">Estadio Azteca</div>
-                <div class="stadium-city">Mexico City</div>
-                <div class="stadium-count" data-proglabel="sd3">0/2</div>
-              </button>
-              <button class="stadium-card" data-station="sd4" type="button" style="--st-c1:#3B82F6;--st-c2:#1E3A8A">
-                <div class="stadium-flag">🇺🇸</div>
-                <div class="stadium-emoji">🗽</div>
-                <div class="stadium-name">MetLife Stadium</div>
-                <div class="stadium-city">New York</div>
-                <div class="stadium-count" data-proglabel="sd4">0/2</div>
-              </button>
-              <button class="stadium-card" data-station="sd5" type="button" style="--st-c1:#FFD700;--st-c2:#FF8C00">
-                <div class="stadium-flag">🇺🇸</div>
-                <div class="stadium-emoji">🌴</div>
-                <div class="stadium-name">SoFi Stadium</div>
-                <div class="stadium-city">Los Angeles</div>
-                <div class="stadium-count" data-proglabel="sd5">0/2</div>
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </section>
-    </div>
-
-    <!-- === SIDEBAR === -->
-    <div class="ch-sidebar">
-
-      <div class="sb-card yip-card">
-        <div class="sb-label">⭐ Mit wem möchtest Du heute üben?</div>
-        <div class="av-picker">
-          <button class="av-opt" data-av-pick="keon" type="button" aria-pressed="false">
-            <img src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Keon">
-            <div class="av-opt-name">Keon</div>
-          </button>
-          <button class="av-opt" data-av-pick="coco" type="button" aria-pressed="false">
-            <img src="https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png" alt="Coco">
-            <div class="av-opt-name">Coco</div>
-          </button>
-          <button class="av-opt" data-av-pick="leya" type="button" aria-pressed="false">
-            <img src="https://ute-laureo.github.io/t7academy-widgets/Assets/Leya_Avatar.png" alt="Leya">
-            <div class="av-opt-name">Leya</div>
-          </button>
-        </div>
-        <div class="yip-greeting">Hallo <span id="kid-name">Champion</span>!</div>
-        <div class="yip-sub">Bereit für coole Tricks mit <span data-av-name="">Keon</span>? ⚽✨</div>
-      </div>
-
-      <div class="sb-card sb-card-stickers">
-        <div class="sb-label gold">🌟 Meine Sticker</div>
-        <div class="sticker-pager" id="sticker-pager" role="tablist" aria-label="Sticker-Seiten"></div>
-        <div class="sticker-grid" id="sticker-grid"></div>
-        <div class="sticker-count" id="sticker-count">0 / 10 Sticker</div>
-      </div>
-
-      <div class="sb-card sb-card-prog">
-        <div class="sb-label">⚡ Fortschritt</div>
-        <div id="fortschritt-body">
-          <div class="kf-hero">
-            <div class="kf-pname" id="kf-name">Spieler</div>
-            <div class="kf-sub">Meine Punkte</div>
-          </div>
-          <div class="kf-stat-row">
-            <div class="kf-stat-card"><div class="kf-stat-num" id="kf-total">0</div><div class="kf-stat-label">Gesamt XP</div></div>
-            <div class="kf-stat-card"><div class="kf-stat-num" id="kf-week">0</div><div class="kf-stat-label">Diese Woche</div></div>
           </div>
         </div>
-      </div>
 
-    </div>
+        <!-- VIEW 2: SPIELPLATZ -->
+        <div class="view view-spielplatz" id="view-spielplatz">
+          <button class="view-back" data-goto="landing" type="button">← Zurück</button>
+          <div class="pt-section-eye"><span data-av-emoji="">🦁</span> Spielplatz</div>
+          <div class="pt-section-title">Wähle eine <em>Station</em></div>
+          <div class="pg-circle">
+            <div class="pg-ring"></div>
+            <div class="pg-center">
+              <img class="pg-center-avatar av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+            </div>
+            <button class="pg-station pg-pos-1" data-station="st1" type="button">
+              <div class="pg-st-num">#1</div>
+              <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="">
+              <div class="pg-st-name">Keons Sitz-Tricks</div>
+              <div class="pg-st-count" data-proglabel="st1">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-2" data-station="st2" type="button">
+              <div class="pg-st-num">#2</div>
+              <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="">
+              <div class="pg-st-name">Keons Ballkontrolle</div>
+              <div class="pg-st-count" data-proglabel="st2">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-3" data-station="st3" type="button">
+              <div class="pg-st-num">#3</div>
+              <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png" alt="">
+              <div class="pg-st-name">Cocos 1 gegen 1</div>
+              <div class="pg-st-count" data-proglabel="st3">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-4" data-station="st4" type="button">
+              <div class="pg-st-num">#4</div>
+              <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png" alt="">
+              <div class="pg-st-name">Cocos Dribbeln</div>
+              <div class="pg-st-count" data-proglabel="st4">0/2</div>
+            </button>
+            <button class="pg-station pg-pos-5" data-station="st5" type="button">
+              <div class="pg-st-num">#5</div>
+              <img class="pg-st-avatar" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Leya_Avatar.png" alt="">
+              <div class="pg-st-name">Leyas Ballkontrolle</div>
+              <div class="pg-st-count" data-proglabel="st5">0/2</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- VIEW 3: STATION FOCUSED -->
+        <div class="view view-station" id="view-station">
+          <button class="view-back" id="view-back-station" type="button">← Zum Spielplatz</button>
+          <div class="station-hero" id="station-hero">
+            <img class="station-avatar" id="station-emoji" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="">
+            <div class="station-info">
+              <div class="station-num" id="station-num">Station 1</div>
+              <div class="station-title" id="station-title">Loading…</div>
+              <div class="station-meta">
+                <div class="station-meta-pill" id="station-count">0/2 geschafft</div>
+                <div class="station-meta-pill" id="station-trickcount">2 Tricks</div>
+              </div>
+            </div>
+          </div>
+          <div class="drills-list">
+            <div class="drills-list-label">Wähle einen Trick</div>
+            <div id="drills-list-target"></div>
+          </div>
+        </div>
+
+        <!-- VIEW 4: TRICKPFAD -->
+        <div class="view view-trickpfad" id="view-trickpfad">
+          <button class="view-back" data-goto="landing" type="button">← Zurück</button>
+          <div class="pt-section-eye">🛤️ Trick-Pfad</div>
+          <div class="pt-section-title">Schritt für <em>Schritt</em></div>
+          <div class="tp-wrap">
+            <div class="tp-start">Los geht's!</div>
+            <div class="tp-path" id="tp-path"></div>
+            <div class="tp-end" id="tp-end">Ziel</div>
+          </div>
+        </div>
+
+        <!-- VIEW 5: STADIEN -->
+        <div class="view view-stadien" id="view-stadien">
+          <button class="view-back" data-goto="landing" type="button">← Zurück</button>
+          <div class="pt-section-eye">✈️ Bonus-Reise</div>
+          <div class="pt-section-title">Reise zu den <em>weltberühmten</em> Stadien</div>
+          <div class="stadia-grid">
+            <button class="stadium-card" data-station="sd1" type="button" style="--st-c:#E4002B">
+              <div class="stadium-flag">🇨🇦</div>
+              <div class="stadium-emoji">🍁</div>
+              <div class="stadium-name">BMO Field</div>
+              <div class="stadium-city">Toronto</div>
+              <div class="stadium-count" data-proglabel="sd1">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd2" type="button" style="--st-c:#00BCD4">
+              <div class="stadium-flag">🇨🇦</div>
+              <div class="stadium-emoji">🏔️</div>
+              <div class="stadium-name">BC Place</div>
+              <div class="stadium-city">Vancouver</div>
+              <div class="stadium-count" data-proglabel="sd2">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd3" type="button" style="--st-c:#22C55E">
+              <div class="stadium-flag">🇲🇽</div>
+              <div class="stadium-emoji">🌶️</div>
+              <div class="stadium-name">Estadio Azteca</div>
+              <div class="stadium-city">Mexico City</div>
+              <div class="stadium-count" data-proglabel="sd3">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd4" type="button" style="--st-c:#1f80ff">
+              <div class="stadium-flag">🇺🇸</div>
+              <div class="stadium-emoji">🗽</div>
+              <div class="stadium-name">MetLife Stadium</div>
+              <div class="stadium-city">New York</div>
+              <div class="stadium-count" data-proglabel="sd4">0/2</div>
+            </button>
+            <button class="stadium-card" data-station="sd5" data-st-text="dark" type="button" style="--st-c:#F7DC1F;--st-text:#0a1530">
+              <div class="stadium-flag">🇺🇸</div>
+              <div class="stadium-emoji">🌴</div>
+              <div class="stadium-name">SoFi Stadium</div>
+              <div class="stadium-city">Los Angeles</div>
+              <div class="stadium-count" data-proglabel="sd5">0/2</div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
   </div>
 
-  <!-- === DRILL MODAL === -->
-  <div class="kmodal-overlay" id="kmodal">
-    <div class="kmodal">
-      <button class="kmodal-close" id="kmodal-close">×</button>
-      <div class="kmodal-content">
+  <!-- === SIDEBAR === -->
+  <div class="ch-sidebar">
 
-        <div class="kmodal-step" id="kstep-watch">
-          <div class="kmodal-title" id="kmodal-title">…</div>
-          <div class="kmodal-sub">Schau dir das Video an, dann probiere es selbst!</div>
-          <div class="kembed"><iframe id="kembed" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen=""></iframe></div>
-          <div class="speech-with-mascot">
+    <div class="sb-card yip-card">
+      <div class="sb-label">⭐ Mit wem möchtest du heute üben?</div>
+      <div class="av-picker">
+        <button class="av-opt" data-av-pick="keon" type="button" aria-pressed="false">
+          <img src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Keon">
+          <div class="av-opt-name">Keon</div>
+        </button>
+        <button class="av-opt" data-av-pick="coco" type="button" aria-pressed="false">
+          <img src="https://ute-laureo.github.io/t7academy-widgets/Assets/Coco_Avatar.png" alt="Coco">
+          <div class="av-opt-name">Coco</div>
+        </button>
+        <button class="av-opt" data-av-pick="leya" type="button" aria-pressed="false">
+          <img src="https://ute-laureo.github.io/t7academy-widgets/Assets/Leya_Avatar.png" alt="Leya">
+          <div class="av-opt-name">Leya</div>
+        </button>
+      </div>
+      <div class="yip-greeting">Hallo <span id="kid-name">Champion</span>!</div>
+      <div class="yip-sub">Bereit für coole Tricks mit <span data-av-name="">Keon</span>? ⚽✨</div>
+    </div>
+
+    <div class="sb-card sb-card-stickers">
+      <div class="sb-label gold">🌟 Meine Sticker</div>
+      <div class="sticker-count" id="sticker-count">0 / 10 Sticker</div>
+      <div class="sticker-pager" id="sticker-pager" role="tablist" aria-label="Sticker-Seiten"></div>
+      <div class="sticker-grid" id="sticker-grid"></div>
+    </div>
+
+    <div class="sb-card sb-card-prog">
+      <div class="sb-label">⚡ Fortschritt</div>
+      <div id="fortschritt-body">
+        <div class="kf-hero">
+          <div class="kf-pname" id="kf-name">Spieler</div>
+          <div class="kf-sub">Meine Punkte</div>
+        </div>
+        <div class="kf-stat-row">
+          <div class="kf-stat-card"><div class="kf-stat-num" id="kf-total">0</div><div class="kf-stat-label">Gesamt XP</div></div>
+          <div class="kf-stat-card"><div class="kf-stat-num" id="kf-week">0</div><div class="kf-stat-label">Diese Woche</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- === DRILL MODAL === -->
+<div class="kmodal-overlay" id="kmodal">
+  <div class="kmodal">
+    <button class="kmodal-close" id="kmodal-close">×</button>
+    <div class="kmodal-content">
+
+      <div class="kmodal-step" id="kstep-watch">
+        <div class="kmodal-title" id="kmodal-title">…</div>
+        <div class="kmodal-sub">Schau dir das Video an, dann probiere es selbst!</div>
+        <div class="kembed"><iframe id="kembed" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen=""></iframe></div>
+        <div class="speech-with-mascot">
+          <img class="speech-mascot-img av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+          <div class="speech"><strong><span data-av-name="">Keon</span> sagt:</strong> Schau gut zu! Achte auf die Füße. Du schaffst das! 🎉</div>
+        </div>
+        <button class="kbig-btn" id="kbtn-tried">Ich habs probiert! 🎯</button>
+      </div>
+
+      <div class="kmodal-step" id="kstep-rate">
+        <div class="kmodal-title">Wie war's?</div>
+        <div class="kmodal-sub">Klick auf das Bild, das zu dir passt 😊</div>
+        <div class="krate-grid">
+          <div class="krate" data-rate="2"><div class="krate-emoji">😅</div><div class="krate-label">Schwierig</div></div>
+          <div class="krate" data-rate="3"><div class="krate-emoji">🙂</div><div class="krate-label">Geht so</div></div>
+          <div class="krate" data-rate="4"><div class="krate-emoji">😄</div><div class="krate-label">Gut!</div></div>
+          <div class="krate" data-rate="5"><div class="krate-emoji">🤩</div><div class="krate-label">Super!</div></div>
+        </div>
+      </div>
+
+      <div class="kmodal-step" id="kstep-success">
+        <div class="ksuccess">
+          <img class="ksuccess-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+          <div class="ksuccess-title" id="ksuccess-title">Super!</div>
+          <div class="ksticker-reveal" id="ksticker-reveal">⭐</div>
+          <div class="ksuccess-msg" id="ksuccess-msg">Du hast einen neuen Sticker bekommen!</div>
+          <button class="kbig-btn gold" id="kbtn-continue">Weiter 🚀</button>
+        </div>
+      </div>
+
+      <div class="kmodal-step" id="kstep-tryagain">
+        <div class="ktryagain">
+          <div class="speech-with-mascot" style="max-width:380px;margin:0 auto 20px">
             <img class="speech-mascot-img av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-            <div class="speech"><strong><span data-av-name="">Keon</span> sagt:</strong> Schau gut zu! Achte auf die Füße. Du schaffst das! 🎉</div>
+            <div class="speech"><strong><span data-av-name="">Keon</span> sagt:</strong> Kein Problem! Niemand kann alles sofort. Probiere es nochmal! 🎉</div>
           </div>
-          <button class="kbig-btn" id="kbtn-tried">Ich habs probiert! 🎯</button>
+          <button class="kbig-btn" id="kbtn-retry">Nochmal versuchen 🔁</button>
+          <button class="kbig-btn gold" id="kbtn-skip" style="margin-top:10px">Andere Übung wählen</button>
         </div>
-
-        <div class="kmodal-step" id="kstep-rate">
-          <div class="kmodal-title">Wie war's?</div>
-          <div class="kmodal-sub">Klick auf das Bild, das zu dir passt 😊</div>
-          <div class="krate-grid">
-            <div class="krate" data-rate="2"><div class="krate-emoji">😅</div><div class="krate-label">Schwierig</div></div>
-            <div class="krate" data-rate="3"><div class="krate-emoji">🙂</div><div class="krate-label">Geht so</div></div>
-            <div class="krate" data-rate="4"><div class="krate-emoji">😄</div><div class="krate-label">Gut!</div></div>
-            <div class="krate" data-rate="5"><div class="krate-emoji">🤩</div><div class="krate-label">Super!</div></div>
-          </div>
-        </div>
-
-        <div class="kmodal-step" id="kstep-success">
-          <div class="ksuccess">
-            <img class="ksuccess-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-            <div class="ksuccess-title" id="ksuccess-title">Super!</div>
-            <div class="ksticker-reveal" id="ksticker-reveal">⭐</div>
-            <div class="ksuccess-msg" id="ksuccess-msg">Du hast einen neuen Sticker bekommen!</div>
-            <button class="kbig-btn gold" id="kbtn-continue">Weiter 🚀</button>
-          </div>
-        </div>
-
-        <div class="kmodal-step" id="kstep-tryagain">
-          <div class="ktryagain">
-            <div class="speech-with-mascot" style="max-width:380px;margin:0 auto 20px">
-              <img class="speech-mascot-img av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-              <div class="speech"><strong><span data-av-name="">Keon</span> sagt:</strong> Kein Problem! Niemand kann alles sofort. Probiere es nochmal! 🎉</div>
-            </div>
-            <button class="kbig-btn" id="kbtn-retry">Nochmal versuchen 🔁</button>
-            <button class="kbig-btn gold" id="kbtn-skip" style="margin-top:10px">Andere Übung wählen</button>
-          </div>
-        </div>
-
       </div>
+
     </div>
   </div>
+</div>
 
-  <!-- Name overlay -->
-  <div class="t7-overlay" id="t7-id-overlay" style="display:none">
-    <img class="t7-overlay-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
-    <h2>Willkommen bei T7!</h2>
-    <p>Wie heisst du? <span data-av-name="">Keon</span> möchte dich kennenlernen!</p>
-    <input id="t7-id-input" type="text" placeholder="Dein Vorname" autocomplete="given-name">
-    <div class="ov-hint" id="t7-id-hint"></div>
-    <button onclick="T7Identity._submit()">Los geht's! 🚀</button>
-  </div>
+<!-- Name overlay -->
+<div class="t7-overlay" id="t7-id-overlay" style="display:none">
+  <img class="t7-overlay-mascot av-img" src="https://ute-laureo.github.io/t7academy-widgets/Assets/Keon_Avatar.png" alt="Avatar">
+  <h2>Willkommen bei T7!</h2>
+  <p>Wie heisst du? <span data-av-name="">Keon</span> möchte dich kennenlernen!</p>
+  <input id="t7-id-input" type="text" placeholder="Dein Vorname" autocomplete="given-name">
+  <div class="ov-hint" id="t7-id-hint"></div>
+  <button onclick="T7Identity._submit()">Los geht's! 🚀</button>
+</div>
 
-  <script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
-  <script src="https://ute-laureo.github.io/t7academy-widgets/t7-minis.js"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-minis.js"></script>
+<script>
+// Escape closes the drill/video modal. Delegates to the existing close
+// button so the engine's cleanup (pause iframe, reset step) still runs.
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Escape' && e.keyCode !== 27) return;
+  var overlay = document.getElementById('kmodal');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  var closeBtn = document.getElementById('kmodal-close');
+  if (closeBtn) { closeBtn.click(); } else { overlay.classList.remove('open'); }
+});
+</script>
