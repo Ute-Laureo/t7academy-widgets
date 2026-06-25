@@ -93,21 +93,21 @@ var STATION_ORDER   = ['st1','st2','st3','st4','st5'];
 var TRICKPATH_ORDER = ['tp1','tp2','tp3','tp4','tp5'];
 var STADIUM_ORDER   = ['sd1','sd2','sd3','sd4','sd5'];
 var STATION_COLORS = {
-  st1: ['#00E5FF','#0080FF'],
-  st2: ['#FFD700','#FF8C00'],
+  st1: ['#0080FF','#0066CC'],
+  st2: ['#F59E0B','#B45309'],
   st3: ['#E4002B','#A30025'],
   st4: ['#3B82F6','#1E3A8A'],
-  st5: ['#22C55E','#006847'],
-  tp1: ['#00E5FF','#0080FF'],
-  tp2: ['#FFD700','#FF8C00'],
+  st5: ['#22C55E','#15803D'],
+  tp1: ['#0080FF','#0066CC'],
+  tp2: ['#F59E0B','#B45309'],
   tp3: ['#E4002B','#A30025'],
   tp4: ['#3B82F6','#1E3A8A'],
-  tp5: ['#22C55E','#006847'],
+  tp5: ['#22C55E','#15803D'],
   sd1: ['#E4002B','#A30025'],
-  sd2: ['#00E5FF','#0080FF'],
-  sd3: ['#22C55E','#006847'],
+  sd2: ['#0080FF','#0066CC'],
+  sd3: ['#22C55E','#15803D'],
   sd4: ['#3B82F6','#1E3A8A'],
-  sd5: ['#FFD700','#FF8C00']
+  sd5: ['#F59E0B','#B45309']
 };
 var TOTAL_STICKERS = 10;
 var TOTAL_STADIUM_STICKERS = 10;
@@ -289,7 +289,7 @@ applyAvatar(STATE.avatar);
 function renderStationView(modKey){
   var mod = KID_MODULES[modKey];
   if (!mod) return;
-  var colors = STATION_COLORS[modKey] || ['#FFD700','#FF8C00'];
+  var colors = STATION_COLORS[modKey] || ['#F59E0B','#B45309'];
   var done = countDone(modKey), total = mod.drills.length;
   var isStadium = (mod.tier === 'stadium');
 
@@ -299,7 +299,7 @@ function renderStationView(modKey){
   if (backBtn) backBtn.textContent = isStadium ? '← Zu den Stadien' : '← Zum Spielplatz';
 
   var hero = document.getElementById('station-hero');
-  hero.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
+  hero.style.background = colors[1];
   var ownerKey = ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'leya'})[modKey] || 'keon';
   var ownerAv = AVATARS[ownerKey];
   var stImg = document.getElementById('station-emoji');

@@ -1,0 +1,380 @@
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - T7 Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://db.onlinewebfonts.com/c/1140819bff120ecc7a6eaed55f1dd6ed?family=Garet+W05+Bold" rel="stylesheet">
+    <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
+
+    
+
+    <!-- TOP NAV (matches Challenges page) -->
+    <nav class="topnav">
+    <div class="nav-logo">
+        <a href="/"><img src="https://ute-laureo.github.io/t7academy-widgets/Assets/logo_t7academy.png?v=2" alt="T7 Academy"></a>
+    </div>
+    <div class="nav-links">
+        <a href="https://www.laureo.at/" class="nav-link active">Home</a>
+        <a href="https://www.laureo.at/sterne/" class="nav-link">Sterne</a>
+        <a href="https://www.laureo.at/sevens/" class="nav-link">Sevens</a>
+        <a href="https://www.laureo.at/challenges/" class="nav-link">Challenges</a>
+        <a href="https://www.laureo.at/minis/" class="nav-link">Minis</a>
+    </div>
+    <div class="nav-right">
+        <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">☾</button>
+        <div class="nav-avatar" id="navAvatar">?</div>
+    </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="home-hero">
+    <div class="home-hero-text">
+        <div class="home-eye">Willkommen zurück</div>
+        <h1>Werde der <span>beste Spieler</span>, der <span>du</span> sein kannst!</h1>
+        <p>Jeder Skill, jede Challenge, jeder Stern – sie machen dich besser. Du brauchst nur Ball, ein bisschen Platz und viel Freude beim Spiel. <strong>Wir zeigen dir den Weg.</strong></p>
+    </div>
+    <div class="home-hero-image"></div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="home-wrap">
+
+    <!-- PLAYER + NEWS row -->
+    <div class="home-two-col">
+
+        <!-- LEFT: Player Overview -->
+        <section class="home-section">
+        <div class="home-section-head player">
+            <div class="hsh-body">
+            <div class="hsh-title">Mein <span class="cyan">Fortschritt</span></div>
+            <div class="hsh-sub">Hier siehst du, wo du gerade stehst — quer durch alle Module.</div>
+            </div>
+        </div>
+        <div class="player-grid">
+            <!-- Sevens card -->
+            <div class="po-card sevens">
+            <div class="po-head">
+                <div class="po-icon cyan">7️⃣</div>
+                <div>
+                <div class="po-title">Sevens</div>
+                <div class="po-meta">Die Grundlagen</div>
+                </div>
+                <a href="https://www.laureo.at/sevens/" class="po-cta">Öffnen →</a>
+            </div>
+            <div id="po-sevens-body" class="po-modules">
+                <div class="home-loading">Lade\u2026</div>
+            </div>
+            </div>
+            <!-- Sterne card -->
+            <div class="po-card sterne">
+                <div class="po-head">
+                    <div class="po-icon gold">⭐</div>
+                    <div>
+                    <div class="po-title">Sterne</div>
+                    <div class="po-meta">Alle Skills der Profis</div>
+                    </div>
+                    <a href="https://www.laureo.at/sterne/" class="po-cta">Öffnen →</a>
+                </div>
+                <div id="po-sterne-body" class="po-modules">
+                    <div class="home-loading">Lade\u2026</div>
+                </div>
+                </div>
+                <!-- Challenges card -->
+            <div class="po-card challenges">
+            <div class="po-head">
+                <div class="po-icon cyan">⚡</div>
+                <div>
+                <div class="po-title">Challenges</div>
+                <div class="po-meta">Trainiere &amp; Sammle XP</div>
+                </div>
+                <a href="https://www.laureo.at/challenges/" class="po-cta">Öffnen →</a>
+            </div>
+            <div id="po-challenges-body" class="po-modules">
+                <div class="home-loading">Lade\u2026</div>
+            </div>
+            </div>
+            <!-- Certificates card -->
+            <div class="po-card certificates">
+            <div class="po-head">
+                <div class="po-icon gold">🏆</div>
+                <div>
+                <div class="po-title">Zertifikate</div>
+                <div class="po-meta">1- bis 5-Sterne</div>
+                </div>
+                <a href="https://www.laureo.at/challenges/#cert-container" class="po-cta">Öffnen →</a>
+            </div>
+            <div id="po-certs-body" class="po-modules">
+                <div class="home-loading">Lade\u2026</div>
+            </div>
+            </div>
+        </div>
+        </section>
+
+        <!-- RIGHT: News Feed -->
+        <section class="home-section">
+        <div class="home-section-head news">
+            <div class="hsh-body">
+            <div class="hsh-title">Was ist <span class="gold">neu?</span></div>
+            <div class="hsh-sub">Aktuelle Updates aus der T7 Academy.</div>
+            </div>
+        </div>
+        <div class="news-feed" id="news-feed">
+            <div class="news-loading">Lade Neuigkeiten\u2026</div>
+        </div>
+        </section>
+
+    </div>
+
+    <!-- THEORY -->
+    <section class="home-section">
+        <div class="home-section-head theory">
+        <div class="hsh-body">
+            <div class="hsh-title">Die <span class="purple">Theorie</span> hinter dem Spiel</div>
+            <div class="hsh-sub">Warum Freestyle und Streetsoccer dich zum besseren Spieler machen.</div>
+        </div>
+        </div>
+        <div class="theory-grid">
+        <div class="theory-card freestyle">
+            <div class="theory-head">
+            <div class="theory-icon purple">✨</div>
+            <div>
+                <div class="theory-title">Freestyle Fussball</div>
+                <div class="theory-sub">Kreativität · Ballgefühl · Selbstvertrauen</div>
+            </div>
+            </div>
+            <div class="theory-body">
+            Freestyle ist kein <strong>Showtime-Trick</strong> – es ist das <strong>Labor für dein Ballgefühl</strong>. Wer den Ball in allen Lagen wie Ronaldinho, Doué, Yamal kontrollieren kann, bringt diese Sicherheit auch ins Spiel: bessere Ballbehandlung bei Annahme, Pass und Schuss und das Selbstvertrauen, im 1-gegen-1 zu dominieren. <strong>10 Minuten Freestyle pro Tag</strong> verändern, wie du Fussball spielst.
+            </div>
+            <div class="theory-videos">
+            <a href="https://www.laureo.at/sterne/" class="theory-vlink">
+                <div class="theory-vplay">▶</div>
+                <div class="theory-vlabel">Was ist Freestyle?</div>
+                <div class="theory-vmeta">3 Min</div>
+            </a>
+            <a href="https://www.laureo.at/challenges/" class="theory-vlink">
+                <div class="theory-vplay">▶</div>
+                <div class="theory-vlabel">Top 5 Einsteiger-Tricks</div>
+                <div class="theory-vmeta">7 Min</div>
+            </a>
+            </div>
+        </div>
+        <div class="theory-card street">
+            <div class="theory-head">
+            <div class="theory-icon green">🇧🇷</div>
+            <div>
+                <div class="theory-title">Streetsoccer</div>
+                <div class="theory-sub">Enge Räume · Schnelle Entscheidungen · Spielwitz</div>
+            </div>
+            </div>
+            <div class="theory-body">
+            Streetsoccer hat fast jeden Weltklasse-Spieler geformt: <strong>Ronaldinho, Neymar, Messi</strong>. Warum? Enge Räume zwingen dich zu schnelleren Entscheidungen, mehr Ballaktionen pro Minute, und Körpertäuschungen statt Athletik. Im echten Spiel hast du auch nur Hundertstel-Sekunden – Street trainiert genau das, was du brauchst.
+            </div>
+            <div class="theory-videos">
+            <a href="https://www.laureo.at/sterne/" class="theory-vlink">
+                <div class="theory-vplay">▶</div>
+                <div class="theory-vlabel">Warum Street so wichtig ist</div>
+                <div class="theory-vmeta">4 Min</div>
+            </a>
+            <a href="https://www.laureo.at/challenges/" class="theory-vlink">
+                <div class="theory-vplay">▶</div>
+                <div class="theory-vlabel">Ginga &amp; Brasilianischer Stil</div>
+                <div class="theory-vmeta">6 Min</div>
+            </a>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    </div>
+
+    <!-- T7 engine (for Identity + Supabase consts) -->
+    <script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
+    <script src="https://ute-laureo.github.io/t7academy-widgets/t7-vimeo-tracker.js"></script>
+    <script src="https://ute-laureo.github.io/t7academy-widgets/loadNews.js?v=1"></script>
+
+    <script>
+    /* ========================================================
+    T7 ACADEMY HOME PAGE LOGIC
+    ======================================================== */
+    (function(){
+    var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
+    var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+
+    /* MODULE METADATA (matches challenge configs on Challenges page) */
+    var CHALLENGE_MODULES=[
+    {key:'jong',label:'Jonglierschule',total:4},
+    {key:'ft1',label:'First Touch',total:5},
+    {key:'fta1',label:'First Touch Air',total:6},
+    {key:'gc0',label:'Ginga Basic',total:5},
+    {key:'gc1',label:'Ginga Advanced',total:5},
+    {key:'jong2',label:'Ball in der Luft',total:4}
+    ];
+    var CERT_MODULES=[
+    {key:'sz1',label:'1 Stern',stars:1,total:5},
+    {key:'sz2',label:'2 Sterne',stars:2,total:5},
+    {key:'sz3',label:'3 Sterne',stars:3,total:5},
+    {key:'sz4',label:'4 Sterne',stars:4,total:5},
+    {key:'sz5',label:'5 Sterne',stars:5,total:5}
+    ];
+
+    function fmtTime(min){
+    if(min<60)return min+' Min';
+    var h=Math.floor(min/60),m=min%60;
+    return h+'h'+(m?' '+m+'m':'');
+    }
+
+    function renderEmptyTile(el,msg){el.innerHTML='<div class="po-empty">'+msg+'</div>';}
+
+    /* === STERNE / SEVENS: real watch-time stats from video_progress ===
+       Categorization rule: a video is "Sevens" if videos.sevens IS NOT NULL,
+       "Sterne" if videos.stars IS NOT NULL. Adjust filter below if your
+       schema convention differs (e.g. swap to category='sevens'). */
+    var SEEN_THRESHOLD_SEC=30; /* total_seconds >= 30 counts as "seen" */
+
+    function renderVideoCard(el,profileId,kind){
+    /* kind: 'sevens' or 'sterne' */
+    if(!profileId){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
+    var videoFilter=kind==='sevens'?'sevens=not.is.null':'stars=not.is.null';
+    var numCls=kind==='sterne'?' gold':'';
+    Promise.all([
+        fetch(SB_URL+'/rest/v1/videos?'+videoFilter+'&select=vimeo_code',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
+        fetch(SB_URL+'/rest/v1/video_progress?profile_id=eq.'+encodeURIComponent(profileId)+'&select=vimeo_id,total_seconds',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
+    ]).then(function(res){
+        var videos=res[0]||[],progress=res[1]||[];
+        var ids={};videos.forEach(function(v){if(v.vimeo_code)ids[v.vimeo_code]=true;});
+        var totalVideos=Object.keys(ids).length;
+        var seen=0,seconds=0;
+        progress.forEach(function(p){
+        if(!ids[p.vimeo_id])return;
+        var s=Number(p.total_seconds||0);
+        seconds+=s;
+        if(s>=SEEN_THRESHOLD_SEC)seen++;
+        });
+        var minutes=Math.round(seconds/60);
+        var timeStr=minutes<60?(minutes+' Min'):(Math.floor(minutes/60)+'h '+(minutes%60)+'m');
+        el.innerHTML=
+        '<div class="po-stats-row">'+
+            '<div class="po-stat-tile"><div class="po-stat-num'+numCls+'">'+seen+(totalVideos?'<span style="opacity:.5;font-weight:400">/'+totalVideos+'</span>':'')+'</div><div class="po-stat-label">Videos gesehen</div></div>'+
+            '<div class="po-stat-tile"><div class="po-stat-num'+numCls+'">'+timeStr+'</div><div class="po-stat-label">Watch Time</div></div>'+
+        '</div>';
+    }).catch(function(){renderEmptyTile(el,'Fehler beim Laden.');});
+    }
+
+    function renderSevens(el,profileId){renderVideoCard(el,profileId,'sevens');}
+    function renderSterne(el,profileId){renderVideoCard(el,profileId,'sterne');}
+    /* === CHALLENGES progress (from drill_attempts, best rating per drill) === */
+    function renderChallenges(el,profileId){
+    if(!profileId){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
+    fetch(SB_URL+'/rest/v1/drill_attempts?profile_id=eq.'+encodeURIComponent(profileId)+'&select=module_key,drill_idx,rating',{
+        headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    }).then(function(r){return r.json();}).then(function(rows){
+        /* Reduce to best rating per (module_key, drill_idx) */
+        var best={};
+        (rows||[]).forEach(function(a){
+        if(!best[a.module_key])best[a.module_key]={};
+        var cur=best[a.module_key][a.drill_idx]||0;
+        if(a.rating>cur)best[a.module_key][a.drill_idx]=a.rating;
+        });
+        var html=CHALLENGE_MODULES.map(function(m){
+        var mb=best[m.key]||{};
+        var done=Object.keys(mb).filter(function(k){return mb[k]>=4;}).length;
+        var pct=Math.round(done/m.total*100);
+        return '<div><div class="po-mod-row"><span class="po-mod-name">'+m.label+'</span><span class="po-mod-stat">'+done+'/'+m.total+'</span></div><div class="po-bar"><div class="po-bar-fill cyan" style="width:'+pct+'%"></div></div></div>';
+        }).join('');
+        el.innerHTML=html;
+    }).catch(function(){renderEmptyTile(el,'Fehler beim Laden.');});
+    }
+
+    /* === CERTIFICATES progress (drill_attempts for cert modules + player_stats.stars) === */
+    function renderCerts(el,profileId){
+    if(!profileId){renderEmptyTile(el,'Anmelden, um Fortschritt zu sehen.');return;}
+    Promise.all([
+        fetch(SB_URL+'/rest/v1/drill_attempts?profile_id=eq.'+encodeURIComponent(profileId)+'&select=module_key,drill_idx,rating',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];}),
+        fetch(SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(profileId)+'&select=stars',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).catch(function(){return[];})
+    ]).then(function(res){
+        var attempts=res[0]||[],statsRow=(res[1]||[])[0];
+        var earnedStars=statsRow&&statsRow.stars?Number(statsRow.stars):0;
+        var best={};
+        attempts.forEach(function(a){
+        if(!best[a.module_key])best[a.module_key]={};
+        var cur=best[a.module_key][a.drill_idx]||0;
+        if(a.rating>cur)best[a.module_key][a.drill_idx]=a.rating;
+        });
+        var html=CERT_MODULES.map(function(m){
+        var mb=best[m.key]||{};
+        var done=Object.keys(mb).filter(function(k){return mb[k]>=4;}).length;
+        var pct=Math.round(done/m.total*100);
+        var cert=earnedStars>=m.stars?' <span style="color:#FF8C00;font-weight:800">\u2605</span>':'';
+        return '<div><div class="po-mod-row"><span class="po-mod-name">'+m.label+cert+'</span><span class="po-mod-stat">'+done+'/'+m.total+'</span></div><div class="po-bar"><div class="po-bar-fill gold" style="width:'+pct+'%"></div></div></div>';
+        }).join('');
+        el.innerHTML=html;
+    }).catch(function(){renderEmptyTile(el,'Fehler beim Laden.');});
+    }
+
+    /* === Init player overview === */
+    function initPlayer(){
+    var elSterne=document.getElementById('po-sterne-body');
+    var elSevens=document.getElementById('po-sevens-body');
+    var elCh=document.getElementById('po-challenges-body');
+    var elCt=document.getElementById('po-certs-body');
+    function renderAll(id){
+        renderSevens(elSevens,id);
+        renderSterne(elSterne,id);
+        renderChallenges(elCh,id);
+        renderCerts(elCt,id);
+    }
+    function go(){T7Identity.resolve(function(id){renderAll(id);});}
+    if(window.T7Identity)go();
+    else setTimeout(function(){
+        if(window.T7Identity)go();
+        else renderAll(null);
+    },1500);
+    /* Refresh when XP is gained in any widget on the page */
+    window.addEventListener('t7xpupdate',function(){
+        var info=window.T7Identity&&T7Identity.get();
+        if(info&&info.id){renderChallenges(elCh,info.id);renderCerts(elCt,info.id);}
+    });
+    }
+
+    /* === NEWS FEED (WordPress REST API + fallback) === */
+    function renderNewsFallback(){
+    /* Static placeholder content shown when WP REST returns nothing */
+    var items=[
+        {date:'14. Mai 2026',title:'Neue Challenges sind online!',excerpt:'Schau dir die brandneuen First Touch Air und Ginga Advanced Challenges an.',link:'/challenges/',emoji:'\u26A1'},
+        {date:'10. Mai 2026',title:'1-Sterne Zertifikate verf\u00fcgbar',excerpt:'Vom 1-Stern bis zum 5-Sterne Zertifikat \u2013 zeige was du wirklich drauf hast.',link:'/challenges/',emoji:'\u2B50'},
+        {date:'5. Mai 2026',title:'Wochen-Streak Belohnungen',excerpt:'Sammle XP und steige in der Rangliste auf \u2013 jede Woche z\u00e4hlt.',link:'/challenges/',emoji:'\uD83D\uDD25'},
+        {date:'1. Mai 2026',title:'Willkommen zur T7 Academy',excerpt:'Werde der beste Spieler, der du sein kannst \u2013 mit Plan und Leidenschaft.',link:'/',emoji:'\u26BD'}
+    ];
+    var html=items.map(function(it){
+        return '<a href="'+it.link+'" class="news-card"><div class="news-thumb">'+it.emoji+'</div><div class="news-body"><div class="news-date">'+it.date+'</div><div class="news-title">'+it.title+'</div><div class="news-excerpt">'+it.excerpt+'</div></div></a>';
+    }).join('');
+    document.getElementById('news-feed').innerHTML=html;
+    }
+
+    /* === Theme + nav === */
+    (function(){
+    var theme=localStorage.getItem('t7_theme')||'dark';
+    document.documentElement.setAttribute('data-theme',theme);
+    document.body.setAttribute('data-theme',theme);
+    var MOON='&#9790;',SUN='&#9728;';
+    var tog=document.getElementById('themeToggle');
+    if(tog){
+        tog.innerHTML=theme==='dark'?MOON:SUN;
+        tog.onclick=function(){
+        theme=theme==='dark'?'light':'dark';
+        document.documentElement.setAttribute('data-theme',theme);
+        document.body.setAttribute('data-theme',theme);
+        localStorage.setItem('t7_theme',theme);
+        tog.innerHTML=theme==='dark'?MOON:SUN;
+        };
+    }
+    var adminBar=document.getElementById('wpadminbar'),nav=document.querySelector('.topnav');
+    if(nav){
+        function updateTop(){nav.style.top=adminBar?adminBar.offsetHeight+'px':'0';}
+        updateTop();window.addEventListener('resize',updateTop);
+        window.addEventListener('scroll',function(){if(window.scrollY>40)nav.classList.add('nav-shrunk');else nav.classList.remove('nav-shrunk');});
+    }
+    })();
+
+    initPlayer();
+    })();
+    </script>
