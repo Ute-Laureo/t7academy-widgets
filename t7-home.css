@@ -1,0 +1,790 @@
+/* ============================================================
+   T7 ACADEMY — t7-home.css
+   ------------------------------------------------------------
+   Home-specific overrides for the subscribed environment.
+   Loaded AFTER t7-base.css so it can override.
+
+   Builds on the lp-* primitives that already live in t7-base.css
+   (and are documented in t7-outside.css):
+     .lp-section / .lp-wrap / .lp-eye / .lp-title / .lp-sub
+     .lp-hero / .lp-hero-grid / .lp-hero-text / .lp-hero-image
+     .lp-hero-stats / .lp-hero-stat / .lp-hero-stat-num / .lp-hero-stat-label
+
+   Scope:
+     1.  Make the inside (subscribed) home page speak the same
+         visual language as the outside (marketing) page.
+     2.  Add components that are unique to the inside home:
+           - home-avatar-slot       (player photo in the hero)
+           - home-prog / home-prog-* (progress cards, lp-prog vocab)
+           - myvids-*                (private clip uploads)
+           - diary-*                 (player reflection)
+     3.  Restyle the existing news-card to fit the lp-* world.
+   ============================================================ */
+
+
+/* ============================================================
+   0. PRIMITIVES NOT IN t7-base.css
+   ------------------------------------------------------------
+   t7-base.css exposes lp-section / lp-wrap / lp-eye / lp-title /
+   lp-sub — but not the hero block or the Fraunces <em> rule.
+   We vendor only what the home page needs, rather than loading
+   the full t7-outside.css (which carries marketing-only blocks
+   like .lp-prog / .lp-theory / .alumni-roll the inside doesn't
+   need).
+============================================================ */
+
+/* Fraunces italic emphasis inside section titles */
+.lp-title em {
+  font-family: 'Fraunces', 'Garet W05 Bold', serif;
+  font-style: italic;
+  font-weight: 700;
+  padding-right: .04em;
+}
+.lp-title em.accent { color: var(--accent); }
+.lp-title em.gold   { color: var(--lp-gold); }
+
+/* Hero — mirrors .lp-hero from t7-outside.css */
+.lp-hero {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--lp-rule);
+}
+.lp-hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  min-height: 480px;
+}
+.lp-hero-text {
+  padding: 72px clamp(24px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.lp-hero-eye {
+  font-family: 'Antonio', 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.lp-hero-eye::before {
+  content: '';
+  width: 36px;
+  height: 1px;
+  background: var(--accent);
+}
+.lp-hero h1 {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 900;
+  font-size: clamp(36px, 5.6vw, 68px);
+  line-height: 1.0;
+  letter-spacing: -.018em;
+  color: var(--text);
+  margin-bottom: 22px;
+}
+.lp-hero h1 em {
+  font-family: 'Fraunces', 'Garet W05 Bold', serif;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--accent);
+  padding-right: .08em;
+}
+.lp-hero p {
+  font-size: clamp(15px, 1.4vw, 19px);
+  line-height: 1.55;
+  color: var(--lp-muted);
+  max-width: 520px;
+  margin-bottom: 32px;
+}
+.lp-hero p strong { color: var(--text); font-weight: 700; }
+
+.lp-hero-stats {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-rule);
+  max-width: 560px;
+}
+.lp-hero-stat { display: flex; flex-direction: column; }
+.lp-hero-stat-num {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: clamp(38px, 3.8vw, 48px);
+  line-height: 1;
+  color: var(--lp-gold);
+  margin-bottom: 8px;
+}
+.lp-hero-stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+
+.lp-hero-image {
+  background: url('https://ute-laureo.github.io/t7academy-widgets/Assets/Home_Hero_Pic.png') center/cover no-repeat;
+  position: relative;
+}
+.lp-hero-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(8,15,30,.65) 0%, rgba(8,15,30,.15) 30%, transparent 60%);
+  pointer-events: none;
+}
+body[data-theme="light"] .lp-hero-image::after {
+  background: linear-gradient(90deg, rgba(232,237,243,.55) 0%, rgba(232,237,243,.15) 30%, transparent 60%) !important;
+}
+
+@media (max-width: 880px) {
+  .lp-hero-grid { grid-template-columns: 1fr; min-height: auto; }
+  .lp-hero-image { height: 280px; order: -1; }
+  .lp-hero-text  { padding: 48px 24px; }
+}
+
+
+/* ============================================================
+   1. KILL THE OLD BOXY SECTION HEAD
+   The previous design wrapped every section in a gradient-
+   bordered box.  The outside vocabulary uses naked typography
+   (lp-eye + lp-title + lp-sub) instead.  We hide the old
+   wrapper if it ever appears.
+============================================================ */
+.home-wrap,
+.home-section-head { all: unset; display: revert; }
+.home-section-head.player,
+.home-section-head.news,
+.home-section-head.theory { background-image: none; border: none; }
+
+
+/* ============================================================
+   2. HERO — pull the player avatar into the right column
+   Reuses .lp-hero / .lp-hero-grid / .lp-hero-image from
+   t7-base.css.  We only modify the right column to be clickable
+   and to overlay an upload prompt when no avatar is set.
+============================================================ */
+.home-avatar-slot {
+  cursor: pointer;
+  outline: none;
+  transition: filter .2s;
+}
+.home-avatar-slot:hover,
+.home-avatar-slot:focus-visible { filter: brightness(1.05); }
+.home-avatar-slot:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--accent);
+}
+
+/* Overlay shows when no avatar has been uploaded yet, OR on hover
+   over an existing avatar (as a re-upload prompt). */
+.home-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(180deg, rgba(8,15,30,0) 40%, rgba(8,15,30,.55) 100%);
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+}
+.home-avatar-slot.no-photo .home-avatar-overlay,
+.home-avatar-slot:hover .home-avatar-overlay,
+.home-avatar-slot:focus-visible .home-avatar-overlay { opacity: 1; }
+
+.home-avatar-icon { font-size: 36px; }
+.home-avatar-cta {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 10px 18px;
+  background: rgba(0,229,255,.18);
+  border: 1px solid var(--accent);
+  border-radius: 99px;
+  backdrop-filter: blur(6px);
+}
+body[data-theme="light"] .home-avatar-overlay {
+  background: linear-gradient(180deg, rgba(232,237,243,0) 40%, rgba(15,23,42,.45) 100%);
+}
+
+/* Uploading state */
+.home-avatar-slot.uploading { pointer-events: none; }
+.home-avatar-slot.uploading::after {
+  content: 'Lade hoch…';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600; font-size: 14px; letter-spacing: .14em; text-transform: uppercase;
+  color: #fff;
+  background: rgba(8,15,30,.6);
+  z-index: 3;
+}
+
+
+/* Nav avatar — small circular thumb that mirrors the hero photo */
+.nav-avatar {
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.nav-avatar.has-photo { color: transparent; font-size: 0; }
+
+
+/* ============================================================
+   3. PROGRESS CARDS — adopt the lp-prog vocabulary
+   Transparent backgrounds, colored eyebrow per card, Antonio
+   uppercase labels, big Garet title.  Each card carries its
+   own --p-c (program color) just like .lp-prog on the outside.
+============================================================ */
+.home-prog-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+@media (max-width: 1000px) { .home-prog-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .home-prog-grid { grid-template-columns: 1fr; } }
+
+.home-prog {
+  background: transparent;
+  padding: 12px 4px 24px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s;
+}
+.home-prog:hover { transform: translateY(-2px); }
+
+.home-prog.p-sevens     { --p-c: var(--accent); }
+.home-prog.p-sterne     { --p-c: var(--lp-gold); }
+.home-prog.p-challenges { --p-c: #1bcb26; }
+body[data-theme="light"] .home-prog.p-challenges { --p-c: #15803D; }
+.home-prog.p-certs      { --p-c: var(--lp-gold); }
+
+.home-prog-age {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--p-c);
+  margin-bottom: 14px;
+}
+.home-prog-icon { font-size: 38px; line-height: 1; margin-bottom: 14px; }
+.home-prog-h {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.home-prog-body { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.home-prog-link {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--p-c);
+  margin-top: 18px;
+}
+.home-prog-link::after { content: ' →'; }
+
+/* Progress bar + module rows  (the actual data viz inside the card) */
+.po-mod-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.po-mod-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.po-mod-stat { font-size: 11px; color: var(--lp-faint); font-weight: 700; font-family: 'Antonio', sans-serif; letter-spacing: .04em; }
+.po-bar { height: 4px; background: rgba(128,140,160,.16); border-radius: 99px; overflow: hidden; }
+.po-bar-fill { height: 100%; border-radius: 99px; transition: width .5s cubic-bezier(.34,1.56,.64,1); }
+.po-bar-fill.gold { background: var(--lp-gold); }
+.po-bar-fill.cyan { background: var(--accent); }
+.po-bar-fill.green { background: var(--lp-green); }
+
+/* Stat-tile pair (used by Sevens + Sterne for "Videos gesehen" / "Watch Time") */
+.po-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.po-stat-tile { padding: 4px 0; }
+.po-stat-num {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--p-c, var(--accent));
+  margin-bottom: 6px;
+}
+.po-stat-num.gold { color: var(--lp-gold); }
+.po-stat-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}
+.po-empty {
+  font-size: 13px;
+  color: var(--lp-muted);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.home-loading {
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  padding: 12px 0;
+}
+
+
+/* ============================================================
+   4. MEINE VIDEOS — upload + private clip list
+============================================================ */
+.myvids { margin-top: 18px; display: flex; flex-direction: column; gap: 18px; }
+
+.myvids-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1.5px dashed rgba(0,229,255,.35);
+  border-radius: 14px;
+  background: rgba(0,229,255,.04);
+  cursor: pointer;
+  transition: all .18s;
+}
+.myvids-upload:hover {
+  border-color: var(--accent);
+  background: rgba(0,229,255,.08);
+  transform: translateY(-1px);
+}
+body[data-theme="light"] .myvids-upload {
+  border-color: rgba(8,145,178,.4);
+  background: rgba(8,145,178,.04);
+}
+body[data-theme="light"] .myvids-upload:hover {
+  border-color: rgba(8,145,178,.7);
+  background: rgba(8,145,178,.08);
+}
+.myvids-upload-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 300;
+  flex-shrink: 0;
+}
+.myvids-upload-h {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.myvids-upload-sub {
+  font-size: 13px;
+  color: var(--lp-muted);
+}
+
+.myvids-progress {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px 18px;
+  background: rgba(0,229,255,.06);
+  border-radius: 10px;
+}
+.myvids-progress-bar { height: 4px; background: rgba(128,140,160,.18); border-radius: 99px; overflow: hidden; }
+.myvids-progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width .2s; }
+.myvids-progress-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+
+.myvids-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+@media (max-width: 880px) { .myvids-list { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .myvids-list { grid-template-columns: 1fr; } }
+
+.myvid-card {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  position: relative;
+}
+.myvid-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface2);
+  cursor: pointer;
+}
+.myvid-thumb video,
+.myvid-thumb img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.myvid-play {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, transparent 0%, rgba(8,15,30,.4) 100%);
+  pointer-events: none;
+  transition: background .2s;
+}
+.myvid-thumb:hover .myvid-play { background: rgba(8,15,30,.55); }
+.myvid-play::before {
+  content: '▶';
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,.92);
+  color: #000;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  padding-left: 3px;
+}
+.myvid-meta {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px;
+  padding: 10px 2px 0;
+}
+.myvid-title {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.myvid-date {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  flex-shrink: 0;
+}
+.myvid-del {
+  background: none; border: none;
+  color: var(--lp-faint);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+}
+.myvid-del:hover { color: var(--lp-red); background: rgba(228,0,43,.08); }
+
+.myvids-empty {
+  grid-column: 1 / -1;
+  padding: 32px 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--lp-muted);
+  text-align: center;
+}
+
+/* Fullscreen-ish player overlay when a clip is tapped */
+.myvid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0,0,0,.88);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.myvid-overlay video { width: 100%; max-width: 1100px; max-height: 80vh; border-radius: 8px; }
+.myvid-overlay-close {
+  position: absolute; top: 18px; right: 22px;
+  background: rgba(255,255,255,.1); color: #fff; border: 0;
+  width: 40px; height: 40px; border-radius: 50%;
+  font-size: 22px; cursor: pointer;
+}
+.myvid-overlay-close:hover { background: rgba(255,255,255,.18); }
+
+
+/* ============================================================
+   5. TAGEBUCH — the signature section
+   Notebook-feel input.  Past entries stack as dated cards.
+   Each entry has two columns: gold (good) + amber (watch).
+============================================================ */
+.diary {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.diary-input { position: relative; }
+.diary-input-date {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.diary-input-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 720px) { .diary-input-cols { grid-template-columns: 1fr; } }
+
+.diary-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 14px;
+  border-left: 3px solid var(--diary-c);
+}
+.diary-col-good  { --diary-c: var(--lp-gold); }
+.diary-col-watch { --diary-c: #E89B1F; }
+body[data-theme="light"] .diary-col-watch { --diary-c: #C2410C; }
+
+.diary-col-label {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--diary-c);
+}
+
+.diary-col textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+  min-height: 100px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  padding: 4px 0;
+}
+.diary-col textarea::placeholder {
+  color: var(--lp-faint);
+  font-style: italic;
+}
+
+.diary-input-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+.diary-save {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  transition: all .18s;
+}
+.diary-save:hover {
+  background: #1ce6ff;
+  box-shadow: 0 0 18px rgba(0,229,255,.3);
+}
+.diary-save:disabled { opacity: .5; cursor: wait; }
+.diary-save-status {
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-green);
+  opacity: 0;
+  transition: opacity .25s;
+}
+.diary-save-status.show { opacity: 1; }
+.diary-save-status.error { color: var(--lp-red); }
+
+/* History feed */
+.diary-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-rule);
+}
+.diary-entry {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .diary-entry { grid-template-columns: 1fr; gap: 8px; }
+}
+.diary-entry-date {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  padding-top: 4px;
+}
+.diary-entry-date .weekday {
+  display: block;
+  font-family: 'Antonio', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  margin-top: 4px;
+}
+.diary-entry-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 720px) { .diary-entry-cols { grid-template-columns: 1fr; gap: 14px; } }
+.diary-entry-col {
+  padding-left: 14px;
+  border-left: 2px solid var(--diary-c);
+}
+.diary-entry-col.good  { --diary-c: var(--lp-gold); }
+.diary-entry-col.watch { --diary-c: #E89B1F; }
+body[data-theme="light"] .diary-entry-col.watch { --diary-c: #C2410C; }
+.diary-entry-col-label {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--diary-c);
+  margin-bottom: 6px;
+}
+.diary-entry-col-text {
+  font-size: 14px;
+  color: var(--lp-muted);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.diary-entry-col-text.empty {
+  font-style: italic;
+  opacity: .5;
+}
+
+.diary-empty {
+  padding: 24px 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--lp-muted);
+  text-align: center;
+}
+
+
+/* ============================================================
+   6. NEWS — restyle the existing news-card to fit the lp world
+   The component lives in t7-base.css; we just override the
+   surface treatment to match the transparent-card vocabulary.
+============================================================ */
+.news-feed {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 540px;          /* roughly 5 cards, scroll past that */
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.news-feed::-webkit-scrollbar { width: 6px; }
+.news-feed::-webkit-scrollbar-track { background: transparent; }
+.news-feed::-webkit-scrollbar-thumb { background: rgba(128,140,160,.25); border-radius: 99px; }
+
+.news-card {
+  display: flex;
+  gap: 14px;
+  padding: 14px 4px;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--lp-rule);
+  transition: transform .15s;
+  background: transparent;
+  border-radius: 0;
+}
+.news-card:last-child { border-bottom: none; }
+.news-card:hover { transform: translateX(4px); }
+.news-thumb {
+  width: 64px; height: 64px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #0080FF);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; color: rgba(0,0,0,.8);
+  overflow: hidden;
+}
+.news-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.news-body { flex: 1; min-width: 0; }
+.news-date {
+  font-family: 'Antonio', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.news-title {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.news-excerpt {
+  font-size: 13px;
+  color: var(--lp-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-loading,
+.news-empty {
+  padding: 24px 0;
+  text-align: center;
+  font-family: 'Antonio', sans-serif;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+}

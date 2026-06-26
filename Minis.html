@@ -155,14 +155,10 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .lc-mini-station{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--surface);box-shadow:0 2px 6px rgba(0,0,0,.18);position:absolute}
 [data-theme="light"] .lc-mini-station{border-color:#fff}
 .lc-mini-station:nth-child(1){left:0;background:var(--accent)}
-.lc-mini-station:nth-child(2){left:48px;background:var(--accent)}
-.lc-mini-station:nth-child(3){left:96px;background:var(--accent)}
-.lc-mini-station:nth-child(4){left:144px;background:var(--accent)}
-.lc-mini-station:nth-child(5){left:192px;background:var(--lp-gold-deep)}
-[data-theme="light"] .lc-mini-station:nth-child(1),
-[data-theme="light"] .lc-mini-station:nth-child(2),
-[data-theme="light"] .lc-mini-station:nth-child(3),
-[data-theme="light"] .lc-mini-station:nth-child(4){background:var(--accent-text)}
+.lc-mini-station:nth-child(2){left:48px;background:var(--lp-brazil)}
+.lc-mini-station:nth-child(3){left:96px;background:var(--lp-red)}
+.lc-mini-station:nth-child(4){left:144px;background:var(--accent2)}
+.lc-mini-station:nth-child(5){left:192px;background:var(--lp-green)}
 .lc-mini-path{display:flex;align-items:center;gap:8px;width:100%}
 .lc-mini-dot{width:18px;height:18px;border-radius:50%;background:var(--accent-text);position:relative;flex-shrink:0;opacity:.45}
 .lc-mini-dot.done{background:var(--lp-green);opacity:1}
@@ -237,11 +233,16 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .pg-center-avatar{width:78%;height:78%;border-radius:50%;object-fit:cover}
 .pg-station{position:absolute;width:32%;aspect-ratio:1/1;border-radius:50%;border:none;cursor:pointer;background:var(--accent-text);padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.22);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;z-index:3;font-family:'Fredoka',sans-serif;overflow:hidden}
 .pg-station:hover{transform:scale(1.05);box-shadow:0 10px 24px rgba(0,0,0,.28)}
-.pg-pos-1{top:0;left:34%}
-.pg-pos-2{top:23.5%;left:66.3%}
-.pg-pos-3{top:61.5%;left:54%}
-.pg-pos-4{top:61.5%;left:14%}
-.pg-pos-5{top:23.5%;left:1.7%;background:var(--lp-gold-deep)}
+.pg-pos-1{top:0;left:34%;background:var(--accent)}
+.pg-pos-2{top:23.5%;left:66.3%;background:var(--lp-brazil)}
+.pg-pos-3{top:61.5%;left:54%;background:var(--lp-red)}
+.pg-pos-4{top:61.5%;left:14%;background:var(--accent2)}
+.pg-pos-5{top:23.5%;left:1.7%;background:var(--lp-green)}
+/* Yellow station needs dark text for contrast */
+.pg-pos-2 .pg-st-num{color:rgba(10,21,48,.75)}
+.pg-pos-2 .pg-st-name{color:#0a1530}
+.pg-pos-2 .pg-st-count{color:rgba(10,21,48,.95);background:rgba(255,255,255,.45)}
+.pg-pos-2 .pg-st-avatar{border-color:rgba(10,21,48,.30)}
 .pg-st-num{position:absolute;top:7%;left:50%;transform:translateX(-50%);font-family:'Antonio','Open Sans',sans-serif;font-weight:600;font-size:clamp(13px,2.2vw,17px);color:rgba(255,255,255,.85);letter-spacing:.12em;line-height:1}
 .pg-st-emoji{font-size:clamp(24px,5.5vw,32px);line-height:1;margin-bottom:3px}
 .pg-st-avatar{width:clamp(40px,9vw,56px);height:clamp(40px,9vw,56px);border-radius:50%;object-fit:cover;background:transparent;margin-bottom:4px;border:2px solid rgba(255,255,255,.4)}
@@ -250,6 +251,13 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 
 /* === STATION VIEW === */
 .station-hero{position:relative;display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--accent2) 0%,var(--accent3) 100%);border-radius:18px;padding:24px;margin-bottom:18px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+/* Dark-text variant for light-colored station backgrounds (e.g. yellow) */
+.station-hero[data-st-text="dark"] .station-num{color:rgba(10,21,48,.75)}
+.station-hero[data-st-text="dark"] .station-title{color:#0a1530}
+.station-hero[data-st-text="dark"] .station-meta{color:rgba(10,21,48,.85)}
+.station-hero[data-st-text="dark"] .station-meta-pill{color:#0a1530;background:rgba(10,21,48,.18)}
+.station-hero[data-st-text="dark"] .station-avatar{border-color:rgba(10,21,48,.30);box-shadow:0 4px 14px rgba(0,0,0,.20);background:rgba(10,21,48,.08)}
+.station-hero[data-st-text="dark"] .station-stadium-badge{background:rgba(10,21,48,.18);border-color:rgba(10,21,48,.30)}
 .station-avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;flex-shrink:0;position:relative;z-index:1;box-shadow:0 4px 14px rgba(0,0,0,.30);background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.3)}
 .station-stadium-badge{width:110px;height:110px;border-radius:50%;flex-shrink:0;position:relative;z-index:1;background:rgba(0,0,0,.25);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:54px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
 .station-info{position:relative;z-index:1;flex:1;min-width:0}
@@ -465,7 +473,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
     <div class="hero-stats">
       <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">Stationen</div></div>
       <div class="hero-stat"><div class="hero-stat-num">1</div><div class="hero-stat-label">Trickpfad</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">Stadien</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">1</div><div class="hero-stat-label">Stadien</div></div>
       <div class="hero-stat"><div class="hero-stat-num">30</div><div class="hero-stat-label">Sticker</div></div>
     </div>
   </div>
@@ -835,4 +843,37 @@ document.addEventListener('keydown', function(e){
   var closeBtn = document.getElementById('kmodal-close');
   if (closeBtn) { closeBtn.click(); } else { overlay.classList.remove('open'); }
 });
+
+// Sync the station-hero bar with each playground station's actual color.
+// t7-minis.js sets hero.style.background = STATION_COLORS[key][1] when a
+// station opens. We hook the click in CAPTURE phase so we update that map
+// before the engine reads it — using getComputedStyle so we always pick up
+// the right color for the current theme (dark or light).
+(function(){
+  // Which stations need dark text on a light background. The Brazil-yellow
+  // station (st2) is currently the only one; extend this set if the palette
+  // changes.
+  var DARK_TEXT_STATIONS = { st2: true };
+
+  document.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('[data-station]');
+    if (!btn) return;
+    var key = btn.dataset.station;
+    if (!key) return;
+
+    // Read the station's actual rendered background and push it into the
+    // engine's color map so the bar matches.
+    var bg = getComputedStyle(btn).backgroundColor;
+    if (window.STATION_COLORS && window.STATION_COLORS[key] && bg) {
+      window.STATION_COLORS[key] = [bg, bg];
+    }
+
+    // Flag dark text for light-background stations so the bar stays readable.
+    var hero = document.getElementById('station-hero');
+    if (hero) {
+      if (DARK_TEXT_STATIONS[key]) hero.setAttribute('data-st-text', 'dark');
+      else hero.removeAttribute('data-st-text');
+    }
+  }, true); // capture phase — runs before the engine's bubble handler
+})();
 </script>
