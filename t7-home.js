@@ -1,88 +1,42 @@
 /* ============================================================
    T7 ACADEMY — t7-home.js
    ------------------------------------------------------------
-   Single home-page script.  Absorbs what used to live in:
-     - the inline <script> block on T7Academy_Home.html
-       (progress cards: Sevens, Sterne, Challenges, Zertifikate)
-     - loadNews.js                       (Google-Sheet news feed)
-     - the inline theme + nav handler
-   And adds three NEW personalization modules:
-     - Avatar    (player photo, hero + nav)
-     - Videos    (private match/training uploads)
-     - Diary     (was lief gut / worauf achten)
+   Single home-page script.
 
-   Vimeo watch-time tracking remains in its own file
-   (t7-vimeo-tracker.js) because it is page-agnostic and used
-   on the Sevens, Sterne and Minis pages too.
+   CLOUD (Supabase) — unchanged from before:
+     - Identity (T7Identity)
+     - Progress: Sevens / Sterne video watch counts
+     - Challenges progress + XP        (player_stats.xp)
+     - Sterne-Zertifikat (star count)  (player_stats.stars)
+     - Avatar URL                      (player_profiles.avatar_url)
+
+   LOCAL ONLY (GDPR — never leaves the device):
+     - Diary entries           → localStorage
+     - Player video uploads    → IndexedDB
+     - With download / upload backup for switching devices.
+
+   Vimeo watch-time tracking still lives in its own file
+   (t7-vimeo-tracker.js).
 
    ────────────────────────────────────────────────────────────
-   REQUIRED SUPABASE SCHEMA
-   Run once in the Supabase SQL editor before deploying:
+   REQUIRED SUPABASE CHANGE
+   Just one column — the diary and clips tables are GONE.
    ────────────────────────────────────────────────────────────
 
-     -- 1) Avatar URL on the existing player_profiles row
      alter table player_profiles
        add column if not exists avatar_url text;
 
-     -- 2) Private player clips (match / training videos)
-     create table if not exists player_clips (
-       id            uuid primary key default gen_random_uuid(),
-       profile_id    uuid not null references player_profiles(id) on delete cascade,
-       title         text,
-       storage_path  text not null,
-       mime_type     text,
-       size_bytes    bigint,
-       created_at    timestamptz not null default now()
-     );
-     create index if not exists player_clips_profile_idx
-       on player_clips(profile_id, created_at desc);
+   STORAGE BUCKET (one):
+     - "player-avatars"  → public read, authenticated write.
+       Storage policy:
 
-     -- 3) Diary entries (one per day per player, last write wins)
-     create table if not exists player_diary (
-       id           uuid primary key default gen_random_uuid(),
-       profile_id   uuid not null references player_profiles(id) on delete cascade,
-       entry_date   date not null,
-       good_text    text,
-       watch_text   text,
-       updated_at   timestamptz not null default now(),
-       unique (profile_id, entry_date)
-     );
-     create index if not exists player_diary_profile_idx
-       on player_diary(profile_id, entry_date desc);
+         create policy "avatars_self_write" on storage.objects for insert
+           with check (
+             bucket_id = 'player-avatars'
+             and split_part(name, '.', 1) = auth.uid()::text
+           );
 
-     -- 4) RLS — players see/edit only their own rows.  Adjust to
-     --    match your auth model (these assume profile_id = auth.uid()
-     --    via the same pattern as video_progress).
-     alter table player_clips enable row level security;
-     alter table player_diary enable row level security;
-
-     create policy "clips_self_select" on player_clips for select
-       using (profile_id = auth.uid());
-     create policy "clips_self_insert" on player_clips for insert
-       with check (profile_id = auth.uid());
-     create policy "clips_self_delete" on player_clips for delete
-       using (profile_id = auth.uid());
-
-     create policy "diary_self_select" on player_diary for select
-       using (profile_id = auth.uid());
-     create policy "diary_self_upsert" on player_diary for insert
-       with check (profile_id = auth.uid());
-     create policy "diary_self_update" on player_diary for update
-       using (profile_id = auth.uid());
-
-   STORAGE BUCKETS (create via Supabase Storage UI):
-     - "player-avatars"  → public read, authenticated write
-     - "player-clips"    → private (signed URLs only), authenticated write
-
-   For the anon-key flow used by these widgets, both buckets
-   need an INSERT policy on storage.objects scoped to the
-   profile_id path prefix.  Example for player-clips:
-
-     create policy "clips_self_write" on storage.objects for insert
-       with check (
-         bucket_id = 'player-clips'
-         and (storage.foldername(name))[1] = auth.uid()::text
-       );
+   That's it for backend.  Diary + clips never touch the network.
    ============================================================ */
 
 (function(){
@@ -97,10 +51,15 @@
   var SB_KEY = window.T7_SB_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 
   var AVATAR_BUCKET = 'player-avatars';
-  var CLIPS_BUCKET  = 'player-clips';
 
-  /* Watch-time threshold for "Video gesehen" tile (matches what
-     the old inline script used). */
+  /* Local storage keys & IDB names — namespaced per profile so two
+     players on the same device don't see each other's data. */
+  var DIARY_KEY_PREFIX = 't7_diary_v1__';   // + profileId (or 'anon')
+  var IDB_NAME         = 't7-academy';
+  var IDB_VERSION      = 1;
+  var CLIPS_STORE      = 'clips';           // keyPath 'id'; index 'profile_id'
+
+  /* Watch-time threshold for "Video gesehen" tile */
   var SEEN_THRESHOLD_SEC = 30;
 
   /* Module metadata — must mirror the Challenges page configs */
@@ -120,12 +79,11 @@
     { key: 'sz5', label: '5 Sterne', stars: 5, total: 5 }
   ];
 
-  /* News feed source (Google Sheets, published CSV) */
   var NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQHWaswAJIeuF1xBh_yBGIDKcB58lya5y6NEJ-rLS_3pJ-7mEZruDXjo7uOj5s5DwtXSEuH7-iq-kYk/pub?output=csv';
 
 
   /* ============================================================
-     HELPERS
+     GENERIC HELPERS
   ============================================================ */
   function $(id){ return document.getElementById(id); }
 
@@ -141,19 +99,6 @@
       .catch(function(){ return []; });
   }
 
-  function sbUpsert(table, body, onConflict){
-    var url = SB_URL + '/rest/v1/' + table + (onConflict ? '?on_conflict=' + encodeURIComponent(onConflict) : '');
-    return fetch(url, {
-      method: 'POST',
-      headers: sbHeaders({ Prefer: 'resolution=merge-duplicates,return=representation' }),
-      body: JSON.stringify(body)
-    }).then(function(r){ return r.ok ? r.json() : null; });
-  }
-
-  function sbDelete(path){
-    return fetch(SB_URL + '/rest/v1/' + path, { method: 'DELETE', headers: sbHeaders() });
-  }
-
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c];
@@ -166,13 +111,6 @@
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
 
-  function fmtDate(s){
-    if (!s) return '';
-    var d = new Date(s);
-    if (isNaN(d)) return s;
-    return d.toLocaleDateString('de-AT', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
-
   function fmtWatchTime(seconds){
     var min = Math.round(seconds / 60);
     if (min < 60) return min + ' Min';
@@ -183,14 +121,57 @@
     el.innerHTML = '<div class="po-empty">' + esc(msg) + '</div>';
   }
 
+  function uuid(){
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+      var r = Math.random() * 16 | 0;
+      var v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  /* Download a JS object as a JSON file */
+  function downloadJson(data, filename){
+    var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  }
+
+  /* Read an uploaded File as JSON */
+  function readJsonFile(file){
+    return new Promise(function(resolve, reject){
+      var r = new FileReader();
+      r.onload  = function(){ try { resolve(JSON.parse(r.result)); } catch(e){ reject(e); } };
+      r.onerror = function(){ reject(r.error); };
+      r.readAsText(file);
+    });
+  }
+
+  /* Set transient status text on an action-row span */
+  function setStatus(el, msg, cls){
+    if (!el) return;
+    el.textContent = msg || '';
+    el.className = 'home-actions-status' + (cls ? ' ' + cls : '');
+    if (msg) {
+      clearTimeout(el.__t7statusTimer);
+      el.__t7statusTimer = setTimeout(function(){
+        el.textContent = '';
+        el.className = 'home-actions-status';
+      }, 3500);
+    }
+  }
+
 
   /* ============================================================
      THEME + NAV (was inline)
   ============================================================ */
   function initThemeAndNav(){
     var theme = localStorage.getItem('t7_theme') || 'dark';
-    var MOON = '\u263E';
-    var SUN  = '\u2600';
+    var MOON = '\u263E', SUN = '\u2600';
     document.documentElement.setAttribute('data-theme', theme);
     document.body.setAttribute('data-theme', theme);
     var tog = $('themeToggle');
@@ -204,8 +185,6 @@
         tog.innerHTML = theme === 'dark' ? MOON : SUN;
       };
     }
-
-    /* WP admin bar offset + shrink-on-scroll */
     var nav = document.querySelector('.topnav');
     if (nav) {
       var adminBar = $('wpadminbar');
@@ -221,7 +200,7 @@
 
 
   /* ============================================================
-     IDENTITY — wait for T7Identity to resolve, then call cb(id|null)
+     IDENTITY
   ============================================================ */
   function whenIdentity(cb){
     function go(){ T7Identity.resolve(function(id){ cb(id || null); }); }
@@ -234,29 +213,27 @@
 
 
   /* ============================================================
-     AVATAR — hero photo + nav thumb
-     Stored at:  player-avatars/{profile_id}.{ext}
+     AVATAR (cloud) — sidebar uploader + nav thumb
+     Stored at  player-avatars/{profile_id}.{ext}
      URL kept on player_profiles.avatar_url
   ============================================================ */
-  var currentProfileId = null;
-
   function applyAvatar(url){
-    var slot = $('avatarSlot');
+    var img   = $('avatarSideImg');
     var navAv = $('navAvatar');
     if (url) {
-      if (slot) {
-        slot.style.backgroundImage = "url('" + url + "')";
-        slot.style.backgroundSize  = 'cover';
-        slot.style.backgroundPosition = 'center';
-        slot.classList.remove('no-photo');
+      if (img) {
+        img.style.backgroundImage = "url('" + url + "')";
+        img.classList.add('has-photo');
       }
       if (navAv) {
         navAv.style.backgroundImage = "url('" + url + "')";
         navAv.classList.add('has-photo');
       }
     } else {
-      /* No photo set yet — keep default hero image, show overlay */
-      if (slot) slot.classList.add('no-photo');
+      if (img) {
+        img.style.backgroundImage = '';
+        img.classList.remove('has-photo');
+      }
       if (navAv) {
         navAv.classList.remove('has-photo');
         navAv.style.backgroundImage = '';
@@ -266,19 +243,32 @@
   }
 
   function initAvatar(profileId){
-    var slot  = $('avatarSlot');
+    var side  = $('avatarSide');
+    var cta   = $('avatarSideCta');
     var input = $('avatarInput');
-    if (!slot || !input) return;
+    if (!side || !input) return;
 
-    /* Click / Enter / Space → open file picker */
     var openPicker = function(){ if (profileId) input.click(); };
-    slot.addEventListener('click', openPicker);
-    slot.addEventListener('keydown', function(e){
+    side.addEventListener('click', openPicker);
+    side.addEventListener('keydown', function(e){
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }
     });
+    if (cta) {
+      cta.addEventListener('click', function(e){
+        /* The CTA is inside the slot — stop the slot click from
+           firing the picker twice. */
+        e.stopPropagation();
+        openPicker();
+      });
+    }
+
+    if (!profileId) {
+      applyAvatar(null);
+      if (cta) { cta.disabled = true; cta.textContent = 'Anmelden zum Hochladen'; }
+      return;
+    }
 
     /* Pull existing avatar URL */
-    if (!profileId) { applyAvatar(null); return; }
     sbGet('player_profiles?id=eq.' + encodeURIComponent(profileId) + '&select=avatar_url')
       .then(function(rows){ applyAvatar(rows && rows[0] && rows[0].avatar_url); });
 
@@ -288,11 +278,12 @@
       if (!file) return;
       if (file.size > 8 * 1024 * 1024) {
         alert('Das Bild ist zu groß (max. 8 MB).');
+        input.value = '';
         return;
       }
-      slot.classList.add('uploading');
+      side.classList.add('uploading');
 
-      var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      var ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
       var path = profileId + '.' + ext;
       var uploadUrl = SB_URL + '/storage/v1/object/' + AVATAR_BUCKET + '/' + path;
 
@@ -308,17 +299,12 @@
       }).then(function(r){
         if (!r.ok) throw new Error('upload failed (' + r.status + ')');
         var publicUrl = SB_URL + '/storage/v1/object/public/' + AVATAR_BUCKET + '/' + path + '?t=' + Date.now();
-        /* Persist URL on player_profiles */
         return fetch(SB_URL + '/rest/v1/player_profiles?id=eq.' + encodeURIComponent(profileId), {
           method: 'PATCH',
           headers: sbHeaders({ Prefer: 'return=minimal' }),
           body: JSON.stringify({ avatar_url: publicUrl })
         }).then(function(r2){
-          if (!r2.ok) {
-            /* The file is up but the URL didn't persist.  Warn so admin
-               can check whether avatar_url exists on player_profiles. */
-            console.warn('[T7 Home] avatar uploaded but PATCH player_profiles failed (' + r2.status + '). Did you add the avatar_url column?');
-          }
+          if (!r2.ok) console.warn('[T7 Home] avatar uploaded but PATCH player_profiles failed (' + r2.status + '). Did you add the avatar_url column?');
           return publicUrl;
         });
       }).then(function(publicUrl){
@@ -327,7 +313,7 @@
         console.error('[T7 Home] avatar upload', err);
         alert('Upload fehlgeschlagen. Bitte später erneut versuchen.');
       }).then(function(){
-        slot.classList.remove('uploading');
+        side.classList.remove('uploading');
         input.value = '';
       });
     });
@@ -335,12 +321,12 @@
 
 
   /* ============================================================
-     PROGRESS CARDS — Sevens, Sterne, Challenges, Zertifikate
-     (logic preserved from the previous inline script, only
-     restructured into named functions and shared helpers.)
+     PROGRESS CARDS (cloud, unchanged in shape)
+     Sevens + Sterne render their own video-watch stats.
+     Challenges + Zertifikate render module progress.
+     Certs also feeds the hero Sterne-Zertifikat badge.
   ============================================================ */
   function renderVideoCard(el, profileId, kind){
-    /* kind: 'sevens' or 'sterne' */
     if (!profileId) { renderEmpty(el, 'Anmelden, um Fortschritt zu sehen.'); return; }
 
     var videoFilter = kind === 'sevens' ? 'sevens=not.is.null' : 'stars=not.is.null';
@@ -350,8 +336,7 @@
       sbGet('videos?' + videoFilter + '&select=vimeo_code'),
       sbGet('video_progress?profile_id=eq.' + encodeURIComponent(profileId) + '&select=vimeo_id,total_seconds')
     ]).then(function(res){
-      var videos = res[0] || [];
-      var progress = res[1] || [];
+      var videos = res[0] || [], progress = res[1] || [];
       var ids = {};
       videos.forEach(function(v){ if (v.vimeo_code) ids[v.vimeo_code] = true; });
       var totalVideos = Object.keys(ids).length;
@@ -378,9 +363,9 @@
           '</div>' +
         '</div>';
 
-      /* Feed hero stats from Sevens+Sterne combined when both render */
+      /* Feed hero stats */
       cumulativeHeroStats.seenVideos += seen;
-      cumulativeHeroStats.seconds += seconds;
+      cumulativeHeroStats.seconds    += seconds;
       flushHeroStats();
     }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
   }
@@ -418,7 +403,8 @@
       var statsRow = (res[1] || [])[0] || {};
       var earnedStars = Number(statsRow.stars || 0);
 
-      /* Feed hero XP */
+      /* Feed hero — XP and Sterne-Zertifikat both flow from here */
+      renderHeroStars(earnedStars);
       if (typeof statsRow.xp === 'number') {
         cumulativeHeroStats.xp = statsRow.xp;
         flushHeroStats();
@@ -447,33 +433,53 @@
 
 
   /* ============================================================
-     HERO STATS — small aggregator that sums data from the four
-     progress cards.  Each card calls flushHeroStats() when its
-     data arrives.
+     HERO — Sterne-Zertifikat badge (right column)
+     Filled in by renderCerts above as soon as data arrives.
+  ============================================================ */
+  function renderHeroStars(stars){
+    var num = $('hero-stars-num');
+    var row = $('hero-stars-row');
+    var sub = $('hero-stars-sub');
+    var n = Math.max(0, Math.min(5, Number(stars || 0)));
+    if (num) num.textContent = String(n);
+    if (row) {
+      var html = '';
+      for (var i = 1; i <= 5; i++) {
+        html += '<span class="s' + (i <= n ? ' earned' : '') + '">\u2605</span>';
+      }
+      row.innerHTML = html;
+    }
+    if (sub) {
+      if (n === 0)      sub.textContent = 'Hol dir dein erstes Sterne-Zertifikat';
+      else if (n === 5) sub.textContent = 'Vollständig — alle 5 Sterne erreicht';
+      else              sub.textContent = 'Auf dem Weg zum ' + (n + 1) + '-Sterne-Zertifikat';
+    }
+  }
+
+
+  /* ============================================================
+     HERO STATS aggregator — fed by progress cards as they load.
   ============================================================ */
   var cumulativeHeroStats = { seenVideos: 0, seconds: 0, xp: null };
 
   function flushHeroStats(){
-    var v = $('stat-videos');
-    var w = $('stat-watchtime');
-    var x = $('stat-xp');
+    var v = $('stat-videos'), w = $('stat-watchtime'), x = $('stat-xp');
     if (v) v.textContent = cumulativeHeroStats.seenVideos;
     if (w) w.textContent = fmtWatchTime(cumulativeHeroStats.seconds);
     if (x) x.textContent = cumulativeHeroStats.xp != null ? cumulativeHeroStats.xp : '—';
   }
-
   function resetHeroStats(){
     cumulativeHeroStats = { seenVideos: 0, seconds: 0, xp: null };
   }
 
   function initProgress(profileId){
     resetHeroStats();
-    renderVideoCard($('po-sevens-body'), profileId, 'sevens');
-    renderVideoCard($('po-sterne-body'), profileId, 'sterne');
+    renderHeroStars(0);                  /* placeholder until renderCerts resolves */
+    renderVideoCard($('po-sevens-body'),    profileId, 'sevens');
+    renderVideoCard($('po-sterne-body'),    profileId, 'sterne');
     renderChallenges($('po-challenges-body'), profileId);
-    renderCerts($('po-certs-body'), profileId);
+    renderCerts($('po-certs-body'),       profileId);
 
-    /* Refresh when XP is gained in any widget on the page */
     window.addEventListener('t7xpupdate', function(){
       var info = window.T7Identity && T7Identity.get();
       if (info && info.id) {
@@ -485,57 +491,332 @@
 
 
   /* ============================================================
-     MEINE VIDEOS — private clip uploads
-     Bucket:  player-clips/{profile_id}/{uuid}.{ext}
-     Table:   player_clips
+     ────────  LOCAL-ONLY STORAGE (GDPR)  ────────
+
+     Diary entries and player video uploads live ONLY on the
+     device.  Nothing in this section talks to the network.
   ============================================================ */
-  function uuid(){
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
-      var r = Math.random() * 16 | 0;
-      var v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
+
+
+  /* ============================================================
+     DIARY  →  localStorage
+     Key:    t7_diary_v1__{profileId|anon}
+     Shape:  [{ entry_date, good_text, watch_text, updated_at }, …]
+  ============================================================ */
+  function diaryKey(profileId){
+    return DIARY_KEY_PREFIX + (profileId || 'anon');
+  }
+  function diaryRead(profileId){
+    try { return JSON.parse(localStorage.getItem(diaryKey(profileId))) || []; }
+    catch(e){ return []; }
+  }
+  function diaryWrite(profileId, entries){
+    localStorage.setItem(diaryKey(profileId), JSON.stringify(entries));
+  }
+  function diaryUpsert(profileId, entry){
+    var entries = diaryRead(profileId);
+    var idx = -1;
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].entry_date === entry.entry_date) { idx = i; break; }
+    }
+    if (idx >= 0) entries[idx] = entry;
+    else entries.push(entry);
+    entries.sort(function(a, b){ return (b.entry_date || '').localeCompare(a.entry_date || ''); });
+    diaryWrite(profileId, entries);
+  }
+  function diaryGetByDate(profileId, isoDate){
+    var entries = diaryRead(profileId);
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].entry_date === isoDate) return entries[i];
+    }
+    return null;
+  }
+
+  function formatDiaryDate(s){
+    if (!s) return { pretty: '', weekday: '' };
+    var d = new Date(s + 'T00:00:00');
+    if (isNaN(d)) return { pretty: s, weekday: '' };
+    var months   = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sept.','Okt.','Nov.','Dez.'];
+    var weekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    return {
+      pretty:  d.getDate() + '. ' + months[d.getMonth()] + ' ' + d.getFullYear(),
+      weekday: weekdays[d.getDay()]
+    };
+  }
+
+  function renderDiaryFeed(profileId){
+    var feed = $('diaryFeed');
+    if (!feed) return;
+    var entries = diaryRead(profileId);
+    var today = todayISO();
+    var past  = entries.filter(function(e){ return e.entry_date !== today; });
+
+    if (!past.length) {
+      feed.innerHTML = '<div class="diary-empty">Noch keine früheren Einträge. Fang heute an.</div>';
+      return;
+    }
+    feed.innerHTML = past.map(function(r){
+      var d     = formatDiaryDate(r.entry_date);
+      var good  = (r.good_text  || '').trim();
+      var watch = (r.watch_text || '').trim();
+      return '' +
+        '<div class="diary-entry">' +
+          '<div class="diary-entry-date">' + esc(d.pretty) +
+            '<span class="weekday">' + esc(d.weekday) + '</span>' +
+          '</div>' +
+          '<div class="diary-entry-cols">' +
+            '<div class="diary-entry-col good">' +
+              '<div class="diary-entry-col-label">Was lief gut</div>' +
+              '<div class="diary-entry-col-text' + (good ? '' : ' empty') + '">' +
+                esc(good || '— kein Eintrag —') +
+              '</div>' +
+            '</div>' +
+            '<div class="diary-entry-col watch">' +
+              '<div class="diary-entry-col-label">Worauf achten</div>' +
+              '<div class="diary-entry-col-text' + (watch ? '' : ' empty') + '">' +
+                esc(watch || '— kein Eintrag —') +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function loadTodayDiary(profileId){
+    var today = diaryGetByDate(profileId, todayISO());
+    if (!today) return;
+    if (today.good_text)  $('diaryGood').value  = today.good_text;
+    if (today.watch_text) $('diaryWatch').value = today.watch_text;
+  }
+
+  function saveDiary(profileId){
+    var btn    = $('diarySave');
+    var status = $('diarySaveStatus');
+    var good   = $('diaryGood').value.trim();
+    var watch  = $('diaryWatch').value.trim();
+    if (!good && !watch) {
+      status.textContent = 'Schreib zuerst etwas auf.';
+      status.classList.add('show', 'error');
+      setTimeout(function(){ status.classList.remove('show', 'error'); }, 2200);
+      return;
+    }
+    btn.disabled = true;
+    status.classList.remove('error');
+    status.textContent = 'Speichere…';
+    status.classList.add('show');
+
+    try {
+      diaryUpsert(profileId, {
+        entry_date: todayISO(),
+        good_text:  good  || null,
+        watch_text: watch || null,
+        updated_at: new Date().toISOString()
+      });
+      status.textContent = 'Gespeichert.';
+      setTimeout(function(){ status.classList.remove('show'); }, 1800);
+      renderDiaryFeed(profileId);
+    } catch(err) {
+      console.error('[T7 Home] diary save', err);
+      status.textContent = 'Speichern fehlgeschlagen.';
+      status.classList.add('error');
+    }
+    btn.disabled = false;
+  }
+
+  /* Export / Import */
+  function diaryExport(profileId){
+    var data = {
+      kind:        't7-academy-diary',
+      version:     1,
+      exported_at: new Date().toISOString(),
+      entries:     diaryRead(profileId)
+    };
+    downloadJson(data, 't7-tagebuch-' + todayISO() + '.json');
+    return data.entries.length;
+  }
+
+  function diaryImport(profileId, file){
+    return readJsonFile(file).then(function(data){
+      if (!data || data.kind !== 't7-academy-diary' || !Array.isArray(data.entries)) {
+        throw new Error('invalid file');
+      }
+      /* Merge: newer updated_at wins; entries with no updated_at
+         only overwrite if no current entry exists for that date. */
+      var existing = diaryRead(profileId);
+      var byDate = {};
+      existing.forEach(function(e){ byDate[e.entry_date] = e; });
+      data.entries.forEach(function(e){
+        if (!e || !e.entry_date) return;
+        var cur = byDate[e.entry_date];
+        var incomingTime = e.updated_at || '';
+        var currentTime  = cur && cur.updated_at || '';
+        if (!cur || incomingTime > currentTime) byDate[e.entry_date] = e;
+      });
+      var merged = Object.keys(byDate).map(function(k){ return byDate[k]; })
+        .sort(function(a, b){ return (b.entry_date || '').localeCompare(a.entry_date || ''); });
+      diaryWrite(profileId, merged);
+      return merged.length;
     });
+  }
+
+  function initDiary(profileId){
+    var dateEl = $('diaryDate');
+    if (dateEl) {
+      var d = formatDiaryDate(todayISO());
+      dateEl.innerHTML = 'Heute · <span style="font-style:normal;font-family:Antonio,sans-serif;font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--lp-faint)">' + esc(d.pretty) + '</span>';
+    }
+    loadTodayDiary(profileId);
+    renderDiaryFeed(profileId);
+    $('diarySave').addEventListener('click', function(){ saveDiary(profileId); });
+
+    /* Export / Import wiring */
+    var status = $('diaryActionsStatus');
+    $('diaryExportBtn').addEventListener('click', function(){
+      try {
+        var n = diaryExport(profileId);
+        setStatus(status, n + ' Einträge gespeichert', 'ok');
+      } catch(e) {
+        console.error('[T7 Home] diary export', e);
+        setStatus(status, 'Export fehlgeschlagen', 'error');
+      }
+    });
+    var importInput = $('diaryImportInput');
+    $('diaryImportBtn').addEventListener('click', function(){ importInput.click(); });
+    importInput.addEventListener('change', function(){
+      var f = importInput.files && importInput.files[0];
+      if (!f) return;
+      diaryImport(profileId, f).then(function(n){
+        setStatus(status, n + ' Einträge wiederhergestellt', 'ok');
+        loadTodayDiary(profileId);
+        renderDiaryFeed(profileId);
+      }).catch(function(err){
+        console.error('[T7 Home] diary import', err);
+        setStatus(status, 'Ungültige Datei', 'error');
+      }).then(function(){ importInput.value = ''; });
+    });
+  }
+
+
+  /* ============================================================
+     CLIPS  →  IndexedDB
+     DB:     t7-academy
+     Store:  clips  (keyPath: 'id')
+     Record: { id, profile_id, title, blob, mime_type, size_bytes, created_at }
+  ============================================================ */
+  function idbOpen(){
+    return new Promise(function(resolve, reject){
+      var req = indexedDB.open(IDB_NAME, IDB_VERSION);
+      req.onupgradeneeded = function(){
+        var db = req.result;
+        if (!db.objectStoreNames.contains(CLIPS_STORE)) {
+          db.createObjectStore(CLIPS_STORE, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror   = function(){ reject(req.error); };
+    });
+  }
+
+  function clipsList(profileId){
+    return idbOpen().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(CLIPS_STORE, 'readonly');
+        var req = tx.objectStore(CLIPS_STORE).getAll();
+        req.onsuccess = function(){
+          var rows = (req.result || []).filter(function(c){
+            return c.profile_id === profileId;
+          });
+          rows.sort(function(a, b){ return (b.created_at || '').localeCompare(a.created_at || ''); });
+          resolve(rows);
+        };
+        req.onerror = function(){ reject(req.error); };
+      });
+    });
+  }
+
+  function clipsPut(record){
+    return idbOpen().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(CLIPS_STORE, 'readwrite');
+        tx.objectStore(CLIPS_STORE).put(record);
+        tx.oncomplete = function(){ resolve(record); };
+        tx.onerror    = function(){ reject(tx.error); };
+      });
+    });
+  }
+
+  function clipsDelete(id){
+    return idbOpen().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(CLIPS_STORE, 'readwrite');
+        tx.objectStore(CLIPS_STORE).delete(id);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror    = function(){ reject(tx.error); };
+      });
+    });
+  }
+
+  /* Map of clipId → object URL, kept alive while the list is rendered.
+     We revoke them all before re-rendering. */
+  var clipUrls = {};
+  function freeClipUrls(){
+    Object.keys(clipUrls).forEach(function(k){ URL.revokeObjectURL(clipUrls[k]); });
+    clipUrls = {};
+  }
+
+  function fmtDateShort(s){
+    if (!s) return '';
+    var d = new Date(s);
+    if (isNaN(d)) return s;
+    return d.toLocaleDateString('de-AT', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   function renderClips(profileId){
     var list = $('myvidsList');
     if (!list) return;
-    if (!profileId) { list.innerHTML = '<div class="myvids-empty">Anmelden, um eigene Videos zu sehen.</div>'; return; }
+    if (!profileId) {
+      list.innerHTML = '<div class="myvids-empty">Anmelden, um eigene Videos zu sehen.</div>';
+      return;
+    }
+    freeClipUrls();
+    clipsList(profileId).then(function(rows){
+      if (!rows.length) {
+        list.innerHTML = '<div class="myvids-empty">Noch keine Videos. Lade dein erstes Match oder Training hoch.</div>';
+        return;
+      }
+      list.innerHTML = rows.map(function(c){
+        var url = URL.createObjectURL(c.blob);
+        clipUrls[c.id] = url;
+        return '' +
+          '<div class="myvid-card" data-id="' + esc(c.id) + '">' +
+            '<div class="myvid-thumb" data-id="' + esc(c.id) + '">' +
+              '<video src="' + esc(url) + '#t=0.1" preload="metadata" muted playsinline></video>' +
+              '<div class="myvid-play"></div>' +
+            '</div>' +
+            '<div class="myvid-meta">' +
+              '<div class="myvid-title">' + esc(c.title || 'Eigenes Video') + '</div>' +
+              '<div class="myvid-date">' + esc(fmtDateShort(c.created_at)) + '</div>' +
+            '</div>' +
+            '<button class="myvid-del" data-id="' + esc(c.id) + '" title="Löschen">✕ Löschen</button>' +
+          '</div>';
+      }).join('');
 
-    sbGet('player_clips?profile_id=eq.' + encodeURIComponent(profileId) + '&select=id,title,storage_path,mime_type,created_at&order=created_at.desc')
-      .then(function(rows){
-        if (!rows.length) {
-          list.innerHTML = '<div class="myvids-empty">Noch keine Videos. Lade dein erstes Match oder Training hoch.</div>';
-          return;
-        }
-        list.innerHTML = rows.map(function(c){
-          var url = SB_URL + '/storage/v1/object/public/' + CLIPS_BUCKET + '/' + c.storage_path;
-          return '' +
-            '<div class="myvid-card" data-id="' + esc(c.id) + '">' +
-              '<div class="myvid-thumb" data-url="' + esc(url) + '">' +
-                '<video src="' + esc(url) + '#t=0.1" preload="metadata" muted playsinline></video>' +
-                '<div class="myvid-play"></div>' +
-              '</div>' +
-              '<div class="myvid-meta">' +
-                '<div class="myvid-title">' + esc(c.title || 'Eigenes Video') + '</div>' +
-                '<div class="myvid-date">' + esc(fmtDate(c.created_at)) + '</div>' +
-              '</div>' +
-              '<button class="myvid-del" data-id="' + esc(c.id) + '" data-path="' + esc(c.storage_path) + '" title="Löschen">✕ Löschen</button>' +
-            '</div>';
-        }).join('');
-
-        /* Tap thumb → open lightbox player */
-        Array.prototype.forEach.call(list.querySelectorAll('.myvid-thumb'), function(t){
-          t.addEventListener('click', function(){ openClipPlayer(t.dataset.url); });
-        });
-        /* Tap delete */
-        Array.prototype.forEach.call(list.querySelectorAll('.myvid-del'), function(b){
-          b.addEventListener('click', function(){
-            if (!confirm('Dieses Video wirklich löschen?')) return;
-            deleteClip(b.dataset.id, b.dataset.path).then(function(){ renderClips(profileId); });
-          });
+      Array.prototype.forEach.call(list.querySelectorAll('.myvid-thumb'), function(t){
+        t.addEventListener('click', function(){
+          var url = clipUrls[t.dataset.id];
+          if (url) openClipPlayer(url);
         });
       });
+      Array.prototype.forEach.call(list.querySelectorAll('.myvid-del'), function(b){
+        b.addEventListener('click', function(){
+          if (!confirm('Dieses Video wirklich löschen?')) return;
+          clipsDelete(b.dataset.id).then(function(){ renderClips(profileId); });
+        });
+      });
+    }).catch(function(err){
+      console.error('[T7 Home] clips list', err);
+      list.innerHTML = '<div class="myvids-empty">Fehler beim Laden der Videos.</div>';
+    });
   }
 
   function openClipPlayer(url){
@@ -547,65 +828,101 @@
     var close = function(){ document.body.removeChild(ov); };
     ov.addEventListener('click', function(e){ if (e.target === ov) close(); });
     ov.querySelector('.myvid-overlay-close').addEventListener('click', close);
-    document.addEventListener('keydown', function esc(e){
-      if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); }
-    });
+    var escListener = function(e){ if (e.key === 'Escape') { close(); document.removeEventListener('keydown', escListener); } };
+    document.addEventListener('keydown', escListener);
     document.body.appendChild(ov);
   }
 
-  function uploadClip(profileId, file){
+  function uploadClipLocal(profileId, file){
     var progressWrap = $('myvidsProgress');
     var progressFill = $('myvidsProgressFill');
     var progressLbl  = $('myvidsProgressLabel');
     progressWrap.hidden = false;
-    progressFill.style.width = '0%';
-    progressLbl.textContent = 'Hochladen…';
+    progressFill.style.width = '100%';       /* IDB write is fast — no real progress to show */
+    progressLbl.textContent = 'Speichere…';
 
-    var ext  = (file.name.split('.').pop() || 'mp4').toLowerCase();
-    var path = profileId + '/' + uuid() + '.' + ext;
+    var title = file.name.replace(/\.[^.]+$/, '').slice(0, 80);
+    var record = {
+      id:          uuid(),
+      profile_id:  profileId,
+      title:       title,
+      blob:        file,                     /* IDB stores Blobs natively */
+      mime_type:   file.type || 'video/mp4',
+      size_bytes:  file.size,
+      created_at:  new Date().toISOString()
+    };
+    return clipsPut(record);
+  }
 
+  /* Export ALL clips for the current profile as one JSON file with
+     base64-encoded blobs.  Note: this can be large — base64 inflates
+     by ~33%, and the whole thing is held in memory during download. */
+  function blobToB64(blob){
     return new Promise(function(resolve, reject){
-      /* Use XHR for upload progress (fetch has no native progress) */
-      var xhr = new XMLHttpRequest();
-      xhr.open('POST', SB_URL + '/storage/v1/object/' + CLIPS_BUCKET + '/' + path);
-      xhr.setRequestHeader('apikey', SB_KEY);
-      xhr.setRequestHeader('Authorization', 'Bearer ' + SB_KEY);
-      xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
-      xhr.upload.onprogress = function(e){
-        if (!e.lengthComputable) return;
-        var pct = Math.round(e.loaded / e.total * 100);
-        progressFill.style.width = pct + '%';
-        progressLbl.textContent = 'Hochladen… ' + pct + '%';
+      var r = new FileReader();
+      r.onload  = function(){
+        var s = r.result;
+        resolve(s.slice(s.indexOf(',') + 1));
       };
-      xhr.onload = function(){
-        if (xhr.status >= 200 && xhr.status < 300) resolve(path);
-        else reject(new Error('upload failed (' + xhr.status + ')'));
-      };
-      xhr.onerror = function(){ reject(new Error('network error')); };
-      xhr.send(file);
-    }).then(function(storagePath){
-      progressLbl.textContent = 'Speichern…';
-      var title = file.name.replace(/\.[^.]+$/, '').slice(0, 80);
-      return sbUpsert('player_clips', {
-        profile_id:   profileId,
-        title:        title,
-        storage_path: storagePath,
-        mime_type:    file.type || 'video/mp4',
-        size_bytes:   file.size
+      r.onerror = function(){ reject(r.error); };
+      r.readAsDataURL(blob);
+    });
+  }
+  function b64ToBlob(b64, mime){
+    var bin   = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: mime || 'video/mp4' });
+  }
+
+  function clipsExport(profileId){
+    return clipsList(profileId).then(function(rows){
+      if (!rows.length) {
+        return { count: 0, data: null };
+      }
+      return Promise.all(rows.map(function(c){
+        return blobToB64(c.blob).then(function(b64){
+          return {
+            id:         c.id,
+            title:      c.title,
+            mime_type:  c.mime_type,
+            size_bytes: c.size_bytes,
+            created_at: c.created_at,
+            blob_b64:   b64
+          };
+        });
+      })).then(function(serializable){
+        var data = {
+          kind:        't7-academy-clips',
+          version:     1,
+          exported_at: new Date().toISOString(),
+          clips:       serializable
+        };
+        downloadJson(data, 't7-videos-' + todayISO() + '.json');
+        return { count: rows.length, data: data };
       });
     });
   }
 
-  function deleteClip(id, storagePath){
-    /* Delete the row, then the storage object.  We swallow errors
-       on the storage side — orphaned files aren't user-facing. */
-    return sbDelete('player_clips?id=eq.' + encodeURIComponent(id))
-      .then(function(){
-        return fetch(SB_URL + '/storage/v1/object/' + CLIPS_BUCKET + '/' + storagePath, {
-          method: 'DELETE',
-          headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
-        }).catch(function(){});
-      });
+  function clipsImport(profileId, file){
+    return readJsonFile(file).then(function(data){
+      if (!data || data.kind !== 't7-academy-clips' || !Array.isArray(data.clips)) {
+        throw new Error('invalid file');
+      }
+      return Promise.all(data.clips.map(function(c){
+        if (!c.id || !c.blob_b64) return null;
+        var blob = b64ToBlob(c.blob_b64, c.mime_type);
+        return clipsPut({
+          id:          c.id,
+          profile_id:  profileId,    /* claim imported clips for current user */
+          title:       c.title || 'Importiertes Video',
+          blob:        blob,
+          mime_type:   c.mime_type,
+          size_bytes:  c.size_bytes || blob.size,
+          created_at:  c.created_at  || new Date().toISOString()
+        });
+      })).then(function(){ return data.clips.length; });
+    });
   }
 
   function initMyVideos(profileId){
@@ -618,11 +935,11 @@
     if (!profileId) {
       wrap.style.opacity = .5;
       wrap.style.pointerEvents = 'none';
+      $('clipsExportBtn').disabled = true;
+      $('clipsImportBtn').disabled = true;
       return;
     }
 
-    /* The <label> already triggers the file input on click;
-       the change handler does the work. */
     input.addEventListener('change', function(){
       var file = input.files && input.files[0];
       if (!file) return;
@@ -631,147 +948,54 @@
         input.value = '';
         return;
       }
-      uploadClip(profileId, file).then(function(){
+      uploadClipLocal(profileId, file).then(function(){
         $('myvidsProgress').hidden = true;
         renderClips(profileId);
       }).catch(function(err){
-        console.error('[T7 Home] clip upload', err);
-        $('myvidsProgressLabel').textContent = 'Upload fehlgeschlagen.';
+        console.error('[T7 Home] clip save', err);
+        $('myvidsProgressLabel').textContent = 'Speichern fehlgeschlagen.';
         setTimeout(function(){ $('myvidsProgress').hidden = true; }, 2500);
       }).then(function(){ input.value = ''; });
+    });
+
+    /* Export / Import wiring */
+    var status = $('clipsActionsStatus');
+    $('clipsExportBtn').addEventListener('click', function(){
+      var btn = $('clipsExportBtn');
+      btn.disabled = true;
+      setStatus(status, 'Sichere…');
+      clipsExport(profileId).then(function(res){
+        if (!res.count) setStatus(status, 'Keine Videos zum Sichern', 'error');
+        else            setStatus(status, res.count + ' Videos gesichert', 'ok');
+      }).catch(function(err){
+        console.error('[T7 Home] clips export', err);
+        setStatus(status, 'Export fehlgeschlagen', 'error');
+      }).then(function(){ btn.disabled = false; });
+    });
+    var importInput = $('clipsImportInput');
+    $('clipsImportBtn').addEventListener('click', function(){ importInput.click(); });
+    importInput.addEventListener('change', function(){
+      var f = importInput.files && importInput.files[0];
+      if (!f) return;
+      var btn = $('clipsImportBtn');
+      btn.disabled = true;
+      setStatus(status, 'Wiederherstellen…');
+      clipsImport(profileId, f).then(function(n){
+        setStatus(status, n + ' Videos wiederhergestellt', 'ok');
+        renderClips(profileId);
+      }).catch(function(err){
+        console.error('[T7 Home] clips import', err);
+        setStatus(status, 'Ungültige Datei', 'error');
+      }).then(function(){
+        btn.disabled = false;
+        importInput.value = '';
+      });
     });
   }
 
 
   /* ============================================================
-     TAGEBUCH — diary entries
-     Table:  player_diary  (unique on profile_id + entry_date)
-  ============================================================ */
-  function formatDiaryDate(s){
-    if (!s) return '';
-    var d = new Date(s);
-    if (isNaN(d)) return s;
-    var months = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sept.','Okt.','Nov.','Dez.'];
-    var weekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-    return {
-      pretty: d.getDate() + '. ' + months[d.getMonth()] + ' ' + d.getFullYear(),
-      weekday: weekdays[d.getDay()]
-    };
-  }
-
-  function renderDiaryFeed(profileId){
-    var feed = $('diaryFeed');
-    if (!feed) return;
-    if (!profileId) { feed.innerHTML = '<div class="diary-empty">Anmelden, um dein Tagebuch zu sehen.</div>'; return; }
-
-    sbGet('player_diary?profile_id=eq.' + encodeURIComponent(profileId) +
-          '&select=entry_date,good_text,watch_text&order=entry_date.desc&limit=30')
-      .then(function(rows){
-        var today = todayISO();
-        /* Hide today's entry from the feed — it's already visible in the input row above. */
-        var past = rows.filter(function(r){ return r.entry_date !== today; });
-
-        if (!past.length) {
-          feed.innerHTML = '<div class="diary-empty">Noch keine früheren Einträge. Fang heute an.</div>';
-          return;
-        }
-        feed.innerHTML = past.map(function(r){
-          var d = formatDiaryDate(r.entry_date);
-          var good  = (r.good_text || '').trim();
-          var watch = (r.watch_text || '').trim();
-          return '' +
-            '<div class="diary-entry">' +
-              '<div class="diary-entry-date">' + esc(d.pretty) +
-                '<span class="weekday">' + esc(d.weekday) + '</span>' +
-              '</div>' +
-              '<div class="diary-entry-cols">' +
-                '<div class="diary-entry-col good">' +
-                  '<div class="diary-entry-col-label">Was lief gut</div>' +
-                  '<div class="diary-entry-col-text' + (good ? '' : ' empty') + '">' +
-                    esc(good || '— kein Eintrag —') +
-                  '</div>' +
-                '</div>' +
-                '<div class="diary-entry-col watch">' +
-                  '<div class="diary-entry-col-label">Worauf achten</div>' +
-                  '<div class="diary-entry-col-text' + (watch ? '' : ' empty') + '">' +
-                    esc(watch || '— kein Eintrag —') +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-        }).join('');
-      });
-  }
-
-  function loadTodayDiary(profileId){
-    if (!profileId) return;
-    sbGet('player_diary?profile_id=eq.' + encodeURIComponent(profileId) +
-          '&entry_date=eq.' + todayISO() + '&select=good_text,watch_text')
-      .then(function(rows){
-        if (!rows.length) return;
-        var r = rows[0];
-        if (r.good_text)  $('diaryGood').value  = r.good_text;
-        if (r.watch_text) $('diaryWatch').value = r.watch_text;
-      });
-  }
-
-  function saveDiary(profileId){
-    var btn = $('diarySave');
-    var status = $('diarySaveStatus');
-    var good  = $('diaryGood').value.trim();
-    var watch = $('diaryWatch').value.trim();
-    if (!good && !watch) {
-      status.textContent = 'Schreib zuerst etwas auf.';
-      status.classList.add('show', 'error');
-      setTimeout(function(){ status.classList.remove('show', 'error'); }, 2200);
-      return;
-    }
-    btn.disabled = true;
-    status.classList.remove('error');
-    status.textContent = 'Speichere…';
-    status.classList.add('show');
-
-    sbUpsert('player_diary', {
-      profile_id: profileId,
-      entry_date: todayISO(),
-      good_text:  good || null,
-      watch_text: watch || null,
-      updated_at: new Date().toISOString()
-    }, 'profile_id,entry_date').then(function(res){
-      if (!res) throw new Error('save failed');
-      status.textContent = 'Gespeichert.';
-      setTimeout(function(){ status.classList.remove('show'); }, 1800);
-      renderDiaryFeed(profileId);
-    }).catch(function(err){
-      console.error('[T7 Home] diary save', err);
-      status.textContent = 'Speichern fehlgeschlagen.';
-      status.classList.add('error');
-    }).then(function(){ btn.disabled = false; });
-  }
-
-  function initDiary(profileId){
-    var dateEl = $('diaryDate');
-    if (dateEl) {
-      var d = formatDiaryDate(todayISO());
-      dateEl.innerHTML = 'Heute · <span style="font-style:normal;font-family:Antonio,sans-serif;font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--lp-faint)">' + esc(d.pretty) + '</span>';
-    }
-    if (!profileId) {
-      $('diarySave').disabled = true;
-      $('diaryGood').disabled = true;
-      $('diaryWatch').disabled = true;
-      $('diaryFeed').innerHTML = '<div class="diary-empty">Anmelden, um dein Tagebuch zu nutzen.</div>';
-      return;
-    }
-    loadTodayDiary(profileId);
-    renderDiaryFeed(profileId);
-    $('diarySave').addEventListener('click', function(){ saveDiary(profileId); });
-  }
-
-
-  /* ============================================================
      NEWS FEED — Google Sheet CSV (absorbed from loadNews.js)
-     Falls back to a built-in placeholder if the sheet is
-     unreachable or empty.
   ============================================================ */
   function parseCSV(text){
     var rows = [], row = [], field = '', inQ = false;
@@ -799,7 +1023,7 @@
       });
   }
 
-  function parseDate(s){
+  function parseDateLoose(s){
     if (!s) return 0;
     s = String(s).trim();
     var iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
@@ -813,7 +1037,7 @@
   function renderNewsCard(it){
     var dateText = '';
     if (it.date) {
-      var t = parseDate(it.date);
+      var t = parseDateLoose(it.date);
       dateText = t ? new Date(t).toLocaleDateString('de-AT', { day: '2-digit', month: 'short', year: 'numeric' }) : it.date;
     }
     var thumb = it.image
@@ -831,10 +1055,10 @@
 
   function renderNewsFallback(el){
     var items = [
-      { date: '14. Mai 2026', title: 'Neue Challenges sind online!',      excerpt: 'Schau dir die brandneuen First Touch Air und Ginga Advanced Challenges an.', link: 'https://www.laureo.at/challenges/', emoji: '\u26A1' },
-      { date: '10. Mai 2026', title: '1-Sterne Zertifikate verfügbar',     excerpt: 'Vom 1-Stern bis zum 5-Sterne Zertifikat — zeige was du wirklich drauf hast.',   link: 'https://www.laureo.at/challenges/', emoji: '\u2B50' },
-      { date: '5. Mai 2026',  title: 'Wochen-Streak Belohnungen',          excerpt: 'Sammle XP und steige in der Rangliste auf — jede Woche zählt.',                link: 'https://www.laureo.at/challenges/', emoji: '🔥' },
-      { date: '1. Mai 2026',  title: 'Willkommen zur T7 Academy',          excerpt: 'Werde der beste Spieler, der du sein kannst — mit Plan und Leidenschaft.',    link: 'https://www.laureo.at/',           emoji: '⚽' }
+      { date: '14. Mai 2026', title: 'Neue Challenges sind online!',  excerpt: 'Schau dir die brandneuen First Touch Air und Ginga Advanced Challenges an.', link: 'https://www.laureo.at/challenges/', emoji: '\u26A1' },
+      { date: '10. Mai 2026', title: '1-Sterne Zertifikate verfügbar', excerpt: 'Vom 1-Stern bis zum 5-Sterne Zertifikat — zeige was du wirklich drauf hast.',   link: 'https://www.laureo.at/challenges/', emoji: '\u2B50' },
+      { date: '5. Mai 2026',  title: 'Wochen-Streak Belohnungen',      excerpt: 'Sammle XP und steige in der Rangliste auf — jede Woche zählt.',                link: 'https://www.laureo.at/challenges/', emoji: '🔥' },
+      { date: '1. Mai 2026',  title: 'Willkommen zur T7 Academy',      excerpt: 'Werde der beste Spieler, der du sein kannst — mit Plan und Leidenschaft.',    link: 'https://www.laureo.at/',           emoji: '⚽' }
     ];
     el.innerHTML = items.map(renderNewsCard).join('');
   }
@@ -842,10 +1066,7 @@
   function loadNews(){
     var el = $('news-feed');
     if (!el) return;
-    if (!NEWS_CSV_URL || NEWS_CSV_URL.indexOf('PASTE_') === 0) {
-      renderNewsFallback(el);
-      return;
-    }
+    if (!NEWS_CSV_URL || NEWS_CSV_URL.indexOf('PASTE_') === 0) { renderNewsFallback(el); return; }
     var url = NEWS_CSV_URL + (NEWS_CSV_URL.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
     fetch(url).then(function(r){
       if (!r.ok) throw new Error('http ' + r.status);
@@ -857,7 +1078,7 @@
           var p = (it.published || '').toLowerCase();
           return p !== 'no' && p !== 'false' && p !== '0';
         })
-        .sort(function(a, b){ return parseDate(b.date) - parseDate(a.date); });
+        .sort(function(a, b){ return parseDateLoose(b.date) - parseDateLoose(a.date); });
       if (!items.length) { renderNewsFallback(el); return; }
       el.innerHTML = items.map(renderNewsCard).join('');
     }).catch(function(){ renderNewsFallback(el); });
@@ -867,6 +1088,8 @@
   /* ============================================================
      BOOT
   ============================================================ */
+  var currentProfileId = null;
+
   function boot(){
     initThemeAndNav();
     loadNews();
@@ -888,9 +1111,9 @@
 
   /* Public hook for debugging / manual refresh */
   window.T7Home = {
-    reloadProgress: function(){
-      if (currentProfileId) initProgress(currentProfileId);
-    },
-    reloadNews: loadNews
+    reloadProgress: function(){ if (currentProfileId) initProgress(currentProfileId); },
+    reloadClips:    function(){ if (currentProfileId) renderClips(currentProfileId); },
+    reloadDiary:    function(){ if (currentProfileId) renderDiaryFeed(currentProfileId); },
+    reloadNews:     loadNews
   };
 })();

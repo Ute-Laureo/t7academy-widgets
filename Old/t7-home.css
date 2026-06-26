@@ -14,15 +14,10 @@
      1.  Make the inside (subscribed) home page speak the same
          visual language as the outside (marketing) page.
      2.  Add components that are unique to the inside home:
-           - home-hero-stars        (Sterne-Zertifikat badge, hero right)
-           - home-layout / -main /
-             -side / -block         (75/25 page grid below the hero)
-           - home-avatar-side       (sidebar photo uploader)
+           - home-avatar-slot       (player photo in the hero)
            - home-prog / home-prog-* (progress cards, lp-prog vocab)
-           - myvids-*                (private clip uploads, IndexedDB)
-           - diary-*                 (player reflection, localStorage)
-           - home-actions /
-             home-action-btn        (download / upload backup toolbar)
+           - myvids-*                (private clip uploads)
+           - diary-*                 (player reflection)
      3.  Restyle the existing news-card to fit the lp-* world.
    ============================================================ */
 
@@ -172,258 +167,81 @@ body[data-theme="light"] .lp-hero-image::after {
 
 
 /* ============================================================
-   2. HERO RIGHT COLUMN — STERNE-ZERTIFIKAT BADGE
-   The hero photo moved out to the sidebar (see §4).  The right
-   column now showcases the player's Sterne-Zertifikat — fed by
-   player_stats.stars from the certs Supabase query.
+   2. HERO — pull the player avatar into the right column
+   Reuses .lp-hero / .lp-hero-grid / .lp-hero-image from
+   t7-base.css.  We only modify the right column to be clickable
+   and to overlay an upload prompt when no avatar is set.
 ============================================================ */
-.home-hero-stars {
+.home-avatar-slot {
+  cursor: pointer;
+  outline: none;
+  transition: filter .2s;
+}
+.home-avatar-slot:hover,
+.home-avatar-slot:focus-visible { filter: brightness(1.05); }
+.home-avatar-slot:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--accent);
+}
+
+/* Overlay shows when no avatar has been uploaded yet, OR on hover
+   over an existing avatar (as a re-upload prompt). */
+.home-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  padding: 48px 32px;
-  position: relative;
-  background:
-    radial-gradient(ellipse at center, rgba(255, 215, 0, .08) 0%, transparent 70%);
-  border-left: 1px solid var(--lp-rule);
-  text-align: center;
+  gap: 10px;
+  background: linear-gradient(180deg, rgba(8,15,30,0) 40%, rgba(8,15,30,.55) 100%);
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
 }
-.home-hero-stars-eye {
+.home-avatar-slot.no-photo .home-avatar-overlay,
+.home-avatar-slot:hover .home-avatar-overlay,
+.home-avatar-slot:focus-visible .home-avatar-overlay { opacity: 1; }
+
+.home-avatar-icon { font-size: 36px; }
+.home-avatar-cta {
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
   font-size: 13px;
-  letter-spacing: .22em;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--lp-faint);
+  color: #fff;
+  padding: 10px 18px;
+  background: rgba(0,229,255,.18);
+  border: 1px solid var(--accent);
+  border-radius: 99px;
+  backdrop-filter: blur(6px);
 }
-.home-hero-stars-big {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  margin: 6px 0;
+body[data-theme="light"] .home-avatar-overlay {
+  background: linear-gradient(180deg, rgba(232,237,243,0) 40%, rgba(15,23,42,.45) 100%);
 }
-.home-hero-stars-num {
+
+/* Uploading state */
+.home-avatar-slot.uploading { pointer-events: none; }
+.home-avatar-slot.uploading::after {
+  content: 'Lade hoch…';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
   font-family: 'Antonio', sans-serif;
-  font-weight: 600;
-  font-size: clamp(80px, 12vw, 140px);
-  line-height: .85;
-  color: var(--lp-gold);
-}
-.home-hero-stars-icon {
-  font-size: clamp(40px, 6vw, 64px);
-  color: var(--lp-gold);
-  filter: drop-shadow(0 0 18px rgba(255, 215, 0, .45));
-  line-height: 1;
-}
-.home-hero-stars-row {
-  display: flex;
-  gap: 10px;
-  font-size: clamp(20px, 2.4vw, 28px);
-  line-height: 1;
-}
-.home-hero-stars-row .s {
-  color: var(--lp-faint);
-  opacity: .3;
-  transition: color .25s, opacity .25s, filter .25s;
-}
-.home-hero-stars-row .s.earned {
-  color: var(--lp-gold);
-  opacity: 1;
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, .45));
-}
-.home-hero-stars-sub {
-  font-family: 'Antonio', sans-serif;
-  font-weight: 500;
-  font-size: 12px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--lp-muted);
-  margin-top: 6px;
-  max-width: 280px;
-}
-
-@media (max-width: 880px) {
-  .home-hero-stars {
-    border-left: none;
-    border-top: 1px solid var(--lp-rule);
-    padding: 36px 24px;
-  }
+  font-weight: 600; font-size: 14px; letter-spacing: .14em; text-transform: uppercase;
+  color: #fff;
+  background: rgba(8,15,30,.6);
+  z-index: 3;
 }
 
 
-/* ============================================================
-   3. TWO-COLUMN LAYOUT — 75% main, 25% sidebar
-   Replaces the previous single-column vertical flow.  Each
-   "section" inside a column is a .home-block; dividers between
-   stacked blocks come from .home-block + .home-block.
-============================================================ */
-.home-layout {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: clamp(40px, 5vw, 68px) clamp(24px, 5vw, 64px);
-  display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
-  gap: clamp(32px, 4vw, 56px);
-  align-items: start;
-}
-.home-main, .home-side {
-  min-width: 0;       /* prevent grid blowout when content has long words */
-  display: flex;
-  flex-direction: column;
-}
-.home-block { display: flex; flex-direction: column; }
-.home-block + .home-block {
-  margin-top: clamp(40px, 5vw, 68px);
-  padding-top: clamp(40px, 5vw, 68px);
-  border-top: 1px solid var(--lp-rule);
-}
-
-/* Sidebar variants: smaller titles, no big sub line */
-.home-block-title-sm {
-  font-size: clamp(22px, 2.6vw, 30px) !important;
-  margin-bottom: 14px !important;
-}
-.home-block-side .lp-sub { display: none; }
-
-/* Stack columns on tablet & smaller — sidebar moves below */
-@media (max-width: 1000px) {
-  .home-layout { grid-template-columns: 1fr; }
-  .home-side {
-    margin-top: clamp(40px, 5vw, 68px);
-    padding-top: clamp(40px, 5vw, 68px);
-    border-top: 1px solid var(--lp-rule);
-  }
-}
-
-
-/* ============================================================
-   4. SIDEBAR — PROFILBILD UPLOADER (small, replaces old hero
-   overlay treatment).  Square photo + a clear CTA button.
-============================================================ */
-.home-avatar-side {
-  margin-top: 8px;
-  outline: none;
-  cursor: pointer;
-}
-.home-avatar-side-img {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 14px;
-  background: var(--surface2);
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid var(--lp-rule);
-  transition: filter .15s, border-color .15s;
-}
-.home-avatar-side:hover .home-avatar-side-img,
-.home-avatar-side:focus-visible .home-avatar-side-img {
-  filter: brightness(.94);
-  border-color: rgba(0, 229, 255, .35);
-}
-.home-avatar-side-img.has-photo .home-avatar-side-placeholder { display: none; }
-.home-avatar-side-placeholder {
-  font-size: 56px;
-  font-weight: 200;
-  color: var(--lp-faint);
-}
-.home-avatar-side-cta {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
-  padding: 10px 16px;
-  background: transparent;
-  border: 1px solid rgba(0, 229, 255, .3);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: 'Antonio', sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all .15s;
-}
-.home-avatar-side-cta:hover {
-  background: rgba(0, 229, 255, .08);
-  border-color: var(--accent);
-}
-body[data-theme="light"] .home-avatar-side-cta {
-  border-color: rgba(8, 145, 178, .4);
-}
-body[data-theme="light"] .home-avatar-side-cta:hover {
-  background: rgba(8, 145, 178, .08);
-  border-color: rgba(8, 145, 178, .7);
-}
-.home-avatar-side.uploading .home-avatar-side-cta {
-  opacity: .55;
-  pointer-events: none;
-}
-.home-avatar-side.uploading .home-avatar-side-cta::after { content: ' …'; }
-
-/* Nav avatar — small circular thumb that mirrors the photo */
+/* Nav avatar — small circular thumb that mirrors the hero photo */
 .nav-avatar {
   background-size: cover;
   background-position: center;
   overflow: hidden;
 }
 .nav-avatar.has-photo { color: transparent; font-size: 0; }
-
-
-/* ============================================================
-   5. ACTION BUTTON ROW — download / upload backup
-   Used at the bottom of Videos and Tagebuch sections.
-============================================================ */
-.home-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px dashed var(--lp-rule);
-}
-.home-action-btn {
-  font-family: 'Antonio', sans-serif;
-  font-weight: 500;
-  font-size: 12px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  padding: 8px 14px;
-  background: transparent;
-  border: 1px solid var(--lp-rule);
-  border-radius: 6px;
-  color: var(--lp-muted);
-  cursor: pointer;
-  transition: all .15s;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.home-action-btn:hover {
-  border-color: var(--accent);
-  color: var(--text);
-  background: rgba(0, 229, 255, .04);
-}
-.home-action-btn[disabled] { opacity: .5; cursor: wait; }
-.home-action-icon { font-size: 14px; line-height: 1; }
-
-.home-actions-status {
-  font-family: 'Antonio', sans-serif;
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--lp-faint);
-  margin-left: 4px;
-}
-.home-actions-status.ok    { color: var(--lp-green); }
-.home-actions-status.error { color: var(--lp-red); }
 
 
 /* ============================================================
@@ -434,10 +252,12 @@ body[data-theme="light"] .home-avatar-side-cta:hover {
 ============================================================ */
 .home-prog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-top: 18px;
 }
+@media (max-width: 1000px) { .home-prog-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .home-prog-grid { grid-template-columns: 1fr; } }
 
 .home-prog {
   background: transparent;
@@ -601,9 +421,11 @@ body[data-theme="light"] .myvids-upload:hover {
 
 .myvids-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 18px;
 }
+@media (max-width: 880px) { .myvids-list { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .myvids-list { grid-template-columns: 1fr; } }
 
 .myvid-card {
   display: flex;
@@ -894,27 +716,22 @@ body[data-theme="light"] .diary-entry-col.watch { --diary-c: #C2410C; }
    surface treatment to match the transparent-card vocabulary.
 ============================================================ */
 .news-feed {
-  margin-top: 14px;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-/* When news lives in the sidebar, it's the entire column — let it
-   grow as tall as needed.  We keep an upper bound on very long
-   feeds to avoid an absurd page. */
-.home-block-side .news-feed {
-  max-height: 720px;
+  gap: 14px;
+  max-height: 540px;          /* roughly 5 cards, scroll past that */
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: 6px;
 }
-.home-block-side .news-feed::-webkit-scrollbar { width: 5px; }
-.home-block-side .news-feed::-webkit-scrollbar-track { background: transparent; }
-.home-block-side .news-feed::-webkit-scrollbar-thumb { background: rgba(128,140,160,.25); border-radius: 99px; }
+.news-feed::-webkit-scrollbar { width: 6px; }
+.news-feed::-webkit-scrollbar-track { background: transparent; }
+.news-feed::-webkit-scrollbar-thumb { background: rgba(128,140,160,.25); border-radius: 99px; }
 
 .news-card {
   display: flex;
-  gap: 12px;
-  padding: 12px 4px;
+  gap: 14px;
+  padding: 14px 4px;
   text-decoration: none;
   color: inherit;
   border-bottom: 1px solid var(--lp-rule);
@@ -923,22 +740,22 @@ body[data-theme="light"] .diary-entry-col.watch { --diary-c: #C2410C; }
   border-radius: 0;
 }
 .news-card:last-child { border-bottom: none; }
-.news-card:hover { transform: translateX(3px); }
+.news-card:hover { transform: translateX(4px); }
 .news-thumb {
-  width: 52px; height: 52px;
+  width: 64px; height: 64px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--accent), #0080FF);
   display: flex; align-items: center; justify-content: center;
-  font-size: 22px; color: rgba(0,0,0,.8);
+  font-size: 26px; color: rgba(0,0,0,.8);
   overflow: hidden;
 }
-.news-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.news-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 .news-body { flex: 1; min-width: 0; }
 .news-date {
   font-family: 'Antonio', sans-serif;
   font-weight: 500;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--accent);
@@ -947,13 +764,13 @@ body[data-theme="light"] .diary-entry-col.watch { --diary-c: #C2410C; }
 .news-title {
   font-family: 'Open Sans', sans-serif;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text);
   margin-bottom: 4px;
   line-height: 1.3;
 }
 .news-excerpt {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--lp-muted);
   line-height: 1.5;
   display: -webkit-box;
