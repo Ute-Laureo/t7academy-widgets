@@ -9,7 +9,7 @@
 <!-- Base widget stylesheet (lp-* primitives, theme tokens, topnav) -->
 <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
 <!-- Home-specific overrides + personalization components -->
-<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-home.css?v=3">
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-home.css?v=2">
 
 
 <!-- TOP NAV (subscribed environment: real page links + theme + avatar) -->
@@ -134,41 +134,84 @@
     </section>
 
 
-    <!-- MEINE AUFNAHMEN — teaser card; opens the full local-drive
-         video repository (IndexedDB, no cloud) in a modal. -->
+    <!-- MEINE AUFNAHMEN — IndexedDB (no cloud) -->
     <section class="home-block">
       <div class="lp-eye">Meine Aufnahmen</div>
       <h2 class="lp-title">Dein letztes <em class="accent">Match</em>. Dein letztes <em class="accent">Training</em>.</h2>
-      <p class="lp-sub">Sammle beliebig viele Videos an einem Ort. Bleibt auf diesem Gerät.</p>
+      <p class="lp-sub">Lade ein Video hoch und schau es dir später an. Bleibt auf diesem Gerät — nutze „Sichern“ und „Wiederherstellen“, um auf ein anderes Gerät zu wechseln.</p>
 
-      <button class="home-card-teaser" id="myvidsCardOpen" type="button"
-              aria-haspopup="dialog" aria-controls="myvidsModal">
-        <div class="home-card-teaser-icon">🎬</div>
-        <div class="home-card-teaser-body">
-          <div class="home-card-teaser-h">Meine Video-Sammlung</div>
-          <div class="home-card-teaser-sub" id="myvidsTeaserSub">Lade…</div>
+      <div class="myvids">
+        <label class="myvids-upload" id="myvidsUpload">
+          <input type="file" id="myvidsInput" accept="video/*" hidden>
+          <div class="myvids-upload-icon">＋</div>
+          <div>
+            <div class="myvids-upload-h">Neues Video hochladen</div>
+            <div class="myvids-upload-sub">Match, Training oder Trick — bis zu ein paar Minuten.</div>
+          </div>
+        </label>
+        <div class="myvids-progress" id="myvidsProgress" hidden>
+          <div class="myvids-progress-bar"><div class="myvids-progress-fill" id="myvidsProgressFill"></div></div>
+          <div class="myvids-progress-label" id="myvidsProgressLabel">Speichere…</div>
         </div>
-        <div class="home-card-teaser-cta">Öffnen</div>
-      </button>
+
+        <div class="myvids-list" id="myvidsList">
+          <div class="home-loading">Lade Videos…</div>
+        </div>
+
+        <div class="home-actions">
+          <button class="home-action-btn" id="clipsExportBtn" title="Alle Videos als Datei speichern">
+            <span class="home-action-icon">↓</span> Videos sichern
+          </button>
+          <button class="home-action-btn" id="clipsImportBtn" title="Backup-Datei einspielen">
+            <span class="home-action-icon">↑</span> Backup wiederherstellen
+          </button>
+          <input type="file" id="clipsImportInput" accept="application/json,.json" hidden>
+          <span class="home-actions-status" id="clipsActionsStatus"></span>
+        </div>
+      </div>
     </section>
 
 
-    <!-- TAGEBUCH — teaser card; opens the full journal
-         (localStorage, no cloud) in a modal. -->
+    <!-- TAGEBUCH — localStorage (no cloud) -->
     <section class="home-block">
       <div class="lp-eye">Mein Tagebuch</div>
       <h2 class="lp-title">Was lief <em class="gold">gut</em>? Worauf <em>achten</em>?</h2>
-      <p class="lp-sub">Tore zählen — aber auch ein guter Pass, eine schnelle Entscheidung, ein Trick im Spiel.</p>
+      <p class="lp-sub">Tore zählen — aber auch ein guter Pass, eine schnelle Entscheidung, ein Trick im Spiel. Schreib auf, was heute hängen geblieben ist.</p>
 
-      <button class="home-card-teaser" id="diaryCardOpen" type="button"
-              aria-haspopup="dialog" aria-controls="diaryModal">
-        <div class="home-card-teaser-icon">📓</div>
-        <div class="home-card-teaser-body">
-          <div class="home-card-teaser-h">Mein Tagebuch</div>
-          <div class="home-card-teaser-sub" id="diaryTeaserSub">Lade…</div>
+      <div class="diary">
+        <div class="diary-input">
+          <div class="diary-input-date" id="diaryDate"></div>
+          <div class="diary-input-cols">
+            <div class="diary-col diary-col-good">
+              <label class="diary-col-label">Was lief gut</label>
+              <textarea id="diaryGood" placeholder="Z. B. „Mein erster Touch hat im ganzen Spiel gepasst.“" rows="4"></textarea>
+            </div>
+            <div class="diary-col diary-col-watch">
+              <label class="diary-col-label">Worauf achten</label>
+              <textarea id="diaryWatch" placeholder="Z. B. „Bei Druck nicht zu früh den Ball verlieren.“" rows="4"></textarea>
+            </div>
+          </div>
+          <div class="diary-input-actions">
+            <button id="diarySave" class="diary-save">Eintragen</button>
+            <div class="diary-save-status" id="diarySaveStatus"></div>
+          </div>
         </div>
-        <div class="home-card-teaser-cta">Öffnen</div>
-      </button>
+
+        <div class="diary-feed" id="diaryFeed">
+          <div class="home-loading">Lade Einträge…</div>
+        </div>
+
+        <div class="home-actions">
+          <button class="home-action-btn" id="diaryExportBtn" title="Tagebuch als Datei speichern">
+            <span class="home-action-icon">↓</span> Tagebuch sichern
+          </button>
+          <button class="home-action-btn" id="diaryImportBtn" title="Backup-Datei einspielen">
+            <span class="home-action-icon">↑</span> Backup wiederherstellen
+          </button>
+          <input type="file" id="diaryImportInput" accept="application/json,.json" hidden>
+          <span class="home-actions-status" id="diaryActionsStatus"></span>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -207,113 +250,9 @@
 
 
 <!-- ============================================================
-     MODALS — full "Meine Aufnahmen" repository and "Mein
-     Tagebuch" journal.  Both stay closed (hidden) until their
-     teaser card above is clicked.  The backup/restore
-     ("Sichern" / "Wiederherstellen") controls only appear here,
-     inside the opened card — never on the collapsed teaser.
-============================================================ -->
-
-<div class="home-modal" id="myvidsModal" role="dialog" aria-modal="true" aria-labelledby="myvidsModalTitle" hidden>
-  <div class="home-modal-backdrop" data-modal-close></div>
-  <div class="home-modal-panel">
-    <button class="home-modal-close" type="button" data-modal-close aria-label="Schließen">✕</button>
-
-    <div class="home-modal-head">
-      <div class="lp-eye">Meine Aufnahmen</div>
-      <h2 id="myvidsModalTitle" class="lp-title home-block-title-sm">Deine Video-Sammlung.</h2>
-      <p class="lp-sub">Lade beliebig viele Videos hoch und schau sie dir später an. Bleibt auf diesem Gerät — nutze „Sichern“ und „Wiederherstellen“, um auf ein anderes Gerät zu wechseln.</p>
-    </div>
-
-    <div class="home-modal-body">
-      <div class="myvids">
-        <label class="myvids-upload" id="myvidsUpload">
-          <input type="file" id="myvidsInput" accept="video/*" multiple hidden>
-          <div class="myvids-upload-icon">＋</div>
-          <div>
-            <div class="myvids-upload-h">Neue Videos hochladen</div>
-            <div class="myvids-upload-sub">Match, Training oder Trick — auch mehrere auf einmal.</div>
-          </div>
-        </label>
-        <div class="myvids-progress" id="myvidsProgress" hidden>
-          <div class="myvids-progress-bar"><div class="myvids-progress-fill" id="myvidsProgressFill"></div></div>
-          <div class="myvids-progress-label" id="myvidsProgressLabel">Speichere…</div>
-        </div>
-
-        <div class="myvids-list" id="myvidsList">
-          <div class="home-loading">Lade Videos…</div>
-        </div>
-
-        <div class="home-actions">
-          <button class="home-action-btn" id="clipsExportBtn" title="Alle Videos als Datei speichern">
-            <span class="home-action-icon">↓</span> Videos sichern
-          </button>
-          <button class="home-action-btn" id="clipsImportBtn" title="Backup-Datei einspielen">
-            <span class="home-action-icon">↑</span> Backup wiederherstellen
-          </button>
-          <input type="file" id="clipsImportInput" accept="application/json,.json" hidden>
-          <span class="home-actions-status" id="clipsActionsStatus"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="home-modal" id="diaryModal" role="dialog" aria-modal="true" aria-labelledby="diaryModalTitle" hidden>
-  <div class="home-modal-backdrop" data-modal-close></div>
-  <div class="home-modal-panel">
-    <button class="home-modal-close" type="button" data-modal-close aria-label="Schließen">✕</button>
-
-    <div class="home-modal-head">
-      <div class="lp-eye">Mein Tagebuch</div>
-      <h2 id="diaryModalTitle" class="lp-title home-block-title-sm">Deine Einträge.</h2>
-      <p class="lp-sub">Schreib auf, was heute hängen geblieben ist. Deine Einträge stehen chronologisch darunter.</p>
-    </div>
-
-    <div class="home-modal-body">
-      <div class="diary">
-        <div class="diary-input">
-          <div class="diary-input-date" id="diaryDate"></div>
-          <div class="diary-input-cols">
-            <div class="diary-col diary-col-good">
-              <label class="diary-col-label">Was lief gut</label>
-              <textarea id="diaryGood" placeholder="Z. B. „Mein erster Touch hat im ganzen Spiel gepasst.“" rows="4"></textarea>
-            </div>
-            <div class="diary-col diary-col-watch">
-              <label class="diary-col-label">Worauf achten</label>
-              <textarea id="diaryWatch" placeholder="Z. B. „Bei Druck nicht zu früh den Ball verlieren.“" rows="4"></textarea>
-            </div>
-          </div>
-          <div class="diary-input-actions">
-            <button id="diarySave" class="diary-save">Eintragen</button>
-            <div class="diary-save-status" id="diarySaveStatus"></div>
-          </div>
-        </div>
-
-        <div class="diary-feed" id="diaryFeed">
-          <div class="home-loading">Lade Einträge…</div>
-        </div>
-
-        <div class="home-actions">
-          <button class="home-action-btn" id="diaryExportBtn" title="Tagebuch als Datei speichern">
-            <span class="home-action-icon">↓</span> Tagebuch sichern
-          </button>
-          <button class="home-action-btn" id="diaryImportBtn" title="Backup-Datei einspielen">
-            <span class="home-action-icon">↑</span> Backup wiederherstellen
-          </button>
-          <input type="file" id="diaryImportInput" accept="application/json,.json" hidden>
-          <span class="home-actions-status" id="diaryActionsStatus"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- ============================================================
      SCRIPTS — engine for identity/Supabase (avatar URL only),
      vimeo tracker, and the single centralised home-page script.
 ============================================================ -->
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-vimeo-tracker.js"></script>
-<script src="https://ute-laureo.github.io/t7academy-widgets/t7-home.js?v=3"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-home.js?v=2"></script>

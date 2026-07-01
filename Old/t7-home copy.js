@@ -14,9 +14,6 @@
      - Diary entries           → localStorage
      - Player video uploads    → IndexedDB
      - With download / upload backup for switching devices.
-     - Both live behind a teaser card on the home page; the full
-       feature (repository / journal + archiving controls) only
-       renders once the card is opened in its modal.
 
    Vimeo watch-time tracking still lives in its own file
    (t7-vimeo-tracker.js).
@@ -199,49 +196,6 @@
         else nav.classList.remove('nav-shrunk');
       });
     }
-  }
-
-
-  /* ============================================================
-     HOME CARD MODALS — "Meine Aufnahmen" and "Mein Tagebuch"
-     stay collapsed as a teaser card on the home page and open
-     into a full-feature modal on click.  Archiving controls
-     (Sichern / Wiederherstellen) only live inside the modal
-     body, so they only become visible once a card is open.
-  ============================================================ */
-  var openHomeModalEl = null;
-
-  function openHomeModal(id){
-    var modal = $(id);
-    if (!modal) return;
-    modal.hidden = false;
-    document.body.classList.add('home-modal-open');
-    openHomeModalEl = modal;
-    var closeBtn = modal.querySelector('.home-modal-close');
-    if (closeBtn) closeBtn.focus();
-  }
-
-  function closeHomeModal(modal){
-    if (!modal || modal.hidden) return;
-    modal.hidden = true;
-    document.body.classList.remove('home-modal-open');
-    if (openHomeModalEl === modal) openHomeModalEl = null;
-  }
-
-  function initHomeModals(){
-    Array.prototype.forEach.call(document.querySelectorAll('.home-modal'), function(modal){
-      Array.prototype.forEach.call(modal.querySelectorAll('[data-modal-close]'), function(el){
-        el.addEventListener('click', function(){ closeHomeModal(modal); });
-      });
-    });
-    var myvidsOpen = $('myvidsCardOpen');
-    if (myvidsOpen) myvidsOpen.addEventListener('click', function(){ openHomeModal('myvidsModal'); });
-    var diaryOpen = $('diaryCardOpen');
-    if (diaryOpen) diaryOpen.addEventListener('click', function(){ openHomeModal('diaryModal'); });
-
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && openHomeModalEl) closeHomeModal(openHomeModalEl);
-    });
   }
 
 
@@ -590,26 +544,10 @@
     };
   }
 
-  /* Teaser subtitle on the collapsed home-page card — entry
-     count + most recent date, so players see at a glance
-     whether they've written today without opening the modal. */
-  function updateDiaryTeaser(entries){
-    var el = $('diaryTeaserSub');
-    if (!el) return;
-    if (!entries.length) {
-      el.textContent = 'Noch keine Einträge — schreib deinen ersten.';
-      return;
-    }
-    var latest = formatDiaryDate(entries[0].entry_date);  /* entries sorted newest first */
-    el.textContent = entries.length + (entries.length === 1 ? ' Eintrag' : ' Einträge') +
-      (latest.pretty ? ' · Zuletzt ' + latest.pretty : '');
-  }
-
   function renderDiaryFeed(profileId){
     var feed = $('diaryFeed');
     if (!feed) return;
     var entries = diaryRead(profileId);
-    updateDiaryTeaser(entries);
     var today = todayISO();
     var past  = entries.filter(function(e){ return e.entry_date !== today; });
 
@@ -833,32 +771,15 @@
     return d.toLocaleDateString('de-AT', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
-  /* Teaser subtitle on the collapsed home-page card — clip
-     count, so players see the size of their repository without
-     opening the modal. */
-  function updateMyvidsTeaser(count, profileId){
-    var el = $('myvidsTeaserSub');
-    if (!el) return;
-    if (!profileId) {
-      el.textContent = 'Anmelden, um eigene Videos zu sehen.';
-      return;
-    }
-    el.textContent = count > 0
-      ? (count + (count === 1 ? ' Video gespeichert' : ' Videos gespeichert'))
-      : 'Noch keine Videos — jetzt das erste hochladen.';
-  }
-
   function renderClips(profileId){
     var list = $('myvidsList');
     if (!list) return;
     if (!profileId) {
       list.innerHTML = '<div class="myvids-empty">Anmelden, um eigene Videos zu sehen.</div>';
-      updateMyvidsTeaser(0, profileId);
       return;
     }
     freeClipUrls();
     clipsList(profileId).then(function(rows){
-      updateMyvidsTeaser(rows.length, profileId);
       if (!rows.length) {
         list.innerHTML = '<div class="myvids-empty">Noch keine Videos. Lade dein erstes Match oder Training hoch.</div>';
         return;
@@ -1020,43 +941,21 @@
     }
 
     input.addEventListener('change', function(){
-      var files = input.files ? Array.prototype.slice.call(input.files) : [];
-      if (!files.length) return;
-
-      var tooBig = files.filter(function(f){ return f.size > 200 * 1024 * 1024; });
-      var toUpload = files.filter(function(f){ return f.size <= 200 * 1024 * 1024; });
-      if (tooBig.length) {
-        alert(tooBig.length === 1
-          ? 'Ein Video ist zu groß (max. 200 MB) und wird übersprungen.'
-          : tooBig.length + ' Videos sind zu groß (max. 200 MB) und werden übersprungen.');
+      var file = input.files && input.files[0];
+      if (!file) return;
+      if (file.size > 200 * 1024 * 1024) {
+        alert('Das Video ist zu groß (max. 200 MB).');
+        input.value = '';
+        return;
       }
-      if (!toUpload.length) { input.value = ''; return; }
-
-      var progressWrap  = $('myvidsProgress');
-      var progressLabel = $('myvidsProgressLabel');
-      progressWrap.hidden = false;
-
-      var i = 0;
-      function next(){
-        if (i >= toUpload.length) {
-          progressWrap.hidden = true;
-          input.value = '';
-          renderClips(profileId);
-          return;
-        }
-        progressLabel.textContent = toUpload.length > 1
-          ? 'Speichere ' + (i + 1) + ' / ' + toUpload.length + '…'
-          : 'Speichere…';
-        uploadClipLocal(profileId, toUpload[i]).then(function(){
-          i++;
-          next();
-        }).catch(function(err){
-          console.error('[T7 Home] clip save', err);
-          progressLabel.textContent = 'Speichern fehlgeschlagen.';
-          setTimeout(function(){ i++; next(); }, 1200);
-        });
-      }
-      next();
+      uploadClipLocal(profileId, file).then(function(){
+        $('myvidsProgress').hidden = true;
+        renderClips(profileId);
+      }).catch(function(err){
+        console.error('[T7 Home] clip save', err);
+        $('myvidsProgressLabel').textContent = 'Speichern fehlgeschlagen.';
+        setTimeout(function(){ $('myvidsProgress').hidden = true; }, 2500);
+      }).then(function(){ input.value = ''; });
     });
 
     /* Export / Import wiring */
@@ -1193,7 +1092,6 @@
 
   function boot(){
     initThemeAndNav();
-    initHomeModals();
     loadNews();
 
     whenIdentity(function(profileId){
