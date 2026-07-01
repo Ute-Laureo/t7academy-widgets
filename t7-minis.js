@@ -1,25 +1,25 @@
 /* T7 Minis page logic — load this after t7-widget-engine.js */
 (function(){
 var KID_MODULES = {
-  st1: { tier:'base', label:'Keons Sitz-Tricks', emoji:'⚽', num:'Station 1',
+  st1: { tier:'base', label:'Keons Sitdowns', emoji:'⚽', num:'Station 1',
     drills:[
       {idx:0, title:'Ball hochhalten (sitzend)', emoji:'🐶', meta:'einfach',  vid:'1124934705', hash:'6a71a27daf', sticker:'🦄'},
       {idx:1, title:'Mit Fuss und Kopf', emoji:'⚽', meta:'einfach',  vid:'1124935347', hash:'c8977c5fb4', sticker:'🐆'}
     ]},
   st2: { tier:'base', label:'Keons Ballkontrolle', emoji:'🇧🇷', num:'Station 2',
     drills:[
-      {idx:0, title:'V-Übung', emoji:'🐸', meta:'einfach', vid:'1110048776', hash:'3990db7901', sticker:'🌟'},
+      {idx:0, title:'V', emoji:'🐸', meta:'einfach', vid:'1110048776', hash:'3990db7901', sticker:'🌟'},
       {idx:1, title:'Sohle Links Rechts', emoji:'🦓', meta:'einfach', vid:'1111311105', hash:'b285a5a081', sticker:'🚀'}
     ]},
   st3: { tier:'base', label:'Cocos 1 gegen 1', emoji:'👣', num:'Station 3',
     drills:[
-      {idx:0, title:'Sohlen-Rückzieher', emoji:'🐢', meta:'mittel', vid:'1110029532', hash:'c98afbe376', sticker:'🔥'},
+      {idx:0, title:'Drag Back', emoji:'🐢', meta:'mittel', vid:'1110029532', hash:'c98afbe376', sticker:'🔥'},
       {idx:1, title:'Übersteiger', emoji:'🐰', meta:'mittel', vid:'1110029715', hash:'8757b6279f', sticker:'🎈'}
     ]},
-  st4: { tier:'base', label:'Cocos Dribbeln', emoji:'✨', num:'Station 4',
+  st4: { tier:'base', label:'Cocos Dribbling', emoji:'✨', num:'Station 4',
     drills:[
       {idx:0, title:'La Croqueta', emoji:'🐙', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'🏆'},
-      {idx:1, title:'Siebener', emoji:'🦊', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'⚡'}
+      {idx:1, title:'Seven', emoji:'🦊', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'⚡'}
     ]},
   st5: { tier:'base', label:'Leyas Ballkontrolle', emoji:'🤹', num:'Station 5',
     drills:[
@@ -28,36 +28,32 @@ var KID_MODULES = {
     ]},
 
   /* === STADIUM JOURNEY (unlocked after collecting all 10 base stickers) ===
-     Stadium NAMES (BMO Field, BC Place …) stay in their native English —
-     they're real-world proper nouns. Drill titles are now German.
-     The hydrateDrillsFromSupabase pool now pulls stars=2 and stars=3 rows
-     (was 3/4 in the previous build). NOTE: vid/hash below are PLACEHOLDERS
-     reusing base-journey Vimeo videos — swap with real 2⭐/3⭐ ids once the
-     videos are uploaded. */
+     NOTE: vid/hash below are PLACEHOLDERS reusing the base-journey Vimeo videos.
+     Swap in real 3⭐/4⭐ Vimeo IDs + hashes when the videos are uploaded. */
   sd1: { tier:'stadium', label:'BMO Field', city:'Toronto', country:'🇨🇦', emoji:'🍁', num:'Stadion 1',
     drills:[
-      {idx:0, title:'Ahorn-Sohle',         emoji:'🍁',  meta:'2 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🍁'},
-      {idx:1, title:'Toronto-Wirbel',      emoji:'🌪️', meta:'3 Sterne', vid:'1110029715', hash:'8757b6279f', sticker:'🏟️'}
+      {idx:0, title:'Maple Sole Drag',     emoji:'🍁',  meta:'3 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🍁'},
+      {idx:1, title:'Toronto Twister',     emoji:'🌪️', meta:'4 Sterne', vid:'1110029715', hash:'8757b6279f', sticker:'🏟️'}
     ]},
   sd2: { tier:'stadium', label:'BC Place', city:'Vancouver', country:'🇨🇦', emoji:'🏔️', num:'Stadion 2',
     drills:[
-      {idx:0, title:'Pazifik-Zug',         emoji:'🌊',  meta:'2 Sterne', vid:'1110048776', hash:'3990db7901', sticker:'🌊'},
-      {idx:1, title:'Berg-Übersteiger',    emoji:'⛰️', meta:'3 Sterne', vid:'1111311105', hash:'b285a5a081', sticker:'🏔️'}
+      {idx:0, title:'Pacific Pull',        emoji:'🌊',  meta:'3 Sterne', vid:'1110048776', hash:'3990db7901', sticker:'🌊'},
+      {idx:1, title:'Mountain Step-Over',  emoji:'⛰️', meta:'4 Sterne', vid:'1111311105', hash:'b285a5a081', sticker:'🏔️'}
     ]},
   sd3: { tier:'stadium', label:'Estadio Azteca', city:'Mexico City', country:'🇲🇽', emoji:'🌶️', num:'Stadion 3',
     drills:[
-      {idx:0, title:'Azteken-Drehung',     emoji:'🌶️', meta:'2 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'🌶️'},
-      {idx:1, title:'Pyramiden-Schuss',    emoji:'🏛️', meta:'3 Sterne', vid:'1110049131', hash:'0944817493', sticker:'🏛️'}
+      {idx:0, title:'Azteca Roulette',     emoji:'🌶️', meta:'3 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'🌶️'},
+      {idx:1, title:'Pyramiden-Schuss',    emoji:'🏛️', meta:'4 Sterne', vid:'1110049131', hash:'0944817493', sticker:'🏛️'}
     ]},
   sd4: { tier:'stadium', label:'MetLife Stadium', city:'New York', country:'🇺🇸', emoji:'🗽', num:'Stadion 4',
     drills:[
-      {idx:0, title:'New York Fallrückzieher', emoji:'🍎', meta:'2 Sterne', vid:'1124934705', hash:'6a71a27daf', sticker:'🍎'},
-      {idx:1, title:'Endspiel-Treffer',         emoji:'🗽', meta:'3 Sterne', vid:'1125467352', hash:'30d35d6e70', sticker:'🏆'}
+      {idx:0, title:'Big Apple Bicycle',   emoji:'🍎',  meta:'3 Sterne', vid:'1124934705', hash:'6a71a27daf', sticker:'🍎'},
+      {idx:1, title:'Final-Finisher',      emoji:'🗽',  meta:'4 Sterne', vid:'1125467352', hash:'30d35d6e70', sticker:'🏆'}
     ]},
   sd5: { tier:'stadium', label:'SoFi Stadium', city:'Los Angeles', country:'🇺🇸', emoji:'🌴', num:'Stadion 5',
     drills:[
-      {idx:0, title:'Surfer-Schritt',      emoji:'🏄',  meta:'2 Sterne', vid:'1124935347', hash:'c8977c5fb4', sticker:'🏄'},
-      {idx:1, title:'Hollywood-Elastico',  emoji:'⭐',  meta:'3 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🌟'}
+      {idx:0, title:'Surfer Side-Step',    emoji:'🏄',  meta:'3 Sterne', vid:'1124935347', hash:'c8977c5fb4', sticker:'🏄'},
+      {idx:1, title:'Hollywood Elastico',  emoji:'⭐',  meta:'4 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🌟'}
     ]},
 
   /* === TRICK-PFAD JOURNEY (page 2: 10 unique stickers) ===
@@ -93,21 +89,21 @@ var STATION_ORDER   = ['st1','st2','st3','st4','st5'];
 var TRICKPATH_ORDER = ['tp1','tp2','tp3','tp4','tp5'];
 var STADIUM_ORDER   = ['sd1','sd2','sd3','sd4','sd5'];
 var STATION_COLORS = {
-  st1: ['#0891B2','#0E7490'],
-  st2: ['#0891B2','#0E7490'],
-  st3: ['#0891B2','#0E7490'],
-  st4: ['#0891B2','#0E7490'],
-  st5: ['#D97706','#B45309'],
-  tp1: ['#0891B2','#0E7490'],
-  tp2: ['#0891B2','#0E7490'],
-  tp3: ['#0891B2','#0E7490'],
-  tp4: ['#0891B2','#0E7490'],
-  tp5: ['#D97706','#B45309'],
-  sd1: ['#0891B2','#0E7490'],
-  sd2: ['#0891B2','#0E7490'],
-  sd3: ['#0891B2','#0E7490'],
-  sd4: ['#0891B2','#0E7490'],
-  sd5: ['#D97706','#B45309']
+  st1: ['#00E5FF','#0080FF'],
+  st2: ['#FFD700','#FF8C00'],
+  st3: ['#E4002B','#A30025'],
+  st4: ['#3B82F6','#1E3A8A'],
+  st5: ['#22C55E','#006847'],
+  tp1: ['#00E5FF','#0080FF'],
+  tp2: ['#FFD700','#FF8C00'],
+  tp3: ['#E4002B','#A30025'],
+  tp4: ['#3B82F6','#1E3A8A'],
+  tp5: ['#22C55E','#006847'],
+  sd1: ['#E4002B','#A30025'],
+  sd2: ['#00E5FF','#0080FF'],
+  sd3: ['#22C55E','#006847'],
+  sd4: ['#3B82F6','#1E3A8A'],
+  sd5: ['#FFD700','#FF8C00']
 };
 var TOTAL_STICKERS = 10;
 var TOTAL_STADIUM_STICKERS = 10;
@@ -289,7 +285,7 @@ applyAvatar(STATE.avatar);
 function renderStationView(modKey){
   var mod = KID_MODULES[modKey];
   if (!mod) return;
-  var colors = STATION_COLORS[modKey] || ['#F59E0B','#B45309'];
+  var colors = STATION_COLORS[modKey] || ['#FFD700','#FF8C00'];
   var done = countDone(modKey), total = mod.drills.length;
   var isStadium = (mod.tier === 'stadium');
 
@@ -299,7 +295,7 @@ function renderStationView(modKey){
   if (backBtn) backBtn.textContent = isStadium ? '← Zu den Stadien' : '← Zum Spielplatz';
 
   var hero = document.getElementById('station-hero');
-  hero.style.background = colors[1];
+  hero.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
   var ownerKey = ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'leya'})[modKey] || 'keon';
   var ownerAv = AVATARS[ownerKey];
   var stImg = document.getElementById('station-emoji');
@@ -818,13 +814,13 @@ function hydrateDrillsFromSupabase(){
   // Schema:
   //   - stars      (int2): difficulty rating
   //   - vimeo_url  (text): full Vimeo URL (e.g. https://vimeo.com/1124934705/6a71a27daf)
-  // For stadium drills (sd1-sd5), ONLY uses videos where stars === 2 or stars === 3.
-  // Each stadium drill's `meta` ('2 Sterne' / '3 Sterne') decides which star pool it draws from.
+  // For stadium drills (sd1-sd5), ONLY uses videos where stars === 3 or stars === 4.
+  // Each stadium drill's `meta` ('3 Sterne' / '4 Sterne') decides which star pool it draws from.
   // The curated drill `title` from KID_MODULES is kept — only vid + hash are updated.
   var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
-  // Filter server-side so 1⭐/4⭐/5⭐ rows never reach the browser.
-  var URL = SB_URL + '/rest/v1/videos?select=stars,vimeo_url&stars=in.(2,3)';
+  // Filter server-side so 1⭐/2⭐/5⭐ rows never reach the browser.
+  var URL = SB_URL + '/rest/v1/videos?select=stars,vimeo_url&stars=in.(3,4)';
 
   // Parse any Vimeo URL into {vid, hash}. Handles:
   //   https://vimeo.com/{id}
@@ -848,33 +844,33 @@ function hydrateDrillsFromSupabase(){
   .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(function(rows){
     if (!Array.isArray(rows) || !rows.length) {
-      console.warn('[T7] videos table returned no 2⭐/3⭐ rows — stadium drills will keep placeholders.');
+      console.warn('[T7] videos table returned no 3⭐/4⭐ rows — stadium drills will keep placeholders.');
       return;
     }
     try { console.log('[T7] videos columns:', Object.keys(rows[0]), '| pool size:', rows.length); } catch(e){}
 
-    // Build 2⭐ and 3⭐ pools of parsed {vid, hash} objects, skipping unparseable URLs.
-    var pool2 = [], pool3 = [];
+    // Build 3⭐ and 4⭐ pools of parsed {vid, hash} objects, skipping unparseable URLs.
+    var pool3 = [], pool4 = [];
     rows.forEach(function(r){
       var parsed = parseVimeoUrl(r.vimeo_url);
       if (!parsed) return;
-      if (r.stars === 2) pool2.push(parsed);
-      else if (r.stars === 3) pool3.push(parsed);
+      if (r.stars === 3) pool3.push(parsed);
+      else if (r.stars === 4) pool4.push(parsed);
     });
 
     // Deterministic assignment: walk stadium drills in order, draw the next
     // unused video from the matching star pool.
-    var i2 = 0, i3 = 0, changed = false;
+    var i3 = 0, i4 = 0, changed = false;
     STADIUM_ORDER.forEach(function(mk){
       var mod = KID_MODULES[mk];
       if (!mod) return;
       mod.drills.forEach(function(d){
-        var wantsTwo = (d.meta && d.meta.indexOf('2') !== -1);
-        var pool = wantsTwo ? pool2 : pool3;
-        var idx  = wantsTwo ? i2 : i3;
+        var wantsThree = (d.meta && d.meta.indexOf('3') !== -1);
+        var pool = wantsThree ? pool3 : pool4;
+        var idx  = wantsThree ? i3 : i4;
         if (idx >= pool.length) return; // pool exhausted, keep placeholder
         var pick = pool[idx];
-        if (wantsTwo) i2++; else i3++;
+        if (wantsThree) i3++; else i4++;
         if (pick.vid  && pick.vid  !== d.vid)  { d.vid  = pick.vid;  changed = true; }
         if (pick.hash !== d.hash) { d.hash = pick.hash; changed = true; }
         // Title is intentionally kept from KID_MODULES (the curated German drill names).
@@ -905,4 +901,51 @@ function boot(email, name){
 
 if (window.T7Identity) { T7Identity.resolve(function(email, name){ boot(email, name); }); }
 else { setTimeout(function(){ if (window.T7Identity) T7Identity.resolve(function(email, name){ boot(email, name); }); else boot(null, null); }, 1500); }
+})();
+
+/* === PAGE-LEVEL LISTENERS ===
+   Extracted from the inline <script> in Minis.html — these hook document-level
+   events that aren't specific to the module closure above. */
+
+// Escape closes the drill/video modal. Delegates to the existing close
+// button so the engine's cleanup (pause iframe, reset step) still runs.
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Escape' && e.keyCode !== 27) return;
+  var overlay = document.getElementById('kmodal');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  var closeBtn = document.getElementById('kmodal-close');
+  if (closeBtn) { closeBtn.click(); } else { overlay.classList.remove('open'); }
+});
+
+// Sync the station-hero bar with each playground station's actual color.
+// t7-minis.js sets hero.style.background = STATION_COLORS[key][1] when a
+// station opens. We hook the click in CAPTURE phase so we update that map
+// before the engine reads it — using getComputedStyle so we always pick up
+// the right color for the current theme (dark or light).
+(function(){
+  // Which stations need dark text on a light background. The Brazil-yellow
+  // station (st2) is currently the only one; extend this set if the palette
+  // changes.
+  var DARK_TEXT_STATIONS = { st2: true };
+
+  document.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('[data-station]');
+    if (!btn) return;
+    var key = btn.dataset.station;
+    if (!key) return;
+
+    // Read the station's actual rendered background and push it into the
+    // engine's color map so the bar matches.
+    var bg = getComputedStyle(btn).backgroundColor;
+    if (window.STATION_COLORS && window.STATION_COLORS[key] && bg) {
+      window.STATION_COLORS[key] = [bg, bg];
+    }
+
+    // Flag dark text for light-background stations so the bar stays readable.
+    var hero = document.getElementById('station-hero');
+    if (hero) {
+      if (DARK_TEXT_STATIONS[key]) hero.setAttribute('data-st-text', 'dark');
+      else hero.removeAttribute('data-st-text');
+    }
+  }, true); // capture phase — runs before the engine's bubble handler
 })();
