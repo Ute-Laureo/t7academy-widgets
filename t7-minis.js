@@ -608,6 +608,86 @@ function hideCertificate(){
   if (modal) modal.classList.remove('open');
 }
 
+/* === CERTIFICATE DOWNLOAD (PDF) ===
+   Renders the certificate to a PDF the child/parent can save and print from
+   their own machine — far more reliable than printing an embedded widget.
+   Libraries are lazy-loaded from a CDN the first time only. If they can't be
+   reached (e.g. a strict CSP), we fall back to the browser print dialog. */
+var _pdfLibsPromise = null;
+function _loadScript(src){
+  return new Promise(function(resolve, reject){
+    var s = document.createElement('script');
+    s.src = src; s.async = true;
+    s.onload = function(){ resolve(); };
+    s.onerror = function(){ reject(new Error('Failed to load ' + src)); };
+    document.head.appendChild(s);
+  });
+}
+function ensurePdfLibs(){
+  if (window.html2canvas && window.jspdf) return Promise.resolve();
+  if (_pdfLibsPromise) return _pdfLibsPromise;
+  _pdfLibsPromise = Promise.all([
+    window.html2canvas ? Promise.resolve() : _loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+    window.jspdf       ? Promise.resolve() : _loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+  ]);
+  return _pdfLibsPromise;
+}
+function downloadCertificate(){
+  var frame = document.getElementById('cert-frame');
+  if (!frame) return;
+  var btn = document.getElementById('cert-print-btn');
+  var oldLabel = btn ? btn.textContent : '';
+  if (btn){ btn.disabled = true; btn.textContent = 'Wird erstellt …'; }
+
+  var wrap = null;
+  ensurePdfLibs()
+    .then(function(){ return (document.fonts && document.fonts.ready) ? document.fonts.ready : null; })
+    .then(function(){
+      // Off-screen, fixed-width clone → consistent output regardless of screen size.
+      var W = 760;
+      wrap = document.createElement('div');
+      wrap.style.cssText = 'position:fixed;left:-99999px;top:0;width:' + (W + 48) + 'px;padding:24px;background:#ffffff;';
+      var clone = frame.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.style.width = W + 'px';
+      clone.style.maxWidth = 'none';
+      clone.style.margin = '0';
+      wrap.appendChild(clone);
+      document.body.appendChild(wrap);
+      // html2canvas doesn't support CSS aspect-ratio — pin each sticker tile to a
+      // real square using its laid-out width so the grid doesn't collapse.
+      clone.querySelectorAll('.cert-st').forEach(function(t){
+        var w = t.getBoundingClientRect().width;
+        t.style.aspectRatio = 'auto';
+        t.style.height = w + 'px';
+      });
+      return window.html2canvas(wrap, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    })
+    .then(function(canvas){
+      if (wrap && wrap.parentNode){ wrap.parentNode.removeChild(wrap); wrap = null; }
+      var img = canvas.toDataURL('image/png');
+      var JsPDF = window.jspdf.jsPDF;
+      var pxW = canvas.width, pxH = canvas.height;
+      var pdf = new JsPDF({ orientation: pxH >= pxW ? 'portrait' : 'landscape', unit: 'pt', format: 'a4' });
+      var pageW = pdf.internal.pageSize.getWidth();
+      var pageH = pdf.internal.pageSize.getHeight();
+      var margin = 28;
+      var ratio  = Math.min((pageW - margin * 2) / pxW, (pageH - margin * 2) / pxH);
+      var drawW  = pxW * ratio, drawH = pxH * ratio;
+      pdf.addImage(img, 'PNG', (pageW - drawW) / 2, (pageH - drawH) / 2, drawW, drawH);
+      var nm = (STATE.name || 'Champion').replace(/[^\w\-]+/g, '_');
+      pdf.save('T7-Zertifikat-' + nm + '.pdf');
+    })
+    .catch(function(err){
+      if (wrap && wrap.parentNode){ wrap.parentNode.removeChild(wrap); }
+      console.warn('[T7] PDF-Download fehlgeschlagen — Druckdialog als Fallback.', err);
+      try { window.print(); } catch(e){}
+    })
+    .then(function(){
+      if (btn){ btn.disabled = false; btn.textContent = oldLabel || '⬇️ Zertifikat herunterladen'; }
+    });
+}
+
 /* === TRICKPFAD === */
 function renderTrickpfad(){
   var path = document.getElementById('tp-path');
@@ -747,7 +827,7 @@ document.getElementById('kbtn-skip').onclick = function(){
   if (champGo)    champGo.onclick    = function(){ hideChampionCeremony(); markChampionSeen(); playTap(); };
   if (champCert)  champCert.onclick  = function(){ markChampionSeen(); showCertificate(); playTap(); };
   if (certBack)   certBack.onclick   = function(){ hideCertificate(); playTap(); };
-  if (certPrint)  certPrint.onclick  = function(){ window.print(); };
+  if (certPrint)  certPrint.onclick  = function(){ downloadCertificate(); };
   if (kfChamp)    kfChamp.onclick    = function(){ showCertificate(); playTap(); };
   // Certificate is available at ANY time from the sidebar card (not gated on champion status).
   if (certOpen)   certOpen.onclick   = function(){ showCertificate(); playTap(); };
