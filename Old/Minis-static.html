@@ -30,10 +30,11 @@
     <div class="hero-eye"><span data-av-emoji="">🦁</span> T7 Minis Academy</div>
     <h1>Hi! Ich bin <span class="accent" data-av-name="">Keon</span>!</h1>
     <p>Komm, wir lernen <strong>coole Fussball-Tricks</strong>! Du schaust ein Video, übst, und sammelst <strong>Punkte und Sticker</strong>. 🌟</p>
-    <div class="hero-stats" id="hero-fortschritt">
-      <div class="hero-stat"><div class="hero-stat-num" id="kf-total">0</div><div class="hero-stat-label">Gesamt XP</div></div>
-      <div class="hero-stat"><div class="hero-stat-num" id="kf-week">0</div><div class="hero-stat-label">Diese Woche</div></div>
-      <div class="hero-stat"><div class="hero-stat-num" id="hero-sticker-count">0 / 30</div><div class="hero-stat-label">Sticker gesammelt</div></div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">Stationen</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">1</div><div class="hero-stat-label">Trickpfad</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">Stadien</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">30</div><div class="hero-stat-label">Sticker</div></div>
     </div>
   </div>
   <div class="hero-image">
@@ -310,13 +311,18 @@
       <div class="sticker-grid" id="sticker-grid"></div>
     </div>
 
-    <div class="sb-card sb-card-cert">
-      <div class="sb-label gold">🏅 Mein Zertifikat</div>
-      <div class="cert-teaser">
-        <div class="cert-teaser-seal">🏆</div>
-        <p>Dein persönliches Zertifikat mit allen gesammelten Stickern — jederzeit ansehen und ausdrucken!</p>
+    <div class="sb-card sb-card-prog">
+      <div class="sb-label">⚡ Fortschritt</div>
+      <div id="fortschritt-body">
+        <div class="kf-hero">
+          <div class="kf-pname" id="kf-name">Spieler</div>
+          <div class="kf-sub">Meine Punkte</div>
+        </div>
+        <div class="kf-stat-row">
+          <div class="kf-stat-card"><div class="kf-stat-num" id="kf-total">0</div><div class="kf-stat-label">Gesamt XP</div></div>
+          <div class="kf-stat-card"><div class="kf-stat-num" id="kf-week">0</div><div class="kf-stat-label">Diese Woche</div></div>
+        </div>
       </div>
-      <button class="cert-open-btn" id="cert-open-btn" type="button">Zertifikat ansehen →</button>
     </div>
 
   </div>
@@ -372,34 +378,6 @@
       </div>
 
     </div>
-  </div>
-</div>
-
-<!-- === CERTIFICATE MODAL === -->
-<div class="cert-overlay" id="certificate-modal">
-  <div class="cert-sheet" id="cert-sheet">
-    <button class="kmodal-close cert-close" id="cert-back-btn" title="Schliessen">×</button>
-    <div class="cert-frame">
-      <div class="cert-eye"><span data-av-emoji="">🦁</span> T7 Minis Academy</div>
-      <div class="cert-heading">Zertifikat</div>
-      <div class="cert-ribbon">🏅 Sticker-Sammlung 🏅</div>
-      <div class="cert-awarded">Dieses Zertifikat gehört</div>
-      <div class="cert-name" id="cert-name">Champion</div>
-      <div class="cert-wall" id="cert-sticker-wall"></div>
-      <div class="cert-count" id="cert-count">0 von 30 Stickern gesammelt</div>
-      <div class="cert-foot">
-        <div class="cert-foot-block">
-          <div class="cert-foot-label">Datum</div>
-          <div class="cert-foot-val" id="cert-date">–</div>
-        </div>
-        <div class="cert-seal">🏆</div>
-        <div class="cert-foot-block">
-          <div class="cert-foot-label">Code</div>
-          <div class="cert-foot-val cert-code" id="cert-code">T7-0000-0000</div>
-        </div>
-      </div>
-    </div>
-    <button class="kbig-btn gold cert-print" id="cert-print-btn" type="button">🖨️ Ausdrucken</button>
   </div>
 </div>
 

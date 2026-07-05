@@ -447,8 +447,6 @@ function renderStickers(){
 
   // Reveal/hide the Champion certificate button in the sidebar
   refreshChampionBadge();
-  // Sync the hero "Sticker gesammelt" stat (x / 30 across all pages)
-  updateHeroStickerCount();
 }
 
 function countBaseStickers(){
@@ -559,39 +557,21 @@ function formatCertDate(){
 function populateCertStickerWall(){
   var wall = document.getElementById('cert-sticker-wall');
   if (!wall) return;
-  var html = '', earned = 0, total = 0;
+  var html = '';
   STICKER_PAGES.forEach(function(p){
-    var slot = 0;
     p.stations.forEach(function(mk){
       var mod = KID_MODULES[mk]; if (!mod) return;
       mod.drills.forEach(function(d){
-        if (slot >= p.total) return;
-        slot++; total++;
         var key    = mk + '_' + d.idx;
         var rating = STATE.ratings[key] || 0;
         if (rating >= 4) {
-          earned++;
-          var cls = 'cert-st earned' + ((STATE.gold && STATE.gold[key]) ? ' gold' : '');
+          var cls = 'cert-st' + ((STATE.gold && STATE.gold[key]) ? ' gold' : '');
           html += '<div class="' + cls + '">' + d.sticker + '</div>';
-        } else {
-          // Not earned yet — show a placeholder "?"
-          html += '<div class="cert-st todo">?</div>';
         }
       });
     });
-    // Pad the page out to its declared total with "?" placeholders.
-    while (slot < p.total){ slot++; total++; html += '<div class="cert-st todo">?</div>'; }
   });
   wall.innerHTML = html;
-  var countEl = document.getElementById('cert-count');
-  if (countEl) countEl.textContent = earned + ' von ' + total + ' Stickern gesammelt';
-}
-
-/* Keep the hero "Sticker gesammelt" stat in sync (x / 30 across all pages). */
-function updateHeroStickerCount(){
-  var el = document.getElementById('hero-sticker-count');
-  if (!el) return;
-  el.textContent = countAllEarned() + ' / ' + totalStickersAcrossPages();
 }
 
 function showCertificate(){
@@ -742,20 +722,12 @@ document.getElementById('kbtn-skip').onclick = function(){
   var certBack   = document.getElementById('cert-back-btn');
   var certPrint  = document.getElementById('cert-print-btn');
   var kfChamp    = document.getElementById('kf-champion-btn');
-  var certOpen   = document.getElementById('cert-open-btn');
   if (champClose) champClose.onclick = function(){ hideChampionCeremony(); markChampionSeen(); playTap(); };
   if (champGo)    champGo.onclick    = function(){ hideChampionCeremony(); markChampionSeen(); playTap(); };
   if (champCert)  champCert.onclick  = function(){ markChampionSeen(); showCertificate(); playTap(); };
   if (certBack)   certBack.onclick   = function(){ hideCertificate(); playTap(); };
   if (certPrint)  certPrint.onclick  = function(){ window.print(); };
   if (kfChamp)    kfChamp.onclick    = function(){ showCertificate(); playTap(); };
-  // Certificate is available at ANY time from the sidebar card (not gated on champion status).
-  if (certOpen)   certOpen.onclick   = function(){ showCertificate(); playTap(); };
-  // Click-outside-to-close on the certificate overlay.
-  var certOv = document.getElementById('certificate-modal');
-  if (certOv) certOv.addEventListener('click', function(e){
-    if (e.target.id === 'certificate-modal') hideCertificate();
-  });
   // Click-outside-to-close on champion overlay (but keep certificate explicit)
   var champOv = document.getElementById('champion-modal');
   if (champOv) champOv.addEventListener('click', function(e){
@@ -914,12 +886,10 @@ function boot(email, name){
   STATE.email = email;
   STATE.name = (name || '').split(' ')[0] || 'Champion';
   document.getElementById('kid-name').textContent = STATE.name;
-  var kfNameEl = document.getElementById('kf-name');
-  if (kfNameEl) kfNameEl.textContent = STATE.name;
+  document.getElementById('kf-name').textContent = STATE.name;
   loadLocal();
   Object.keys(KID_MODULES).forEach(updatePlaygroundStation);
   renderStickers();
-  updateHeroStickerCount();
   renderTrickpfad();
   hydrateDrillsFromSupabase();
   hydrateFromSupabase();
@@ -941,9 +911,6 @@ else { setTimeout(function(){ if (window.T7Identity) T7Identity.resolve(function
 // button so the engine's cleanup (pause iframe, reset step) still runs.
 document.addEventListener('keydown', function(e){
   if (e.key !== 'Escape' && e.keyCode !== 27) return;
-  // Certificate modal closes first if it's open.
-  var cert = document.getElementById('certificate-modal');
-  if (cert && cert.classList.contains('open')) { cert.classList.remove('open'); return; }
   var overlay = document.getElementById('kmodal');
   if (!overlay || !overlay.classList.contains('open')) return;
   var closeBtn = document.getElementById('kmodal-close');
