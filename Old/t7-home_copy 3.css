@@ -58,12 +58,6 @@
   display: grid;
   grid-template-columns: 1.05fr 1fr;
   min-height: 480px;
-  /* Match the centered 1400px column used by .home-layout so the
-     hero text lines up on the left with "Mein Fortschritt" /
-     "Nur für mich" on large screens.  The .lp-hero band itself stays
-     full-bleed (border, background); only its content is centered. */
-  max-width: 1400px;
-  margin-inline: auto;
 }
 .lp-hero-text {
   padding: 72px clamp(24px, 5vw, 64px);
@@ -474,29 +468,6 @@ body[data-theme="light"] .home-avatar-side-cta:hover {
 .home-actions-status.ok    { color: var(--lp-green); }
 .home-actions-status.error { color: var(--lp-red); }
 
-/* Friendly "your stuff lives on this device — make a backup" hint,
-   shown inside the local-only feature modals so kids don't lose
-   their entries, goals, or videos. */
-.home-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 22px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: rgba(0, 229, 255, .06);
-  border: 1px solid rgba(0, 229, 255, .22);
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--lp-muted);
-}
-body[data-theme="light"] .home-hint {
-  background: rgba(8, 145, 178, .06);
-  border-color: rgba(8, 145, 178, .25);
-}
-.home-hint-ico { font-size: 18px; line-height: 1.35; flex-shrink: 0; }
-.home-hint strong { color: var(--text); font-weight: 800; }
-
 
 /* ============================================================
    3. PROGRESS CARDS — adopt the lp-prog vocabulary
@@ -845,73 +816,6 @@ body[data-theme="light"] .diary-col-watch { --diary-c: #C2410C; }
   font-style: italic;
 }
 
-/* Voice notes — record instead of type.  The recorder inherits the
-   column's --diary-c accent (gold for good, amber for watch). */
-.diary-voice {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 6px;
-}
-.diary-voice-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'Antonio', sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  padding: 8px 15px;
-  border-radius: 99px;
-  border: 1px solid var(--diary-c);
-  color: var(--diary-c);
-  background: transparent;
-  cursor: pointer;
-  transition: background .15s, filter .15s;
-}
-.diary-voice-btn:hover { background: rgba(255,255,255,.05); filter: brightness(1.1); }
-.diary-voice-ico { font-size: 15px; line-height: 1; }
-.diary-voice-btn.recording {
-  border-color: var(--lp-red);
-  color: #fff;
-  background: var(--lp-red);
-  animation: diaryVoicePulse 1.2s ease-in-out infinite;
-}
-@keyframes diaryVoicePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(228,0,43,.5); }
-  50%      { box-shadow: 0 0 0 6px rgba(228,0,43,0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .diary-voice-btn.recording { animation: none; }
-}
-.diary-voice-time {
-  font-family: 'Antonio', sans-serif;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: .08em;
-  color: var(--lp-red);
-}
-.diary-voice-player {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-.diary-voice-audio { height: 36px; flex: 1; min-width: 0; max-width: 280px; }
-.diary-voice-del {
-  background: none;
-  border: none;
-  color: var(--lp-faint);
-  font-size: 13px;
-  cursor: pointer;
-  padding: 5px 7px;
-  border-radius: 6px;
-  transition: color .15s, background .15s;
-}
-.diary-voice-del:hover { color: var(--lp-red); background: rgba(228,0,43,.08); }
-
 .diary-input-actions {
   display: flex;
   align-items: center;
@@ -1014,13 +918,6 @@ body[data-theme="light"] .diary-entry-col.watch { --diary-c: #C2410C; }
 .diary-entry-col-text.empty {
   font-style: italic;
   opacity: .5;
-}
-.diary-entry-audio {
-  display: block;
-  margin-top: 8px;
-  height: 36px;
-  width: 100%;
-  max-width: 300px;
 }
 
 .diary-empty {
@@ -1161,11 +1058,9 @@ body[data-theme="dark"] .goals-col input[type="date"]::-webkit-calendar-picker-i
   line-height: 1.4;
   white-space: pre-wrap;
 }
-/* Completed goals get a green check instead of a strikethrough. */
-.goal-check {
-  color: var(--lp-green);
-  font-weight: 900;
-  margin-right: 6px;
+.goal-entry.done .goal-cell-goal .goal-text {
+  text-decoration: line-through;
+  color: var(--lp-muted);
 }
 .goal-when {
   font-family: 'Antonio', sans-serif;

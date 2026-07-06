@@ -60,9 +60,8 @@
   var DIARY_KEY_PREFIX = 't7_diary_v1__';   // + profileId (or 'anon')
   var GOALS_KEY_PREFIX = 't7_goals_v1__';   // + profileId (or 'anon')
   var IDB_NAME         = 't7-academy';
-  var IDB_VERSION      = 2;
+  var IDB_VERSION      = 1;
   var CLIPS_STORE      = 'clips';           // keyPath 'id'; index 'profile_id'
-  var DIARY_AUDIO_STORE = 'diary_audio';    // keyPath 'id'  (voice notes)
 
   /* Watch-time threshold for "Video gesehen" tile */
   var SEEN_THRESHOLD_SEC = 30;
@@ -228,14 +227,6 @@
     modal.hidden = true;
     document.body.classList.remove('home-modal-open');
     if (openHomeModalEl === modal) openHomeModalEl = null;
-    /* Never leave the mic live in the background — stopping keeps
-       whatever was recorded so far as an unsaved preview. */
-    if (modal.id === 'diaryModal') {
-      ['good', 'watch'].forEach(function(c){
-        var r = diaryRecorders[c];
-        if (r && r.btn && r.btn.classList.contains('recording')) diaryVoiceStop(r);
-      });
-    }
   }
 
   function initHomeModals(){
@@ -590,187 +581,6 @@
     return null;
   }
 
-  /* ---- Voice notes: audio blobs in IndexedDB (store 'diary_audio')
-     so the browser's localStorage quota is never touched. ---- */
-  function diaryAudioPut(record){
-    return idbOpen().then(function(db){
-      return new Promise(function(resolve, reject){
-        var tx = db.transaction(DIARY_AUDIO_STORE, 'readwrite');
-        tx.objectStore(DIARY_AUDIO_STORE).put(record);
-        tx.oncomplete = function(){ resolve(record); };
-        tx.onerror    = function(){ reject(tx.error); };
-      });
-    });
-  }
-  function diaryAudioGet(id){
-    return idbOpen().then(function(db){
-      return new Promise(function(resolve, reject){
-        var tx = db.transaction(DIARY_AUDIO_STORE, 'readonly');
-        var req = tx.objectStore(DIARY_AUDIO_STORE).get(id);
-        req.onsuccess = function(){ resolve(req.result || null); };
-        req.onerror   = function(){ reject(req.error); };
-      });
-    });
-  }
-  function diaryAudioDelete(id){
-    return idbOpen().then(function(db){
-      return new Promise(function(resolve){
-        var tx = db.transaction(DIARY_AUDIO_STORE, 'readwrite');
-        tx.objectStore(DIARY_AUDIO_STORE).delete(id);
-        tx.oncomplete = function(){ resolve(); };
-        tx.onerror    = function(){ resolve(); };
-      });
-    }).catch(function(){});
-  }
-
-  /* Object-URL lifecycle for audio shown in the feed */
-  var diaryAudioUrls = {};
-  function freeDiaryAudioUrls(){
-    Object.keys(diaryAudioUrls).forEach(function(k){ URL.revokeObjectURL(diaryAudioUrls[k]); });
-    diaryAudioUrls = {};
-  }
-  function loadDiaryAudioUrls(ids){
-    var uniq = {};
-    ids.forEach(function(id){ if (id) uniq[id] = true; });
-    return Promise.all(Object.keys(uniq).map(function(id){
-      return diaryAudioGet(id).then(function(rec){
-        if (rec && rec.blob) diaryAudioUrls[id] = URL.createObjectURL(rec.blob);
-      }).catch(function(){});
-    })).then(function(){ return diaryAudioUrls; });
-  }
-
-
-  /* ---- Recorder widgets (one per column: good / watch) ---- */
-  var diaryRecorders = {};
-  var diaryVoiceSupported = !!(navigator.mediaDevices &&
-                               navigator.mediaDevices.getUserMedia &&
-                               window.MediaRecorder);
-
-  function fmtRecTime(ms){
-    var s = Math.floor(ms / 1000);
-    return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
-  }
-  function stopStream(rec){
-    if (rec.stream) { rec.stream.getTracks().forEach(function(t){ t.stop(); }); rec.stream = null; }
-  }
-  function diaryVoiceSetPreview(rec, blob){
-    if (rec.previewUrl) URL.revokeObjectURL(rec.previewUrl);
-    rec.previewUrl = URL.createObjectURL(blob);
-    rec.audioEl.src = rec.previewUrl;
-    rec.playerEl.hidden = false;
-    rec.txtEl.textContent = 'Neu aufnehmen';
-  }
-  function diaryVoiceClearPreview(rec){
-    if (rec.previewUrl) { URL.revokeObjectURL(rec.previewUrl); rec.previewUrl = null; }
-    rec.audioEl.removeAttribute('src');
-    rec.playerEl.hidden = true;
-    rec.txtEl.textContent = 'Sprachnotiz aufnehmen';
-  }
-  function diaryVoiceStart(rec){
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream){
-      rec.stream = stream;
-      rec.chunks = [];
-      var mr;
-      try { mr = new MediaRecorder(stream); } catch(e){ mr = new MediaRecorder(stream, {}); }
-      rec.mr = mr;
-      rec.mime = mr.mimeType || 'audio/webm';
-      mr.ondataavailable = function(e){ if (e.data && e.data.size) rec.chunks.push(e.data); };
-      mr.onstop = function(){
-        var blob = new Blob(rec.chunks, { type: rec.mime });
-        rec.pendingBlob = blob;
-        rec.pendingMime = rec.mime;
-        rec.removed = false;
-        diaryVoiceSetPreview(rec, blob);
-        stopStream(rec);
-      };
-      mr.start();
-      rec.startTs = Date.now();
-      rec.btn.classList.add('recording');
-      rec.txtEl.textContent = 'Stopp';
-      rec.timeEl.hidden = false;
-      rec.timeEl.textContent = '0:00';
-      rec.timer = setInterval(function(){
-        rec.timeEl.textContent = fmtRecTime(Date.now() - rec.startTs);
-        if (Date.now() - rec.startTs > 5 * 60 * 1000) diaryVoiceStop(rec);   /* 5-min cap */
-      }, 250);
-    }).catch(function(err){
-      console.error('[T7 Home] mic', err);
-      alert('Mikrofon nicht verfügbar. Bitte erlaube den Zugriff — oder tippe deinen Eintrag.');
-    });
-  }
-  function diaryVoiceStop(rec){
-    if (rec.mr && rec.mr.state !== 'inactive') { try { rec.mr.stop(); } catch(e){} }
-    rec.btn.classList.remove('recording');
-    if (rec.timer) { clearInterval(rec.timer); rec.timer = null; }
-    rec.timeEl.hidden = true;
-  }
-  function makeDiaryRecorder(col){
-    var wrap = $(col === 'good' ? 'diaryVoiceGood' : 'diaryVoiceWatch');
-    if (!wrap) return null;
-    var rec = {
-      col: col, wrap: wrap,
-      btn:      wrap.querySelector('.diary-voice-btn'),
-      txtEl:    wrap.querySelector('.diary-voice-txt'),
-      timeEl:   wrap.querySelector('.diary-voice-time'),
-      playerEl: wrap.querySelector('.diary-voice-player'),
-      audioEl:  wrap.querySelector('.diary-voice-audio'),
-      delEl:    wrap.querySelector('.diary-voice-del'),
-      mr: null, chunks: [], stream: null, timer: null, startTs: 0, mime: '',
-      pendingBlob: null, pendingMime: '', audioId: null, removed: false, previewUrl: null
-    };
-    if (!diaryVoiceSupported) { wrap.hidden = true; return rec; }
-    rec.btn.addEventListener('click', function(){
-      if (rec.btn.classList.contains('recording')) diaryVoiceStop(rec);
-      else diaryVoiceStart(rec);
-    });
-    rec.delEl.addEventListener('click', function(){
-      rec.pendingBlob = null;
-      if (rec.audioId) rec.removed = true;   /* mark saved audio for deletion on next save */
-      diaryVoiceClearPreview(rec);
-    });
-    return rec;
-  }
-  function diaryRecorderReset(rec){
-    if (!rec) return;
-    diaryVoiceStop(rec);
-    stopStream(rec);
-    rec.pendingBlob = null; rec.pendingMime = '';
-    rec.audioId = null; rec.removed = false;
-    diaryVoiceClearPreview(rec);
-  }
-  function diaryRecorderLoadExisting(rec, audioId){
-    if (!rec || !audioId) return;
-    rec.audioId = audioId;
-    rec.removed = false;
-    diaryAudioGet(audioId).then(function(recd){
-      if (recd && recd.blob) diaryVoiceSetPreview(rec, recd.blob);
-    }).catch(function(){});
-  }
-  /* Resolve which audio id to persist for a column at save time. */
-  function diaryResolveColumnAudio(profileId, rec){
-    if (!rec) return Promise.resolve(null);
-    if (rec.pendingBlob) {
-      var newId = uuid();
-      var oldId = rec.audioId;
-      return diaryAudioPut({
-        id: newId, profile_id: profileId, blob: rec.pendingBlob,
-        mime_type: rec.pendingMime || 'audio/webm', created_at: new Date().toISOString()
-      }).then(function(){
-        if (oldId && oldId !== newId) diaryAudioDelete(oldId);
-        rec.audioId = newId; rec.pendingBlob = null; rec.removed = false;
-        return newId;
-      });
-    }
-    if (rec.removed) {
-      var old = rec.audioId;
-      rec.audioId = null; rec.removed = false;
-      if (old) return diaryAudioDelete(old).then(function(){ return null; });
-      return Promise.resolve(null);
-    }
-    return Promise.resolve(rec.audioId || null);
-  }
-
-
   function formatDiaryDate(s){
     if (!s) return { pretty: '', weekday: '' };
     var d = new Date(s + 'T00:00:00');
@@ -806,63 +616,42 @@
     var today = todayISO();
     var past  = entries.filter(function(e){ return e.entry_date !== today; });
 
-    freeDiaryAudioUrls();
     if (!past.length) {
       feed.innerHTML = '<div class="diary-empty">Noch keine früheren Einträge. Fang heute an.</div>';
       return;
     }
-
-    var ids = [];
-    past.forEach(function(e){
-      if (e.good_audio_id)  ids.push(e.good_audio_id);
-      if (e.watch_audio_id) ids.push(e.watch_audio_id);
-    });
-
-    loadDiaryAudioUrls(ids).then(function(urls){
-      feed.innerHTML = past.map(function(r){
-        var d = formatDiaryDate(r.entry_date);
-        return '' +
-          '<div class="diary-entry">' +
-            '<div class="diary-entry-date">' + esc(d.pretty) +
-              '<span class="weekday">' + esc(d.weekday) + '</span>' +
+    feed.innerHTML = past.map(function(r){
+      var d     = formatDiaryDate(r.entry_date);
+      var good  = (r.good_text  || '').trim();
+      var watch = (r.watch_text || '').trim();
+      return '' +
+        '<div class="diary-entry">' +
+          '<div class="diary-entry-date">' + esc(d.pretty) +
+            '<span class="weekday">' + esc(d.weekday) + '</span>' +
+          '</div>' +
+          '<div class="diary-entry-cols">' +
+            '<div class="diary-entry-col good">' +
+              '<div class="diary-entry-col-label">Was lief gut</div>' +
+              '<div class="diary-entry-col-text' + (good ? '' : ' empty') + '">' +
+                esc(good || '— kein Eintrag —') +
+              '</div>' +
             '</div>' +
-            '<div class="diary-entry-cols">' +
-              diaryEntryColHtml('Was lief gut',  'good',  r.good_text,  r.good_audio_id,  urls) +
-              diaryEntryColHtml('Worauf achten', 'watch', r.watch_text, r.watch_audio_id, urls) +
+            '<div class="diary-entry-col watch">' +
+              '<div class="diary-entry-col-label">Worauf achten</div>' +
+              '<div class="diary-entry-col-text' + (watch ? '' : ' empty') + '">' +
+                esc(watch || '— kein Eintrag —') +
+              '</div>' +
             '</div>' +
-          '</div>';
-      }).join('');
-    });
-  }
-
-  function diaryEntryColHtml(label, cls, text, audioId, urls){
-    var t = (text || '').trim();
-    var audio = (audioId && urls[audioId])
-      ? '<audio class="diary-entry-audio" controls preload="metadata" src="' + esc(urls[audioId]) + '"></audio>'
-      : '';
-    var textHtml;
-    if (t)          textHtml = '<div class="diary-entry-col-text">' + esc(t) + '</div>';
-    else if (audio) textHtml = '';   /* audio-only entry — no placeholder needed */
-    else            textHtml = '<div class="diary-entry-col-text empty">— kein Eintrag —</div>';
-    return '<div class="diary-entry-col ' + cls + '">' +
-        '<div class="diary-entry-col-label">' + esc(label) + '</div>' +
-        textHtml + audio +
-      '</div>';
+          '</div>' +
+        '</div>';
+    }).join('');
   }
 
   function loadTodayDiary(profileId){
-    /* Clean slate — clears text and recorder state (e.g. after import). */
-    if ($('diaryGood'))  $('diaryGood').value  = '';
-    if ($('diaryWatch')) $('diaryWatch').value = '';
-    diaryRecorderReset(diaryRecorders.good);
-    diaryRecorderReset(diaryRecorders.watch);
-
     var today = diaryGetByDate(profileId, todayISO());
     if (!today) return;
     if (today.good_text)  $('diaryGood').value  = today.good_text;
     if (today.watch_text) $('diaryWatch').value = today.watch_text;
-    if (today.good_audio_id)  diaryRecorderLoadExisting(diaryRecorders.good,  today.good_audio_id);
-    if (today.watch_audio_id) diaryRecorderLoadExisting(diaryRecorders.watch, today.watch_audio_id);
   }
 
   function saveDiary(profileId){
@@ -870,82 +659,45 @@
     var status = $('diarySaveStatus');
     var good   = $('diaryGood').value.trim();
     var watch  = $('diaryWatch').value.trim();
-    var gRec   = diaryRecorders.good;
-    var wRec   = diaryRecorders.watch;
-
-    var gRecording = !!(gRec && gRec.btn && gRec.btn.classList.contains('recording'));
-    var wRecording = !!(wRec && wRec.btn && wRec.btn.classList.contains('recording'));
-    var hasGoodAudio  = !!(gRec && (gRec.pendingBlob || gRecording || (gRec.audioId && !gRec.removed)));
-    var hasWatchAudio = !!(wRec && (wRec.pendingBlob || wRecording || (wRec.audioId && !wRec.removed)));
-
-    if (!good && !watch && !hasGoodAudio && !hasWatchAudio) {
-      status.textContent = 'Schreib oder sprich zuerst etwas auf.';
+    if (!good && !watch) {
+      status.textContent = 'Schreib zuerst etwas auf.';
       status.classList.add('show', 'error');
       setTimeout(function(){ status.classList.remove('show', 'error'); }, 2200);
       return;
     }
-
-    /* If a recording is still running, stop it so its audio is captured. */
-    if (gRecording) diaryVoiceStop(gRec);
-    if (wRecording) diaryVoiceStop(wRec);
-
     btn.disabled = true;
     status.classList.remove('error');
     status.textContent = 'Speichere…';
     status.classList.add('show');
 
-    /* Small delay lets a just-stopped recorder assemble its blob. */
-    setTimeout(function(){
-      Promise.all([
-        diaryResolveColumnAudio(profileId, gRec),
-        diaryResolveColumnAudio(profileId, wRec)
-      ]).then(function(ids){
-        diaryUpsert(profileId, {
-          entry_date:     todayISO(),
-          good_text:      good  || null,
-          watch_text:     watch || null,
-          good_audio_id:  ids[0] || null,
-          watch_audio_id: ids[1] || null,
-          updated_at:     new Date().toISOString()
-        });
-        status.textContent = 'Gespeichert.';
-        setTimeout(function(){ status.classList.remove('show'); }, 1800);
-        renderDiaryFeed(profileId);
-      }).catch(function(err){
-        console.error('[T7 Home] diary save', err);
-        status.textContent = 'Speichern fehlgeschlagen.';
-        status.classList.add('error');
-      }).then(function(){ btn.disabled = false; });
-    }, (gRecording || wRecording) ? 180 : 0);
+    try {
+      diaryUpsert(profileId, {
+        entry_date: todayISO(),
+        good_text:  good  || null,
+        watch_text: watch || null,
+        updated_at: new Date().toISOString()
+      });
+      status.textContent = 'Gespeichert.';
+      setTimeout(function(){ status.classList.remove('show'); }, 1800);
+      renderDiaryFeed(profileId);
+    } catch(err) {
+      console.error('[T7 Home] diary save', err);
+      status.textContent = 'Speichern fehlgeschlagen.';
+      status.classList.add('error');
+    }
+    btn.disabled = false;
   }
 
-  /* Export / Import — bundles the voice notes as base64 so a backup
-     is self-contained and can be moved to another device. */
+  /* Export / Import */
   function diaryExport(profileId){
-    var entries = diaryRead(profileId);
-    var uniq = {};
-    entries.forEach(function(e){
-      if (e.good_audio_id)  uniq[e.good_audio_id]  = true;
-      if (e.watch_audio_id) uniq[e.watch_audio_id] = true;
-    });
-    return Promise.all(Object.keys(uniq).map(function(id){
-      return diaryAudioGet(id).then(function(rec){
-        if (!rec || !rec.blob) return null;
-        return blobToB64(rec.blob).then(function(b64){
-          return { id: id, mime_type: rec.mime_type || 'audio/webm', b64: b64 };
-        });
-      }).catch(function(){ return null; });
-    })).then(function(audioList){
-      var data = {
-        kind:        't7-academy-diary',
-        version:     2,
-        exported_at: new Date().toISOString(),
-        entries:     entries,
-        audio:       audioList.filter(Boolean)
-      };
-      downloadJson(data, 't7-tagebuch-' + todayISO() + '.json');
-      return entries.length;
-    });
+    var data = {
+      kind:        't7-academy-diary',
+      version:     1,
+      exported_at: new Date().toISOString(),
+      entries:     diaryRead(profileId)
+    };
+    downloadJson(data, 't7-tagebuch-' + todayISO() + '.json');
+    return data.entries.length;
   }
 
   function diaryImport(profileId, file){
@@ -953,40 +705,26 @@
       if (!data || data.kind !== 't7-academy-diary' || !Array.isArray(data.entries)) {
         throw new Error('invalid file');
       }
-      /* Restore voice notes first so entries that reference them work. */
-      var audioArr = Array.isArray(data.audio) ? data.audio : [];
-      return Promise.all(audioArr.map(function(a){
-        if (!a || !a.id || !a.b64) return null;
-        var blob = b64ToBlob(a.b64, a.mime_type || 'audio/webm');
-        return diaryAudioPut({
-          id: a.id, profile_id: profileId, blob: blob,
-          mime_type: a.mime_type || 'audio/webm', created_at: new Date().toISOString()
-        });
-      })).then(function(){
-        /* Merge entries: newer updated_at wins; otherwise keep current. */
-        var existing = diaryRead(profileId);
-        var byDate = {};
-        existing.forEach(function(e){ byDate[e.entry_date] = e; });
-        data.entries.forEach(function(e){
-          if (!e || !e.entry_date) return;
-          var cur = byDate[e.entry_date];
-          var incomingTime = e.updated_at || '';
-          var currentTime  = cur && cur.updated_at || '';
-          if (!cur || incomingTime > currentTime) byDate[e.entry_date] = e;
-        });
-        var merged = Object.keys(byDate).map(function(k){ return byDate[k]; })
-          .sort(function(a, b){ return (b.entry_date || '').localeCompare(a.entry_date || ''); });
-        diaryWrite(profileId, merged);
-        return merged.length;
+      /* Merge: newer updated_at wins; entries with no updated_at
+         only overwrite if no current entry exists for that date. */
+      var existing = diaryRead(profileId);
+      var byDate = {};
+      existing.forEach(function(e){ byDate[e.entry_date] = e; });
+      data.entries.forEach(function(e){
+        if (!e || !e.entry_date) return;
+        var cur = byDate[e.entry_date];
+        var incomingTime = e.updated_at || '';
+        var currentTime  = cur && cur.updated_at || '';
+        if (!cur || incomingTime > currentTime) byDate[e.entry_date] = e;
       });
+      var merged = Object.keys(byDate).map(function(k){ return byDate[k]; })
+        .sort(function(a, b){ return (b.entry_date || '').localeCompare(a.entry_date || ''); });
+      diaryWrite(profileId, merged);
+      return merged.length;
     });
   }
 
   function initDiary(profileId){
-    /* Build the voice recorders before loading today's entry. */
-    diaryRecorders.good  = makeDiaryRecorder('good');
-    diaryRecorders.watch = makeDiaryRecorder('watch');
-
     var dateEl = $('diaryDate');
     if (dateEl) {
       var d = formatDiaryDate(todayISO());
@@ -999,15 +737,13 @@
     /* Export / Import wiring */
     var status = $('diaryActionsStatus');
     $('diaryExportBtn').addEventListener('click', function(){
-      var btn = $('diaryExportBtn');
-      btn.disabled = true;
-      setStatus(status, 'Sichere…');
-      diaryExport(profileId).then(function(n){
+      try {
+        var n = diaryExport(profileId);
         setStatus(status, n + ' Einträge gespeichert', 'ok');
-      }).catch(function(e){
+      } catch(e) {
         console.error('[T7 Home] diary export', e);
         setStatus(status, 'Export fehlgeschlagen', 'error');
-      }).then(function(){ btn.disabled = false; });
+      }
     });
     var importInput = $('diaryImportInput');
     $('diaryImportBtn').addEventListener('click', function(){ importInput.click(); });
@@ -1126,7 +862,7 @@
         '<div class="goal-entry' + (done ? ' done' : '') + '" data-id="' + esc(g.id) + '">' +
           '<div class="goal-cell goal-cell-goal">' +
             '<div class="goal-cell-label">Ziel</div>' +
-            '<div class="goal-text">' + (done ? '<span class="goal-check">\u2713</span>' : '') + esc(g.goal_text || '') + '</div>' +
+            '<div class="goal-text">' + esc(g.goal_text || '') + '</div>' +
           '</div>' +
           '<div class="goal-cell goal-cell-when">' +
             '<div class="goal-cell-label">Bis wann</div>' +
@@ -1285,13 +1021,9 @@
         if (!db.objectStoreNames.contains(CLIPS_STORE)) {
           db.createObjectStore(CLIPS_STORE, { keyPath: 'id' });
         }
-        if (!db.objectStoreNames.contains(DIARY_AUDIO_STORE)) {
-          db.createObjectStore(DIARY_AUDIO_STORE, { keyPath: 'id' });
-        }
       };
       req.onsuccess = function(){ resolve(req.result); };
       req.onerror   = function(){ reject(req.error); };
-      req.onblocked = function(){ console.warn('[T7 Home] IndexedDB upgrade blocked — close other tabs.'); };
     });
   }
 
