@@ -666,24 +666,56 @@
     rec.playerEl.hidden = true;
     rec.txtEl.textContent = 'Sprachnotiz aufnehmen';
   }
+  /* Pick a container/codec the browser can actually record.  Safari
+     only supports audio/mp4 (AAC); Chrome/Edge/Firefox use WebM/Opus.
+     Ordering mp4 first lets Safari succeed while others fall through. */
+  function pickAudioMime(){
+    if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return '';
+    var cands = ['audio/mp4', 'audio/aac', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg'];
+    for (var i = 0; i < cands.length; i++) {
+      try { if (MediaRecorder.isTypeSupported(cands[i])) return cands[i]; } catch(e){}
+    }
+    return '';
+  }
+
   function diaryVoiceStart(rec){
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Aufnahme wird von diesem Browser nicht unterstützt. Bitte tippe deinen Eintrag.');
+      return;
+    }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream){
       rec.stream = stream;
       rec.chunks = [];
+      var mime = pickAudioMime();
       var mr;
-      try { mr = new MediaRecorder(stream); } catch(e){ mr = new MediaRecorder(stream, {}); }
+      try {
+        mr = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      } catch(e1){
+        try { mr = new MediaRecorder(stream); }
+        catch(e2){
+          console.error('[T7 Home] MediaRecorder unsupported', e2);
+          alert('Aufnahme wird von diesem Browser nicht unterstützt. Bitte tippe deinen Eintrag.');
+          stopStream(rec);
+          return;
+        }
+      }
       rec.mr = mr;
-      rec.mime = mr.mimeType || 'audio/webm';
+      rec.chosenMime = mime;
       mr.ondataavailable = function(e){ if (e.data && e.data.size) rec.chunks.push(e.data); };
+      mr.onerror = function(ev){ console.error('[T7 Home] recorder error', ev && ev.error); };
       mr.onstop = function(){
-        var blob = new Blob(rec.chunks, { type: rec.mime });
+        var type = (rec.mr && rec.mr.mimeType) ||
+                   (rec.chunks[0] && rec.chunks[0].type) ||
+                   rec.chosenMime || 'audio/mp4';
+        var blob = new Blob(rec.chunks, { type: type });
         rec.pendingBlob = blob;
-        rec.pendingMime = rec.mime;
+        rec.pendingMime = type;
         rec.removed = false;
-        diaryVoiceSetPreview(rec, blob);
+        if (blob.size) diaryVoiceSetPreview(rec, blob);
         stopStream(rec);
       };
-      mr.start();
+      /* A timeslice makes Safari emit data reliably. */
+      try { mr.start(1000); } catch(e3){ try { mr.start(); } catch(e4){ console.error('[T7 Home] start', e4); } }
       rec.startTs = Date.now();
       rec.btn.classList.add('recording');
       rec.txtEl.textContent = 'Stopp';
@@ -695,7 +727,15 @@
       }, 250);
     }).catch(function(err){
       console.error('[T7 Home] mic', err);
-      alert('Mikrofon nicht verfügbar. Bitte erlaube den Zugriff — oder tippe deinen Eintrag.');
+      var name = err && err.name;
+      var msg;
+      if (name === 'NotAllowedError' || name === 'SecurityError')
+        msg = 'Der Zugriff aufs Mikrofon wurde blockiert. Erlaube das Mikrofon in den Browser-Einstellungen (bei Safari: Einstellungen › Websites › Mikrofon) — oder tippe deinen Eintrag.';
+      else if (name === 'NotFoundError' || name === 'DevicesNotFoundError')
+        msg = 'Es wurde kein Mikrofon gefunden. Bitte tippe deinen Eintrag.';
+      else
+        msg = 'Mikrofon nicht verfügbar. Bitte tippe deinen Eintrag.';
+      alert(msg);
     });
   }
   function diaryVoiceStop(rec){
@@ -704,18 +744,18 @@
     if (rec.timer) { clearInterval(rec.timer); rec.timer = null; }
     rec.timeEl.hidden = true;
   }
-  function makeDiaryRecorder(col){
+  function makeDiaryRecorder(col, profileId){
     var wrap = $(col === 'good' ? 'diaryVoiceGood' : 'diaryVoiceWatch');
     if (!wrap) return null;
     var rec = {
-      col: col, wrap: wrap,
+      col: col, wrap: wrap, profileId: profileId,
       btn:      wrap.querySelector('.diary-voice-btn'),
       txtEl:    wrap.querySelector('.diary-voice-txt'),
       timeEl:   wrap.querySelector('.diary-voice-time'),
       playerEl: wrap.querySelector('.diary-voice-player'),
       audioEl:  wrap.querySelector('.diary-voice-audio'),
       delEl:    wrap.querySelector('.diary-voice-del'),
-      mr: null, chunks: [], stream: null, timer: null, startTs: 0, mime: '',
+      mr: null, chunks: [], stream: null, timer: null, startTs: 0, chosenMime: '',
       pendingBlob: null, pendingMime: '', audioId: null, removed: false, previewUrl: null
     };
     if (!diaryVoiceSupported) { wrap.hidden = true; return rec; }
@@ -724,9 +764,24 @@
       else diaryVoiceStart(rec);
     });
     rec.delEl.addEventListener('click', function(){
-      rec.pendingBlob = null;
-      if (rec.audioId) rec.removed = true;   /* mark saved audio for deletion on next save */
-      diaryVoiceClearPreview(rec);
+      if (rec.pendingBlob) {
+        /* Unsaved take — just drop it. */
+        rec.pendingBlob = null;
+        rec.removed = false;
+        diaryVoiceClearPreview(rec);
+        return;
+      }
+      if (rec.audioId) {
+        /* Already saved — delete now so it actually sticks, no
+           separate save needed. */
+        if (!confirm('Diese Aufnahme wirklich löschen?')) return;
+        rec.audioId = null;
+        rec.removed = false;
+        diaryVoiceClearPreview(rec);
+        removeDiaryAudioFromEntry(rec.profileId, todayISO(), rec.col);
+      } else {
+        diaryVoiceClearPreview(rec);
+      }
     });
     return rec;
   }
@@ -768,6 +823,29 @@
       return Promise.resolve(null);
     }
     return Promise.resolve(rec.audioId || null);
+  }
+
+  /* Remove a saved voice note from an entry immediately (used by the
+     delete buttons in both the input area and the feed).  If the entry
+     is left completely empty, it's dropped. */
+  function removeDiaryAudioFromEntry(profileId, entryDate, col){
+    var field = col === 'good' ? 'good_audio_id' : 'watch_audio_id';
+    var entries = diaryRead(profileId);
+    var delId = null;
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].entry_date !== entryDate) continue;
+      var e = entries[i];
+      delId = e[field] || null;
+      e[field] = null;
+      e.updated_at = new Date().toISOString();
+      var empty = !(e.good_text || '').trim() && !(e.watch_text || '').trim() &&
+                  !e.good_audio_id && !e.watch_audio_id;
+      if (empty) entries.splice(i, 1);
+      break;
+    }
+    if (delId) diaryAudioDelete(delId);
+    diaryWrite(profileId, entries);
+    renderDiaryFeed(profileId);
   }
 
 
@@ -827,23 +905,34 @@
               '<span class="weekday">' + esc(d.weekday) + '</span>' +
             '</div>' +
             '<div class="diary-entry-cols">' +
-              diaryEntryColHtml('Was lief gut',  'good',  r.good_text,  r.good_audio_id,  urls) +
-              diaryEntryColHtml('Worauf achten', 'watch', r.watch_text, r.watch_audio_id, urls) +
+              diaryEntryColHtml('Was lief gut',  'good',  r.good_text,  r.good_audio_id,  urls, r.entry_date) +
+              diaryEntryColHtml('Worauf achten', 'watch', r.watch_text, r.watch_audio_id, urls, r.entry_date) +
             '</div>' +
           '</div>';
       }).join('');
+
+      Array.prototype.forEach.call(feed.querySelectorAll('.diary-entry-audio-del'), function(b){
+        b.addEventListener('click', function(){
+          if (!confirm('Diese Aufnahme wirklich löschen?')) return;
+          removeDiaryAudioFromEntry(profileId, b.dataset.date, b.dataset.col);
+        });
+      });
     });
   }
 
-  function diaryEntryColHtml(label, cls, text, audioId, urls){
+  function diaryEntryColHtml(label, cls, text, audioId, urls, entryDate){
     var t = (text || '').trim();
-    var audio = (audioId && urls[audioId])
-      ? '<audio class="diary-entry-audio" controls preload="metadata" src="' + esc(urls[audioId]) + '"></audio>'
+    var hasAudio = !!(audioId && urls[audioId]);
+    var audio = hasAudio
+      ? '<div class="diary-entry-audio-wrap">' +
+          '<audio class="diary-entry-audio" controls preload="metadata" src="' + esc(urls[audioId]) + '"></audio>' +
+          '<button type="button" class="diary-entry-audio-del" data-date="' + esc(entryDate) + '" data-col="' + esc(cls) + '" title="Aufnahme löschen" aria-label="Aufnahme löschen">✕</button>' +
+        '</div>'
       : '';
     var textHtml;
-    if (t)          textHtml = '<div class="diary-entry-col-text">' + esc(t) + '</div>';
-    else if (audio) textHtml = '';   /* audio-only entry — no placeholder needed */
-    else            textHtml = '<div class="diary-entry-col-text empty">— kein Eintrag —</div>';
+    if (t)             textHtml = '<div class="diary-entry-col-text">' + esc(t) + '</div>';
+    else if (hasAudio) textHtml = '';   /* audio-only entry — no placeholder needed */
+    else               textHtml = '<div class="diary-entry-col-text empty">— kein Eintrag —</div>';
     return '<div class="diary-entry-col ' + cls + '">' +
         '<div class="diary-entry-col-label">' + esc(label) + '</div>' +
         textHtml + audio +
@@ -984,8 +1073,8 @@
 
   function initDiary(profileId){
     /* Build the voice recorders before loading today's entry. */
-    diaryRecorders.good  = makeDiaryRecorder('good');
-    diaryRecorders.watch = makeDiaryRecorder('watch');
+    diaryRecorders.good  = makeDiaryRecorder('good', profileId);
+    diaryRecorders.watch = makeDiaryRecorder('watch', profileId);
 
     var dateEl = $('diaryDate');
     if (dateEl) {
