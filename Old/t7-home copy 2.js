@@ -58,7 +58,6 @@
   /* Local storage keys & IDB names — namespaced per profile so two
      players on the same device don't see each other's data. */
   var DIARY_KEY_PREFIX = 't7_diary_v1__';   // + profileId (or 'anon')
-  var GOALS_KEY_PREFIX = 't7_goals_v1__';   // + profileId (or 'anon')
   var IDB_NAME         = 't7-academy';
   var IDB_VERSION      = 1;
   var CLIPS_STORE      = 'clips';           // keyPath 'id'; index 'profile_id'
@@ -239,8 +238,6 @@
     if (myvidsOpen) myvidsOpen.addEventListener('click', function(){ openHomeModal('myvidsModal'); });
     var diaryOpen = $('diaryCardOpen');
     if (diaryOpen) diaryOpen.addEventListener('click', function(){ openHomeModal('diaryModal'); });
-    var goalsOpen = $('goalsCardOpen');
-    if (goalsOpen) goalsOpen.addEventListener('click', function(){ openHomeModal('goalsModal'); });
 
     document.addEventListener('keydown', function(e){
       if (e.key === 'Escape' && openHomeModalEl) closeHomeModal(openHomeModalEl);
@@ -763,251 +760,6 @@
 
 
   /* ============================================================
-     MEINE ZIELE  →  localStorage
-     Key:    t7_goals_v1__{profileId|anon}
-     Shape:  [{ id, goal_text, due_date, progress, created_at, updated_at }, …]
-     Local-only — same GDPR treatment as the diary.  Three columns:
-     Ziel / Bis wann / Fortschritt.  Each saved goal keeps an inline
-     progress control so it can be updated over time.
-  ============================================================ */
-  function goalsKey(profileId){
-    return GOALS_KEY_PREFIX + (profileId || 'anon');
-  }
-  function goalsRead(profileId){
-    try { return JSON.parse(localStorage.getItem(goalsKey(profileId))) || []; }
-    catch(e){ return []; }
-  }
-  function goalsWrite(profileId, goals){
-    localStorage.setItem(goalsKey(profileId), JSON.stringify(goals));
-  }
-  /* Incomplete goals first (soonest deadline first), completed last. */
-  function goalsSorted(goals){
-    return goals.slice().sort(function(a, b){
-      var ac = Number(a.progress || 0) >= 100;
-      var bc = Number(b.progress || 0) >= 100;
-      if (ac !== bc) return ac ? 1 : -1;
-      var ad = a.due_date || '9999-12-31';
-      var bd = b.due_date || '9999-12-31';
-      if (ad !== bd) return ad < bd ? -1 : 1;
-      return (b.created_at || '').localeCompare(a.created_at || '');
-    });
-  }
-  function goalsAdd(profileId, goal){
-    var goals = goalsRead(profileId);
-    goals.push(goal);
-    goalsWrite(profileId, goals);
-  }
-  function goalsSetProgress(profileId, id, progress){
-    var goals = goalsRead(profileId);
-    for (var i = 0; i < goals.length; i++) {
-      if (goals[i].id === id) {
-        goals[i].progress   = progress;
-        goals[i].updated_at = new Date().toISOString();
-        break;
-      }
-    }
-    goalsWrite(profileId, goals);
-  }
-  function goalsDelete(profileId, id){
-    goalsWrite(profileId, goalsRead(profileId).filter(function(g){ return g.id !== id; }));
-  }
-
-  function formatGoalDate(s){
-    if (!s) return '';
-    var d = new Date(s + 'T00:00:00');
-    if (isNaN(d)) return s;
-    var months = ['Jan.','Feb.','März','Apr.','Mai','Juni','Juli','Aug.','Sept.','Okt.','Nov.','Dez.'];
-    return d.getDate() + '. ' + months[d.getMonth()] + ' ' + d.getFullYear();
-  }
-
-  /* Teaser subtitle on the collapsed "Meine Ziele" card. */
-  function updateGoalsTeaser(goals){
-    var el = $('goalsTeaserSub');
-    if (!el) return;
-    if (!goals.length) {
-      el.textContent = 'Noch keine Ziele — setz dir dein erstes.';
-      return;
-    }
-    var done = goals.filter(function(g){ return Number(g.progress || 0) >= 100; }).length;
-    el.textContent = goals.length + (goals.length === 1 ? ' Ziel' : ' Ziele') + ' · ' + done + ' erreicht';
-  }
-
-  var GOAL_STEPS = [0, 25, 50, 75, 100];
-  function goalProgressSelect(id, current){
-    var opts = GOAL_STEPS.map(function(v){
-      return '<option value="' + v + '"' + (v === current ? ' selected' : '') + '>' + v + ' %</option>';
-    }).join('');
-    return '<select class="goal-prog-set" data-id="' + esc(id) + '" aria-label="Fortschritt ändern">' + opts + '</select>';
-  }
-
-  function renderGoalsFeed(profileId){
-    var feed = $('goalsFeed');
-    if (!feed) return;
-    var goals = goalsSorted(goalsRead(profileId));
-    updateGoalsTeaser(goals);
-
-    if (!goals.length) {
-      feed.innerHTML = '<div class="goals-empty">Noch keine Ziele. Setz dir dein erstes und verfolge, wie du näher kommst.</div>';
-      return;
-    }
-
-    var today = todayISO();
-    feed.innerHTML = goals.map(function(g){
-      var progress = Math.max(0, Math.min(100, Number(g.progress || 0)));
-      var done     = progress >= 100;
-      var overdue  = g.due_date && g.due_date < today && !done;
-      var whenText = g.due_date ? formatGoalDate(g.due_date) : '— offen —';
-      var whenCls  = 'goal-when' + (g.due_date ? (overdue ? ' overdue' : '') : ' none');
-      return '' +
-        '<div class="goal-entry' + (done ? ' done' : '') + '" data-id="' + esc(g.id) + '">' +
-          '<div class="goal-cell goal-cell-goal">' +
-            '<div class="goal-cell-label">Ziel</div>' +
-            '<div class="goal-text">' + esc(g.goal_text || '') + '</div>' +
-          '</div>' +
-          '<div class="goal-cell goal-cell-when">' +
-            '<div class="goal-cell-label">Bis wann</div>' +
-            '<div class="' + whenCls + '">' + esc(whenText) + (overdue ? ' \u26A0' : '') + '</div>' +
-          '</div>' +
-          '<div class="goal-cell goal-cell-prog">' +
-            '<div class="goal-cell-label">Fortschritt</div>' +
-            '<div class="goal-prog">' +
-              '<div class="goal-prog-top">' +
-                '<span class="goal-prog-pct">' + progress + ' %</span>' +
-                goalProgressSelect(g.id, progress) +
-              '</div>' +
-              '<div class="po-bar"><div class="po-bar-fill green" style="width:' + progress + '%"></div></div>' +
-            '</div>' +
-          '</div>' +
-          '<button class="goal-del" data-id="' + esc(g.id) + '" title="Ziel löschen">\u2715</button>' +
-        '</div>';
-    }).join('');
-
-    Array.prototype.forEach.call(feed.querySelectorAll('.goal-prog-set'), function(sel){
-      sel.addEventListener('change', function(){
-        goalsSetProgress(profileId, sel.dataset.id, Number(sel.value));
-        renderGoalsFeed(profileId);
-      });
-    });
-    Array.prototype.forEach.call(feed.querySelectorAll('.goal-del'), function(b){
-      b.addEventListener('click', function(){
-        if (!confirm('Dieses Ziel wirklich löschen?')) return;
-        goalsDelete(profileId, b.dataset.id);
-        renderGoalsFeed(profileId);
-      });
-    });
-  }
-
-  function saveGoal(profileId){
-    var btn    = $('goalSave');
-    var status = $('goalSaveStatus');
-    var text   = $('goalText').value.trim();
-    var when   = $('goalWhen').value || null;
-    var prog   = Number($('goalProgress').value || 0);
-    if (!text) {
-      status.textContent = 'Schreib zuerst ein Ziel auf.';
-      status.classList.add('show', 'error');
-      setTimeout(function(){ status.classList.remove('show', 'error'); }, 2200);
-      return;
-    }
-    btn.disabled = true;
-    status.classList.remove('error');
-    status.textContent = 'Speichere…';
-    status.classList.add('show');
-
-    try {
-      var now = new Date().toISOString();
-      goalsAdd(profileId, {
-        id:         uuid(),
-        goal_text:  text,
-        due_date:   when,
-        progress:   prog,
-        created_at: now,
-        updated_at: now
-      });
-      $('goalText').value     = '';
-      $('goalWhen').value     = '';
-      $('goalProgress').value = '0';
-      status.textContent = 'Hinzugefügt.';
-      setTimeout(function(){ status.classList.remove('show'); }, 1800);
-      renderGoalsFeed(profileId);
-    } catch(err) {
-      console.error('[T7 Home] goal save', err);
-      status.textContent = 'Speichern fehlgeschlagen.';
-      status.classList.add('error');
-    }
-    btn.disabled = false;
-  }
-
-  /* Export / Import */
-  function goalsExport(profileId){
-    var data = {
-      kind:        't7-academy-goals',
-      version:     1,
-      exported_at: new Date().toISOString(),
-      goals:       goalsRead(profileId)
-    };
-    downloadJson(data, 't7-ziele-' + todayISO() + '.json');
-    return data.goals.length;
-  }
-
-  function goalsImport(profileId, file){
-    return readJsonFile(file).then(function(data){
-      if (!data || data.kind !== 't7-academy-goals' || !Array.isArray(data.goals)) {
-        throw new Error('invalid file');
-      }
-      /* Merge by id: newer updated_at wins; unknown ids are added. */
-      var existing = goalsRead(profileId);
-      var byId = {};
-      existing.forEach(function(g){ if (g && g.id) byId[g.id] = g; });
-      data.goals.forEach(function(g){
-        if (!g || !g.id) return;
-        var cur = byId[g.id];
-        var incomingTime = g.updated_at || '';
-        var currentTime  = cur && cur.updated_at || '';
-        if (!cur || incomingTime > currentTime) byId[g.id] = g;
-      });
-      var merged = Object.keys(byId).map(function(k){ return byId[k]; });
-      goalsWrite(profileId, merged);
-      return merged.length;
-    });
-  }
-
-  function initGoals(profileId){
-    renderGoalsFeed(profileId);
-    var save = $('goalSave');
-    if (save) save.addEventListener('click', function(){ saveGoal(profileId); });
-
-    var status = $('goalsActionsStatus');
-    var exportBtn = $('goalsExportBtn');
-    if (exportBtn) exportBtn.addEventListener('click', function(){
-      try {
-        var n = goalsExport(profileId);
-        setStatus(status, n + (n === 1 ? ' Ziel gesichert' : ' Ziele gesichert'), 'ok');
-      } catch(e) {
-        console.error('[T7 Home] goals export', e);
-        setStatus(status, 'Export fehlgeschlagen', 'error');
-      }
-    });
-    var importInput = $('goalsImportInput');
-    var importBtn   = $('goalsImportBtn');
-    if (importBtn && importInput) {
-      importBtn.addEventListener('click', function(){ importInput.click(); });
-      importInput.addEventListener('change', function(){
-        var f = importInput.files && importInput.files[0];
-        if (!f) return;
-        goalsImport(profileId, f).then(function(n){
-          setStatus(status, n + (n === 1 ? ' Ziel wiederhergestellt' : ' Ziele wiederhergestellt'), 'ok');
-          renderGoalsFeed(profileId);
-        }).catch(function(err){
-          console.error('[T7 Home] goals import', err);
-          setStatus(status, 'Ungültige Datei', 'error');
-        }).then(function(){ importInput.value = ''; });
-      });
-    }
-  }
-
-
-  /* ============================================================
      CLIPS  →  IndexedDB
      DB:     t7-academy
      Store:  clips  (keyPath: 'id')
@@ -1450,7 +1202,6 @@
       initProgress(profileId);
       initMyVideos(profileId);
       initDiary(profileId);
-      initGoals(profileId);
     });
   }
 
@@ -1465,7 +1216,6 @@
     reloadProgress: function(){ if (currentProfileId) initProgress(currentProfileId); },
     reloadClips:    function(){ if (currentProfileId) renderClips(currentProfileId); },
     reloadDiary:    function(){ if (currentProfileId) renderDiaryFeed(currentProfileId); },
-    reloadGoals:    function(){ if (currentProfileId) renderGoalsFeed(currentProfileId); },
     reloadNews:     loadNews
   };
 })();

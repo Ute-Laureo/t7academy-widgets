@@ -59,17 +59,19 @@
       </div>
     </div>
 
-    <!-- Sterne-Zertifikat — fed from player_stats.stars by renderCerts() -->
-    <div class="home-hero-stars" aria-label="Dein Sterne-Zertifikat">
-      <div class="home-hero-stars-eye">Dein Sterne-Zertifikat</div>
-      <div class="home-hero-stars-big">
-        <span class="home-hero-stars-num" id="hero-stars-num">0</span>
-        <span class="home-hero-stars-icon">★</span>
+    <!-- Profilbild — moved up from the sidebar into the hero.
+         Still the same avatar uploader (avatarSide / avatarInput …),
+         just given a hero-scaled treatment. -->
+    <div class="home-hero-avatar" aria-label="Dein Profilbild">
+      <div class="home-hero-avatar-eye">Dein Profilbild</div>
+      <div class="home-avatar-side" id="avatarSide" role="button" tabindex="0"
+           aria-label="Profilbild hochladen oder ersetzen">
+        <input type="file" id="avatarInput" accept="image/*" hidden>
+        <div class="home-avatar-side-img" id="avatarSideImg">
+          <span class="home-avatar-side-placeholder">+</span>
+        </div>
+        <button class="home-avatar-side-cta" id="avatarSideCta" type="button">Bild hochladen</button>
       </div>
-      <div class="home-hero-stars-row" id="hero-stars-row" aria-hidden="true">
-        <span class="s">★</span><span class="s">★</span><span class="s">★</span><span class="s">★</span><span class="s">★</span>
-      </div>
-      <div class="home-hero-stars-sub" id="hero-stars-sub">Lade…</div>
     </div>
   </div>
 </section>
@@ -134,41 +136,53 @@
     </section>
 
 
-    <!-- MEINE AUFNAHMEN — teaser card; opens the full local-drive
-         video repository (IndexedDB, no cloud) in a modal. -->
+    <!-- NUR FÜR MICH — "Meine eigene Analyse".  Three teaser cards
+         side by side: Meine Ziele (new), Mein Tagebuch, Meine
+         Aufnahmen.  Each opens its full feature in a modal below.
+         All three are local-only (no cloud) and offer download /
+         upload backup inside their opened card. -->
     <section class="home-block">
-      <div class="lp-eye">Meine Aufnahmen</div>
-      <h2 class="lp-title">Dein letztes <em class="accent">Match</em>. Dein letztes <em class="accent">Training</em>.</h2>
-      <p class="lp-sub">Sammle beliebig viele Videos an einem Ort. Bleibt auf diesem Gerät.</p>
+      <div class="lp-eye">Nur für mich</div>
+      <h2 class="lp-title">Meine eigene <em class="accent">Analyse</em>.</h2>
+      <p class="lp-sub">Deine Ziele, deine Gedanken, deine Videos — alles an einem Ort und nur auf diesem Gerät.</p>
 
-      <button class="home-card-teaser" id="myvidsCardOpen" type="button"
-              aria-haspopup="dialog" aria-controls="myvidsModal">
-        <div class="home-card-teaser-icon">🎬</div>
-        <div class="home-card-teaser-body">
-          <div class="home-card-teaser-h">Meine Video-Sammlung</div>
-          <div class="home-card-teaser-sub" id="myvidsTeaserSub">Lade…</div>
-        </div>
-        <div class="home-card-teaser-cta">Öffnen</div>
-      </button>
-    </section>
+      <div class="home-analyse-grid">
 
+        <!-- MEINE ZIELE (new) — 3-Spalten-Liste (Ziel / Bis wann /
+             Fortschritt), lokal, mit Sichern & Wiederherstellen. -->
+        <button class="home-card-teaser home-card-teaser-v" id="goalsCardOpen" type="button"
+                aria-haspopup="dialog" aria-controls="goalsModal">
+          <div class="home-card-teaser-icon">🎯</div>
+          <div class="home-card-teaser-body">
+            <div class="home-card-teaser-h">Meine Ziele</div>
+            <div class="home-card-teaser-sub" id="goalsTeaserSub">Lade…</div>
+          </div>
+          <div class="home-card-teaser-cta">Öffnen</div>
+        </button>
 
-    <!-- TAGEBUCH — teaser card; opens the full journal
-         (localStorage, no cloud) in a modal. -->
-    <section class="home-block">
-      <div class="lp-eye">Mein Tagebuch</div>
-      <h2 class="lp-title">Was lief <em class="gold">gut</em>? Worauf <em>achten</em>?</h2>
-      <p class="lp-sub">Tore zählen — aber auch ein guter Pass, eine schnelle Entscheidung, ein Trick im Spiel.</p>
+        <!-- MEIN TAGEBUCH -->
+        <button class="home-card-teaser home-card-teaser-v" id="diaryCardOpen" type="button"
+                aria-haspopup="dialog" aria-controls="diaryModal">
+          <div class="home-card-teaser-icon">📓</div>
+          <div class="home-card-teaser-body">
+            <div class="home-card-teaser-h">Mein Tagebuch</div>
+            <div class="home-card-teaser-sub" id="diaryTeaserSub">Lade…</div>
+          </div>
+          <div class="home-card-teaser-cta">Öffnen</div>
+        </button>
 
-      <button class="home-card-teaser" id="diaryCardOpen" type="button"
-              aria-haspopup="dialog" aria-controls="diaryModal">
-        <div class="home-card-teaser-icon">📓</div>
-        <div class="home-card-teaser-body">
-          <div class="home-card-teaser-h">Mein Tagebuch</div>
-          <div class="home-card-teaser-sub" id="diaryTeaserSub">Lade…</div>
-        </div>
-        <div class="home-card-teaser-cta">Öffnen</div>
-      </button>
+        <!-- MEINE AUFNAHMEN -->
+        <button class="home-card-teaser home-card-teaser-v" id="myvidsCardOpen" type="button"
+                aria-haspopup="dialog" aria-controls="myvidsModal">
+          <div class="home-card-teaser-icon">🎬</div>
+          <div class="home-card-teaser-body">
+            <div class="home-card-teaser-h">Meine Aufnahmen</div>
+            <div class="home-card-teaser-sub" id="myvidsTeaserSub">Lade…</div>
+          </div>
+          <div class="home-card-teaser-cta">Öffnen</div>
+        </button>
+
+      </div>
     </section>
 
   </main>
@@ -176,18 +190,22 @@
 
   <aside class="home-side">
 
-    <!-- PROFILBILD (sidebar uploader) -->
+    <!-- STERNE-ZERTIFIKAT (moved down from the hero) — sits at the
+         top of the sidebar, level with "Mein Fortschritt".  Fed from
+         player_stats.stars by renderCerts(); IDs unchanged. -->
     <section class="home-block home-block-side">
-      <div class="lp-eye">Profilbild</div>
-      <h2 class="lp-title home-block-title-sm">Du.</h2>
+      <div class="lp-eye">Sterne-Zertifikat</div>
+      <h2 class="lp-title home-block-title-sm">Deine <em class="gold">Sterne</em>.</h2>
 
-      <div class="home-avatar-side" id="avatarSide" role="button" tabindex="0"
-           aria-label="Profilbild hochladen oder ersetzen">
-        <input type="file" id="avatarInput" accept="image/*" hidden>
-        <div class="home-avatar-side-img" id="avatarSideImg">
-          <span class="home-avatar-side-placeholder">+</span>
+      <div class="home-hero-stars home-hero-stars--side" aria-label="Dein Sterne-Zertifikat">
+        <div class="home-hero-stars-big">
+          <span class="home-hero-stars-num" id="hero-stars-num">0</span>
+          <span class="home-hero-stars-icon">★</span>
         </div>
-        <button class="home-avatar-side-cta" id="avatarSideCta" type="button">Bild hochladen</button>
+        <div class="home-hero-stars-row" id="hero-stars-row" aria-hidden="true">
+          <span class="s">★</span><span class="s">★</span><span class="s">★</span><span class="s">★</span><span class="s">★</span>
+        </div>
+        <div class="home-hero-stars-sub" id="hero-stars-sub">Lade…</div>
       </div>
     </section>
 
@@ -213,6 +231,65 @@
      ("Sichern" / "Wiederherstellen") controls only appear here,
      inside the opened card — never on the collapsed teaser.
 ============================================================ -->
+
+<div class="home-modal" id="goalsModal" role="dialog" aria-modal="true" aria-labelledby="goalsModalTitle" hidden>
+  <div class="home-modal-backdrop" data-modal-close></div>
+  <div class="home-modal-panel">
+    <button class="home-modal-close" type="button" data-modal-close aria-label="Schließen">✕</button>
+
+    <div class="home-modal-head">
+      <div class="lp-eye">Meine Ziele</div>
+      <h2 id="goalsModalTitle" class="lp-title home-block-title-sm">Wo willst du <em class="accent">hin</em>?</h2>
+      <p class="lp-sub">Setz dir ein klares Ziel, ein Datum bis wann — und halt fest, wie weit du schon bist. Bleibt auf diesem Gerät — nutze „Sichern“ und „Wiederherstellen“, um auf ein anderes Gerät zu wechseln.</p>
+    </div>
+
+    <div class="home-modal-body">
+      <div class="goals">
+        <div class="goals-input">
+          <div class="goals-input-cols">
+            <div class="goals-col goals-col-goal">
+              <label class="goals-col-label" for="goalText">Ziel</label>
+              <textarea id="goalText" placeholder="Z. B. „Beidfüßig sicher passen.“" rows="3"></textarea>
+            </div>
+            <div class="goals-col goals-col-when">
+              <label class="goals-col-label" for="goalWhen">Bis wann</label>
+              <input type="date" id="goalWhen">
+            </div>
+            <div class="goals-col goals-col-prog">
+              <label class="goals-col-label" for="goalProgress">Fortschritt</label>
+              <select id="goalProgress">
+                <option value="0">0 %</option>
+                <option value="25">25 %</option>
+                <option value="50">50 %</option>
+                <option value="75">75 %</option>
+                <option value="100">100 %</option>
+              </select>
+            </div>
+          </div>
+          <div class="goals-input-actions">
+            <button id="goalSave" class="diary-save">Ziel hinzufügen</button>
+            <div class="diary-save-status" id="goalSaveStatus"></div>
+          </div>
+        </div>
+
+        <div class="goals-feed" id="goalsFeed">
+          <div class="home-loading">Lade Ziele…</div>
+        </div>
+
+        <div class="home-actions">
+          <button class="home-action-btn" id="goalsExportBtn" title="Ziele als Datei speichern">
+            <span class="home-action-icon">↓</span> Ziele sichern
+          </button>
+          <button class="home-action-btn" id="goalsImportBtn" title="Backup-Datei einspielen">
+            <span class="home-action-icon">↑</span> Backup wiederherstellen
+          </button>
+          <input type="file" id="goalsImportInput" accept="application/json,.json" hidden>
+          <span class="home-actions-status" id="goalsActionsStatus"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="home-modal" id="myvidsModal" role="dialog" aria-modal="true" aria-labelledby="myvidsModalTitle" hidden>
   <div class="home-modal-backdrop" data-modal-close></div>
