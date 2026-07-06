@@ -112,11 +112,11 @@
 
 .lp-hero-stats {
   display: flex;
-  gap: 40px;
+  gap: 28px 34px;
   flex-wrap: wrap;
   padding-top: 24px;
   border-top: 1px solid var(--lp-rule);
-  max-width: 560px;
+  max-width: 640px;
 }
 .lp-hero-stat { display: flex; flex-direction: column; }
 .lp-hero-stat-num {
@@ -133,6 +133,16 @@
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--lp-faint);
+}
+
+/* Sterne-Zertifikat sits inline with the other hero stats — the
+   star count in gold, followed by a small ★ glyph. */
+.lp-hero-stat-star {
+  font-size: .52em;
+  color: var(--lp-gold);
+  margin-left: .14em;
+  vertical-align: baseline;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, .4));
 }
 
 .lp-hero-image {
@@ -284,24 +294,6 @@ body[data-theme="light"] .lp-hero-image::after {
     padding: 36px 24px;
   }
 }
-
-/* ---- Sidebar variant of the Sterne-Zertifikat (moved down) ----
-   Same component, shrunk and left-aligned to sit in the 25% column
-   next to "Mein Fortschritt". */
-.home-hero-stars--side {
-  align-items: flex-start;
-  justify-content: flex-start;
-  text-align: left;
-  gap: 8px;
-  padding: 4px 0 0;
-  border-left: none;
-  background: none;
-}
-.home-hero-stars--side .home-hero-stars-big { margin: 0; }
-.home-hero-stars--side .home-hero-stars-num { font-size: clamp(64px, 9vw, 92px); }
-.home-hero-stars--side .home-hero-stars-icon { font-size: clamp(30px, 5vw, 44px); }
-.home-hero-stars--side .home-hero-stars-row { font-size: 22px; gap: 8px; }
-.home-hero-stars--side .home-hero-stars-sub { max-width: none; margin-top: 8px; }
 
 
 /* ============================================================
