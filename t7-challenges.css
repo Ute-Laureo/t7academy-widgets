@@ -9,26 +9,37 @@
    (4-tab category grid, section banners, Builder filter UI,
    Monats hint, widget rows/buttons, sidebar cards, Sterne-
    Zertifikat identity) in line with the flat visual language
-   used on Home (t7-home.css) and Sterne — hairline dividers,
-   transparent surfaces, Antonio sub-headers in sentence case,
-   Garet titles — instead of the earlier neon gradient-bordered /
-   all-caps / boxed-card style, and fixes light-mode contrast on
-   several accent colors that were tuned for the dark theme only.
+   used on Home (t7-home.css) — hairline dividers, transparent
+   surfaces, and Home's actual Antonio-uppercase eyebrow/label
+   system (.lp-eye: 14px, .22em tracking, uppercase — the same
+   pattern behind .home-prog-age, .diary-voice-btn, .news-date,
+   etc.) instead of the earlier neon gradient-bordered / boxed-
+   card style. Titles/intros are sized to match .lp-title /
+   .lp-sub directly, the same primitives Home's own section
+   headers use. Also fixes light-mode contrast on several accent
+   colors that were tuned for the dark theme only.
+
+   Widget-internal sub-labels that t7-base.css already sets
+   uppercase (.rl-title, .t7f-stat-label, .pbadge, etc.) are left
+   alone here on purpose — they already match Home's convention,
+   no override needed.
 
    Also overrides .t7h-wrap / .shz-wrap / .t7w .* / .t7a-wrap /
-   .t7b-wrap / .nav-link.active / .sb-card / .rl-* / .t7f-*, all
-   of which are baked into t7-base.css itself, so the whole page —
-   tabs, banners, module rows, sidebar — reads as one consistent,
-   readable family.
+   .t7b-wrap / .nav-link.active / .sb-card, all of which are baked
+   into t7-base.css itself, so the whole page — tabs, banners,
+   module rows, sidebar — reads as one consistent family with Home.
    ============================================================ */
 
 
 /* ============================================================
    1. SECTION BANNERS — Technikschule / Zertifikate / Builder /
-   Monats. Each keeps its own identity color via --cat-c, but the
-   chrome (icon + Garet title + muted intro + thin pills) is the
-   same flat pattern lp-hero / home-block headers use — no more
-   gradient border box, topline, or orb glow.
+   Monats. Each keeps its own identity color via --cat-c. Title
+   and intro are sized to match Home's .lp-title / .lp-sub
+   exactly (same clamp values, same line-height) — these are the
+   same primitives Home uses for its own in-page section headers
+   ("Wo du gerade stehst.", "Meine eigene Analyse."), not a
+   smaller custom scale. Pills are Antonio-uppercase, matching
+   .diary-voice-btn / .home-avatar-side-cta.
 ============================================================ */
 
 /* Kill the old neon decorations outright — topline + both orbs,
@@ -44,14 +55,14 @@
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 18px;
+  gap: 20px;
   width: 100%;
   overflow: visible;
   border: none;
   border-radius: 0;
   background: none;
   background-image: none;
-  padding: 26px 4px 24px;
+  padding: 30px 4px 28px;
   margin-top: 4px;
   border-bottom: 1px solid var(--lp-rule);
 }
@@ -80,9 +91,9 @@
   position: static;
   transform: none;
   flex-shrink: 0;
-  font-size: 32px;
+  font-size: 40px;
   line-height: 1;
-  margin-top: 2px;
+  margin-top: 4px;
   filter: none;
 }
 
@@ -94,15 +105,19 @@
   padding-right: 0;
 }
 
+/* Same font-size clamp, line-height and margin as Home's own
+   .lp-title (t7-base.css §"LANDING-PAGE PRIMITIVES") — this is
+   the exact scale Home uses for in-page section headers, not
+   just the hero. */
 .t7h-title, .shz-title, .shb-title, .shm-title {
   font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
   font-weight: 900;
-  font-size: clamp(19px, 2.3vw, 26px);
+  line-height: 1.04;
+  font-size: clamp(30px, 4.4vw, 52px);
   letter-spacing: -.01em;
-  line-height: 1.15;
   color: var(--text);
   white-space: normal;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 .t7h-title span, .shz-title span, .shb-title span, .shm-title span {
   color: var(--cat-c);
@@ -120,8 +135,9 @@
   color: var(--cat-c);
 }
 
+/* Same font-size clamp, color and max-width as Home's .lp-sub. */
 .t7h-intro, .shz-intro, .shb-intro, .shm-intro {
-  font-size: 14px;
+  font-size: clamp(15px, 1.4vw, 18px);
   line-height: 1.6;
   color: var(--lp-muted);
   max-width: 640px;
@@ -145,9 +161,8 @@
   color: var(--cat-c);
 }
 
-/* Pills: sentence case as authored in the HTML ("XP sammeln", not
-   "XP SAMMELN") — narrower letter-spacing to match, since wide
-   tracking was tuned for all-caps and looks odd on mixed case. */
+/* Pills: Antonio, uppercase, .1em tracking — the same recipe as
+   Home's .diary-voice-btn / .home-avatar-side-cta pill buttons. */
 .t7h-pills, .shz-pills, .shb-pills, .shm-pills {
   display: flex;
   gap: 8px;
@@ -160,7 +175,8 @@
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
   font-size: 12px;
-  letter-spacing: .02em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
   padding: 6px 14px;
   border-radius: 99px;
   border: 1px solid var(--cat-c);
@@ -178,19 +194,17 @@
 }
 
 @media (max-width: 640px) {
-  .t7h-wrap, .shz-wrap, .shb-wrap, .shm-wrap { gap: 14px; padding: 22px 2px 20px; }
-  .t7h-icon, .shz-icon, .shb-icon, .shm-icon { font-size: 26px; }
+  .t7h-wrap, .shz-wrap, .shb-wrap, .shm-wrap { gap: 14px; padding: 24px 2px 22px; }
+  .t7h-icon, .shz-icon, .shb-icon, .shm-icon { font-size: 30px; }
 }
 
 
 /* ============================================================
    2. 4-CARD CATEGORY TAB GRID
-   Flat hover-lift tiles instead of gradient-bordered cards — same
-   family as .home-prog on the Home page. Each tab keeps its own
-   --cat-color identity but the surface stays transparent; the
-   active tab is marked with a colored underline, not a glow.
-   (See §9 for the mobile single-column layout, which needs its
-   own distinguishability treatment.)
+   Same family as Home's .home-prog cards: icon, Garet title,
+   Antonio-uppercase eyebrow meta — flat, hover-lift, no gradient
+   border box. Sized closer to home-prog's own proportions.
+   (See §9 for the mobile single-column layout.)
 ============================================================ */
 .ch-cat-grid {
   display: grid;
@@ -208,9 +222,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   align-items: flex-start;
-  padding: 18px 16px 16px;
+  padding: 20px 18px 18px;
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
@@ -227,24 +241,26 @@
   background: rgba(128, 140, 160, .04);
 }
 
-.ch-cat-icon { font-size: 24px; line-height: 1; color: var(--cat-color); }
+.ch-cat-icon { font-size: 30px; line-height: 1; color: var(--cat-color); }
 .ch-cat-title {
   font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 900;
   letter-spacing: -.01em;
   color: var(--text);
-  line-height: 1.25;
+  line-height: 1.2;
   margin-top: 2px;
 }
-.ch-cat-sub { font-size: 11px; color: var(--lp-muted); line-height: 1.4; }
+.ch-cat-sub { font-size: 12px; color: var(--lp-muted); line-height: 1.4; }
+/* Eyebrow-style meta, matching .home-prog-age exactly. */
 .ch-cat-count {
   margin-top: auto;
   padding-top: 10px;
   font-family: 'Antonio', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .03em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
   color: var(--cat-color);
 }
 
@@ -265,10 +281,9 @@
 
 /* ============================================================
    3. BUILDER FILTER UI
-   Thin-border pills and hairline card, matching the pill-toggle /
-   search-wrap vocabulary from Sterne/Sevens rather than the
-   heavy violet gradient buttons. Labels/buttons in sentence case,
-   matching the HTML source, not forced uppercase.
+   Hairline card matching .home-card-teaser's surface treatment;
+   labels and buttons use Home's Antonio-uppercase system
+   (.diary-col-label / .diary-voice-btn) rather than plain text.
 ============================================================ */
 .bf-card {
   background: transparent;
@@ -285,7 +300,8 @@
   font-family: 'Antonio', sans-serif;
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: .02em;
+  letter-spacing: .18em;
+  text-transform: uppercase;
   color: var(--lp-faint);
   min-width: 110px;
 }
@@ -341,8 +357,9 @@
   padding: 10px 20px;
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
-  font-size: 13px;
-  letter-spacing: .02em;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
   color: #C084FC;
   cursor: pointer;
   transition: all .15s;
@@ -356,8 +373,9 @@
   padding: 10px 20px;
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
-  font-size: 13px;
-  letter-spacing: .02em;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
   color: var(--lp-muted);
   cursor: pointer;
   transition: all .15s;
@@ -376,9 +394,10 @@
 .bf-preview.open { display: block; }
 .bf-preview-title {
   font-family: 'Antonio', sans-serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: .03em;
+  letter-spacing: .12em;
+  text-transform: uppercase;
   color: var(--lp-faint);
   margin-bottom: 12px;
 }
@@ -405,9 +424,11 @@
   text-overflow: ellipsis;
 }
 .bf-vid-meta {
+  font-family: 'Antonio', sans-serif;
   font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
   color: var(--lp-faint);
-  letter-spacing: .03em;
 }
 
 
@@ -500,9 +521,8 @@
   color: var(--wa);
 }
 
-/* "Starten" button — swap the filled glowing pill for the same
-   flat outlined-pill language as .bf-build in the Builder panel,
-   and sentence case (as the widget authors it) instead of caps. */
+/* "Starten" button — flat outlined pill, Antonio uppercase,
+   matching Home's .diary-voice-btn / .home-avatar-side-cta. */
 .t7w .cr-btn {
   background: transparent;
   border: 1px solid var(--wa);
@@ -512,7 +532,8 @@
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
   font-size: 12px;
-  letter-spacing: .01em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
   padding: 8px 16px;
 }
 .t7w .cr-btn:hover {
@@ -614,6 +635,12 @@
 [data-theme="light"] .bf-build:hover:not(:disabled) { background: rgba(124, 58, 237, .08); }
 [data-theme="light"] .bf-pill.active { background: rgba(124, 58, 237, .1); border-color: #7C3AED; }
 
+/* Rangliste subtitle ("Top Spieler · T7 Academy") uses a
+   translucent cyan tuned for the dark card; solid + darker in
+   light mode for the same reason as everything else in this
+   section. */
+[data-theme="light"] .rl-sub { color: #0E7490; }
+
 
 /* ============================================================
    8. SIDEBAR CARDS — Sterne Zertifikat / Fortschritt / Rangliste
@@ -622,7 +649,9 @@
    that hadn't been brought into the flat, hairline-divider system
    used everywhere else. Now transparent, stacked with a hairline
    divider between them (same pattern as .home-block on the Home
-   page), and their small header labels (§10) are sentence case.
+   page). The card label is now a genuine .lp-eye clone — same
+   14px / .22em / uppercase Antonio treatment and leading line
+   Home uses for every section eyebrow.
 ============================================================ */
 .ch-sidebar .sb-card {
   background: transparent;
@@ -636,12 +665,14 @@
   border-top: 1px solid var(--lp-rule);
 }
 
+/* .lp-eye clone (t7-base.css primitive): Antonio 600, 14px,
+   .22em tracking, uppercase, leading 28px line. */
 .ch-sidebar .sb-label {
   font-family: 'Antonio', 'Open Sans', sans-serif;
   font-weight: 600;
-  font-size: 13px;
-  letter-spacing: .04em;
-  text-transform: none;
+  font-size: 14px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
   color: var(--accent);
   border-bottom: none;
   padding-bottom: 0;
@@ -653,7 +684,7 @@
 .ch-sidebar .sb-label::before {
   content: '';
   display: inline-block;
-  width: 22px;
+  width: 28px;
   height: 1px;
   background: currentColor;
 }
@@ -687,7 +718,7 @@
     border-left-color: var(--cat-color);
     background: rgba(128, 140, 160, .05);
   }
-  .ch-cat-icon { font-size: 22px; flex-shrink: 0; }
+  .ch-cat-icon { font-size: 24px; flex-shrink: 0; }
   .ch-cat-title { margin-top: 0; }
   .ch-cat-sub { display: none; }
   .ch-cat-count {
@@ -699,25 +730,3 @@
     flex-shrink: 0;
   }
 }
-
-
-/* ============================================================
-   10. REMAINING SUB-HEADER UPPERCASE SWEEP
-   A few small labels inside the sidebar widgets (Rangliste,
-   Fortschritt) and inside an opened drill screen still had
-   text-transform: uppercase baked into t7-base.css. Same fix as
-   the rest of the page: sentence case, tighter tracking.
-============================================================ */
-.rl-title { text-transform: none; letter-spacing: .02em; }
-.rl-sub   { text-transform: none; letter-spacing: .03em; }
-[data-theme="light"] .rl-sub { color: #0E7490; }
-.vt-btn   { text-transform: none; letter-spacing: .02em; }
-
-.t7f-sub        { text-transform: none; letter-spacing: .02em; }
-.t7f-stat-label { text-transform: none; letter-spacing: .02em; }
-
-.t7w .drill-eye,
-.t7w .plabel   { text-transform: none; letter-spacing: .03em; }
-.t7w .step-name { text-transform: none; letter-spacing: .02em; }
-.t7w .pbadge    { text-transform: none; }
-.t7w .rate-text { text-transform: none; }
