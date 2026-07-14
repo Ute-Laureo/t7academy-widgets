@@ -14,9 +14,9 @@
    system (.lp-eye: 14px, .22em tracking, uppercase — the same
    pattern behind .home-prog-age, .diary-voice-btn, .news-date,
    etc.) instead of the earlier neon gradient-bordered / boxed-
-   card style. Titles/intros are sized to match .lp-title /
-   .lp-sub directly, the same primitives Home's own section
-   headers use. Also fixes light-mode contrast on several accent
+   card style. Banner titles are sized to match the page's own
+   .hero h1 (same clamp, same line-height) instead of a larger
+   custom scale. Also fixes light-mode contrast on several accent
    colors that were tuned for the dark theme only, and resets
    native button chrome (outline/appearance) so the four custom
    `<button>` families here — .ch-cat, .bf-pill/.bf-build/.bf-reset,
@@ -39,11 +39,10 @@
 /* ============================================================
    1. SECTION BANNERS — Technikschule / Zertifikate / Builder /
    Monats. Each keeps its own identity color via --cat-c. Title
-   and intro are sized to match Home's .lp-title / .lp-sub
-   exactly (same clamp values, same line-height) — these are the
-   same primitives Home uses for its own in-page section headers
-   ("Wo du gerade stehst.", "Meine eigene Analyse."), not a
-   smaller custom scale. Pills are Antonio-uppercase, matching
+   is sized to match the page's own .hero h1 exactly (same clamp,
+   line-height, margin) — these banners sit right below the hero
+   in the same page, so they should read as the same typographic
+   scale, not a larger one. Pills are Antonio-uppercase, matching
    .diary-voice-btn / .home-avatar-side-cta.
 ============================================================ */
 
@@ -96,7 +95,7 @@
   position: static;
   transform: none;
   flex-shrink: 0;
-  font-size: 40px;
+  font-size: 36px;
   line-height: 1;
   margin-top: 4px;
   filter: none;
@@ -110,19 +109,19 @@
   padding-right: 0;
 }
 
-/* Same font-size clamp, line-height and margin as Home's own
-   .lp-title (t7-base.css §"LANDING-PAGE PRIMITIVES") — this is
-   the exact scale Home uses for in-page section headers, not
-   just the hero. */
+/* Same font-size clamp, line-height, letter-spacing and margin as
+   the page's own .hero h1 (t7-base.css) — these banners are
+   secondary headers on the same page as that hero, so they share
+   its scale rather than a larger one. */
 .t7h-title, .shz-title, .shb-title, .shm-title {
   font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
   font-weight: 900;
   line-height: 1.04;
-  font-size: clamp(30px, 4.4vw, 52px);
+  font-size: clamp(28px, 4vw, 44px);
   letter-spacing: -.01em;
   color: var(--text);
   white-space: normal;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .t7h-title span, .shz-title span, .shb-title span, .shm-title span {
   color: var(--cat-c);
@@ -140,7 +139,6 @@
   color: var(--cat-c);
 }
 
-/* Same font-size clamp, color and max-width as Home's .lp-sub. */
 .t7h-intro, .shz-intro, .shb-intro, .shm-intro {
   font-size: clamp(15px, 1.4vw, 18px);
   line-height: 1.6;
@@ -167,12 +165,15 @@
 }
 
 /* Pills: Antonio, uppercase, .1em tracking — the same recipe as
-   Home's .diary-voice-btn / .home-avatar-side-cta pill buttons. */
+   Home's .diary-voice-btn / .home-avatar-side-cta pill buttons.
+   Zertifikate's own star-count pills (.shz-pills) are hidden here
+   — see §10, they've moved onto each cert row's icon instead. */
 .t7h-pills, .shz-pills, .shb-pills, .shm-pills {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
+.shz-pills { display: none; }
 .t7h-pill, .shz-pill, .shb-pill, .shm-pill {
   display: inline-flex;
   align-items: center;
@@ -200,7 +201,7 @@
 
 @media (max-width: 640px) {
   .t7h-wrap, .shz-wrap, .shb-wrap, .shm-wrap { gap: 14px; padding: 24px 2px 22px; }
-  .t7h-icon, .shz-icon, .shb-icon, .shm-icon { font-size: 30px; }
+  .t7h-icon, .shz-icon, .shb-icon, .shm-icon { font-size: 28px; }
 }
 
 
@@ -525,12 +526,13 @@
    t7-base.css (.t7a-wrap = cyan default, .t7b-wrap = certs), so
    this flattening automatically inherits the right identity color
    everywhere: cyan rows in Technikschule, gold rows in Zertifikate,
-   and whatever the Builder/Monats widget mounts with.
+   violet rows in the Builder-built widget (see §11), and whatever
+   the Monats widget mounts with.
 
    Row border-color is pinned to the neutral --lp-rule hairline
-   (same value in both themes) so Technikschule and Zertifikate
-   rows share literally the same resting-state chrome — only the
-   badge / button / progress-bar accents differ by section.
+   (same value in both themes) so every module row shares literally
+   the same resting-state chrome — only the badge / button /
+   progress-bar accents differ by section.
 ============================================================ */
 
 /* Row header ("collapsed" module bar) — hairline border instead of
@@ -683,10 +685,12 @@
    dark mode is untouched.
 ============================================================ */
 
-/* Technikschule / Builder-built / Monats widget rows (.t7a-wrap is
-   the generic, non-cert widget wrapper) — badge tint, row border
-   and the "Starten" button all read var(--wa), so darkening it
-   here fixes all three at once, in light mode only. */
+/* Technikschule / Monats widget rows (.t7a-wrap is the generic,
+   non-cert widget wrapper) — badge tint, row border and the
+   "Starten" button all read var(--wa), so darkening it here fixes
+   all three at once, in light mode only. The Builder-built widget
+   is re-pointed to violet instead in §11 and gets its own
+   light-mode value there. */
 [data-theme="light"] .t7a-wrap {
   --wa: #0E7490;
   --wa2: #075985;
@@ -806,3 +810,67 @@
     flex-shrink: 0;
   }
 }
+
+
+/* ============================================================
+   10. STERNE-ZERTIFIKAT — PILL ON EACH ROW, NOT IN THE BANNER
+   The "★ 1-Stern / ★★ 2-Sterne / …" filter pills used to sit in
+   the banner as a static row (hidden in §1 above — .shz-pills).
+   Each cert row already has its own icon badge; rounding it into
+   a full pill echoes that same pill language per-row instead of
+   once at the top. The badge still shows whatever T7.loadCerts()
+   puts in it (the ★ glyphs are data-driven, not something CSS can
+   rewrite per row) — this only changes the badge's shape/frame.
+============================================================ */
+.t7b-wrap .cr-badge {
+  border-radius: 99px;
+}
+
+
+/* ============================================================
+   11. "BAU DIR DEINE EIGENE CHALLENGE" — VIOLET, NOT CYAN
+   T7.challenge() always mounts the built widget with the default
+   cyan accent (.t7a-wrap's --wa), regardless of which tab built
+   it. The Builder panel's own chrome is violet, so the widget it
+   produces should carry that same identity through — re-point
+   --wa/--wa2/--wa-rgb specifically inside #builder-container
+   (higher specificity than the plain .t7a-wrap rule in t7-base.css
+   thanks to the ID, so it wins regardless of load order).
+============================================================ */
+#builder-container .t7w,
+#builder-container .t7a-wrap {
+  --wa: #A855F7;
+  --wa2: #EC4899;
+  --wa-rgb: 168, 85, 247;
+}
+[data-theme="light"] #builder-container .t7w,
+[data-theme="light"] #builder-container .t7a-wrap {
+  --wa: #7C3AED;
+  --wa2: #EC4899;
+  --wa-rgb: 124, 58, 237;
+}
+
+
+/* ============================================================
+   12. INDIVIDUAL SKILL/DRILL ROWS (.prow) — SIMPLIFIED
+   Inside an expanded module (any tab — Technikschule, Zertifikate,
+   the Builder-built widget, Monats), each individual skill is a
+   .prow row. These still had the earlier heavier treatment
+   (translucent white fill, thicker border, 16px radius) that the
+   rest of the page moved away from — flattened here to match the
+   same hairline-bordered, transparent surface as the outer .cr
+   module rows (§5), just one level down.
+============================================================ */
+.t7w .prow {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 8px;
+  box-shadow: none;
+}
+.t7w .prow:hover:not(.plocked) {
+  background: rgba(var(--wa-rgb), .04);
+  border-color: rgba(var(--wa-rgb), .5);
+  box-shadow: none;
+  transform: none;
+}
+.t7w .prow.pdone { border-color: rgba(var(--wa-rgb), .35); }
