@@ -541,7 +541,7 @@
    t7-base.css (.t7a-wrap = cyan default, .t7b-wrap = certs), so
    this flattening automatically inherits the right identity color
    everywhere: cyan rows in Technikschule, gold rows in Zertifikate,
-   violet rows in the Builder-built widget (see §11), and whatever
+   violet rows in the Builder-built widget (see §10), and whatever
    the Monats widget mounts with.
 
    Row border-color is pinned to the neutral --lp-rule hairline
@@ -696,21 +696,7 @@
    inline background/box-shadow directly onto this div — see the
    NOTE below — so it must be neutralized with !important to win
    over an inline style, the only way an external stylesheet can
-   outrank inline styles without editing the HTML/JS itself).
-
-   NOTE — the ⭐ glyph itself is markup the widget script injects
-   identically for every certificate row (t7-widget-engine.js
-   always renders the same hardcoded "★" span, with its own
-   inline color/text-shadow), regardless of whether the row is
-   the 1-star or 5-star tier. There's no per-row data (attribute
-   or class) exposed to hook a "real" star count onto via CSS —
-   the tier is only distinguished in the row's own title text
-   ("1-Stern Zertifikat") and progress sub-label. Making the badge
-   itself show "★★★" or "3 Sterne" per row would require adding a
-   cfg.stars parameter to the cert widget's template in
-   t7-widget-engine.js (the shared engine script, not this
-   page-specific stylesheet) so the count could be rendered per
-   instance. Flagging this rather than guessing at it in CSS. */
+   outrank inline styles without editing the HTML/JS itself). */
 .t7b-wrap .cr-badge {
   background: transparent !important;
   background-image: none !important;
@@ -886,6 +872,17 @@
    --wa/--wa2/--wa-rgb specifically inside #builder-container
    (higher specificity than the plain .t7a-wrap rule in t7-base.css
    thanks to the ID, so it wins regardless of load order).
+
+   The --wa custom property covers most of the row (badge tint,
+   row border, "Starten"/"Schließen" button) automatically. But two
+   elements — the player avatar and the "total XP" pill — are
+   hardcoded to a solid cyan gradient fill directly in t7-base.css
+   (the exact same pattern already found and fixed for the gold
+   certificate widget in §6), completely bypassing --wa. Left
+   alone, those two stayed cyan while everything else around them
+   correctly went violet — the "mixed aqua and violet" look this
+   section fixes by giving them the same explicit violet gradient
+   override §6 gives the cert widget's gold one.
 ============================================================ */
 #builder-container .t7w,
 #builder-container .t7a-wrap {
@@ -898,6 +895,14 @@
   --wa: #7C3AED;
   --wa2: #EC4899;
   --wa-rgb: 124, 58, 237;
+}
+#builder-container .t7w .cr-avatar {
+  background: linear-gradient(135deg, #A855F7, #EC4899);
+  box-shadow: 0 0 8px rgba(168, 85, 247, .35);
+}
+#builder-container .t7w .cr-xp-total {
+  background: linear-gradient(135deg, #A855F7, #EC4899);
+  box-shadow: 0 0 10px rgba(168, 85, 247, .28);
 }
 
 
