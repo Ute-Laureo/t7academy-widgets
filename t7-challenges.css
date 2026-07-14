@@ -203,7 +203,10 @@
    2. 4-CARD CATEGORY TAB GRID
    Same family as Home's .home-prog cards: icon, Garet title,
    Antonio-uppercase eyebrow meta — flat, hover-lift, no gradient
-   border box. Sized closer to home-prog's own proportions.
+   border box. Background is a translucent tint of the tab's OWN
+   identity color at rest (not neutral gray), strengthening on
+   hover/active — this needs an explicit --cat-rgb per tab since
+   rgba() can't take a hex custom property directly.
    (See §9 for the mobile single-column layout.)
 ============================================================ */
 .ch-cat-grid {
@@ -219,6 +222,7 @@
 
 .ch-cat {
   --cat-color: var(--accent);
+  --cat-rgb: 0, 229, 255;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -228,17 +232,17 @@
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
-  background: transparent;
+  background: rgba(var(--cat-rgb), .05);
   color: var(--text);
   font-family: 'Open Sans', sans-serif;
   text-align: left;
   cursor: pointer;
   transition: background .15s, border-color .15s;
 }
-.ch-cat:hover { background: rgba(128, 140, 160, .05); }
+.ch-cat:hover { background: rgba(var(--cat-rgb), .09); }
 .ch-cat.active {
   border-bottom-color: var(--cat-color);
-  background: rgba(128, 140, 160, .04);
+  background: rgba(var(--cat-rgb), .13);
 }
 
 .ch-cat-icon { font-size: 30px; line-height: 1; color: var(--cat-color); }
@@ -264,15 +268,15 @@
   color: var(--cat-color);
 }
 
-.ch-cat-tech    { --cat-color: var(--accent); }
-.ch-cat-cert    { --cat-color: var(--lp-gold); }
-.ch-cat-build   { --cat-color: #A855F7; }
-.ch-cat-monats  { --cat-color: #FF6B35; }
+.ch-cat-tech    { --cat-color: var(--accent);  --cat-rgb: 0, 229, 255; }
+.ch-cat-cert    { --cat-color: var(--lp-gold); --cat-rgb: 255, 215, 0; }
+.ch-cat-build   { --cat-color: #A855F7;        --cat-rgb: 168, 85, 247; }
+.ch-cat-monats  { --cat-color: #FF6B35;        --cat-rgb: 255, 107, 53; }
 
-[data-theme="light"] .ch-cat-tech   { --cat-color: #0E7490; }
-[data-theme="light"] .ch-cat-cert   { --cat-color: #9A6708; }
-[data-theme="light"] .ch-cat-build  { --cat-color: #7C3AED; }
-[data-theme="light"] .ch-cat-monats { --cat-color: #C2410C; }
+[data-theme="light"] .ch-cat-tech   { --cat-color: #0E7490; --cat-rgb: 14, 116, 144; }
+[data-theme="light"] .ch-cat-cert   { --cat-color: #9A6708; --cat-rgb: 154, 103, 8; }
+[data-theme="light"] .ch-cat-build  { --cat-color: #7C3AED; --cat-rgb: 124, 58, 237; }
+[data-theme="light"] .ch-cat-monats { --cat-color: #C2410C; --cat-rgb: 194, 65, 12; }
 
 /* Tab panel reveal — unchanged, purely functional */
 .ch-panel { display: none; }
@@ -475,12 +479,18 @@
    this flattening automatically inherits the right identity color
    everywhere: cyan rows in Technikschule, gold rows in Zertifikate,
    and whatever the Builder/Monats widget mounts with.
+
+   Row border-color is pinned to the neutral --lp-rule hairline
+   (same value in both themes) so Technikschule and Zertifikate
+   rows share literally the same resting-state chrome — only the
+   badge / button / progress-bar accents differ by section.
 ============================================================ */
 
 /* Row header ("collapsed" module bar) — hairline border instead of
    a filled gradient box; no glossy sheen sweep, no glow on hover. */
 .t7w .cr {
   background: transparent;
+  border-color: var(--lp-rule);
   box-shadow: none;
 }
 .t7w .cr::before { content: none; }
@@ -498,15 +508,22 @@
   border-color: var(--lp-rule);
 }
 
-/* Zertifikate widget uses a gradient-clip border trick for its gold
-   frame — neutralize it in favor of a plain hairline border so the
-   row matches every other panel; the gold identity now comes from
-   the badge / button / XP pill colors instead (see §6). */
+/* Zertifikate widget uses a gradient-clip border trick (a layered
+   background-image) for its gold frame in BOTH themes — including
+   a light-mode-specific version in t7-base.css that would otherwise
+   win by specificity and leave the cert rows on a solid white fill
+   while Technikschule stays transparent. Neutralize both. */
 .t7b-wrap .cr,
 .t7b-wrap .t7-panel {
   background: transparent;
   background-image: none;
-  border: 1px solid var(--lp-rule);
+  border-color: var(--lp-rule);
+}
+[data-theme="light"] .t7b-wrap .cr,
+[data-theme="light"] .t7b-wrap .t7-panel {
+  background: transparent;
+  background-image: none;
+  border-color: var(--lp-rule);
 }
 .t7b-wrap .cr:hover { box-shadow: none !important; border-color: rgba(255, 215, 0, .5); }
 .t7b-wrap .cr.open { border-bottom-color: var(--lp-rule); }
@@ -521,19 +538,24 @@
   color: var(--wa);
 }
 
-/* "Starten" button — flat outlined pill, Antonio uppercase,
-   matching Home's .diary-voice-btn / .home-avatar-side-cta. */
+/* "Starten" button — flat outlined button. Radius and typography
+   now match the neighboring XP pills (.cr-xp / .cr-xp-total: plain
+   Open Sans, bold, no letter-spacing) instead of the Antonio/pill
+   treatment used for the Builder's own filter buttons — those two
+   button families read as different components, so this one now
+   matches what's actually next to it in the row. Radius (8px) is
+   also much closer to the row's own 12px corner radius, instead of
+   the previous full-pill (99px) which looked mismatched inside a
+   barely-rounded rectangular row. */
 .t7w .cr-btn {
   background: transparent;
   border: 1px solid var(--wa);
-  border-radius: 99px;
+  border-radius: 8px;
   box-shadow: none;
   color: var(--wa);
-  font-family: 'Antonio', sans-serif;
-  font-weight: 600;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
   font-size: 12px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
   padding: 8px 16px;
 }
 .t7w .cr-btn:hover {
@@ -700,7 +722,8 @@
    only "active" cue (a bottom border) doesn't read in a stacked
    list. Below 520px this switches to a clear horizontal list —
    icon + title on one line, a hairline divider between each row,
-   and the active tab marked with a left accent bar instead.
+   and the active tab marked with a left accent bar instead. The
+   resting-state color tint from §2 carries through automatically.
 ============================================================ */
 @media (max-width: 520px) {
   .ch-cat-grid { border-bottom: none; }
@@ -716,7 +739,7 @@
   .ch-cat.active {
     border-bottom-color: var(--lp-rule);
     border-left-color: var(--cat-color);
-    background: rgba(128, 140, 160, .05);
+    background: rgba(var(--cat-rgb), .13);
   }
   .ch-cat-icon { font-size: 24px; flex-shrink: 0; }
   .ch-cat-title { margin-top: 0; }
