@@ -17,7 +17,12 @@
    card style. Titles/intros are sized to match .lp-title /
    .lp-sub directly, the same primitives Home's own section
    headers use. Also fixes light-mode contrast on several accent
-   colors that were tuned for the dark theme only.
+   colors that were tuned for the dark theme only, and resets
+   native button chrome (outline/appearance) so the four custom
+   `<button>` families here — .ch-cat, .bf-pill/.bf-build/.bf-reset,
+   .t7w .cr-btn — render identically across Firefox/Chromium/Safari
+   instead of picking up a browser default focus outline that only
+   some engines suppress automatically.
 
    Widget-internal sub-labels that t7-base.css already sets
    uppercase (.rl-title, .t7f-stat-label, .pbadge, etc.) are left
@@ -207,6 +212,15 @@
    identity color at rest (not neutral gray), strengthening on
    hover/active — this needs an explicit --cat-rgb per tab since
    rgba() can't take a hex custom property directly.
+
+   Each tile is a <button>, so it picks up the browser's native
+   focus outline / appearance — Safari suppresses this by default
+   on mouse interaction, Firefox and Chromium (Edge) don't, which
+   is why the same page showed a visible rectangle around the tile
+   in some browsers and not others. Reset explicitly below so the
+   look is identical everywhere, with a deliberate on-brand ring
+   only for keyboard focus (:focus-visible).
+
    (See §9 for the mobile single-column layout.)
 ============================================================ */
 .ch-cat-grid {
@@ -229,6 +243,7 @@
   gap: 6px;
   align-items: flex-start;
   padding: 20px 18px 18px;
+  margin: 0;
   border: none;
   border-bottom: 2px solid transparent;
   border-radius: 0;
@@ -237,9 +252,19 @@
   font-family: 'Open Sans', sans-serif;
   text-align: left;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
   transition: background .15s, border-color .15s;
 }
+.ch-cat::-moz-focus-inner { border: 0; }
 .ch-cat:hover { background: rgba(var(--cat-rgb), .09); }
+.ch-cat:focus { outline: none; }
+.ch-cat:focus-visible {
+  outline: 2px solid var(--cat-color);
+  outline-offset: -2px;
+}
 .ch-cat.active {
   border-bottom-color: var(--cat-color);
   background: rgba(var(--cat-rgb), .13);
@@ -288,6 +313,7 @@
    Hairline card matching .home-card-teaser's surface treatment;
    labels and buttons use Home's Antonio-uppercase system
    (.diary-col-label / .diary-voice-btn) rather than plain text.
+   Same native-button-chrome reset as §2 on every <button> here.
 ============================================================ */
 .bf-card {
   background: transparent;
@@ -320,8 +346,15 @@
   color: var(--text);
   font-family: 'Open Sans', sans-serif;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
   transition: all .15s;
 }
+.bf-pill::-moz-focus-inner { border: 0; }
+.bf-pill:focus { outline: none; }
+.bf-pill:focus-visible { outline: 2px solid #A855F7; outline-offset: -2px; }
 .bf-pill:hover { border-color: #A855F7; color: #C084FC; }
 .bf-pill.active {
   background: rgba(168, 85, 247, .12);
@@ -366,8 +399,15 @@
   text-transform: uppercase;
   color: #C084FC;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
   transition: all .15s;
 }
+.bf-build::-moz-focus-inner { border: 0; }
+.bf-build:focus { outline: none; }
+.bf-build:focus-visible { outline: 2px solid #A855F7; outline-offset: -2px; }
 .bf-build:hover:not(:disabled) { background: rgba(168, 85, 247, .1); }
 .bf-build:disabled { opacity: .4; cursor: not-allowed; }
 .bf-reset {
@@ -382,8 +422,15 @@
   text-transform: uppercase;
   color: var(--lp-muted);
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
   transition: all .15s;
 }
+.bf-reset::-moz-focus-inner { border: 0; }
+.bf-reset:focus { outline: none; }
+.bf-reset:focus-visible { outline: 2px solid var(--lp-rule); outline-offset: -2px; }
 .bf-reset:hover { border-color: var(--text); color: var(--text); }
 
 /* Result preview grid (compact thumbnails before "start") */
@@ -539,14 +586,13 @@
 }
 
 /* "Starten" button — flat outlined button. Radius and typography
-   now match the neighboring XP pills (.cr-xp / .cr-xp-total: plain
-   Open Sans, bold, no letter-spacing) instead of the Antonio/pill
+   match the neighboring XP pills (.cr-xp / .cr-xp-total: plain
+   Open Sans, bold, no letter-spacing) rather than the Antonio/pill
    treatment used for the Builder's own filter buttons — those two
    button families read as different components, so this one now
    matches what's actually next to it in the row. Radius (8px) is
-   also much closer to the row's own 12px corner radius, instead of
-   the previous full-pill (99px) which looked mismatched inside a
-   barely-rounded rectangular row. */
+   also much closer to the row's own 12px corner radius. Same
+   native-chrome reset as every other button on this page. */
 .t7w .cr-btn {
   background: transparent;
   border: 1px solid var(--wa);
@@ -557,7 +603,14 @@
   font-weight: 800;
   font-size: 12px;
   padding: 8px 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
 }
+.t7w .cr-btn::-moz-focus-inner { border: 0; }
+.t7w .cr-btn:focus { outline: none; }
+.t7w .cr-btn:focus-visible { outline: 2px solid var(--wa); outline-offset: -2px; }
 .t7w .cr-btn:hover {
   background: rgba(var(--wa-rgb), .1);
   box-shadow: none;
