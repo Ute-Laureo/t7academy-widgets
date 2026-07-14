@@ -595,7 +595,7 @@
 /* Module icon badge — was a solid gradient-filled square with a
    heavy glow; now a soft tinted outline, same language as the
    flattened .ch-cat-icon / banner icons above. Certificate rows
-   get a fully flat, unframed treatment instead — see §6. */
+   get a dedicated pill treatment instead — see §6. */
 .t7w .cr-badge {
   background: rgba(var(--wa-rgb), .12);
   border: 1px solid rgba(var(--wa-rgb), .4);
@@ -689,29 +689,53 @@
   background: rgba(154, 103, 8, .1);
 }
 
-/* Per-row certificate badge — was rendering as a circular gold
-   ring around a dark fill (a "coin/medal" look, still framed like
-   a badge even after removing the solid glow-fill in the previous
-   round). Dropped the frame entirely — no border, no background,
-   no ring — so it's just the flat colored star icon on its own,
-   matching how every other icon on this page (banner icons,
-   .ch-cat-icon) is unframed. This is the plainest, most consistent
-   reading; the star-count pill idea from §1 lives in this same
-   spot conceptually, just without literally re-adding a bordered
-   shape around it. */
+/* Per-row certificate badge — restyled to match the .shz-pill
+   look from the banner (§1): transparent fill, thin border in
+   the section's own color, fully rounded, colored icon instead
+   of a solid gradient-filled "coin" (the widget engine bakes an
+   inline background/box-shadow directly onto this div — see the
+   NOTE below — so it must be neutralized with !important to win
+   over an inline style, the only way an external stylesheet can
+   outrank inline styles without editing the HTML/JS itself).
+
+   NOTE — the ⭐ glyph itself is markup the widget script injects
+   identically for every certificate row (t7-widget-engine.js
+   always renders the same hardcoded "★" span, with its own
+   inline color/text-shadow), regardless of whether the row is
+   the 1-star or 5-star tier. There's no per-row data (attribute
+   or class) exposed to hook a "real" star count onto via CSS —
+   the tier is only distinguished in the row's own title text
+   ("1-Stern Zertifikat") and progress sub-label. Making the badge
+   itself show "★★★" or "3 Sterne" per row would require adding a
+   cfg.stars parameter to the cert widget's template in
+   t7-widget-engine.js (the shared engine script, not this
+   page-specific stylesheet) so the count could be rendered per
+   instance. Flagging this rather than guessing at it in CSS. */
 .t7b-wrap .cr-badge {
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
-  border: none !important;
-  color: var(--wa);
+  border: 1px solid var(--wa);
+  border-radius: 99px;
+  width: auto;
+  min-width: 40px;
+  height: auto;
+  padding: 6px 14px;
 }
 [data-theme="light"] .t7b-wrap .cr-badge {
+  border-color: var(--wa);
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
-  border: none !important;
-  color: var(--wa);
+}
+/* The ★ glyph is a nested <span> with its own inline color/
+   text-shadow (white, drop-shadow) — override with !important
+   so it reads in the section's gold identity instead. */
+.t7b-wrap .cr-badge span {
+  color: var(--wa) !important;
+  text-shadow: none !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
 }
 
 
@@ -730,7 +754,7 @@
    non-cert widget wrapper) — badge tint, row border and the
    "Starten" button all read var(--wa), so darkening it here fixes
    all three at once, in light mode only. The Builder-built widget
-   is re-pointed to violet instead in §11 and gets its own
+   is re-pointed to violet instead in §10 and gets its own
    light-mode value there. */
 [data-theme="light"] .t7a-wrap {
   --wa: #0E7490;
