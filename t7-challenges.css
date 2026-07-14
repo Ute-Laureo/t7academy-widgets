@@ -7,22 +7,19 @@
 
    Purpose: bring the Challenges page's page-specific chrome
    (4-tab category grid, section banners, Builder filter UI,
-   Monats hint, widget rows/buttons, Sterne-Zertifikat identity)
-   in line with the flat visual language used on Home
-   (t7-home.css) and Sterne — hairline dividers, transparent
-   surfaces, Antonio sub-headers in sentence case, Garet titles —
-   instead of the earlier neon gradient-bordered / all-caps box
-   style, and fixes light-mode contrast on several accent colors
-   that were tuned for the dark theme only.
+   Monats hint, widget rows/buttons, sidebar cards, Sterne-
+   Zertifikat identity) in line with the flat visual language
+   used on Home (t7-home.css) and Sterne — hairline dividers,
+   transparent surfaces, Antonio sub-headers in sentence case,
+   Garet titles — instead of the earlier neon gradient-bordered /
+   all-caps / boxed-card style, and fixes light-mode contrast on
+   several accent colors that were tuned for the dark theme only.
 
    Also overrides .t7h-wrap / .shz-wrap / .t7w .* / .t7a-wrap /
-   .t7b-wrap / .nav-link.active, all of which are baked into
-   t7-base.css itself, so the whole page — tabs, banners, module
-   rows, sidebar — reads as one consistent, readable family.
-
-   Everything NOT covered here (the sidebar .rl-* / .t7f-* stat
-   cards, the base .ch-layout grid) is untouched — it already
-   lives in t7-base.css and isn't part of this page's own chrome.
+   .t7b-wrap / .nav-link.active / .sb-card / .rl-* / .t7f-*, all
+   of which are baked into t7-base.css itself, so the whole page —
+   tabs, banners, module rows, sidebar — reads as one consistent,
+   readable family.
    ============================================================ */
 
 
@@ -192,6 +189,8 @@
    family as .home-prog on the Home page. Each tab keeps its own
    --cat-color identity but the surface stays transparent; the
    active tab is marked with a colored underline, not a glow.
+   (See §9 for the mobile single-column layout, which needs its
+   own distinguishability treatment.)
 ============================================================ */
 .ch-cat-grid {
   display: grid;
@@ -449,8 +448,6 @@
    button and icon badge so Technikschule / Zertifikate look like
    they belong to the same flat family as the Builder panel above,
    instead of the earlier heavy gradient-fill / neon-glow rows.
-   This is scoped to the Challenges page only (t7-challenges.css
-   isn't loaded on Sterne/Sevens), so it doesn't touch those pages.
 
    Section colors (--wa / --wa2) are set per-widget-wrapper in
    t7-base.css (.t7a-wrap = cyan default, .t7b-wrap = certs), so
@@ -483,7 +480,7 @@
 /* Zertifikate widget uses a gradient-clip border trick for its gold
    frame — neutralize it in favor of a plain hairline border so the
    row matches every other panel; the gold identity now comes from
-   the badge / button / XP pill colors instead (see below). */
+   the badge / button / XP pill colors instead (see §6). */
 .t7b-wrap .cr,
 .t7b-wrap .t7-panel {
   background: transparent;
@@ -546,7 +543,7 @@
 
 /* Zertifikate module-list widget — re-point its accent variables
    from cyan to gold so badge / button / XP pill / avatar all pick
-   up the same color automatically (see §5 above, which reads
+   up the same color automatically (see §5, which reads
    --wa / --wa-rgb rather than hardcoded hex). */
 .t7b-wrap {
   --wa: #FFD700;
@@ -616,3 +613,111 @@
 [data-theme="light"] .bf-build { border-color: #7C3AED; }
 [data-theme="light"] .bf-build:hover:not(:disabled) { background: rgba(124, 58, 237, .08); }
 [data-theme="light"] .bf-pill.active { background: rgba(124, 58, 237, .1); border-color: #7C3AED; }
+
+
+/* ============================================================
+   8. SIDEBAR CARDS — Sterne Zertifikat / Fortschritt / Rangliste
+   These were still solid bordered boxes (white/dark fill + border
+   + radius) left over from t7-base.css — the one part of the page
+   that hadn't been brought into the flat, hairline-divider system
+   used everywhere else. Now transparent, stacked with a hairline
+   divider between them (same pattern as .home-block on the Home
+   page), and their small header labels (§10) are sentence case.
+============================================================ */
+.ch-sidebar .sb-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+.ch-sidebar .sb-card + .sb-card {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-rule);
+}
+
+.ch-sidebar .sb-label {
+  font-family: 'Antonio', 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-transform: none;
+  color: var(--accent);
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.ch-sidebar .sb-label::before {
+  content: '';
+  display: inline-block;
+  width: 22px;
+  height: 1px;
+  background: currentColor;
+}
+.ch-sidebar .sb-label.gold { color: var(--lp-gold); }
+[data-theme="light"] .ch-sidebar .sb-label { color: #0E7490; }
+[data-theme="light"] .ch-sidebar .sb-label.gold { color: #9A6708; }
+
+
+/* ============================================================
+   9. MOBILE CATEGORY TABS — Technikschule / Zertifikate / Builder
+   / Monats were indistinguishable once the grid collapses to a
+   single column: same padding, no divider between rows, and the
+   only "active" cue (a bottom border) doesn't read in a stacked
+   list. Below 520px this switches to a clear horizontal list —
+   icon + title on one line, a hairline divider between each row,
+   and the active tab marked with a left accent bar instead.
+============================================================ */
+@media (max-width: 520px) {
+  .ch-cat-grid { border-bottom: none; }
+  .ch-cat {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 4px 16px 12px;
+    border-bottom: 1px solid var(--lp-rule);
+    border-left: 3px solid transparent;
+  }
+  .ch-cat:last-child { border-bottom: none; }
+  .ch-cat.active {
+    border-bottom-color: var(--lp-rule);
+    border-left-color: var(--cat-color);
+    background: rgba(128, 140, 160, .05);
+  }
+  .ch-cat-icon { font-size: 22px; flex-shrink: 0; }
+  .ch-cat-title { margin-top: 0; }
+  .ch-cat-sub { display: none; }
+  .ch-cat-count {
+    margin-top: 0;
+    margin-left: auto;
+    padding-top: 0;
+    padding-left: 10px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+}
+
+
+/* ============================================================
+   10. REMAINING SUB-HEADER UPPERCASE SWEEP
+   A few small labels inside the sidebar widgets (Rangliste,
+   Fortschritt) and inside an opened drill screen still had
+   text-transform: uppercase baked into t7-base.css. Same fix as
+   the rest of the page: sentence case, tighter tracking.
+============================================================ */
+.rl-title { text-transform: none; letter-spacing: .02em; }
+.rl-sub   { text-transform: none; letter-spacing: .03em; }
+[data-theme="light"] .rl-sub { color: #0E7490; }
+.vt-btn   { text-transform: none; letter-spacing: .02em; }
+
+.t7f-sub        { text-transform: none; letter-spacing: .02em; }
+.t7f-stat-label { text-transform: none; letter-spacing: .02em; }
+
+.t7w .drill-eye,
+.t7w .plabel   { text-transform: none; letter-spacing: .03em; }
+.t7w .step-name { text-transform: none; letter-spacing: .02em; }
+.t7w .pbadge    { text-transform: none; }
+.t7w .rate-text { text-transform: none; }
