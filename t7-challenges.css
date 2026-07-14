@@ -440,3 +440,138 @@
   color: var(--lp-muted);
 }
 [data-theme="light"] .monats-hint code { color: #C2410C; }
+
+
+/* ============================================================
+   5. MODULE-LIST WIDGET (.t7w) — flatten the row chrome, "Starten"
+   button and icon badge so Technikschule / Zertifikate look like
+   they belong to the same flat family as the Builder panel above,
+   instead of the earlier heavy gradient-fill / neon-glow rows.
+   This is scoped to the Challenges page only (t7-challenges.css
+   isn't loaded on Sterne/Sevens), so it doesn't touch those pages.
+
+   Section colors (--wa / --wa2) are set per-widget-wrapper in
+   t7-base.css (.t7a-wrap = cyan default, .t7b-wrap = certs), so
+   this flattening automatically inherits the right identity color
+   everywhere: cyan rows in Technikschule, gold rows in Zertifikate,
+   and whatever the Builder/Monats widget mounts with.
+============================================================ */
+
+/* Row header ("collapsed" module bar) — hairline border instead of
+   a filled gradient box; no glossy sheen sweep, no glow on hover. */
+.t7w .cr {
+  background: transparent;
+  box-shadow: none;
+}
+.t7w .cr::before { content: none; }
+.t7w .cr:hover {
+  box-shadow: none;
+  transform: none;
+  border-color: rgba(var(--wa-rgb), .5);
+  background: rgba(var(--wa-rgb), .03);
+}
+.t7w .cr.open { border-bottom-color: var(--lp-rule); }
+
+/* Expanded drill panel — same flat hairline treatment */
+.t7w .t7-panel {
+  background: transparent;
+  border-color: var(--lp-rule);
+}
+
+/* Zertifikate widget uses a gradient-clip border trick for its gold
+   frame — neutralize it in favor of a plain hairline border so the
+   row matches every other panel; the gold identity now comes from
+   the badge / button / XP pill colors instead (see below). */
+.t7b-wrap .cr,
+.t7b-wrap .t7-panel {
+  background: transparent;
+  background-image: none;
+  border: 1px solid var(--lp-rule);
+}
+.t7b-wrap .cr:hover { box-shadow: none !important; border-color: rgba(255, 215, 0, .5); }
+.t7b-wrap .cr.open { border-bottom-color: var(--lp-rule); }
+
+/* Module icon badge — was a solid gradient-filled square with a
+   heavy glow; now a soft tinted outline, same language as the
+   flattened .ch-cat-icon / banner icons above. */
+.t7w .cr-badge {
+  background: rgba(var(--wa-rgb), .12);
+  border: 1px solid rgba(var(--wa-rgb), .4);
+  box-shadow: none;
+  color: var(--wa);
+}
+
+/* "Starten" button — swap the filled glowing pill for the same
+   flat outlined-pill language as .bf-build in the Builder panel. */
+.t7w .cr-btn {
+  background: transparent;
+  border: 1px solid var(--wa);
+  border-radius: 99px;
+  box-shadow: none;
+  color: var(--wa);
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+}
+.t7w .cr-btn:hover {
+  background: rgba(var(--wa-rgb), .1);
+  box-shadow: none;
+  transform: none;
+}
+
+
+/* ============================================================
+   6. STERNE-ZERTIFIKAT — GOLD IDENTITY
+   The certificate badge (sidebar) and the Zertifikate module rows
+   were mixing gold (frame, progress bar) with cyan (badge, avatar,
+   button, XP pill, player name) — this makes both fully gold
+   instead of a mixed cyan/gold look.
+============================================================ */
+
+/* Sidebar "Sterne Zertifikat" card (T7Badge) — only the earned
+   player name was still cyan; everything else was already gold. */
+.t7-cert-name {
+  color: var(--lp-gold);
+  text-shadow: 0 0 18px rgba(255, 215, 0, .5);
+}
+[data-theme="light"] .t7-cert-name {
+  color: #ca8309;
+  text-shadow: 0 0 14px rgba(202, 131, 9, .35);
+}
+
+/* Zertifikate module-list widget — re-point its accent variables
+   from cyan to gold so badge / button / XP pill / avatar all pick
+   up the same color automatically (see §5 above, which reads
+   --wa / --wa-rgb rather than hardcoded hex). */
+.t7b-wrap {
+  --wa: #FFD700;
+  --wa2: #FF8C00;
+  --wa-rgb: 255, 215, 0;
+}
+[data-theme="light"] .t7b-wrap {
+  --wa: #ca8309;
+  --wa2: #FF8C00;
+  --wa-rgb: 202, 131, 9;
+}
+
+/* Two elements in the widget use a hardcoded cyan gradient instead
+   of the --wa variables — override them directly for the cert
+   widget so no cyan survives anywhere in the Zertifikate rows. */
+.t7b-wrap .cr-avatar {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  box-shadow: 0 0 8px rgba(255, 215, 0, .35);
+}
+.t7b-wrap .cr-xp-total {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  box-shadow: 0 0 10px rgba(255, 215, 0, .28);
+}
+/* Light mode has its own universal (cyan) override for .cr-xp on
+   .t7w — win it back for the cert widget specifically. */
+[data-theme="light"] .t7b-wrap .cr-xp {
+  color: #ca8309;
+  border-color: rgba(202, 131, 9, .4);
+  background: rgba(202, 131, 9, .1);
+}
