@@ -7,21 +7,22 @@
 
    Purpose: bring the Challenges page's page-specific chrome
    (4-tab category grid, section banners, Builder filter UI,
-   Monats hint) in line with the flat visual language used on
-   Home (t7-home.css) and Sterne — hairline dividers, transparent
-   surfaces, Antonio-uppercase eyebrows, Garet titles — instead
-   of the earlier neon gradient-bordered / orb-glow box style.
+   Monats hint, widget rows/buttons, Sterne-Zertifikat identity)
+   in line with the flat visual language used on Home
+   (t7-home.css) and Sterne — hairline dividers, transparent
+   surfaces, Antonio sub-headers in sentence case, Garet titles —
+   instead of the earlier neon gradient-bordered / all-caps box
+   style, and fixes light-mode contrast on several accent colors
+   that were tuned for the dark theme only.
 
-   Also overrides .t7h-wrap / .shz-wrap, which is baked into
-   t7-base.css itself (leftover from an older version of this
-   page) so all four category banners — Technikschule, Sterne-
-   Zertifikate, Builder, Monats — read as one consistent family
-   instead of two different visual systems.
+   Also overrides .t7h-wrap / .shz-wrap / .t7w .* / .t7a-wrap /
+   .t7b-wrap / .nav-link.active, all of which are baked into
+   t7-base.css itself, so the whole page — tabs, banners, module
+   rows, sidebar — reads as one consistent, readable family.
 
-   Everything NOT covered here (widget internals .t7w .*, the
-   sidebar .sb-card / .rl-* / .t7f-*, the base .ch-layout grid)
-   is untouched — it already lives in t7-base.css and isn't part
-   of this page's own chrome.
+   Everything NOT covered here (the sidebar .rl-* / .t7f-* stat
+   cards, the base .ch-layout grid) is untouched — it already
+   lives in t7-base.css and isn't part of this page's own chrome.
    ============================================================ */
 
 
@@ -69,8 +70,12 @@
   background-image: none;
   border-color: transparent;
 }
-[data-theme="light"] .t7h-wrap { --cat-c: #0891B2; }
-[data-theme="light"] .shz-wrap { --cat-c: #ca8309; }
+/* Light-mode identity colors are deliberately darker than their
+   dark-mode counterparts (#0E7490 vs cyan #00E5FF, #9A6708 vs
+   gold #FFD700) — the bright versions drop under 3:1 contrast
+   against white cards. See §7 for the full contrast rationale. */
+[data-theme="light"] .t7h-wrap { --cat-c: #0E7490; }
+[data-theme="light"] .shz-wrap { --cat-c: #9A6708; }
 [data-theme="light"] .shb-wrap { --cat-c: #7C3AED; }
 [data-theme="light"] .shm-wrap { --cat-c: #C2410C; }
 
@@ -143,6 +148,9 @@
   color: var(--cat-c);
 }
 
+/* Pills: sentence case as authored in the HTML ("XP sammeln", not
+   "XP SAMMELN") — narrower letter-spacing to match, since wide
+   tracking was tuned for all-caps and looks odd on mixed case. */
 .t7h-pills, .shz-pills, .shb-pills, .shm-pills {
   display: flex;
   gap: 8px;
@@ -154,9 +162,8 @@
   gap: 6px;
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: .02em;
   padding: 6px 14px;
   border-radius: 99px;
   border: 1px solid var(--cat-c);
@@ -236,10 +243,9 @@
   margin-top: auto;
   padding-top: 10px;
   font-family: 'Antonio', sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  letter-spacing: .03em;
   color: var(--cat-color);
 }
 
@@ -248,8 +254,8 @@
 .ch-cat-build   { --cat-color: #A855F7; }
 .ch-cat-monats  { --cat-color: #FF6B35; }
 
-[data-theme="light"] .ch-cat-tech   { --cat-color: #0891B2; }
-[data-theme="light"] .ch-cat-cert   { --cat-color: #ca8309; }
+[data-theme="light"] .ch-cat-tech   { --cat-color: #0E7490; }
+[data-theme="light"] .ch-cat-cert   { --cat-color: #9A6708; }
 [data-theme="light"] .ch-cat-build  { --cat-color: #7C3AED; }
 [data-theme="light"] .ch-cat-monats { --cat-color: #C2410C; }
 
@@ -262,7 +268,8 @@
    3. BUILDER FILTER UI
    Thin-border pills and hairline card, matching the pill-toggle /
    search-wrap vocabulary from Sterne/Sevens rather than the
-   heavy violet gradient buttons.
+   heavy violet gradient buttons. Labels/buttons in sentence case,
+   matching the HTML source, not forced uppercase.
 ============================================================ */
 .bf-card {
   background: transparent;
@@ -277,10 +284,9 @@
 .bf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .bf-label {
   font-family: 'Antonio', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
+  letter-spacing: .02em;
   color: var(--lp-faint);
   min-width: 110px;
 }
@@ -336,9 +342,8 @@
   padding: 10px 20px;
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
-  font-size: 12px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: .02em;
   color: #C084FC;
   cursor: pointer;
   transition: all .15s;
@@ -352,9 +357,8 @@
   padding: 10px 20px;
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
-  font-size: 12px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: .02em;
   color: var(--lp-muted);
   cursor: pointer;
   transition: all .15s;
@@ -373,10 +377,9 @@
 .bf-preview.open { display: block; }
 .bf-preview-title {
   font-family: 'Antonio', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  letter-spacing: .03em;
   color: var(--lp-faint);
   margin-bottom: 12px;
 }
@@ -405,8 +408,7 @@
 .bf-vid-meta {
   font-size: 10px;
   color: var(--lp-faint);
-  letter-spacing: .05em;
-  text-transform: uppercase;
+  letter-spacing: .03em;
 }
 
 
@@ -502,7 +504,8 @@
 }
 
 /* "Starten" button — swap the filled glowing pill for the same
-   flat outlined-pill language as .bf-build in the Builder panel. */
+   flat outlined-pill language as .bf-build in the Builder panel,
+   and sentence case (as the widget authors it) instead of caps. */
 .t7w .cr-btn {
   background: transparent;
   border: 1px solid var(--wa);
@@ -511,9 +514,8 @@
   color: var(--wa);
   font-family: 'Antonio', sans-serif;
   font-weight: 600;
-  font-size: 11px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: .01em;
   padding: 8px 16px;
 }
 .t7w .cr-btn:hover {
@@ -538,8 +540,8 @@
   text-shadow: 0 0 18px rgba(255, 215, 0, .5);
 }
 [data-theme="light"] .t7-cert-name {
-  color: #ca8309;
-  text-shadow: 0 0 14px rgba(202, 131, 9, .35);
+  color: #9A6708;
+  text-shadow: 0 0 14px rgba(154, 103, 8, .3);
 }
 
 /* Zertifikate module-list widget — re-point its accent variables
@@ -552,9 +554,9 @@
   --wa-rgb: 255, 215, 0;
 }
 [data-theme="light"] .t7b-wrap {
-  --wa: #ca8309;
+  --wa: #9A6708;
   --wa2: #FF8C00;
-  --wa-rgb: 202, 131, 9;
+  --wa-rgb: 154, 103, 8;
 }
 
 /* Two elements in the widget use a hardcoded cyan gradient instead
@@ -571,7 +573,46 @@
 /* Light mode has its own universal (cyan) override for .cr-xp on
    .t7w — win it back for the cert widget specifically. */
 [data-theme="light"] .t7b-wrap .cr-xp {
-  color: #ca8309;
-  border-color: rgba(202, 131, 9, .4);
-  background: rgba(202, 131, 9, .1);
+  color: #9A6708;
+  border-color: rgba(154, 103, 8, .4);
+  background: rgba(154, 103, 8, .1);
 }
+
+
+/* ============================================================
+   7. LIGHT-MODE CONTRAST FIXES
+   The dark-mode accent colors (--accent #00e0ff, --wa #00E5FF,
+   the Builder lavender #C084FC) read fine against near-black
+   dark surfaces, but drop well under WCAG AA (several under
+   3:1 — #00e0ff on white is only ~1.6:1) once the same colors
+   sit on the white light-mode cards. These re-point the same
+   elements to darker, higher-contrast tones for light mode only;
+   dark mode is untouched.
+============================================================ */
+
+/* Technikschule / Builder-built / Monats widget rows (.t7a-wrap is
+   the generic, non-cert widget wrapper) — badge tint, row border
+   and the "Starten" button all read var(--wa), so darkening it
+   here fixes all three at once, in light mode only. */
+[data-theme="light"] .t7a-wrap {
+  --wa: #0E7490;
+  --wa2: #075985;
+  --wa-rgb: 14, 116, 144;
+}
+
+/* Top nav "Challenges" active tab was using the raw (very light)
+   --accent for its text color. Scoped to this page only. */
+[data-theme="light"] .nav-link.active { color: #0E7490; }
+
+/* Builder filter UI — the lavender accent text was tuned for the
+   dark panel background; swap it for the same darker violet
+   already used for the Builder identity elsewhere on this page. */
+[data-theme="light"] .bf-pill:hover,
+[data-theme="light"] .bf-pill.active,
+[data-theme="light"] .bf-build,
+[data-theme="light"] .bf-count strong {
+  color: #7C3AED;
+}
+[data-theme="light"] .bf-build { border-color: #7C3AED; }
+[data-theme="light"] .bf-build:hover:not(:disabled) { background: rgba(124, 58, 237, .08); }
+[data-theme="light"] .bf-pill.active { background: rgba(124, 58, 237, .1); border-color: #7C3AED; }
