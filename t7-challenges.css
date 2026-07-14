@@ -1,0 +1,442 @@
+/* ============================================================
+   T7 ACADEMY — t7-challenges.css
+   ------------------------------------------------------------
+   Challenges-page overrides. Loaded AFTER t7-base.css (and
+   after it, if present, t7-home.css — order doesn't matter
+   between those two since they don't touch the same selectors).
+
+   Purpose: bring the Challenges page's page-specific chrome
+   (4-tab category grid, section banners, Builder filter UI,
+   Monats hint) in line with the flat visual language used on
+   Home (t7-home.css) and Sterne — hairline dividers, transparent
+   surfaces, Antonio-uppercase eyebrows, Garet titles — instead
+   of the earlier neon gradient-bordered / orb-glow box style.
+
+   Also overrides .t7h-wrap / .shz-wrap, which is baked into
+   t7-base.css itself (leftover from an older version of this
+   page) so all four category banners — Technikschule, Sterne-
+   Zertifikate, Builder, Monats — read as one consistent family
+   instead of two different visual systems.
+
+   Everything NOT covered here (widget internals .t7w .*, the
+   sidebar .sb-card / .rl-* / .t7f-*, the base .ch-layout grid)
+   is untouched — it already lives in t7-base.css and isn't part
+   of this page's own chrome.
+   ============================================================ */
+
+
+/* ============================================================
+   1. SECTION BANNERS — Technikschule / Zertifikate / Builder /
+   Monats. Each keeps its own identity color via --cat-c, but the
+   chrome (icon + Garet title + muted intro + thin pills) is the
+   same flat pattern lp-hero / home-block headers use — no more
+   gradient border box, topline, or orb glow.
+============================================================ */
+
+/* Kill the old neon decorations outright — topline + both orbs,
+   on all four banners. */
+.t7h-topline, .shz-topline, .shb-topline, .shm-topline,
+.t7h-orb1,    .shz-orb1,    .shb-orb1,    .shm-orb1,
+.t7h-orb2,    .shz-orb2,    .shb-orb2,    .shm-orb2 {
+  display: none;
+}
+
+.t7h-wrap, .shz-wrap, .shb-wrap, .shm-wrap {
+  --cat-c: var(--accent);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+  background: none;
+  background-image: none;
+  padding: 26px 4px 24px;
+  margin-top: 4px;
+  border-bottom: 1px solid var(--lp-rule);
+}
+.shz-wrap { --cat-c: var(--lp-gold); }
+.shb-wrap { --cat-c: #A855F7; }
+.shm-wrap { --cat-c: #FF6B35; }
+
+[data-theme="light"] .t7h-wrap,
+[data-theme="light"] .shz-wrap,
+[data-theme="light"] .shb-wrap,
+[data-theme="light"] .shm-wrap {
+  background: none;
+  background-image: none;
+  border-color: transparent;
+}
+[data-theme="light"] .t7h-wrap { --cat-c: #0891B2; }
+[data-theme="light"] .shz-wrap { --cat-c: #ca8309; }
+[data-theme="light"] .shb-wrap { --cat-c: #7C3AED; }
+[data-theme="light"] .shm-wrap { --cat-c: #C2410C; }
+
+.t7h-icon, .shz-icon, .shb-icon, .shm-icon {
+  position: static;
+  transform: none;
+  flex-shrink: 0;
+  font-size: 32px;
+  line-height: 1;
+  margin-top: 2px;
+  filter: none;
+}
+
+.t7h-content, .shz-content, .shb-content, .shm-content {
+  position: static;
+  z-index: auto;
+  flex: 1;
+  min-width: 0;
+  padding-right: 0;
+}
+
+.t7h-title, .shz-title, .shb-title, .shm-title {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-weight: 900;
+  font-size: clamp(19px, 2.3vw, 26px);
+  letter-spacing: -.01em;
+  line-height: 1.15;
+  color: var(--text);
+  white-space: normal;
+  margin-bottom: 8px;
+}
+.t7h-title span, .shz-title span, .shb-title span, .shm-title span {
+  color: var(--cat-c);
+}
+[data-theme="light"] .t7h-title,
+[data-theme="light"] .shz-title,
+[data-theme="light"] .shb-title,
+[data-theme="light"] .shm-title {
+  color: var(--text);
+}
+[data-theme="light"] .t7h-title span,
+[data-theme="light"] .shz-title span,
+[data-theme="light"] .shb-title span,
+[data-theme="light"] .shm-title span {
+  color: var(--cat-c);
+}
+
+.t7h-intro, .shz-intro, .shb-intro, .shm-intro {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--lp-muted);
+  max-width: 640px;
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+.t7h-intro strong, .shz-intro strong, .shb-intro strong, .shm-intro strong {
+  color: var(--cat-c);
+  font-weight: 700;
+}
+[data-theme="light"] .t7h-intro,
+[data-theme="light"] .shz-intro,
+[data-theme="light"] .shb-intro,
+[data-theme="light"] .shm-intro {
+  color: var(--lp-muted);
+}
+[data-theme="light"] .t7h-intro strong,
+[data-theme="light"] .shz-intro strong,
+[data-theme="light"] .shb-intro strong,
+[data-theme="light"] .shm-intro strong {
+  color: var(--cat-c);
+}
+
+.t7h-pills, .shz-pills, .shb-pills, .shm-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.t7h-pill, .shz-pill, .shb-pill, .shm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--cat-c);
+  color: var(--cat-c);
+  background: transparent;
+  box-shadow: none;
+}
+[data-theme="light"] .t7h-pill,
+[data-theme="light"] .shz-pill,
+[data-theme="light"] .shb-pill,
+[data-theme="light"] .shm-pill {
+  background: transparent;
+  border-color: var(--cat-c);
+  color: var(--cat-c);
+}
+
+@media (max-width: 640px) {
+  .t7h-wrap, .shz-wrap, .shb-wrap, .shm-wrap { gap: 14px; padding: 22px 2px 20px; }
+  .t7h-icon, .shz-icon, .shb-icon, .shm-icon { font-size: 26px; }
+}
+
+
+/* ============================================================
+   2. 4-CARD CATEGORY TAB GRID
+   Flat hover-lift tiles instead of gradient-bordered cards — same
+   family as .home-prog on the Home page. Each tab keeps its own
+   --cat-color identity but the surface stays transparent; the
+   active tab is marked with a colored underline, not a glow.
+============================================================ */
+.ch-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 10px;
+  border-top: 1px solid var(--lp-rule);
+  border-bottom: 1px solid var(--lp-rule);
+}
+@media (max-width: 880px) { .ch-cat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .ch-cat-grid { grid-template-columns: 1fr; } }
+
+.ch-cat {
+  --cat-color: var(--accent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  padding: 18px 16px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: 'Open Sans', sans-serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.ch-cat:hover { background: rgba(128, 140, 160, .05); }
+.ch-cat.active {
+  border-bottom-color: var(--cat-color);
+  background: rgba(128, 140, 160, .04);
+}
+
+.ch-cat-icon { font-size: 24px; line-height: 1; color: var(--cat-color); }
+.ch-cat-title {
+  font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -.01em;
+  color: var(--text);
+  line-height: 1.25;
+  margin-top: 2px;
+}
+.ch-cat-sub { font-size: 11px; color: var(--lp-muted); line-height: 1.4; }
+.ch-cat-count {
+  margin-top: auto;
+  padding-top: 10px;
+  font-family: 'Antonio', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--cat-color);
+}
+
+.ch-cat-tech    { --cat-color: var(--accent); }
+.ch-cat-cert    { --cat-color: var(--lp-gold); }
+.ch-cat-build   { --cat-color: #A855F7; }
+.ch-cat-monats  { --cat-color: #FF6B35; }
+
+[data-theme="light"] .ch-cat-tech   { --cat-color: #0891B2; }
+[data-theme="light"] .ch-cat-cert   { --cat-color: #ca8309; }
+[data-theme="light"] .ch-cat-build  { --cat-color: #7C3AED; }
+[data-theme="light"] .ch-cat-monats { --cat-color: #C2410C; }
+
+/* Tab panel reveal — unchanged, purely functional */
+.ch-panel { display: none; }
+.ch-panel.active { display: flex; }
+
+
+/* ============================================================
+   3. BUILDER FILTER UI
+   Thin-border pills and hairline card, matching the pill-toggle /
+   search-wrap vocabulary from Sterne/Sevens rather than the
+   heavy violet gradient buttons.
+============================================================ */
+.bf-card {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 14px;
+  padding: 22px 22px 18px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.bf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.bf-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  min-width: 110px;
+}
+.bf-pills { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; }
+.bf-pill {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'Open Sans', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+.bf-pill:hover { border-color: #A855F7; color: #C084FC; }
+.bf-pill.active {
+  background: rgba(168, 85, 247, .12);
+  border-color: #A855F7;
+  color: #C084FC;
+}
+.bf-search {
+  flex: 1;
+  min-width: 200px;
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 99px;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'Open Sans', sans-serif;
+}
+.bf-search:focus { outline: none; border-color: #A855F7; }
+.bf-search::placeholder { color: var(--lp-faint); }
+
+.bf-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--lp-rule);
+  flex-wrap: wrap;
+}
+.bf-count { font-size: 13px; color: var(--lp-muted); font-weight: 600; }
+.bf-count strong { color: #C084FC; }
+.bf-btnrow { display: flex; gap: 10px; flex-wrap: wrap; }
+.bf-build {
+  background: transparent;
+  border: 1px solid #A855F7;
+  border-radius: 99px;
+  padding: 10px 20px;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #C084FC;
+  cursor: pointer;
+  transition: all .15s;
+}
+.bf-build:hover:not(:disabled) { background: rgba(168, 85, 247, .1); }
+.bf-build:disabled { opacity: .4; cursor: not-allowed; }
+.bf-reset {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 99px;
+  padding: 10px 20px;
+  font-family: 'Antonio', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.bf-reset:hover { border-color: var(--text); color: var(--text); }
+
+/* Result preview grid (compact thumbnails before "start") */
+.bf-preview {
+  display: none;
+  border: 1px solid var(--lp-rule);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 14px;
+  background: transparent;
+}
+.bf-preview.open { display: block; }
+.bf-preview-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lp-faint);
+  margin-bottom: 12px;
+}
+.bf-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.bf-vid {
+  background: transparent;
+  border: 1px solid var(--lp-rule);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bf-vid-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bf-vid-meta {
+  font-size: 10px;
+  color: var(--lp-faint);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+
+/* ============================================================
+   4. MONATS EDITOR HINT — same soft-tinted callout pattern as
+   .home-hint on the Home page (see t7-home.css §5), recolored to
+   the Monats orange identity.
+============================================================ */
+.monats-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255, 107, 53, .06);
+  border: 1px solid rgba(255, 107, 53, .22);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--lp-muted);
+}
+.monats-hint code {
+  background: rgba(0, 0, 0, .3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #FF6B35;
+  font-size: 12px;
+}
+[data-theme="light"] .monats-hint {
+  background: rgba(194, 65, 12, .06);
+  border-color: rgba(194, 65, 12, .25);
+  color: var(--lp-muted);
+}
+[data-theme="light"] .monats-hint code { color: #C2410C; }
