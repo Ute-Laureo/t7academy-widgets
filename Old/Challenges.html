@@ -350,33 +350,167 @@
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-cert-upload.js?v=2"></script>
 <!-- Vimeo watch-time tracker (records progress to video_progress table) -->
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-vimeo-tracker.js"></script>
-<!-- loadMonats.js merged into t7-widget-engine.js — no separate script needed -->
+<!-- Challenge des Monats loader (reads from Google Sheet, mounts into #monats-container) -->
+<script src="https://ute-laureo.github.io/t7academy-widgets/loadMonats.js"></script>
 
 <script>
 /* ============================================================
-   PANEL 1: TECHNIKSCHULE
-   Pulls all kind='challenge' modules from Supabase (modules +
-   videos tables) and auto-mounts them into #ch-container.
-   Add / reorder / edit modules in Supabase \u2014 no code change needed.
+   PANEL 1: TECHNIKSCHULE - all existing Technik/Groundmoves
+   challenges, rendered into #ch-container (engine default).
 ============================================================ */
-T7.loadChallenges('ch-container');
+T7.challenge({
+  title:'Jonglierschule',badge:'7\uFE0F\u20E3',moduleKey:'jong',
+  heroText:'4 Uebungen von einfach bis mittel. Zeige was du drauf hast!',
+  unlockMsg:'Erreiche Bewertung 4 oder 5 bei Challenges 1 und 2 um Challenges 3 und 4 freizuschalten!',
+  drills:[
+    {title:'Sit Downs Jonglieren',    eye:'Challenge 01',meta:'Einfach - Schusstechnik',vid:'1124934705',hash:'6a71a27daf',type:'rate',xp:10,star:1,next:'Challenge 2 ist jetzt offen!'},
+    {title:'Sit Downs Fuss Kopf Fuss',eye:'Challenge 02',meta:'Einfach - Schusstechnik',vid:'1124935347',hash:'c8977c5fb4',type:'rate',xp:10,star:1,next:'Challenges 3 und 4 sind jetzt freigeschaltet!'},
+    {title:'Freestyle Jonglieren',    eye:'Challenge 03',meta:'Mittel - Ballannahme',   vid:'1125467352',hash:'30d35d6e70',type:'rate',xp:10,star:3,next:'Challenge 4 ist jetzt offen!'},
+    {title:'Fussball Jonglieren',     eye:'Challenge 04',meta:'Mittel - Schusstechnik', vid:'1125467472',hash:'e6c7888db8',type:'rate',xp:10,star:3,next:'Alle 4 Challenges abgeschlossen!'}
+  ]
+});
+T7.challenge({
+  title:'First Touch',badge:'7\uFE0F\u20E3',moduleKey:'ft1',
+  heroText:'5 First Touch Uebungen - von einfach bis mittel. Bewertung 4 oder 5 schaltet die naechste Uebung frei.',
+  unlockMsg:'Erreiche Bewertung 4 oder 5 um die naechste Uebung freizuschalten!',
+  drills:[
+    {title:'Annahme Innenseite (Pass)',eye:'Challenge 01',meta:'Einfach - Ballannahme',        vid:'1110049085',hash:'995deb6889',type:'rate',xp:10,star:1,next:'Challenge 2 ist jetzt offen!'},
+    {title:'Annahme Fuss-Spitze',      eye:'Challenge 02',meta:'Mittel - Ballannahme',          vid:'1127880501',hash:'636ebeb0c4',type:'rate',xp:10,star:2,next:'Challenge 3 ist jetzt offen!'},
+    {title:'Mitnahme Aussenseite',     eye:'Challenge 03',meta:'Mittel - Ballmitnahme',         vid:'1129453133',hash:'428374cce7',type:'rate',xp:10,star:3,next:'Challenge 4 ist jetzt offen!'},
+    {title:'Mitnahme Sohle',           eye:'Challenge 04',meta:'Fortgeschritten - Ballmitnahme',vid:'1129453204',hash:'01fa59ea55',type:'rate',xp:10,star:4,next:'Challenge 5 ist jetzt offen!'},
+    {title:'Marcello',                 eye:'Challenge 05',meta:'Fortgeschritten - Ballmitnahme',vid:'1129149106',hash:'bb3b5bade0',type:'rate',xp:10,star:5,next:'Alle 5 First Touch Skills gemeistert!'}
+  ]
+});
+T7.challenge({
+  title:'First Touch Air',badge:'7\uFE0F\u20E3',moduleKey:'fta1',
+  heroText:'6 First Touch Air Uebungen - Bewertung 4 oder 5 schaltet die naechste Uebung frei.',
+  unlockMsg:'Erreiche Bewertung 4 oder 5 um die naechste Uebung freizuschalten!',
+  drills:[
+    {title:'Annahme Innenseite', eye:'Challenge 01',meta:'Einfach - Ballannahme aus der Luft',vid:'1127882291',hash:'34a8d52f16',type:'rate',xp:10,star:1,next:'Challenge 2 ist jetzt offen!'},
+    {title:'Annahme Fuss-Spitze',eye:'Challenge 02',meta:'Einfach - Ballannahme aus der Luft',vid:'1127880501',hash:'636ebeb0c4',type:'rate',xp:10,star:2,next:'Challenge 3 ist jetzt offen!'},
+    {title:'Annahme Aussenseite',eye:'Challenge 03',meta:'Mittel - Ballannahme aus der Luft', vid:'1129148972',hash:'be47c5682f',type:'rate',xp:10,star:3,next:'Challenge 4 ist jetzt offen!'},
+    {title:'Annahme Oberschenkel',eye:'Challenge 04',meta:'Mittel - Ballannahme aus der Luft',vid:'1127880718',hash:'66d88d0e47',type:'rate',xp:10,star:4,next:'Challenge 5 ist jetzt offen!'},
+    {title:'Annahme Brust',      eye:'Challenge 05',meta:'Mittel - Ballannahme aus der Luft', vid:'1127889818',hash:'1c33df2fa4',type:'rate',xp:10,star:5,next:'Challenge 6 ist jetzt offen!'},
+    {title:'Annahme Schulter',   eye:'Challenge 06',meta:'Mittel - Ballannahme aus der Luft', vid:'1127902193',hash:'b19d804a10',type:'rate',xp:10,star:6,next:'Alle 6 First Touch Air Skills gemeistert!'}
+  ]
+});
+T7.challenge({
+  title:'Ginga Basic',badge:'\ud83c\udde7\ud83c\uddf7',moduleKey:'gc0',
+  heroText:'5 Ginga Grundbewegungen - von einfach bis mittel. Jeder Versuch bringt Punkte!',
+  unlockMsg:'',
+  drills:[
+    {title:'V',             eye:'Challenge 01',meta:'Einfach - Ginga Basic',vid:'1110048776',hash:'3990db7901',type:'rate',xp:10,star:1,next:'Naechste Challenge: Sole Left Right'},
+    {title:'Sole Left Right',eye:'Challenge 02',meta:'Einfach - Ginga Basic',vid:'1111311105',hash:'b285a5a081',type:'rate',xp:10,star:1,next:'Naechste Challenge: Drag Back'},
+    {title:'Drag Back',     eye:'Challenge 03',meta:'Mittel - Ginga Basic', vid:'1110029532',hash:'c98afbe376',type:'rate',xp:10,star:1,next:'Naechste Challenge: Step Over'},
+    {title:'Step Over',     eye:'Challenge 04',meta:'Mittel - Ginga Basic', vid:'1110029715',hash:'8757b6279f',type:'rate',xp:10,star:1,next:'Naechste Challenge: La Croqueta'},
+    {title:'La Croqueta',   eye:'Challenge 05',meta:'Mittel - Ginga Basic', vid:'1110029615',hash:'d558930be0',type:'rate',xp:10,star:1,next:'Alle 5 Ginga Basic Challenges gemeistert!'}
+  ]
+});
+T7.challenge({
+  title:'Ginga Advanced',badge:'\ud83c\udde7\ud83c\uddf7',moduleKey:'gc1',
+  heroText:'Zeige uns deine Groundmoves im Eins gegen Eins. Jeder Versuch bringt Punkte!',
+  unlockMsg:'',
+  drills:[
+    {title:'Sole Role',        eye:'Challenge 01',meta:'Mittel - Ginga Advanced',vid:'1109282215',hash:'08c5487fa2',type:'rate',xp:10,star:1,next:'Naechste Challenge: Step Over'},
+    {title:'Step Over',        eye:'Challenge 02',meta:'Mittel - Ginga Advanced',vid:'1110029715',hash:'8757b6279f',type:'rate',xp:10,star:1,next:'Naechste Challenge: Ronaldo Chop'},
+    {title:'Ronaldo Chop',     eye:'Challenge 03',meta:'Mittel - Ginga Advanced',vid:'1108506571',hash:'93ac3ef1d9',type:'rate',xp:10,star:1,next:'Naechste Challenge: Reverse Elastico'},
+    {title:'Reverse Elastico', eye:'Challenge 04',meta:'Mittel - Ginga Advanced',vid:'1096874149',hash:'d47a0fd085',type:'rate',xp:10,star:1,next:'Naechste Challenge: Double Seven'},
+    {title:'Double Seven',     eye:'Challenge 05',meta:'Mittel - Ginga Advanced',vid:'1130122092',hash:'9e2782b01e',type:'rate',xp:10,star:1,next:'Alle 5 Ginga Advanced Challenges gemeistert!'}
+  ]
+});
+T7.challenge({
+  title:'Brazilian Dance',badge:'\ud83c\udde7\ud83c\uddf7',moduleKey:'br1',
+  heroText:'Zeige uns deine Meistere die Tricks der brasilianischen Ballk&uuml;nstler &mdash; von einfach bis schwierig. Jeder Versuch bringt Punkte!',
+  unlockMsg:'',
+  drills:[
+    {title:'Thiago',            eye:'Challenge 01',meta:'Einfach - Brazilian Dance',vid:'1109277286',hash:'0da9f2acec',type:'rate',xp:10,star:1,next:'Naechste Challenge: Samba'},
+    {title:'Samba',             eye:'Challenge 02',meta:'Mittel - Brazilian Dance',vid:'1150310023',hash:'316bc2fb69',type:'rate',xp:10,star:1,next:'Naechste Challenge: Marcelo'},
+    {title:'Marcelo',           eye:'Challenge 03',meta:'Mittel - Brazilian Dance',vid:'1148623478',hash:'0af6a7d193',type:'rate',xp:10,star:1,next:'Naechste Challenge: Rainbow'},
+    {title:'Rainbow',           eye:'Challenge 04',meta:'Schwierig - Brazilian Dance',vid:'1110029867',hash:'061207fe6c',type:'rate',xp:10,star:1,next:'Naechste Challenge: Brazilian Circle'},
+    {title:'Brazilian Circle',  eye:'Challenge 05',meta:'Schwierig - Brazilian Dance',vid:'1096847104',hash:'98fcc93e60',type:'rate',xp:10,star:1,next:'Alle 5 Brazilian Dance Challenges gemeistert!'}
+  ]
+});
+T7.challenge({
+  title:'Ball in der Luft halten',badge:'\u26BD',moduleKey:'jong2',
+  heroText:'4 Jonglier Challenges - merke dir deine Anzahl und sammle XP!',
+  unlockMsg:'Erreiche dein Ziel fuer weitere Challenges!',
+  drills:[
+    {title:'Sitdown Jonglieren',  eye:'Challenge 01',meta:'Einfach - max. 10 XP (ab 10x)',            vid:'1124934705',hash:'6a71a27daf',type:'hits',maxHits:10,xp:10,star:1,next:'Challenge 2 ist jetzt offen!'},
+    {title:'Freestyle Jonglieren',eye:'Challenge 02',meta:'Mittel - max. 10 XP (ab 20x)',             vid:'1125467352',hash:'30d35d6e70',type:'hits',maxHits:20,xp:10,star:1,next:'Challenge 3 ist jetzt offen!'},
+    {title:'Jonglieren Aufstehen',eye:'Challenge 03',meta:'Mittel - 10 XP wenn geschafft',            vid:'1124938670',hash:'8cf0293979',type:'rate',xp:10,star:1,next:'Challenge 4 ist jetzt offen!'},
+    {title:'Jonglieren 11 to 55', eye:'Challenge 04',meta:'Fortgeschritten - 10 XP wenn geschafft',  vid:'1130121991',hash:'6425012f79',type:'rate',xp:10,star:1,next:'Alle 4 Challenges gemeistert!'}
+  ]
+});
 
 /* ============================================================
-   PANEL 2: ZERTIFIKATE
-   Pulls all kind='certificate' modules from Supabase and
-   auto-mounts them into #cert-container.
+   PANEL 2: ZERTIFIKATE - 1 to 5 star certificates,
+   rendered into #cert-container.
 ============================================================ */
-T7.loadCerts('cert-container');
+T7.certificate({
+  title:'1 Stern Zertifikat',badge:'\u2B50',instanceKey:'sz1',stars:1,
+  heroText:'Zeige deine Skills und erhalte dein offizielles T7 Zertifikat!',
+  drills:[
+    {title:'V',                 eye:'Challenge 01',meta:'Technik - Ballkontrolle',vid:'1150309223',hash:'437e99ba8e',xp:15,next:'Weiter zu Challenge 2!'},
+    {title:'Sohle Links Rechts',eye:'Challenge 02',meta:'Technik - Ballannahme',  vid:'1108507106',hash:'18d2905016',xp:15,next:'Weiter zu Challenge 3!'},
+    {title:'Sohle um den Fuss', eye:'Challenge 03',meta:'Technik - Dribbling',    vid:'1108506991',hash:'6597f5cef6',xp:15,next:'Weiter zu Challenge 4!'},
+    {title:'Spann Balancieren', eye:'Challenge 04',meta:'Technik - Schuss',       vid:'1110049131',hash:'0944817493',xp:15,next:'Letzte Challenge!'},
+    {title:"Cross One's Leg",   eye:'Challenge 05',meta:'Technik - Kombination',  vid:'1103529086',hash:'cea1749d3e',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
+  ]
+});
+T7.certificate({
+  title:'2 Sterne Zertifikat',badge:'\u2B50\u2B50',instanceKey:'sz2',stars:2,
+  heroText:'Zeige deine Skills und erhalte dein Zertifikat!',
+  drills:[
+    {title:'Leg Cross',  eye:'Challenge 01',meta:'Technik - Ballkontrolle',vid:'1108506666',hash:'3b553e1736',xp:15,next:'Weiter zu Challenge 2!'},
+    {title:'Seven',      eye:'Challenge 02',meta:'Technik - Ballfuehrung', vid:'1110048992',hash:'34251d5943',xp:15,next:'Weiter zu Challenge 3!'},
+    {title:'La Croqueta',eye:'Challenge 03',meta:'Technik - Dribbling',    vid:'1110029615',hash:'d558930be0',xp:15,next:'Weiter zu Challenge 4!'},
+    {title:'No Look',    eye:'Challenge 04',meta:'Technik - Kreativitaet', vid:'1109282305',hash:'26d2c5dcc7',xp:15,next:'Letzte Challenge!'},
+    {title:'Roulette',   eye:'Challenge 05',meta:'Technik - Dribbling',    vid:'1109282284',hash:'a124376bf0',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
+  ]
+});
+T7.certificate({
+  title:'3 Sterne Zertifikat',badge:'\u2B50\u2B50\u2B50',instanceKey:'sz3',stars:3,
+  heroText:'Zeige deine Skills und erhalte dein Zertifikat!',
+  drills:[
+    {title:'Hop Step-Over',eye:'Challenge 01',meta:'Technik - Dribbling',   vid:'1109282057',hash:'bdaaffaec2',xp:15,next:'Weiter zu Challenge 2!'},
+    {title:'Elastico',     eye:'Challenge 02',meta:'Technik - Dribbling',   vid:'1109277349',hash:'08c13fbfa2',xp:15,next:'Weiter zu Challenge 3!'},
+    {title:'Samba',        eye:'Challenge 03',meta:'Technik - Rhythmus',    vid:'1150310023',hash:'316bc2fb69',xp:15,next:'Weiter zu Challenge 4!'},
+    {title:'Hocus Pocus',  eye:'Challenge 04',meta:'Technik - Kreativitaet',vid:'1096847154',hash:'7f3afdc8df',xp:15,next:'Letzte Challenge!'},
+    {title:'Neckstall',    eye:'Challenge 05',meta:'Technik - Jonglage',    vid:'1110029943',hash:'878275cd7f',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
+  ]
+});
+T7.certificate({
+  title:'4 Sterne Zertifikat',badge:'\u2B50\u2B50\u2B50\u2B50',instanceKey:'sz4',stars:4,
+  heroText:'Zeige deine Skills und erhalte dein Zertifikat!',
+  drills:[
+    {title:'X-Over',          eye:'Challenge 01',meta:'Technik - Dribbling',   vid:'1109277432',hash:'4e7467143d',xp:15,next:'Weiter zu Challenge 2!'},
+    {title:'Cross-Over',      eye:'Challenge 02',meta:'Technik - Dribbling',   vid:'1108506468',hash:'4fe716a207',xp:15,next:'Weiter zu Challenge 3!'},
+    {title:'Heel Flick Turn', eye:'Challenge 03',meta:'Technik - Wendung',     vid:'1108506347',hash:'50d1d735a6',xp:15,next:'Weiter zu Challenge 4!'},
+    {title:'Dragon Stepover', eye:'Challenge 04',meta:'Technik - Dribbling',   vid:'1108506827',hash:'1b0e60bd92',xp:15,next:'Letzte Challenge!'},
+    {title:'Inside Out Chop', eye:'Challenge 05',meta:'Technik - Kreativitaet',vid:'1096847014',hash:'f2ac122b88',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
+  ]
+});
+T7.certificate({
+  title:'5 Sterne Zertifikat',badge:'\u2B50\u2B50\u2B50\u2B50\u2B50',instanceKey:'sz5',stars:5,
+  heroText:'Zeige deine Skills und erhalte dein Zertifikat!',
+  drills:[
+    {title:'Rainbow',        eye:'Challenge 01',meta:'Technik - Dribbling',vid:'1110029867',hash:'061207fe6c',xp:15,next:'Weiter zu Challenge 2!'},
+    {title:'Hop the World',  eye:'Challenge 02',meta:'Technik - Jonglage', vid:'1108506910',hash:'3d779e9836',xp:15,next:'Weiter zu Challenge 3!'},
+    {title:'Dragon Stepover',eye:'Challenge 03',meta:'Technik - Dribbling',vid:'1108506827',hash:'1b0e60bd92',xp:15,next:'Weiter zu Challenge 4!'},
+    {title:'Kleine Pyramide',eye:'Challenge 04',meta:'Technik - Jonglage', vid:'1110029772',hash:'039bbd0b3e',xp:15,next:'Letzte Challenge!'},
+    {title:'Sole Flick Up',  eye:'Challenge 05',meta:'Technik - Jonglage', vid:'1110049304',hash:'2f0d3b553a',xp:20,next:'Alle 5 gemeistert! Jetzt Final-Video einreichen!'}
+  ]
+});
 
 /* ============================================================
    PANEL 4: CHALLENGE DES MONATS
-   Reads the current month's row from the Google Sheet CSV and
-   reuses the matching Supabase module for the drill list.
-   To change the monthly challenge: update the Google Sheet only.
-   Sheet columns: month (YYYY-MM), name, module_key, badge,
-                  hero_text, unlock_msg
+   ============================================================
+   This panel is now driven by loadMonats.js (loaded below),
+   which reads the monthly challenge from a Google Sheet.
+   See: https://ute-laureo.github.io/t7academy-widgets/loadMonats.js
+   To edit each month, the admin updates the published Google
+   Sheet - no code changes needed.
 ============================================================ */
-T7.loadMonats('monats-container', 'YOUR_GOOGLE_SHEETS_CSV_URL_HERE');
 
 /* ============================================================
    PANEL 3: BUILDER - dynamic challenge from filters
