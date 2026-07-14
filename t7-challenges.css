@@ -16,13 +16,15 @@
    etc.) instead of the earlier neon gradient-bordered / boxed-
    card style. Banner titles are sized to match the page's own
    .hero h1 (same clamp, same line-height) instead of a larger
-   custom scale. Also fixes light-mode contrast on several accent
-   colors that were tuned for the dark theme only, and resets
-   native button chrome (outline/appearance) so the four custom
-   `<button>` families here — .ch-cat, .bf-pill/.bf-build/.bf-reset,
-   .t7w .cr-btn — render identically across Firefox/Chromium/Safari
-   instead of picking up a browser default focus outline that only
-   some engines suppress automatically.
+   custom scale, and their highlighted word borrows the hero's
+   own italic Fraunces <em> accent treatment (see §1). Also fixes
+   light-mode contrast on several accent colors that were tuned
+   for the dark theme only, and resets native button chrome
+   (outline/appearance) so the four custom `<button>` families
+   here — .ch-cat, .bf-pill/.bf-build/.bf-reset, .t7w .cr-btn —
+   render identically across Firefox/Chromium/Safari instead of
+   picking up a browser default focus outline that only some
+   engines suppress automatically.
 
    Widget-internal sub-labels that t7-base.css already sets
    uppercase (.rl-title, .t7f-stat-label, .pbadge, etc.) are left
@@ -42,8 +44,14 @@
    is sized to match the page's own .hero h1 exactly (same clamp,
    line-height, margin) — these banners sit right below the hero
    in the same page, so they should read as the same typographic
-   scale, not a larger one. Pills are Antonio-uppercase, matching
-   .diary-voice-btn / .home-avatar-side-cta.
+   scale, not a larger one. The highlighted word within each title
+   (the <span>, e.g. "Zertifikate" in "T7 Academy Zertifikate")
+   borrows the hero's own italic Fraunces <em> treatment (t7-base.css:
+   .hero h1 em — font-family:'Fraunces','Garet W05 Bold',serif;
+   font-style:italic;font-weight:700) so the section header echoes
+   the hero's handwritten-highlight accent — only the font changes,
+   the existing --cat-c color stays exactly as it was. Pills are
+   Antonio-uppercase, matching .diary-voice-btn / .home-avatar-side-cta.
 ============================================================ */
 
 /* Kill the old neon decorations outright — topline + both orbs,
@@ -123,8 +131,14 @@
   white-space: normal;
   margin-bottom: 14px;
 }
+/* The highlighted word — same italic Fraunces accent as the
+   hero's <em>. Color is untouched (still var(--cat-c), each
+   section's own identity color); only the typeface changes. */
 .t7h-title span, .shz-title span, .shb-title span, .shm-title span {
   color: var(--cat-c);
+  font-family: 'Fraunces', 'Garet W05 Bold', serif;
+  font-style: italic;
+  font-weight: 700;
 }
 [data-theme="light"] .t7h-title,
 [data-theme="light"] .shz-title,
@@ -167,7 +181,7 @@
 /* Pills: Antonio, uppercase, .1em tracking — the same recipe as
    Home's .diary-voice-btn / .home-avatar-side-cta pill buttons.
    Zertifikate's own star-count pills (.shz-pills) are hidden here
-   — see §10, their visual style has moved onto each cert row's
+   — see §6, their visual style has moved onto each cert row's
    badge instead of sitting as a static row in the banner. */
 .t7h-pills, .shz-pills, .shb-pills, .shm-pills {
   display: flex;
@@ -581,7 +595,7 @@
 /* Module icon badge — was a solid gradient-filled square with a
    heavy glow; now a soft tinted outline, same language as the
    flattened .ch-cat-icon / banner icons above. Certificate rows
-   get a further pill-shaped treatment — see §6. */
+   get a fully flat, unframed treatment instead — see §6. */
 .t7w .cr-badge {
   background: rgba(var(--wa-rgb), .12);
   border: 1px solid rgba(var(--wa-rgb), .4);
@@ -675,36 +689,29 @@
   background: rgba(154, 103, 8, .1);
 }
 
-/* Per-row certificate badge — was rendering as a solid, glowing
-   gold-filled circle (t7-base.css bakes a hardcoded gold gradient
-   + glow into .t7b-wrap .cr-badge, the same "hardcoded fill instead
-   of --wa variable" pattern as .cr-avatar/.cr-xp-total above), which
-   reads as a sheriff/coin badge rather than matching the rest of the
-   page's flat, outlined language. Flattened here into the same
-   pill shape and outline treatment as the banner's own .shz-pill
-   filter chips (transparent fill, thin gold border, gold icon/text,
-   fully rounded) — so the "pill" visual identity now lives on each
-   certificate row instead of as a static row in the banner (hidden
-   in §1 above). Sized to stay pill-like rather than a tight square,
-   with room for the star icon/count the widget script renders inside. */
+/* Per-row certificate badge — was rendering as a circular gold
+   ring around a dark fill (a "coin/medal" look, still framed like
+   a badge even after removing the solid glow-fill in the previous
+   round). Dropped the frame entirely — no border, no background,
+   no ring — so it's just the flat colored star icon on its own,
+   matching how every other icon on this page (banner icons,
+   .ch-cat-icon) is unframed. This is the plainest, most consistent
+   reading; the star-count pill idea from §1 lives in this same
+   spot conceptually, just without literally re-adding a bordered
+   shape around it. */
 .t7b-wrap .cr-badge {
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
-  border: 1px solid var(--wa);
+  border: none !important;
   color: var(--wa);
-  border-radius: 99px;
-  width: auto;
-  min-width: 40px;
-  height: auto;
-  padding: 6px 12px;
 }
 [data-theme="light"] .t7b-wrap .cr-badge {
-  border-color: var(--wa);
-  color: var(--wa);
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
+  border: none !important;
+  color: var(--wa);
 }
 
 
@@ -847,21 +854,7 @@
 
 
 /* ============================================================
-   10. STERNE-ZERTIFIKAT — PILL ON EACH ROW, NOT IN THE BANNER
-   The "★ 1-Stern / ★★ 2-Sterne / …" filter pills used to sit in
-   the banner as a static row (hidden in §1 above — .shz-pills).
-   The pill-chip look itself (transparent fill, thin colored
-   border, fully rounded, colored icon/text — no solid fill) now
-   lives on each certificate row's own badge instead — see the
-   .t7b-wrap .cr-badge rule in §6, which is where that visual
-   treatment is actually implemented so it sits next to the rest
-   of the gold-identity overrides. This section is left as a
-   pointer/marker only; no separate rule needed here.
-============================================================ */
-
-
-/* ============================================================
-   11. "BAU DIR DEINE EIGENE CHALLENGE" — VIOLET, NOT CYAN
+   10. "BAU DIR DEINE EIGENE CHALLENGE" — VIOLET, NOT CYAN
    T7.challenge() always mounts the built widget with the default
    cyan accent (.t7a-wrap's --wa), regardless of which tab built
    it. The Builder panel's own chrome is violet, so the widget it
@@ -885,7 +878,7 @@
 
 
 /* ============================================================
-   12. INDIVIDUAL SKILL/DRILL ROWS (.prow) — SIMPLIFIED
+   11. INDIVIDUAL SKILL/DRILL ROWS (.prow) — SIMPLIFIED
    Inside an expanded module (any tab — Technikschule, Zertifikate,
    the Builder-built widget, Monats), each individual skill is a
    .prow row. These still had the earlier heavier treatment
@@ -907,25 +900,3 @@
   transform: none;
 }
 .t7w .prow.pdone { border-color: rgba(var(--wa-rgb), .35); }
-
-
-/* ============================================================
-   13. MODULE ROW HEADERS — HERO EM-STYLE ITALIC ACCENT
-   The hero's <em> accent ("Zeige *Deine Skills!*") is set in
-   italic Fraunces (t7-base.css: .hero h1 em — font-family:
-   'Fraunces','Garet W05 Bold',serif; font-style:italic;
-   font-weight:700), layered over Garet's upright display face
-   used everywhere else. Borrowing just that font treatment (not
-   its color — .hero h1 em also recolors to --accent, which would
-   be wrong here since each module already carries its own section
-   identity color elsewhere in the row) for each module's own
-   title (.cr-title: "1-Stern Zertifikat", "Passen mit Innenseite",
-   etc.) gives every row header the same handwritten-highlight
-   accent as the hero, while leaving t7-base.css's existing color
-   (#fff dark / #0F172A light) untouched.
-============================================================ */
-.t7w .cr-title {
-  font-family: 'Fraunces', 'Garet W05 Bold', serif;
-  font-style: italic;
-  font-weight: 700;
-}
