@@ -1118,3 +1118,20 @@ function T7LoadMonats(containerId){
         +'Details: '+e.message+'</div>';
     });
 }
+
+/* ===========================================================
+   T7 PUBLIC NAMESPACE  (RESTORED)
+   ------------------------------------------------------------
+   Challenges.html (and the dynamic loaders above) call the
+   lowercase API: T7.loadChallenges / T7.loadCerts / T7.loadMonats
+   / T7.challenge / T7.certificate.
+   Without this object the page throws "T7 is not defined" on the
+   first call and NOTHING on the Challenges page renders.
+   =========================================================== */
+window.T7 = {
+  challenge:      T7Challenge,
+  certificate:    T7Cert,
+  loadChallenges: T7LoadChallenges,
+  loadCerts:      T7LoadCerts,
+  loadMonats:     T7LoadMonats
+};
