@@ -1,9 +1,6 @@
 /* T7 Minis page logic — load this after t7-widget-engine.js */
 (function(){
-/* FALLBACK_MODULES — offline/error-safe mirror of the Supabase mini modules.
-   The live content is loaded from the `modules` table (kind='mini') by
-   loadMiniModules(); this object is only used if that fetch fails. */
-var FALLBACK_MODULES = {
+var KID_MODULES = {
   st1: { tier:'base', label:'Keons Sitdowns', emoji:'⚽', num:'Station 1',
     drills:[
       {idx:0, title:'Ball hochhalten (sitzend)', emoji:'🐶', meta:'einfach',  vid:'1124934705', hash:'6a71a27daf', sticker:'🦄'},
@@ -118,143 +115,7 @@ var STICKER_PAGES = [
   { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER,  total: TOTAL_STICKERS },
   { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,    total: TOTAL_STADIUM_STICKERS }
 ];
-/* ============================================================
-   SUPABASE-DRIVEN MINI MODULES
-   ------------------------------------------------------------
-   KID_MODULES is loaded from the `modules` table (kind='mini') instead of
-   being hardcoded. FALLBACK_MODULES (above) mirrors the same content so the
-   page still works if the fetch fails or the child is offline.
-   buildModuleState() derives every module-scoped structure (order arrays,
-   colors, sticker pages, totals) from a KID_MODULES-shaped object.
-   ============================================================ */
-var KID_MODULES = {};
-
-function buildModuleState(mods){
-  var prevColors = STATION_COLORS || {};   // literal defaults on first call → color fallback
-  KID_MODULES = mods;
-  STATION_ORDER = []; TRICKPATH_ORDER = []; STADIUM_ORDER = []; STATION_COLORS = {};
-  Object.keys(mods).forEach(function(k){
-    var m = mods[k];
-    if (m.tier === 'base') STATION_ORDER.push(k);
-    else if (m.tier === 'trickpath') TRICKPATH_ORDER.push(k);
-    else if (m.tier === 'stadium') STADIUM_ORDER.push(k);
-    STATION_COLORS[k] = m.colors || prevColors[k] || ['#FFD700','#FF8C00'];
-  });
-  function drillCount(order){ return order.reduce(function(n,k){ return n + ((mods[k] && mods[k].drills) ? mods[k].drills.length : 0); }, 0); }
-  TOTAL_STICKERS         = drillCount(STATION_ORDER) || 10;
-  TOTAL_STADIUM_STICKERS = drillCount(STADIUM_ORDER) || 10;
-  STICKER_PAGES = [
-    { id:'base',      label:'Spielplatz', stations: STATION_ORDER,   total: TOTAL_STICKERS },
-    { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER, total: drillCount(TRICKPATH_ORDER) || 10 },
-    { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,   total: TOTAL_STADIUM_STICKERS }
-  ];
-  // Expose the live color map so the capture-phase color-sync listener at the
-  // bottom of this file can read/update it (it references window.STATION_COLORS).
-  window.STATION_COLORS = STATION_COLORS;
-}
-
-/* Parse a stored Vimeo reference into {vid, hash}. Accepts "id/hash",
-   "id?h=hash", or a full player URL. */
-function parseVimeoCode(code){
-  var s = String(code || '').trim();
-  var idM = s.match(/(\d{6,})/);
-  var vid = idM ? idM[1] : '';
-  var hash = '';
-  var slashM = s.match(/\d+\/([a-zA-Z0-9]+)/);
-  var queryM = s.match(/[?&]h=([a-zA-Z0-9]+)/);
-  if (slashM) hash = slashM[1];
-  else if (queryM) hash = queryM[1];
-  return { vid: vid, hash: hash };
-}
-
-/* Turn modules-table rows into the KID_MODULES shape the render code expects. */
-function miniRowsToModules(rows){
-  var out = {};
-  rows.forEach(function(row){
-    var challenges = [];
-    try { challenges = (typeof row.challenges === 'string') ? JSON.parse(row.challenges) : (row.challenges || []); }
-    catch(e){ challenges = []; }
-    challenges.sort(function(a,b){ return (a.idx||0) - (b.idx||0); });
-    var drills = challenges.map(function(d, i){
-      var v = parseVimeoCode(d.vimeo_code);
-      return {
-        idx: (typeof d.idx === 'number' ? d.idx : i),
-        title: d.title || ('Trick ' + (i+1)),
-        emoji: d.emoji || '⚽',
-        meta: d.meta || '',
-        sticker: d.sticker || '⭐',
-        vid: v.vid, hash: v.hash
-      };
-    });
-    var colors = (row.color && String(row.color).indexOf(',') >= 0)
-      ? String(row.color).split(',').map(function(s){ return s.trim(); })
-      : null;
-    out[row.key] = {
-      tier: row.tier || 'base',
-      label: row.label || row.key,
-      emoji: row.icon || '⚽',
-      num: row.num || '',
-      avatar: row.avatar || undefined,
-      city: row.city || undefined,
-      country: row.country || undefined,
-      colors: colors,
-      drills: drills
-    };
-  });
-  return out;
-}
-
-/* Fetch published kind='mini' modules and build state; fall back to the
-   embedded FALLBACK_MODULES on any error. Always calls done(). */
-function loadMiniModules(done){
-  var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
-  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
-  var sel = 'key,label,icon,color,sort_order,kind,tier,city,country,num,avatar,progressive,challenges';
-  var url = SB_URL + '/rest/v1/modules?kind=eq.mini&published=eq.true&order=sort_order.asc&select=' + encodeURIComponent(sel);
-  fetch(url, { headers: { apikey: SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } })
-    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(rows){
-      if (!Array.isArray(rows) || !rows.length) throw new Error('no mini modules returned');
-      buildModuleState(miniRowsToModules(rows));
-    })
-    .catch(function(e){
-      console.warn('[T7 Minis] module fetch failed — using offline fallback.', e);
-      buildModuleState(FALLBACK_MODULES);
-    })
-    .then(function(){ if (done) done(); });
-}
-
-/* Populate the static landing/station/stadium tiles from the loaded modules,
-   so tile text can't drift from the DB content. */
-function syncTilesFromData(){
-  document.querySelectorAll('.pg-station[data-station]').forEach(function(btn){
-    var m = KID_MODULES[btn.dataset.station]; if (!m) return;
-    var nm = btn.querySelector('.pg-st-name'); if (nm) nm.textContent = m.label;
-    var a  = (typeof AVATARS !== 'undefined') ? AVATARS[m.avatar] : null;
-    var av = btn.querySelector('.pg-st-avatar'); if (av && a) { av.src = a.img; av.alt = a.alt; }
-  });
-  document.querySelectorAll('.stadium-card[data-station]').forEach(function(card){
-    var m = KID_MODULES[card.dataset.station]; if (!m) return;
-    var f = card.querySelector('.stadium-flag');  if (f && m.country) f.textContent = m.country;
-    var e = card.querySelector('.stadium-emoji'); if (e && m.emoji)   e.textContent = m.emoji;
-    var nm= card.querySelector('.stadium-name');  if (nm) nm.textContent = m.label;
-    var ct= card.querySelector('.stadium-city');  if (ct && m.city)    ct.textContent = m.city;
-    if (m.colors && m.colors[0]) card.style.setProperty('--st-c', m.colors[0]);
-  });
-}
-
-/* Boot only after the mini modules are loaded (or the fallback is applied). */
-function startMinis(id, name){
-  loadMiniModules(function(){
-    try { syncTilesFromData(); } catch(e){}
-    boot(id, name);
-  });
-}
-
-/* STATE.id holds the player_profiles UUID (injected by WordPress as
-   window.T7_PROFILE_ID and delivered via T7Identity.resolve). It was formerly
-   an email; the v2.0 engine is UUID-keyed, so every Supabase call now uses id. */
-var STATE = { id:null, name:'Champion', ratings:{}, gold:{}, completions:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
+var STATE = { email:null, name:'Champion', ratings:{}, gold:{}, completions:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
 try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','leya'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
 
@@ -435,7 +296,7 @@ function renderStationView(modKey){
 
   var hero = document.getElementById('station-hero');
   hero.style.background = 'linear-gradient(135deg,' + colors[0] + ',' + colors[1] + ')';
-  var ownerKey = mod.avatar || ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'leya'})[modKey] || 'keon';
+  var ownerKey = ({st1:'keon', st2:'keon', st3:'coco', st4:'coco', st5:'leya'})[modKey] || 'keon';
   var ownerAv = AVATARS[ownerKey];
   var stImg = document.getElementById('station-emoji');
   if (isStadium) {
@@ -645,7 +506,7 @@ function markChampionSeen(){ try { localStorage.setItem(championStorageKey(), '1
 /* Deterministic reward code derived from email+name. Same kid always gets the
    same code so it can be redeemed (and validated server-side later). */
 function generateRewardCode(){
-  var str = (STATE.id || '') + '|' + (STATE.name || 'CHAMPION');
+  var str = (STATE.email || '') + '|' + (STATE.name || 'CHAMPION');
   var hash = 0;
   for (var i = 0; i < str.length; i++) {
     hash = ((hash << 5) - hash) + str.charCodeAt(i);
@@ -907,15 +768,11 @@ function resolveOutcome(rating){
     newGold = true;
   }
   saveLocal();
-  if (STATE.id && window.T7SB) {
+  if (STATE.email && window.T7SB) {
+    var moduleLabel = KID_MODULES[modKey].label;
     var XP_BY_RATING = {2:4, 3:6, 4:8, 5:10};
     var xp = XP_BY_RATING[rating] || 0;
-    // v2.0 engine split the old single upsert() into two calls:
-    //   addXP        — adds this attempt's XP to the cumulative player_stats.total_xp
-    //   recordAttempt — appends one row to drill_attempts (drives best-rating + streaks)
-    T7SB.addXP(STATE.id, xp, STATE.totalXP);
-    T7SB.recordAttempt(STATE.id, modKey, idx, rating, xp);
-    STATE.totalXP += xp;               // optimistic; refreshFortschritt reconciles from the server
+    T7SB.upsert(STATE.email, STATE.name, modKey, moduleLabel, idx, rating, xp, Date.now(), null);
     try { window.dispatchEvent(new CustomEvent('t7xpupdate')); } catch(e){}
     setTimeout(refreshFortschritt, 1500);
   }
@@ -1021,16 +878,13 @@ function loadLocal(){ try{
 }catch(e){} }
 
 function hydrateFromSupabase(){
-  if (!STATE.id || !window.T7SB) return;
+  if (!STATE.email || !window.T7SB) return;
   Object.keys(KID_MODULES).forEach(function(mk){
-    // getBestRatings returns { drill_idx: {rating, xp} } — the best rating per
-    // drill for this module — replacing the old getModuleXP(email, mk) row list.
-    T7SB.getBestRatings(STATE.id, mk, function(best){
+    T7SB.getModuleXP(STATE.email, mk, function(rows){
       var changed = false;
-      Object.keys(best || {}).forEach(function(i){
-        var key = mk + '_' + i;
-        var rating = (best[i] && best[i].rating) || 0;
-        if (rating > (STATE.ratings[key] || 0)) { STATE.ratings[key] = rating; changed = true; }
+      rows.forEach(function(r){
+        var key = mk + '_' + r.challenge_idx;
+        if ((r.rating || 0) > (STATE.ratings[key] || 0)) { STATE.ratings[key] = r.rating; changed = true; }
       });
       if (changed) {
         saveLocal();
@@ -1044,23 +898,23 @@ function hydrateFromSupabase(){
 }
 
 function refreshFortschritt(){
-  if (!STATE.id || !window.T7SB) return;
-  // Total XP now comes from player_stats via getStats (was getTotalXP(email)).
-  T7SB.getStats(STATE.id, function(stats){
-    STATE.totalXP = (stats && stats.total_xp) || 0;
-    var el = document.getElementById('kf-total');
-    if (el) el.textContent = STATE.totalXP.toLocaleString('de-AT');
-  });
-  // Weekly XP is summed client-side from drill_attempts (was the old `attempts`
-  // table keyed by player_email). attempted_at is now an ISO timestamp string.
-  T7SB.getAllAttempts(STATE.id, function(rows){
+  if (!STATE.email) return;
+  if (window.T7SB) {
+    T7SB.getTotalXP(STATE.email, function(total){
+      STATE.totalXP = total || 0;
+      document.getElementById('kf-total').textContent = STATE.totalXP.toLocaleString('de-AT');
+    });
+  }
+  var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+  fetch(SB_URL+'/rest/v1/attempts?player_email=eq.'+encodeURIComponent(STATE.email)+'&select=attempted_at,xp',{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+  .then(function(r){return r.json();}).then(function(rows){
     var now=new Date(),sw=new Date(now);sw.setHours(0,0,0,0);sw.setDate(now.getDate()-((now.getDay()+6)%7));
     var t0=sw.getTime(),xp=0;
-    (rows||[]).forEach(function(a){var ts=a.attempted_at?new Date(a.attempted_at).getTime():0; if(ts>=t0)xp+=Number(a.xp||0);});
+    (rows||[]).forEach(function(a){var ts=typeof a.attempted_at==='number'?a.attempted_at:parseInt(a.attempted_at)||0; if(ts>=t0)xp+=Number(a.xp||0);});
     STATE.weekXP=xp;
-    var el = document.getElementById('kf-week');
-    if (el) el.textContent = xp;
-  });
+    document.getElementById('kf-week').textContent = xp;
+  }).catch(function(){});
 }
 
 function hydrateDrillsFromSupabase(){
@@ -1136,8 +990,8 @@ function hydrateDrillsFromSupabase(){
   .catch(function(err){ console.warn('[T7] hydrateDrillsFromSupabase failed', err); });
 }
 
-function boot(id, name){
-  STATE.id = id;
+function boot(email, name){
+  STATE.email = email;
   STATE.name = (name || '').split(' ')[0] || 'Champion';
   document.getElementById('kid-name').textContent = STATE.name;
   var kfNameEl = document.getElementById('kf-name');
@@ -1147,8 +1001,7 @@ function boot(id, name){
   renderStickers();
   updateHeroStickerCount();
   renderTrickpfad();
-  // Stadium videos now come from the mini modules table (vimeo_code per drill),
-  // so the old videos-table hydrator (hydrateDrillsFromSupabase) is no longer called.
+  hydrateDrillsFromSupabase();
   hydrateFromSupabase();
   refreshFortschritt();
   refreshChampionBadge();
@@ -1156,10 +1009,8 @@ function boot(id, name){
   setTimeout(maybeShowChampion, 1200);
 }
 
-// T7Identity.resolve delivers (id, name): id = player_profiles UUID, name = first_name.
-// startMinis loads the mini modules from Supabase (with offline fallback) before booting.
-if (window.T7Identity) { T7Identity.resolve(function(id, name){ startMinis(id, name); }); }
-else { setTimeout(function(){ if (window.T7Identity) T7Identity.resolve(function(id, name){ startMinis(id, name); }); else startMinis(null, null); }, 1500); }
+if (window.T7Identity) { T7Identity.resolve(function(email, name){ boot(email, name); }); }
+else { setTimeout(function(){ if (window.T7Identity) T7Identity.resolve(function(email, name){ boot(email, name); }); else boot(null, null); }, 1500); }
 })();
 
 /* === PAGE-LEVEL LISTENERS ===
