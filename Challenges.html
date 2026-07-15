@@ -54,8 +54,8 @@
       <button class="ch-cat ch-cat-build" data-tab="builder" type="button">
         <div class="ch-cat-icon">🔧</div>
         <div class="ch-cat-title">Deine eigene Challenges</div>
-        <div class="ch-cat-sub">Filter wählen, Challenge starten</div>
-        <div class="ch-cat-count">Unbegrenzt</div>
+        <div class="ch-cat-sub">Auswählen, los gehts</div>
+        <div class="ch-cat-count">Unzählige Challenges</div>
       </button>
       <button class="ch-cat ch-cat-monats" data-tab="monats" type="button">
         <div class="ch-cat-icon">🔥</div>
@@ -92,7 +92,7 @@
         <div class="shz-icon">⭐</div>
         <div class="shz-content">
           <div class="shz-title">T7 Academy <span>Zertifikate</span></div>
-          <div class="shz-intro">Von <strong>1-Stern</strong> bis <strong>5-Sterne Zertifikat</strong> — zeige was du wirklich drauf hast. Reiche dein Final-Video ein und hol dir dein offizielles T7 Zertifikat!</div>
+          <div class="shz-intro">Von <strong>1-Stern</strong> bis <strong>5-Sterne Zertifikat</strong> — beweise was du drauf hast. Reiche dein Final-Video ein und hol dir dein offizielles T7 Zertifikat!</div>
           <div class="shz-pills">
             <div class="shz-pill">⭐ 1-Stern</div>
             <div class="shz-pill">⭐⭐ 2-Sterne</div>
@@ -247,13 +247,12 @@ T7.loadCerts('cert-container');
 
 /* ============================================================
    PANEL 4: CHALLENGE DES MONATS
-   Reads the current month's row from the Google Sheet CSV and
-   reuses the matching Supabase module for the drill list.
-   To change the monthly challenge: update the Google Sheet only.
-   Sheet columns: month (YYYY-MM), name, module_key, badge,
-                  hero_text, unlock_msg
+   Reads the current month's row from the Supabase `monthly_challenges`
+   table and reuses the matching Supabase module for the drill list.
+   To change the monthly challenge: use the Expert Admin panel
+   (expert-admin.html) — no code or spreadsheet edits needed.
 ============================================================ */
-T7.loadMonats('monats-container', 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQHWaswAJIeuF1xBh_yBGIDKcB58lya5y6NEJ-rLS_3pJ-7mEZruDXjo7uOj5s5DwtXSEuH7-iq-kYk/pubhtml?gid=861911345&single=true');
+T7.loadMonats('monats-container');
 
 
 /* ============================================================

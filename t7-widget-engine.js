@@ -1040,26 +1040,22 @@ function T7LoadCerts(containerId){
   });
 }
 
-/* === T7LoadMonats ===
-   Reads the monthly challenge definition from a published Google Sheets CSV.
-   Absorbed from the old loadMonats.js so Challenges.html needs no extra script tag.
-
-   Expected Google Sheet columns (row 1 = headers):
-     month      YYYY-MM format, e.g. "2026-07"
-     name       display title shown in the tab and widget header
-     module_key existing Supabase module key to reuse its drill list
-     badge      emoji shown in the widget header (optional)
-     hero_text  hero text override (optional)
-     unlock_msg unlock message override (optional)
-
-   How it works:
-     1. Fetches the CSV and finds the row whose month == current YYYY-MM.
-     2. Updates #monatsLabel (tab chip) and #monatsName (section header).
-     3. If module_key is set, loads that module's drills from Supabase and
-        mounts a T7Challenge into containerId with a month-scoped moduleKey
-        (so each month gets its own localStorage / XP bucket).
-*/
-function T7LoadMonats(containerId,sheetsUrl){
+/* ============================================================
+   T7LoadMonats — Supabase edition (replaces the Google Sheets version)
+   ------------------------------------------------------------
+   HOW TO INSTALL
+   1. In t7-widget-engine.js, replace the whole existing
+      `function T7LoadMonats(containerId, sheetsUrl){ ... }`
+      with the function below.
+   2. In Challenges.html, change the call from:
+         T7.loadMonats('monats-container', 'https://docs.google.com/.../pubhtml?...');
+      to simply:
+         T7.loadMonats('monats-container');
+   3. Run monthly_challenges.sql once in Supabase.
+   No other changes needed — it reuses _T7FetchAll, _T7BuildDrills,
+   T7_SB_URL/T7_SB_KEY and T7.challenge exactly like before.
+============================================================ */
+function T7LoadMonats(containerId){
   var cont=document.getElementById(containerId);if(!cont)return;
   var MONTHS=['Januar','Februar','M\xe4rz','April','Mai','Juni',
                'Juli','August','September','Oktober','November','Dezember'];
@@ -1069,57 +1065,31 @@ function T7LoadMonats(containerId,sheetsUrl){
   /* Set month label immediately so the tab chip is always current */
   var elLabel=document.getElementById('monatsLabel');
   if(elLabel)elLabel.textContent=ml;
-  if(!sheetsUrl){
-    cont.innerHTML='<div class="monats-hint">Kein Google-Sheets-Link konfiguriert.<br>'
-      +'Setze den <code>sheetsUrl</code>-Parameter in <code>T7.loadMonats()</code>.</div>';
-    return;
-  }
   cont.innerHTML='<div style="padding:28px;text-align:center;color:var(--muted);font-size:13px">Lade Challenge des Monats…</div>';
-  /* Simple but robust CSV parser — handles quoted fields with embedded commas */
-  function parseCSV(text){
-    var res=[],lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-    lines.forEach(function(line){
-      if(!line.trim())return;
-      var cells=[],inQ=false,cell='';
-      for(var i=0;i<line.length;i++){
-        var c=line[i];
-        if(c==='"'){if(inQ&&line[i+1]==='"'){cell+='"';i++;}else{inQ=!inQ;}}
-        else if(c===','&&!inQ){cells.push(cell.trim());cell='';}
-        else{cell+=c;}
-      }
-      cells.push(cell.trim());
-      res.push(cells);
-    });
-    return res;
-  }
-  fetch(sheetsUrl)
+  function hdr(){return{'apikey':T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY};}
+
+  fetch(T7_SB_URL+'/rest/v1/monthly_challenges?month=eq.'+encodeURIComponent(mk)+'&select=*&limit=1',{headers:hdr()})
     .then(function(r){
       if(!r.ok)throw new Error('HTTP '+r.status);
-      return r.text();
+      return r.json();
     })
-    .then(function(csv){
-      var rows=parseCSV(csv);
-      if(rows.length<2)throw new Error('empty sheet');
-      var hdr=rows[0];
-      function col(row,name){var i=hdr.indexOf(name);return i>=0?(row[i]||'').trim():'';}
-      var found=null;
-      for(var i=1;i<rows.length;i++){if(col(rows[i],'month')===mk){found=rows[i];break;}}
-      if(!found){
+    .then(function(rows){
+      var row=Array.isArray(rows)&&rows.length?rows[0]:null;
+      if(!row){
         cont.innerHTML='<div class="monats-hint">Kein Eintrag f\xfcr <strong>'+ml+'</strong> gefunden.<br>'
-          +'F\xfcge eine Zeile mit <code>month='+mk+'</code> in dein Google Sheet ein.</div>';
+          +'Lege den Monat im <strong>Challenge-des-Monats</strong>-Formular an.</div>';
         return;
       }
-      var name     =col(found,'name')      ||'Challenge des Monats';
-      var modKey   =col(found,'module_key');
-      var badge    =col(found,'badge')     ||'🔥';
-      var heroText =col(found,'hero_text') ||'';
-      var unlockMsg=col(found,'unlock_msg')||'';
+      var name     =(row.name||'').trim()      ||'Challenge des Monats';
+      var modKey   =(row.module_key||'').trim();
+      var badge    =(row.badge||'').trim()     ||'🔥';
+      var heroText =(row.hero_text||'').trim();
+      var unlockMsg=(row.unlock_msg||'').trim();
       var elName=document.getElementById('monatsName');
       if(elName)elName.textContent=name;
       cont.innerHTML='';
       if(!modKey){
-        cont.innerHTML='<div class="monats-hint">Tipp: Trage <code>module_key</code> in dein Google Sheet ein,<br>'
-          +'um ein bestehendes Modul als Monats-Challenge zu verwenden.</div>';
+        cont.innerHTML='<div class="monats-hint">F\xfcr diesen Monat ist kein Modul gesetzt.</div>';
         return;
       }
       _T7FetchAll(function(modules,videos){
@@ -1130,7 +1100,7 @@ function T7LoadMonats(containerId,sheetsUrl){
           return;
         }
         var drills=_T7BuildDrills(mod,videos);
-        /* Use a month-scoped moduleKey so each month has its own XP bucket */
+        /* Month-scoped moduleKey so each month has its own XP / localStorage bucket */
         T7.challenge({
           containerId:containerId,
           title:name||mod.label,
@@ -1148,14 +1118,3 @@ function T7LoadMonats(containerId,sheetsUrl){
         +'Details: '+e.message+'</div>';
     });
 }
-
-/* === PUBLIC API === */
-var T7={
-  /* Low-level: mount a single pre-configured challenge or certificate widget */
-  challenge:function(cfg){cfg.containerId=cfg.containerId||'ch-container';new T7Challenge(cfg);},
-  certificate:function(cfg){cfg.containerId=cfg.containerId||'cert-container';new T7Cert(cfg);},
-  /* High-level: pull from Supabase / Google Sheets and auto-mount */
-  loadChallenges:T7LoadChallenges,
-  loadCerts:T7LoadCerts,
-  loadMonats:T7LoadMonats
-};
