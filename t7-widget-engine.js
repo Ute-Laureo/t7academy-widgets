@@ -1056,22 +1056,29 @@ function T7LoadCerts(containerId){
    T7_SB_URL/T7_SB_KEY and T7.challenge exactly like before.
 ============================================================ */
 /* ============================================================
-   T7LoadMonats — curated-drills edition
+   T7LoadMonats — curated-drills edition (robust month matching)
    ------------------------------------------------------------
-   Reads the current month's row from monthly_challenges and builds
-   the challenge from its hand-picked `drills` array (curated in the
-   Expert Admin). Each drill: {title, vid, hash, meta, xp}.
-   If a row has no curated drills but still carries a legacy
-   module_key, it falls back to the old module-based build so older
-   months keep working unchanged.
+   Builds the Challenge des Monats from the current month's row in
+   monthly_challenges, using its hand-picked `drills` array
+   ({title, vid, hash, meta, xp}) curated in the Expert Admin.
+
+   Month resolution is forgiving: the canonical key is YYYY-MM, but
+   older rows may store the German month name ("Juli"), "Juli 2026",
+   "072026", etc. We fetch the table and match the current month
+   across those formats so a data-entry slip never blanks the panel.
+
+   If the matched row has no curated drills but still carries a
+   legacy module_key, we fall back to the old module-based build.
 ============================================================ */
 function T7LoadMonats(containerId){
   var cont=document.getElementById(containerId);if(!cont)return;
   var MONTHS=['Januar','Februar','M\xe4rz','April','Mai','Juni',
                'Juli','August','September','Oktober','November','Dezember'];
   var now=new Date();
-  var mk=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  var ml=MONTHS[now.getMonth()]+' '+now.getFullYear();
+  var monthIdx=now.getMonth();
+  var year=now.getFullYear();
+  var mk=year+'-'+String(monthIdx+1).padStart(2,'0');
+  var ml=MONTHS[monthIdx]+' '+year;
   /* Set month label immediately so the tab chip is always current */
   var elLabel=document.getElementById('monatsLabel');
   if(elLabel)elLabel.textContent=ml;
@@ -1079,10 +1086,86 @@ function T7LoadMonats(containerId){
   function hdr(){return{'apikey':T7_SB_KEY,'Authorization':'Bearer '+T7_SB_KEY};}
   function hint(msg){return '<div class="monats-hint">'+msg+'</div>';}
 
-  fetch(T7_SB_URL+'/rest/v1/monthly_challenges?month=eq.'+encodeURIComponent(mk)+'&select=*&limit=1',{headers:hdr()})
+  /* Does a stored month value refer to the current calendar month? */
+  function matchesCurrentMonth(raw){
+    var rm=String(raw==null?'':raw).toLowerCase().trim();
+    if(!rm)return false;
+    if(rm===mk)return true;                        /* 2026-07            */
+    if(rm.indexOf(mk+'-')===0)return true;         /* 2026-07-01 (ISO)   */
+    var g=MONTHS[monthIdx].toLowerCase();          /* "juli" / "märz" */
+    var gs=g.replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u');
+    if(rm===g||rm===gs)return true;                /* "Juli"             */
+    if(rm===g+' '+year||rm===gs+' '+year)return true;   /* "Juli 2026"   */
+    if(rm===g+year||rm===gs+year)return true;
+    var digits=rm.replace(/[^0-9]/g,'');
+    if(digits){
+      var y=String(year), m2=String(monthIdx+1).padStart(2,'0'), yy=y.slice(2);
+      var cand=[y+m2, m2+y, m2+yy, yy+m2];         /* 202607 / 072026 …  */
+      if(cand.indexOf(digits)>=0)return true;
+    }
+    return false;
+  }
+
+  /* Build + mount from a curated drills array. */
+  function mountCurated(row,name,badge,heroText,unlockMsg){
+    var raw=row.drills, curated=[];
+    try{curated=(typeof raw==='string'?JSON.parse(raw):(raw||[]));}catch(e){curated=[];}
+    if(!Array.isArray(curated)||!curated.length)return false;
+    var nd=curated.length;
+    var drills=curated.map(function(d,i){
+      var last=(i===nd-1);
+      return{
+        title:(d.title||('Video '+(i+1))),
+        eye:'Challenge '+String(i+1).padStart(2,'0'),
+        meta:(d.meta||'Challenge des Monats'),
+        vid:String(d.vid||''),
+        hash:String(d.hash||''),
+        type:'rate',
+        xp:(typeof d.xp==='number'?d.xp:10),
+        star:1,   /* every curated drill open from the start */
+        next:last?('Alle '+nd+' Challenges abgeschlossen!'):'Weiter zur n\xe4chsten Challenge!'
+      };
+    });
+    cont.innerHTML='';
+    T7.challenge({
+      containerId:containerId,
+      title:name,badge:badge,
+      moduleKey:'monats_'+mk.replace('-','_'),
+      heroText:heroText,unlockMsg:unlockMsg,
+      drills:drills
+    });
+    return true;
+  }
+
+  /* Back-compat: mount from a legacy module_key. */
+  function mountFromModule(modKey,name,badge,heroText,unlockMsg){
+    _T7FetchAll(function(modules,videos){
+      var mod=null;
+      for(var i=0;i<modules.length;i++){if(modules[i].key===modKey){mod=modules[i];break;}}
+      if(!mod){cont.innerHTML=hint('Modul <code>'+modKey+'</code> nicht in Supabase gefunden.');return;}
+      var drills=_T7BuildDrills(mod,videos);
+      cont.innerHTML='';
+      T7.challenge({
+        containerId:containerId,
+        title:name||mod.label,
+        badge:badge||mod.icon||'🔥',
+        moduleKey:'monats_'+mk.replace('-','_'),
+        heroText:heroText||mod.hero_text||'',
+        unlockMsg:unlockMsg||mod.unlock_msg||'',
+        drills:drills
+      });
+    });
+  }
+
+  /* One fetch, resolve the current-month row client-side (format-tolerant). */
+  fetch(T7_SB_URL+'/rest/v1/monthly_challenges?select=*&order=month.desc',{headers:hdr()})
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(function(rows){
-      var row=Array.isArray(rows)&&rows.length?rows[0]:null;
+      rows=Array.isArray(rows)?rows:[];
+      var row=null;
+      /* Prefer an exact canonical match, then any format that resolves to now. */
+      for(var i=0;i<rows.length;i++){if(String(rows[i].month).trim()===mk){row=rows[i];break;}}
+      if(!row){for(var j=0;j<rows.length;j++){if(matchesCurrentMonth(rows[j].month)){row=rows[j];break;}}}
       if(!row){
         cont.innerHTML=hint('Kein Eintrag f\xfcr <strong>'+ml+'</strong> gefunden.<br>'
           +'Lege den Monat im <strong>Challenge-des-Monats</strong>-Formular an.');
@@ -1095,65 +1178,15 @@ function T7LoadMonats(containerId){
       var elName=document.getElementById('monatsName');
       if(elName)elName.textContent=name;
 
-      /* --- Preferred path: curated drills hand-picked in the admin --- */
-      var raw=row.drills, curated=[];
-      try{curated=(typeof raw==='string'?JSON.parse(raw):(raw||[]));}catch(e){curated=[];}
-      if(Array.isArray(curated)&&curated.length){
-        var nd=curated.length;
-        var drills=curated.map(function(d,i){
-          var last=(i===nd-1);
-          return{
-            title:(d.title||('Video '+(i+1))),
-            eye:'Challenge '+String(i+1).padStart(2,'0'),
-            meta:(d.meta||'Challenge des Monats'),
-            vid:String(d.vid||''),
-            hash:String(d.hash||''),
-            type:'rate',
-            xp:(typeof d.xp==='number'?d.xp:10),
-            /* star:1 keeps every curated drill open from the start */
-            star:1,
-            next:last?('Alle '+nd+' Challenges abgeschlossen!'):'Weiter zur n\xe4chsten Challenge!'
-          };
-        });
-        cont.innerHTML='';
-        T7.challenge({
-          containerId:containerId,
-          title:name,
-          badge:badge,
-          moduleKey:'monats_'+mk.replace('-','_'),
-          heroText:heroText,
-          unlockMsg:unlockMsg,
-          drills:drills
-        });
-        return;
-      }
+      if(mountCurated(row,name,badge,heroText,unlockMsg))return;
 
-      /* --- Back-compat: no curated drills, but a legacy module_key is set --- */
       var modKey=(row.module_key||'').trim();
       if(!modKey){
         cont.innerHTML=hint('F\xfcr <strong>'+ml+'</strong> sind noch keine Videos ausgew\xe4hlt.<br>'
           +'\xd6ffne das <strong>Challenge-des-Monats</strong>-Formular und stelle die Challenge zusammen.');
         return;
       }
-      _T7FetchAll(function(modules,videos){
-        var mod=null;
-        for(var i=0;i<modules.length;i++){if(modules[i].key===modKey){mod=modules[i];break;}}
-        if(!mod){
-          cont.innerHTML=hint('Modul <code>'+modKey+'</code> nicht in Supabase gefunden.');
-          return;
-        }
-        var drills=_T7BuildDrills(mod,videos);
-        cont.innerHTML='';
-        T7.challenge({
-          containerId:containerId,
-          title:name||mod.label,
-          badge:badge||mod.icon||'🔥',
-          moduleKey:'monats_'+mk.replace('-','_'),
-          heroText:heroText||mod.hero_text||'',
-          unlockMsg:unlockMsg||mod.unlock_msg||'',
-          drills:drills
-        });
-      });
+      mountFromModule(modKey,name,badge,heroText,unlockMsg);
     })
     .catch(function(e){
       console.error('[T7LoadMonats]',e);
