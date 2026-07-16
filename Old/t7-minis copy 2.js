@@ -1,7 +1,93 @@
 /* T7 Minis page logic — load this after t7-widget-engine.js */
 (function(){
-var FALLBACK_MODULES = {"st1": {"tier": "base", "label": "Keons Sitdowns", "emoji": "⚽", "num": "Station 1", "colors": ["#00E5FF", "#0080FF"], "heroText": "Übe deine Schusstechnik", "drills": [{"idx": 0, "title": "Jonglieren Sitdown", "emoji": "🐶", "meta": "Einfach", "sticker": "🦄", "vid": "1124934705", "hash": ""}, {"idx": 1, "title": "Jonglieren Sitdown Fuss Kopf Fuss", "emoji": "⚽", "meta": "Einfach", "sticker": "🐆", "vid": "1124935347", "hash": ""}], "avatar": "keon"}, "st2": {"tier": "base", "label": "Keons Ballkontrolle", "emoji": "🇧🇷", "num": "Station 2", "colors": ["#FFD700", "#FF8C00"], "heroText": "Behalte den Ball nah bei dir", "drills": [{"idx": 0, "title": "V", "emoji": "🐸", "meta": "Einfach", "sticker": "🌟", "vid": "1150309223", "hash": ""}, {"idx": 1, "title": "Sohle Links Rechts", "emoji": "🦓", "meta": "Einfach", "sticker": "🚀", "vid": "1108507106", "hash": ""}], "avatar": "keon"}, "st3": {"tier": "base", "label": "Cocos 1 gegen 1", "emoji": "👣", "num": "Station 3", "colors": ["#E4002B", "#A30025"], "heroText": "Täusche deine Gegner", "drills": [{"idx": 0, "title": "Drag Back", "emoji": "🐢", "meta": "Einfach", "sticker": "🔥", "vid": "1110029532", "hash": ""}, {"idx": 1, "title": "Uebersteiger", "emoji": "🐰", "meta": "Einfach", "sticker": "🎈", "vid": "1110029715", "hash": ""}], "avatar": "coco"}, "st4": {"tier": "base", "label": "Cocos Dribbling", "emoji": "✨", "num": "Station 4", "colors": ["#3B82F6", "#1E3A8A"], "heroText": "Lass dich nicht fangen", "drills": [{"idx": 0, "title": "La Croqueta", "emoji": "🐙", "meta": "Einfach", "sticker": "🏆", "vid": "1110029615", "hash": ""}, {"idx": 1, "title": "Siebener", "emoji": "🦊", "meta": "Einfach", "sticker": "⚡", "vid": "1110048992", "hash": ""}], "avatar": "coco"}, "st5": {"tier": "base", "label": "Leyas Ballkontrolle", "emoji": "🤹", "num": "Station 5", "colors": ["#22C55E", "#006847"], "heroText": "Lerne Ballgefühl", "drills": [{"idx": 0, "title": "Spann Balancieren", "emoji": "🐧", "meta": "Einfach", "sticker": "👑", "vid": "1110049131", "hash": ""}, {"idx": 1, "title": "Jonglieren Freestyle", "emoji": "🦄", "meta": "Mittel", "sticker": "🎁", "vid": "1125467352", "hash": ""}], "avatar": "leya"}, "tp1": {"tier": "trickpath", "label": "Lauf-Ball", "emoji": "🏃", "num": "Stufe 1", "colors": ["#00E5FF", "#0080FF"], "heroText": "Schnell, mutig, unaufhaltsam", "drills": [{"idx": 0, "title": "Basic Switch", "emoji": "🦘", "meta": "Einfach", "sticker": "🦘", "vid": "1190060946", "hash": "8f3bec6dfd"}, {"idx": 1, "title": "La Croqueta", "emoji": "🤸", "meta": "Einfach", "sticker": "🤸", "vid": "1110029615", "hash": "d558930be0"}]}, "tp2": {"tier": "trickpath", "label": "Ball-Freunde", "emoji": "🤝", "num": "Stufe 2", "colors": ["#FFD700", "#FF8C00"], "heroText": "Jeder Kick zählt", "drills": [{"idx": 0, "title": "Hop Stepover", "emoji": "🐾", "meta": "Mittel", "sticker": "🐾", "vid": "1109282057", "hash": "bdaaffaec2"}, {"idx": 1, "title": "Ronaldo Chop", "emoji": "🔄", "meta": "Einfach", "sticker": "🐶", "vid": "1108506571", "hash": "93ac3ef1d9"}]}, "tp3": {"tier": "trickpath", "label": "Speed-Kick", "emoji": "💨", "num": "Stufe 3", "colors": ["#E4002B", "#A30025"], "heroText": "Werde zur Legende", "drills": [{"idx": 0, "title": "Uebersteiger", "emoji": "🐍", "meta": "Einfach", "sticker": "🐍", "vid": "1110029715", "hash": "8757b6279f"}, {"idx": 1, "title": "Elastico", "emoji": "💨", "meta": "Mittel", "sticker": "💨", "vid": "1109277349", "hash": "08c13fbfa2"}]}, "tp4": {"tier": "trickpath", "label": "Geheimer Trick", "emoji": "🎯", "num": "Stufe 4", "colors": ["#3B82F6", "#1E3A8A"], "heroText": "Dein Spiel, dein Tor", "drills": [{"idx": 0, "title": "Reverse Elastico", "emoji": "🌀", "meta": "Mittel", "sticker": "🌀", "vid": "1096874149", "hash": "d47a0fd085"}, {"idx": 1, "title": "Roulette", "emoji": "👟", "meta": "Einfach", "sticker": "👟", "vid": "1109282284", "hash": "a124376bf0"}]}, "tp5": {"tier": "trickpath", "label": "Champion-Finale", "emoji": "🌈", "num": "Stufe 5", "colors": ["#22C55E", "#006847"], "heroText": "Einfach kicken", "drills": [{"idx": 0, "title": "Hokus Pokus", "emoji": "🎩", "meta": "Mittel", "sticker": "🎩", "vid": "1096847154", "hash": "7f3afdc8df"}, {"idx": 1, "title": "Sole Roll", "emoji": "🦁", "meta": "Mittel", "sticker": "🦁", "vid": "1109282215", "hash": "08c5487fa2"}]}, "sd1": {"tier": "stadium", "label": "Maracanã", "emoji": "🌴", "num": "Stadion 1", "colors": ["#009C3B", "#FFDF00"], "heroText": "Mutig weiterüben", "drills": [{"idx": 0, "title": "Sohle um den Fuss", "emoji": "🦜", "meta": "Einfach", "sticker": "🦜", "vid": "1108506991", "hash": "6597f5cef6"}, {"idx": 1, "title": "No Look", "emoji": "🥥", "meta": "Einfach", "sticker": "🥥", "vid": "1109282305", "hash": "26d2c5dcc7"}], "city": "Rio de Janeiro", "country": "🇧🇷"}, "sd2": {"tier": "stadium", "label": "Wembley", "emoji": "🦁", "num": "Stadion 2", "colors": ["#CF081F", "#FFFFFF"], "heroText": "Bleib dabei", "drills": [{"idx": 0, "title": "Leg Cross", "emoji": "👑", "meta": "Einfach", "sticker": "👑", "vid": "1108506666", "hash": "3b553e1736"}, {"idx": 1, "title": "Siebener", "emoji": "🎯", "meta": "Einfach", "sticker": "🎯", "vid": "1110048992", "hash": "34251d5943"}], "city": "London", "country": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, "sd3": {"tier": "stadium", "label": "Allianz Arena", "emoji": "🥨", "num": "Stadion 3", "colors": ["#000000", "#DD0000"], "heroText": "Zeig was du kannst", "drills": [{"idx": 0, "title": "Achter", "emoji": "🏰", "meta": "Einfach", "sticker": "🏰", "vid": "1110048556", "hash": "d4284c1a62"}, {"idx": 1, "title": "Outside Inside", "emoji": "🥨", "meta": "Einfach", "sticker": "🥨", "vid": "1109282136", "hash": "64d0dbeb23"}], "city": "Munich", "country": "🇩🇪"}, "sd4": {"tier": "stadium", "label": "Santiago Bernabéu", "emoji": "💃", "num": "Stadion 4", "colors": ["#AA151B", "#F1BF00"], "heroText": "Richtig gute Technik", "drills": [{"idx": 0, "title": "Spann Balancieren", "emoji": "🐂", "meta": "Einfach", "sticker": "🐂", "vid": "1110049131", "hash": "0944817493"}, {"idx": 1, "title": "Pass Innenseite", "emoji": "🌟", "meta": "Einfach", "sticker": "🌟", "vid": "1130972529", "hash": "0987e3903a"}], "city": "Madrid", "country": "🇪🇸"}, "sd5": {"tier": "stadium", "label": "Parc des Princes", "emoji": "🗼", "num": "Stadion 5", "colors": ["#0055A4", "#EF4135"], "heroText": "Erster Kontakt", "drills": [{"idx": 0, "title": "Mitnahme Aussenseite", "emoji": "🥐", "meta": "Einfach", "sticker": "🥐", "vid": "1129453133", "hash": "428374cce7"}, {"idx": 1, "title": "Mitnahme Sohle", "emoji": "🗼", "meta": "Einfach", "sticker": "🗼", "vid": "1129453204", "hash": "01fa59ea55"}], "city": "Paris", "country": "🇫🇷"}};
+/* FALLBACK_MODULES — offline/error-safe mirror of the Supabase mini modules.
+   The live content is loaded from the `modules` table (kind='mini') by
+   loadMiniModules(); this object is only used if that fetch fails. */
+var FALLBACK_MODULES = {
+  st1: { tier:'base', label:'Keons Sitdowns', emoji:'⚽', num:'Station 1',
+    drills:[
+      {idx:0, title:'Ball hochhalten (sitzend)', emoji:'🐶', meta:'einfach',  vid:'1124934705', hash:'6a71a27daf', sticker:'🦄'},
+      {idx:1, title:'Mit Fuss und Kopf', emoji:'⚽', meta:'einfach',  vid:'1124935347', hash:'c8977c5fb4', sticker:'🐆'}
+    ]},
+  st2: { tier:'base', label:'Keons Ballkontrolle', emoji:'🇧🇷', num:'Station 2',
+    drills:[
+      {idx:0, title:'V', emoji:'🐸', meta:'einfach', vid:'1110048776', hash:'3990db7901', sticker:'🌟'},
+      {idx:1, title:'Sohle Links Rechts', emoji:'🦓', meta:'einfach', vid:'1111311105', hash:'b285a5a081', sticker:'🚀'}
+    ]},
+  st3: { tier:'base', label:'Cocos 1 gegen 1', emoji:'👣', num:'Station 3',
+    drills:[
+      {idx:0, title:'Drag Back', emoji:'🐢', meta:'mittel', vid:'1110029532', hash:'c98afbe376', sticker:'🔥'},
+      {idx:1, title:'Übersteiger', emoji:'🐰', meta:'mittel', vid:'1110029715', hash:'8757b6279f', sticker:'🎈'}
+    ]},
+  st4: { tier:'base', label:'Cocos Dribbling', emoji:'✨', num:'Station 4',
+    drills:[
+      {idx:0, title:'La Croqueta', emoji:'🐙', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'🏆'},
+      {idx:1, title:'Seven', emoji:'🦊', meta:'mittel', vid:'1110029615', hash:'d558930be0', sticker:'⚡'}
+    ]},
+  st5: { tier:'base', label:'Leyas Ballkontrolle', emoji:'🤹', num:'Station 5',
+    drills:[
+      {idx:0, title:'Spann Balancieren', emoji:'🐧', meta:'mittel', vid:'1110049131', hash:'0944817493', sticker:'👑'},
+      {idx:1, title:'Jonglieren Freestyle', emoji:'🦄', meta:'schwierig', vid:'1125467352', hash:'30d35d6e70', sticker:'🎁'}
+    ]},
 
+  /* === STADIUM JOURNEY (unlocked after collecting all 10 base stickers) ===
+     NOTE: vid/hash below are PLACEHOLDERS reusing the base-journey Vimeo videos.
+     Swap in real 3⭐/4⭐ Vimeo IDs + hashes when the videos are uploaded. */
+  sd1: { tier:'stadium', label:'BMO Field', city:'Toronto', country:'🇨🇦', emoji:'🍁', num:'Stadion 1',
+    drills:[
+      {idx:0, title:'Maple Sole Drag',     emoji:'🍁',  meta:'3 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🍁'},
+      {idx:1, title:'Toronto Twister',     emoji:'🌪️', meta:'4 Sterne', vid:'1110029715', hash:'8757b6279f', sticker:'🏟️'}
+    ]},
+  sd2: { tier:'stadium', label:'BC Place', city:'Vancouver', country:'🇨🇦', emoji:'🏔️', num:'Stadion 2',
+    drills:[
+      {idx:0, title:'Pacific Pull',        emoji:'🌊',  meta:'3 Sterne', vid:'1110048776', hash:'3990db7901', sticker:'🌊'},
+      {idx:1, title:'Mountain Step-Over',  emoji:'⛰️', meta:'4 Sterne', vid:'1111311105', hash:'b285a5a081', sticker:'🏔️'}
+    ]},
+  sd3: { tier:'stadium', label:'Estadio Azteca', city:'Mexico City', country:'🇲🇽', emoji:'🌶️', num:'Stadion 3',
+    drills:[
+      {idx:0, title:'Azteca Roulette',     emoji:'🌶️', meta:'3 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'🌶️'},
+      {idx:1, title:'Pyramiden-Schuss',    emoji:'🏛️', meta:'4 Sterne', vid:'1110049131', hash:'0944817493', sticker:'🏛️'}
+    ]},
+  sd4: { tier:'stadium', label:'MetLife Stadium', city:'New York', country:'🇺🇸', emoji:'🗽', num:'Stadion 4',
+    drills:[
+      {idx:0, title:'Big Apple Bicycle',   emoji:'🍎',  meta:'3 Sterne', vid:'1124934705', hash:'6a71a27daf', sticker:'🍎'},
+      {idx:1, title:'Final-Finisher',      emoji:'🗽',  meta:'4 Sterne', vid:'1125467352', hash:'30d35d6e70', sticker:'🏆'}
+    ]},
+  sd5: { tier:'stadium', label:'SoFi Stadium', city:'Los Angeles', country:'🇺🇸', emoji:'🌴', num:'Stadion 5',
+    drills:[
+      {idx:0, title:'Surfer Side-Step',    emoji:'🏄',  meta:'3 Sterne', vid:'1124935347', hash:'c8977c5fb4', sticker:'🏄'},
+      {idx:1, title:'Hollywood Elastico',  emoji:'⭐',  meta:'4 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🌟'}
+    ]},
+
+  /* === TRICK-PFAD JOURNEY (page 2: 10 unique stickers) ===
+     Progressive milestones, easy → harder. vid/hash are placeholders; swap with Supabase
+     ids later (you can extend hydrateDrillsFromSupabase to handle tier:'trickpath'). */
+  tp1: { tier:'trickpath', label:'Aufwärmen', emoji:'🏃', num:'Stufe 1',
+    drills:[
+      {idx:0, title:'Knie-Hoch',       emoji:'🦘', meta:'1 Stern',  vid:'1124934705', hash:'6a71a27daf', sticker:'🦘'},
+      {idx:1, title:'Beine-Strecken',  emoji:'🤸', meta:'1 Stern',  vid:'1124935347', hash:'c8977c5fb4', sticker:'🤸'}
+    ]},
+  tp2: { tier:'trickpath', label:'Ball-Freunde', emoji:'🤝', num:'Stufe 2',
+    drills:[
+      {idx:0, title:'Ball-Tippen',     emoji:'🐾', meta:'2 Sterne', vid:'1110048776', hash:'3990db7901', sticker:'🐾'},
+      {idx:1, title:'Innen-Aussen',    emoji:'🔄', meta:'2 Sterne', vid:'1111311105', hash:'b285a5a081', sticker:'🔄'}
+    ]},
+  tp3: { tier:'trickpath', label:'Speed-Kick', emoji:'💨', num:'Stufe 3',
+    drills:[
+      {idx:0, title:'Slalom-Lauf',     emoji:'🐍', meta:'2 Sterne', vid:'1110029532', hash:'c98afbe376', sticker:'🐍'},
+      {idx:1, title:'Sprint-Schuss',   emoji:'💨', meta:'3 Sterne', vid:'1110029715', hash:'8757b6279f', sticker:'💨'}
+    ]},
+  tp4: { tier:'trickpath', label:'Geheimer Trick', emoji:'🎯', num:'Stufe 4',
+    drills:[
+      {idx:0, title:'Roulette',        emoji:'🌀', meta:'3 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'🌀'},
+      {idx:1, title:'Sohle-Drag',      emoji:'👟', meta:'2 Sterne', vid:'1110029615', hash:'d558930be0', sticker:'👟'}
+    ]},
+  tp5: { tier:'trickpath', label:'Champion-Finale', emoji:'🌈', num:'Stufe 5',
+    drills:[
+      {idx:0, title:'Kombi-Magie',     emoji:'🎩', meta:'3 Sterne', vid:'1110049131', hash:'0944817493', sticker:'🎩'},
+      {idx:1, title:'Mega-Power',      emoji:'🦁', meta:'4 Sterne', vid:'1125467352', hash:'30d35d6e70', sticker:'🦁'}
+    ]}
+};
 var STATION_ORDER   = ['st1','st2','st3','st4','st5'];
 var TRICKPATH_ORDER = ['tp1','tp2','tp3','tp4','tp5'];
 var STADIUM_ORDER   = ['sd1','sd2','sd3','sd4','sd5'];
@@ -32,14 +118,19 @@ var STICKER_PAGES = [
   { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER,  total: TOTAL_STICKERS },
   { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,    total: TOTAL_STADIUM_STICKERS }
 ];
-
 /* ============================================================
-   SUPABASE-DRIVEN MINI MODULES  (KID_MODULES from modules table, kind='mini')
-   FALLBACK_MODULES (above) mirrors it for offline / fetch-fail.
+   SUPABASE-DRIVEN MINI MODULES
+   ------------------------------------------------------------
+   KID_MODULES is loaded from the `modules` table (kind='mini') instead of
+   being hardcoded. FALLBACK_MODULES (above) mirrors the same content so the
+   page still works if the fetch fails or the child is offline.
+   buildModuleState() derives every module-scoped structure (order arrays,
+   colors, sticker pages, totals) from a KID_MODULES-shaped object.
    ============================================================ */
 var KID_MODULES = {};
+
 function buildModuleState(mods){
-  var prevColors = STATION_COLORS || {};
+  var prevColors = STATION_COLORS || {};   // literal defaults on first call → color fallback
   KID_MODULES = mods;
   STATION_ORDER = []; TRICKPATH_ORDER = []; STADIUM_ORDER = []; STATION_COLORS = {};
   Object.keys(mods).forEach(function(k){
@@ -49,64 +140,120 @@ function buildModuleState(mods){
     else if (m.tier === 'stadium') STADIUM_ORDER.push(k);
     STATION_COLORS[k] = m.colors || prevColors[k] || ['#FFD700','#FF8C00'];
   });
-  function dc(o){ return o.reduce(function(n,k){ return n + ((mods[k]&&mods[k].drills)?mods[k].drills.length:0); },0); }
-  TOTAL_STICKERS = dc(STATION_ORDER)||10; TOTAL_STADIUM_STICKERS = dc(STADIUM_ORDER)||10;
+  function drillCount(order){ return order.reduce(function(n,k){ return n + ((mods[k] && mods[k].drills) ? mods[k].drills.length : 0); }, 0); }
+  TOTAL_STICKERS         = drillCount(STATION_ORDER) || 10;
+  TOTAL_STADIUM_STICKERS = drillCount(STADIUM_ORDER) || 10;
   STICKER_PAGES = [
-    { id:'base', label:'Spielplatz', stations: STATION_ORDER, total: TOTAL_STICKERS },
-    { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER, total: dc(TRICKPATH_ORDER)||10 },
-    { id:'stadium', label:'Stadien', stations: STADIUM_ORDER, total: TOTAL_STADIUM_STICKERS }
+    { id:'base',      label:'Spielplatz', stations: STATION_ORDER,   total: TOTAL_STICKERS },
+    { id:'trickpath', label:'Trick-Pfad', stations: TRICKPATH_ORDER, total: drillCount(TRICKPATH_ORDER) || 10 },
+    { id:'stadium',   label:'Stadien',    stations: STADIUM_ORDER,   total: TOTAL_STADIUM_STICKERS }
   ];
+  // Expose the live color map so the capture-phase color-sync listener at the
+  // bottom of this file can read/update it (it references window.STATION_COLORS).
   window.STATION_COLORS = STATION_COLORS;
 }
+
+/* Parse a stored Vimeo reference into {vid, hash}. Accepts "id/hash",
+   "id?h=hash", or a full player URL. */
 function parseVimeoCode(code){
-  var s=String(code||'').trim(); var idM=s.match(/(\d{6,})/); var vid=idM?idM[1]:''; var hash='';
-  var sl=s.match(/\d+\/([a-zA-Z0-9]+)/); var q=s.match(/[?&]h=([a-zA-Z0-9]+)/);
-  if(sl)hash=sl[1]; else if(q)hash=q[1];
-  return {vid:vid,hash:hash};
+  var s = String(code || '').trim();
+  var idM = s.match(/(\d{6,})/);
+  var vid = idM ? idM[1] : '';
+  var hash = '';
+  var slashM = s.match(/\d+\/([a-zA-Z0-9]+)/);
+  var queryM = s.match(/[?&]h=([a-zA-Z0-9]+)/);
+  if (slashM) hash = slashM[1];
+  else if (queryM) hash = queryM[1];
+  return { vid: vid, hash: hash };
 }
+
+/* Turn modules-table rows into the KID_MODULES shape the render code expects. */
 function miniRowsToModules(rows){
-  var out={};
+  var out = {};
   rows.forEach(function(row){
-    var ch=[]; try{ ch=(typeof row.challenges==='string')?JSON.parse(row.challenges):(row.challenges||[]); }catch(e){ ch=[]; }
-    ch.sort(function(a,b){return (a.idx||0)-(b.idx||0);});
-    var drills=ch.map(function(d,i){ var v=parseVimeoCode(d.vimeo_code);
-      return {idx:(typeof d.idx==='number'?d.idx:i),title:d.title||('Trick '+(i+1)),emoji:d.emoji||'⚽',meta:d.meta||'',sticker:d.sticker||'⭐',vid:v.vid,hash:v.hash}; });
-    var colors=(row.color&&String(row.color).indexOf(',')>=0)?String(row.color).split(',').map(function(s){return s.trim();}):null;
-    out[row.key]={tier:row.tier||'base',label:row.label||row.key,emoji:row.icon||'⚽',num:row.num||'',
-      avatar:row.avatar||undefined,city:row.city||undefined,country:row.country||undefined,
-      heroText:row.hero_text||'',colors:colors,drills:drills};
+    var challenges = [];
+    try { challenges = (typeof row.challenges === 'string') ? JSON.parse(row.challenges) : (row.challenges || []); }
+    catch(e){ challenges = []; }
+    challenges.sort(function(a,b){ return (a.idx||0) - (b.idx||0); });
+    var drills = challenges.map(function(d, i){
+      var v = parseVimeoCode(d.vimeo_code);
+      return {
+        idx: (typeof d.idx === 'number' ? d.idx : i),
+        title: d.title || ('Trick ' + (i+1)),
+        emoji: d.emoji || '⚽',
+        meta: d.meta || '',
+        sticker: d.sticker || '⭐',
+        vid: v.vid, hash: v.hash
+      };
+    });
+    var colors = (row.color && String(row.color).indexOf(',') >= 0)
+      ? String(row.color).split(',').map(function(s){ return s.trim(); })
+      : null;
+    out[row.key] = {
+      tier: row.tier || 'base',
+      label: row.label || row.key,
+      emoji: row.icon || '⚽',
+      num: row.num || '',
+      avatar: row.avatar || undefined,
+      city: row.city || undefined,
+      country: row.country || undefined,
+      colors: colors,
+      drills: drills
+    };
   });
   return out;
 }
+
+/* Fetch published kind='mini' modules and build state; fall back to the
+   embedded FALLBACK_MODULES on any error. Always calls done(). */
 function loadMiniModules(done){
-  var SB_URL='https://qajjuhjmrtuomwrbxmpz.supabase.co';
-  var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
-  var sel='key,label,icon,color,sort_order,kind,tier,city,country,num,avatar,progressive,hero_text,challenges';
-  var url=SB_URL+'/rest/v1/modules?kind=eq.mini&published=eq.true&order=sort_order.asc&select='+encodeURIComponent(sel);
-  fetch(url,{headers:{apikey:SB_KEY,'Authorization':'Bearer '+SB_KEY}})
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(function(rows){ if(!Array.isArray(rows)||!rows.length) throw new Error('no mini modules'); buildModuleState(miniRowsToModules(rows)); })
-    .catch(function(e){ console.warn('[T7 Minis] module fetch failed — offline fallback.',e); buildModuleState(FALLBACK_MODULES); })
-    .then(function(){ if(done) done(); });
+  var SB_URL = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+  var sel = 'key,label,icon,color,sort_order,kind,tier,city,country,num,avatar,progressive,challenges';
+  var url = SB_URL + '/rest/v1/modules?kind=eq.mini&published=eq.true&order=sort_order.asc&select=' + encodeURIComponent(sel);
+  fetch(url, { headers: { apikey: SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(rows){
+      if (!Array.isArray(rows) || !rows.length) throw new Error('no mini modules returned');
+      buildModuleState(miniRowsToModules(rows));
+    })
+    .catch(function(e){
+      console.warn('[T7 Minis] module fetch failed — using offline fallback.', e);
+      buildModuleState(FALLBACK_MODULES);
+    })
+    .then(function(){ if (done) done(); });
 }
+
+/* Populate the static landing/station/stadium tiles from the loaded modules,
+   so tile text can't drift from the DB content. */
 function syncTilesFromData(){
   document.querySelectorAll('.pg-station[data-station]').forEach(function(btn){
-    var m=KID_MODULES[btn.dataset.station]; if(!m) return;
-    var nm=btn.querySelector('.pg-st-name'); if(nm) nm.textContent=m.label;
-    var a=(typeof AVATARS!=='undefined')?AVATARS[m.avatar]:null;
-    var av=btn.querySelector('.pg-st-avatar'); if(av&&a){ av.src=a.img; av.alt=a.alt; }
+    var m = KID_MODULES[btn.dataset.station]; if (!m) return;
+    var nm = btn.querySelector('.pg-st-name'); if (nm) nm.textContent = m.label;
+    var a  = (typeof AVATARS !== 'undefined') ? AVATARS[m.avatar] : null;
+    var av = btn.querySelector('.pg-st-avatar'); if (av && a) { av.src = a.img; av.alt = a.alt; }
   });
   document.querySelectorAll('.stadium-card[data-station]').forEach(function(card){
-    var m=KID_MODULES[card.dataset.station]; if(!m) return;
-    var f=card.querySelector('.stadium-flag'); if(f&&m.country) f.textContent=m.country;
-    var e=card.querySelector('.stadium-emoji'); if(e&&m.emoji) e.textContent=m.emoji;
-    var nm=card.querySelector('.stadium-name'); if(nm) nm.textContent=m.label;
-    var ct=card.querySelector('.stadium-city'); if(ct&&m.city) ct.textContent=m.city;
-    if(m.colors&&m.colors[0]) card.style.setProperty('--st-c',m.colors[0]);
+    var m = KID_MODULES[card.dataset.station]; if (!m) return;
+    var f = card.querySelector('.stadium-flag');  if (f && m.country) f.textContent = m.country;
+    var e = card.querySelector('.stadium-emoji'); if (e && m.emoji)   e.textContent = m.emoji;
+    var nm= card.querySelector('.stadium-name');  if (nm) nm.textContent = m.label;
+    var ct= card.querySelector('.stadium-city');  if (ct && m.city)    ct.textContent = m.city;
+    if (m.colors && m.colors[0]) card.style.setProperty('--st-c', m.colors[0]);
   });
 }
-function startMinis(id,name){ loadMiniModules(function(){ try{ syncTilesFromData(); }catch(e){} boot(id,name); }); }
 
+/* Boot only after the mini modules are loaded (or the fallback is applied). */
+function startMinis(id, name){
+  loadMiniModules(function(){
+    try { syncTilesFromData(); } catch(e){}
+    boot(id, name);
+  });
+}
+
+/* STATE.id holds the player_profiles UUID (injected by WordPress as
+   window.T7_PROFILE_ID and delivered via T7Identity.resolve). It was formerly
+   an email; the v2.0 engine is UUID-keyed, so every Supabase call now uses id. */
 var STATE = { id:null, name:'Champion', ratings:{}, gold:{}, completions:{}, curMod:null, curDrill:null, curStation:null, muted:false, totalXP:0, weekXP:0, avatar:'keon', stickerPage:0 };
 try { STATE.muted = localStorage.getItem('t7kid_muted') === '1'; } catch(e){}
 try { var savedAv = localStorage.getItem('t7kid_avatar'); if (savedAv && ['keon','coco','leya'].indexOf(savedAv) >= 0) STATE.avatar = savedAv; } catch(e){}
@@ -311,7 +458,6 @@ function renderStationView(modKey){
   }
   document.getElementById('station-num').textContent = mod.num;
   document.getElementById('station-title').textContent = mod.label + (isStadium && mod.city ? ' · ' + mod.city : '');
-  (function(){ var he=document.getElementById('station-hero-text'); if(!he){ he=document.createElement('div'); he.id='station-hero-text'; he.className='station-hero-text'; he.style.cssText='margin-top:6px;font-size:13px;font-weight:600;opacity:.9'; var ti=document.getElementById('station-title'); if(ti&&ti.parentNode) ti.parentNode.insertBefore(he, ti.nextSibling); } if(he) he.textContent = mod.heroText || ''; })();
   document.getElementById('station-count').textContent = done + '/' + total + ' geschafft';
   document.getElementById('station-trickcount').textContent = total + ' Tricks';
 
@@ -764,9 +910,12 @@ function resolveOutcome(rating){
   if (STATE.id && window.T7SB) {
     var XP_BY_RATING = {2:4, 3:6, 4:8, 5:10};
     var xp = XP_BY_RATING[rating] || 0;
+    // v2.0 engine split the old single upsert() into two calls:
+    //   addXP        — adds this attempt's XP to the cumulative player_stats.total_xp
+    //   recordAttempt — appends one row to drill_attempts (drives best-rating + streaks)
     T7SB.addXP(STATE.id, xp, STATE.totalXP);
     T7SB.recordAttempt(STATE.id, modKey, idx, rating, xp);
-    STATE.totalXP += xp;
+    STATE.totalXP += xp;               // optimistic; refreshFortschritt reconciles from the server
     try { window.dispatchEvent(new CustomEvent('t7xpupdate')); } catch(e){}
     setTimeout(refreshFortschritt, 1500);
   }
@@ -874,6 +1023,8 @@ function loadLocal(){ try{
 function hydrateFromSupabase(){
   if (!STATE.id || !window.T7SB) return;
   Object.keys(KID_MODULES).forEach(function(mk){
+    // getBestRatings returns { drill_idx: {rating, xp} } — the best rating per
+    // drill for this module — replacing the old getModuleXP(email, mk) row list.
     T7SB.getBestRatings(STATE.id, mk, function(best){
       var changed = false;
       Object.keys(best || {}).forEach(function(i){
@@ -894,15 +1045,21 @@ function hydrateFromSupabase(){
 
 function refreshFortschritt(){
   if (!STATE.id || !window.T7SB) return;
+  // Total XP now comes from player_stats via getStats (was getTotalXP(email)).
   T7SB.getStats(STATE.id, function(stats){
     STATE.totalXP = (stats && stats.total_xp) || 0;
-    var el = document.getElementById('kf-total'); if (el) el.textContent = STATE.totalXP.toLocaleString('de-AT');
+    var el = document.getElementById('kf-total');
+    if (el) el.textContent = STATE.totalXP.toLocaleString('de-AT');
   });
+  // Weekly XP is summed client-side from drill_attempts (was the old `attempts`
+  // table keyed by player_email). attempted_at is now an ISO timestamp string.
   T7SB.getAllAttempts(STATE.id, function(rows){
     var now=new Date(),sw=new Date(now);sw.setHours(0,0,0,0);sw.setDate(now.getDate()-((now.getDay()+6)%7));
     var t0=sw.getTime(),xp=0;
     (rows||[]).forEach(function(a){var ts=a.attempted_at?new Date(a.attempted_at).getTime():0; if(ts>=t0)xp+=Number(a.xp||0);});
-    STATE.weekXP=xp; var el=document.getElementById('kf-week'); if(el) el.textContent=xp;
+    STATE.weekXP=xp;
+    var el = document.getElementById('kf-week');
+    if (el) el.textContent = xp;
   });
 }
 
@@ -990,7 +1147,8 @@ function boot(id, name){
   renderStickers();
   updateHeroStickerCount();
   renderTrickpfad();
-  // stadium videos now come from mini modules (vimeo_code per drill)
+  // Stadium videos now come from the mini modules table (vimeo_code per drill),
+  // so the old videos-table hydrator (hydrateDrillsFromSupabase) is no longer called.
   hydrateFromSupabase();
   refreshFortschritt();
   refreshChampionBadge();
@@ -998,6 +1156,8 @@ function boot(id, name){
   setTimeout(maybeShowChampion, 1200);
 }
 
+// T7Identity.resolve delivers (id, name): id = player_profiles UUID, name = first_name.
+// startMinis loads the mini modules from Supabase (with offline fallback) before booting.
 if (window.T7Identity) { T7Identity.resolve(function(id, name){ startMinis(id, name); }); }
 else { setTimeout(function(){ if (window.T7Identity) T7Identity.resolve(function(id, name){ startMinis(id, name); }); else startMinis(null, null); }, 1500); }
 })();
