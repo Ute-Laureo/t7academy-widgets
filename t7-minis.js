@@ -22,6 +22,15 @@ var STATION_COLORS = {
   sd4: ['#7C3AED','#5B21B6'],
   sd5: ['#0055A4','#EF4135']
 };
+/* Force the stadium palette regardless of Supabase `color` values.
+   [card colour, hero-gradient 2nd colour]. Set to null to let Supabase drive that stadium again. */
+var STADIUM_COLOR_OVERRIDE = {
+  sd1: ['#009C3B','#FFDF00'],
+  sd2: ['#E4002B','#A30025'],
+  sd3: ['#EA580C','#C2410C'],
+  sd4: ['#7C3AED','#5B21B6'],
+  sd5: ['#0055A4','#EF4135']
+};
 var TOTAL_STICKERS = 10;
 var TOTAL_STADIUM_STICKERS = 10;
 
@@ -49,6 +58,13 @@ function buildModuleState(mods){
     else if (m.tier === 'stadium') STADIUM_ORDER.push(k);
     STATION_COLORS[k] = m.colors || prevColors[k] || ['#FFD700','#FF8C00'];
   });
+  if (STADIUM_COLOR_OVERRIDE) {
+    Object.keys(STADIUM_COLOR_OVERRIDE).forEach(function(k){
+      if (!STADIUM_COLOR_OVERRIDE[k]) return;
+      if (KID_MODULES[k]) KID_MODULES[k].colors = STADIUM_COLOR_OVERRIDE[k].slice();
+      STATION_COLORS[k] = STADIUM_COLOR_OVERRIDE[k].slice();
+    });
+  }
   function dc(o){ return o.reduce(function(n,k){ return n + ((mods[k]&&mods[k].drills)?mods[k].drills.length:0); },0); }
   TOTAL_STICKERS = dc(STATION_ORDER)||10; TOTAL_STADIUM_STICKERS = dc(STADIUM_ORDER)||10;
   STICKER_PAGES = [
