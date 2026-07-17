@@ -8,13 +8,13 @@
 /* --- Minis mobile fixes (self-contained; can move to t7-minis.css) --- */
 /* Let the station/stadium title shrink & wrap inside the flex header instead of clipping */
 .station-info{ min-width:0; flex:1 1 auto; }
-.station-title{ overflow-wrap:break-word; word-break:break-word; }
+.station-title{ overflow-wrap:break-word; word-break:normal; }
 @media (max-width:600px){
   .station-title{ font-size:22px; line-height:1.12; }
   .station-hero{ gap:10px; }
 }
 /* Trick-path node mascot */
-.tp-node-av{ width:26px; height:26px; border-radius:50%; object-fit:cover; }
+.tp-node-av{ display:none !important; }
 </style>
 
 
