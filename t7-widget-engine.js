@@ -690,7 +690,7 @@ function T7Rangliste(containerId){
   var allP=[];
   function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);}
   function ai(n){return n?(n.charCodeAt(0)+n.length)%AC.length:0;}
-  cont.innerHTML='<div class="rl-header"><div class="rl-title">Top Spieler \u00b7 T7 Academy</div></div><div id="t7rl-list-'+containerId+'"><div class="rl-loading">Lade\u2026</div></div>';
+  cont.innerHTML='<div id="t7rl-list-'+containerId+'"><div class="rl-loading">Lade\u2026</div></div>';
   var listEl=document.getElementById('t7rl-list-'+containerId);
   function renderList(){
     var med=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];

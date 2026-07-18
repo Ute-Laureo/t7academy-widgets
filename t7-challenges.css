@@ -929,3 +929,67 @@
   transform: none;
 }
 .t7w .prow.pdone { border-color: rgba(var(--wa-rgb), .35); }
+
+
+/* ============================================================
+   12. TECHNIKSCHULE — PURE AQUA (no blue mix)
+   The default widget palette (t7-base.css .t7a-wrap) blends aqua
+   (--wa #00E5FF) into a blue (--wa2 #0080FF) for gradient ends
+   and — most visibly — the "0 / 5" skill counter, since
+   .cr-prog-label reads var(--wa2). Pin --wa2 to the same aqua so
+   the whole Technikschule widget reads as one aqua identity:
+   progress fill, skill counter and "Starten" button all stay aqua
+   instead of trailing off into blue. Scoped to #ch-container so
+   only Technikschule is affected; Monats (§13), Builder (§10) and
+   the cert widget (§6) keep their own identities. Light mode picks
+   up the darker teal --wa already set for .t7a-wrap in §7.
+============================================================ */
+#ch-container .t7a-wrap,
+#ch-container .t7w {
+  --wa2: var(--wa);
+}
+/* Outcome "total XP" pill is hardcoded aqua→blue in base css —
+   flatten its blue end to aqua too. */
+#ch-container .t7w .xp-total-pill {
+  background: linear-gradient(135deg, #00E5FF, #00C8E8);
+}
+
+
+/* ============================================================
+   13. CHALLENGE DES MONATS — ORANGE, NOT AQUA
+   Monats mounts through T7.challenge() into #monats-container,
+   which inherits the default cyan --wa from .t7a-wrap. Re-point
+   --wa/--wa2/--wa-rgb to the same orange the Monats tab identity
+   uses (§2: #FF6B35 dark / #C2410C light) so the expandable module
+   rows ("dropdowns"), progress bar and the inverse XP pill
+   (.cr-xp, which reads --wa) all turn orange.
+
+   Three elements bypass --wa with a hardcoded cyan gradient in
+   base css (avatar, the full XP pill .cr-xp-total, and the outcome
+   .xp-total-pill) — same pattern §6/§10 handle for cert/Builder —
+   so they're re-pointed to orange explicitly here.
+============================================================ */
+#monats-container .t7w,
+#monats-container .t7a-wrap {
+  --wa: #FF6B35;
+  --wa2: #FF8C00;
+  --wa-rgb: 255, 107, 53;
+}
+[data-theme="light"] #monats-container .t7w,
+[data-theme="light"] #monats-container .t7a-wrap {
+  --wa: #C2410C;
+  --wa2: #9A3412;
+  --wa-rgb: 194, 65, 12;
+}
+#monats-container .t7w .cr-avatar {
+  background: linear-gradient(135deg, #FF6B35, #FF8C00);
+  box-shadow: 0 0 8px rgba(255, 107, 53, .35);
+}
+#monats-container .t7w .cr-xp-total {
+  background: linear-gradient(135deg, #FF6B35, #FF8C00);
+  box-shadow: 0 0 10px rgba(255, 107, 53, .28);
+}
+#monats-container .t7w .xp-total-pill {
+  background: linear-gradient(135deg, #FF6B35, #FF8C00);
+  box-shadow: 0 0 10px rgba(255, 107, 53, .28);
+}
