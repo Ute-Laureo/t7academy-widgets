@@ -948,7 +948,7 @@
 #ch-container .t7w {
   --wa2: var(--wa);
 }
-/* Outcome "total XP" pill is hardcoded aqua→blue in base css —
+/* Outcome "total XP" pill is hardcoded aqua->blue in base css —
    flatten its blue end to aqua too. */
 #ch-container .t7w .xp-total-pill {
   background: linear-gradient(135deg, #00E5FF, #00C8E8);
@@ -992,4 +992,27 @@
 #monats-container .t7w .xp-total-pill {
   background: linear-gradient(135deg, #FF6B35, #FF8C00);
   box-shadow: 0 0 10px rgba(255, 107, 53, .28);
+}
+
+
+/* ============================================================
+   14. LIGHT-MODE INVERSE XP PILL (.cr-xp) — FOLLOW SECTION COLOR
+   In light mode t7-base.css hardcodes .cr-xp to aqua
+   ([data-theme="light"] .t7w .cr-xp { color:#00B8D4; ... }),
+   setting color/border/background directly instead of reading
+   --wa. That override wins over the --wa re-points in §10/§13, so
+   the inverse "XP" pill stayed aqua in light mode for the Builder
+   ("Deine eigene Challenge") and Monats widgets. Re-point it here
+   with higher (#id) specificity: violet for Builder, orange for
+   Monats — matching each section's light-mode identity.
+============================================================ */
+[data-theme="light"] #builder-container .t7w .cr-xp {
+  color: #7C3AED;
+  border-color: rgba(124, 58, 237, .4);
+  background: rgba(124, 58, 237, .1);
+}
+[data-theme="light"] #monats-container .t7w .cr-xp {
+  color: #C2410C;
+  border-color: rgba(194, 65, 12, .4);
+  background: rgba(194, 65, 12, .1);
 }
