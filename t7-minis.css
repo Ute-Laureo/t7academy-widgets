@@ -76,14 +76,14 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 @media(max-width:880px){.hero{grid-template-columns:1fr;min-height:auto}.hero-image{height:240px;order:-1}.hero-text{padding:40px 22px}.hero h1{font-size:32px}.hero-overlay-avatar{max-width:180px;width:55%}.hero-stats{gap:24px;padding-top:20px;margin-top:22px}}
 
 /* === LAYOUT === */
-.ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:28px;padding:52px clamp(20px,3vw,40px) 80px;background:var(--bg);align-items:start}
+.ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:28px;padding:76px clamp(20px,3vw,40px) 80px;background:var(--bg);align-items:start}
 .ch-main{min-width:0;display:flex;flex-direction:column;gap:18px}
 .ch-sidebar{min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:88px;height:fit-content;align-self:start}
-@media(max-width:960px){.ch-layout{grid-template-columns:1fr;padding:36px 16px 100px}.ch-sidebar{position:static}}
+@media(max-width:960px){.ch-layout{grid-template-columns:1fr;padding:52px 16px 100px}.ch-sidebar{position:static}}
 .ch-section{display:flex;flex-direction:column;gap:16px}
 
 /* === BANNER (Keon greeting) === */
-.kh-wrap{position:relative;width:100%;overflow:hidden;border-radius:14px;padding:20px 22px 18px;border:1px solid var(--lp-rule);background:rgba(0,229,255,.04)}
+.kh-wrap{position:relative;width:100%;overflow:hidden;border-radius:14px;padding:14px 22px 18px;border:1px solid var(--lp-rule);background:rgba(0,229,255,.04)}
 [data-theme="light"] .kh-wrap{background:#fff;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
 .kh-topline{display:none}
 .kh-orb1,.kh-orb2{display:none}
@@ -262,7 +262,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .station-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:26px;color:#fff;line-height:1.15;letter-spacing:-.01em}
 .station-meta{font-family:'Open Sans',sans-serif;font-size:12px;color:rgba(255,255,255,.85);font-weight:700;margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
 .station-meta-pill{background:rgba(255,255,255,.20);padding:4px 11px;border-radius:99px;color:#fff;letter-spacing:.02em}
-.drills-list{display:flex;flex-direction:column;gap:14px;background:transparent;border:1px solid var(--lp-rule);border-radius:16px;padding:24px}
+.drills-list{display:flex;flex-direction:column;gap:14px;background:transparent;border:1px solid var(--lp-rule);border-radius:16px;padding:16px 24px 24px}
 [data-theme="light"] .drills-list{background:#fff;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
 .drills-list-label{font-family:'Antonio','Open Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-text);margin-bottom:4px;display:flex;align-items:center;gap:10px}
 .drills-list-label::after{content:'';flex:1;height:1px;background:var(--lp-rule)}
@@ -320,7 +320,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .tp-node.tp-done .tp-badge{color:var(--lp-green);border-color:var(--lp-green)}
 
 /* === SIDEBAR CARDS === */
-.sb-card{background:rgba(255,255,255,.03);border:1px solid var(--lp-rule);border-radius:14px;padding:20px}
+.sb-card{background:rgba(255,255,255,.03);border:1px solid var(--lp-rule);border-radius:14px;padding:14px 20px 20px}
 [data-theme="light"] .sb-card{background:#fff;border-color:rgba(15,23,42,.10);box-shadow:0 1px 2px rgba(15,23,42,.04)}
 .sb-label{font-family:'Antonio','Open Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent-text);margin-bottom:16px;border-bottom:1px solid var(--lp-rule);padding-bottom:12px;display:flex;align-items:center;gap:8px}
 .sb-label.gold{color:var(--lp-gold)}
