@@ -6,7 +6,7 @@
    CLOUD (Supabase) — unchanged from before:
      - Identity (T7Identity)
      - Progress: Sevens / Sterne video watch counts
-     - Challenges progress + XP        (player_stats.xp)
+     - Challenges progress + XP        (player_stats.total_xp)
      - Sterne-Zertifikat (star count)  (player_stats.stars)
      - Avatar URL                      (player_profiles.avatar_url)
 
@@ -431,8 +431,8 @@
   /* ---- Challenge des Monats helpers ----
      The monthly module_key is always 'monats_<currentYYYY_MM>' (built from
      today's date on the Challenges page, independent of how the row stores
-     its month). We only read the monthly_challenges row for the drill TOTAL
-     and its display name. */
+     its month). We only read the monthly_challenges row to get the drill
+     TOTAL and its display name. */
   function currentMonthKey(){
     var d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -444,8 +444,8 @@
     var mk = currentMonthKey();
     var rm = String(raw == null ? '' : raw).toLowerCase().trim();
     if (!rm) return false;
-    if (rm === mk) return true;
-    if (rm.indexOf(mk + '-') === 0) return true;
+    if (rm === mk) return true;                 /* 2026-07          */
+    if (rm.indexOf(mk + '-') === 0) return true; /* 2026-07-01 (ISO) */
     var digits = rm.replace(/[^0-9]/g, '');
     if (digits) {
       var d = new Date(), y = String(d.getFullYear()),
@@ -461,10 +461,12 @@
     return Array.isArray(arr) ? arr.length : 0;
   }
 
-  /* ---- Dynamic module list (mirrors the Challenges page) ----
-     Loads the `modules` table so the home cards never drift from Supabase.
-     Totals come from each module's `challenges` array. Falls back to the
-     hardcoded CHALLENGE_MODULES / CERT_MODULES if the fetch fails. */
+  /* ---- Dynamic module list ----
+     The Challenges page loads its modules straight from Supabase, so a
+     hardcoded list here drifts out of sync (e.g. new modules, renamed keys).
+     We load the same `modules` table and derive each module's total from its
+     `challenges` array. Falls back to the CHALLENGE_MODULES / CERT_MODULES
+     constants if the fetch fails or returns nothing. */
   var _modCache = null;
   function countChallenges(raw){
     var arr = [];
@@ -479,7 +481,7 @@
         var ch = [], ce = [];
         rows.forEach(function(m){
           var total = countChallenges(m.challenges);
-          if (!total) return;
+          if (!total) return;                                  /* skip empty modules */
           if (m.kind === 'certificate') ce.push({ key: m.key, label: m.label, stars: Number(m.stars || 0), total: total });
           else if (m.kind === 'challenge') ch.push({ key: m.key, label: m.label, total: total });
         });
@@ -489,111 +491,121 @@
       .catch(function(){ cb({ challenges: CHALLENGE_MODULES, certs: CERT_MODULES }); });
   }
 
-  /* ---- Small render helpers for the challenge cards ---- */
-  function xpHeader(xp){
-    return '<div class="po-xp">⚡ ' + (xp || 0) + ' XP</div>';
-  }
-  function barRow(nameHtml, done, total, color){
-    var hasTotal = (typeof total === 'number' && total > 0);
-    var pct = hasTotal ? Math.round(done / total * 100) : 0;
-    return '<div>' +
-      '<div class="po-mod-row"><span class="po-mod-name">' + nameHtml + '</span>' +
-        '<span class="po-mod-stat">' + done + '/' + total + '</span></div>' +
-      '<div class="po-bar"><div class="po-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
-    '</div>';
-  }
-
-  /* ============================================================
-     CHALLENGE CARDS — four separate cards, each with its own XP:
-       Technik (po-technik-body), Zertifikate (po-certs-body),
-       Eigene Challenges (po-builder-body), Challenge des Monats
-       (po-monats-body). XP per card = sum of that category's
-       drill_attempts.xp, so the four add up to the hero total.
-     Also feeds the hero Sterne-Zertifikat badge + total XP.
-  ============================================================ */
-  function renderChallengeCards(profileId){
-    var elTech = $('po-technik-body'), elCert = $('po-certs-body'),
-        elBuild = $('po-builder-body'), elMon = $('po-monats-body');
-    var cards = [elTech, elCert, elBuild, elMon];
-    if (!profileId) { cards.forEach(function(e){ if (e) renderEmpty(e, 'Anmelden, um Fortschritt zu sehen.'); }); return; }
-
+  function renderChallenges(el, profileId){
+    if (!profileId) { renderEmpty(el, 'Anmelden, um Fortschritt zu sehen.'); return; }
     loadModules(function(mods){
-      Promise.all([
-        sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating,xp'),
-        sbGet('monthly_challenges?select=*&order=month.desc'),
-        sbGet('player_stats?id=eq.' + encodeURIComponent(profileId) + '&select=stars,total_xp')
-      ]).then(function(res){
-        var attempts = res[0] || [], monthly = res[1] || [], statsRow = (res[2] || [])[0] || {};
+    Promise.all([
+      sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating'),
+      sbGet('monthly_challenges?select=*&order=month.desc')
+    ]).then(function(res){
+        var rows    = res[0] || [];
+        var monthly = res[1] || [];
 
-        /* Feed hero: stars + total XP */
-        var earnedStars = Number(statsRow.stars || 0);
-        renderHeroStars(earnedStars);
-        if (typeof statsRow.total_xp === 'number') { cumulativeHeroStats.xp = statsRow.total_xp; flushHeroStats(); }
-
-        /* best rating per drill + summed xp per module key */
-        var best = {}, xpByKey = {};
-        attempts.forEach(function(a){
+        var best = {};
+        rows.forEach(function(a){
           if (!best[a.module_key]) best[a.module_key] = {};
           var cur = best[a.module_key][a.drill_idx] || 0;
           if (a.rating > cur) best[a.module_key][a.drill_idx] = a.rating;
-          xpByKey[a.module_key] = (xpByKey[a.module_key] || 0) + Number(a.xp || 0);
         });
         function doneCount(key){
           var mb = best[key] || {};
           return Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
         }
-        function catXP(pred){
-          var t = 0;
-          Object.keys(xpByKey).forEach(function(k){ if (pred(k)) t += xpByKey[k]; });
-          return t;
-        }
-        var challengeKeys = {}, certKeys = {};
-        mods.challenges.forEach(function(m){ challengeKeys[m.key] = 1; });
-        mods.certs.forEach(function(m){ certKeys[m.key] = 1; });
-        var isBuilder = function(k){ return k === 'builder' || k.indexOf('builder_') === 0; };
-        var isMonats  = function(k){ return k.indexOf('monats_') === 0; };
 
-        /* --- Technik --- */
-        if (elTech) {
-          elTech.innerHTML = xpHeader(catXP(function(k){ return challengeKeys[k]; })) +
-            mods.challenges.map(function(m){ return barRow(esc(m.label), doneCount(m.key), m.total, 'cyan'); }).join('');
-        }
+        /* Technik modules (from Supabase) */
+        var html = mods.challenges.map(function(m){
+          var done = doneCount(m.key);
+          var pct  = Math.round(done / m.total * 100);
+          return '<div>' +
+            '<div class="po-mod-row"><span class="po-mod-name">' + esc(m.label) + '</span>' +
+              '<span class="po-mod-stat">' + done + '/' + m.total + '</span></div>' +
+            '<div class="po-bar"><div class="po-bar-fill cyan" style="width:' + pct + '%"></div></div>' +
+          '</div>';
+        }).join('');
 
-        /* --- Zertifikate --- */
-        if (elCert) {
-          elCert.innerHTML = xpHeader(catXP(function(k){ return certKeys[k]; })) +
-            mods.certs.map(function(m){
-              var star = earnedStars >= m.stars ? ' <span style="color:var(--lp-gold);font-weight:800">★</span>' : '';
-              return barRow(esc(m.label) + star, doneCount(m.key), m.total, 'gold');
-            }).join('');
+        /* Challenge des Monats — current month's curated challenge */
+        var mRow = null;
+        for (var i = 0; i < monthly.length; i++) {
+          if (String(monthly[i].month).trim() === currentMonthKey()) { mRow = monthly[i]; break; }
         }
-
-        /* --- Eigene Challenges (Builder) --- */
-        if (elBuild) {
-          var builtKeys = {}, mastered = 0;
-          Object.keys(best).forEach(function(k){
-            if (isBuilder(k)) { builtKeys[k] = 1; var db = best[k]; Object.keys(db).forEach(function(d){ if (db[d] >= 4) mastered++; }); }
-          });
-          elBuild.innerHTML = xpHeader(catXP(isBuilder)) +
-            '<div class="po-mod-row"><span class="po-mod-name">🔧 Challenges gebaut</span><span class="po-mod-stat">' + Object.keys(builtKeys).length + '</span></div>' +
-            '<div class="po-mod-row"><span class="po-mod-name">★ Drills gemeistert</span><span class="po-mod-stat">' + mastered + '</span></div>';
+        if (!mRow) {
+          for (var j = 0; j < monthly.length; j++) {
+            if (monthMatchesNow(monthly[j].month)) { mRow = monthly[j]; break; }
+          }
         }
-
-        /* --- Challenge des Monats --- */
-        if (elMon) {
-          var mRow = null;
-          for (var i = 0; i < monthly.length; i++) { if (String(monthly[i].month).trim() === currentMonthKey()) { mRow = monthly[i]; break; } }
-          if (!mRow) { for (var j = 0; j < monthly.length; j++) { if (monthMatchesNow(monthly[j].month)) { mRow = monthly[j]; break; } } }
-          var mDone = doneCount(monatsModuleKey()), mTotal = monatsDrillTotal(mRow);
+        var mDone  = doneCount(monatsModuleKey());
+        var mTotal = monatsDrillTotal(mRow);
+        if (mTotal || mDone) {
           var mName = (mRow && (mRow.name || '').trim()) || 'Challenge des Monats';
-          elMon.innerHTML = xpHeader(catXP(isMonats)) +
-            ((mTotal || mDone)
-              ? barRow('🔥 ' + esc(mName), mDone, (mTotal || '?'), 'cyan')
-              : '<div class="po-empty">Diesen Monat noch keine Challenge.</div>');
+          var mPct  = mTotal ? Math.round(mDone / mTotal * 100) : 0;
+          html += '<div>' +
+            '<div class="po-mod-row"><span class="po-mod-name">🔥 ' + esc(mName) + '</span>' +
+              '<span class="po-mod-stat">' + mDone + '/' + (mTotal || '?') + '</span></div>' +
+            '<div class="po-bar"><div class="po-bar-fill cyan" style="width:' + mPct + '%"></div></div>' +
+          '</div>';
         }
-      }).catch(function(){
-        cards.forEach(function(e){ if (e) renderEmpty(e, 'Fehler beim Laden.'); });
+
+        /* Eigene Challenges — one summary line (built count + drills mastered).
+           Matches both the legacy single 'builder' key and the differentiated
+           'builder_<sig>' keys, so it's correct before and after differentiation. */
+        var builtKeys = {}, builderMastered = 0;
+        Object.keys(best).forEach(function(k){
+          if (k === 'builder' || k.indexOf('builder_') === 0) {
+            builtKeys[k] = true;
+            var db = best[k];
+            Object.keys(db).forEach(function(d){ if (db[d] >= 4) builderMastered++; });
+          }
+        });
+        var builtCount = Object.keys(builtKeys).length;
+        if (builtCount) {
+          html += '<div class="po-mod-row" style="margin-top:6px;padding-top:8px;border-top:1px solid rgba(128,140,160,.14)">' +
+              '<span class="po-mod-name">🔧 Eigene Challenges</span>' +
+              '<span class="po-mod-stat">' + builtCount + ' gebaut · ' + builderMastered + ' ★</span>' +
+            '</div>';
+        }
+
+        el.innerHTML = html;
+      }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
+    });
+  }
+
+  function renderCerts(el, profileId){
+    if (!profileId) { renderEmpty(el, 'Anmelden, um Fortschritt zu sehen.'); return; }
+    loadModules(function(mods){
+    Promise.all([
+      sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating'),
+      sbGet('player_stats?id=eq.' + encodeURIComponent(profileId) + '&select=stars,total_xp')
+    ]).then(function(res){
+      var attempts = res[0] || [];
+      var statsRow = (res[1] || [])[0] || {};
+      var earnedStars = Number(statsRow.stars || 0);
+
+      /* Feed hero — XP and Sterne-Zertifikat both flow from here */
+      renderHeroStars(earnedStars);
+      if (typeof statsRow.total_xp === 'number') {
+        cumulativeHeroStats.xp = statsRow.total_xp;
+        flushHeroStats();
+      }
+
+      var best = {};
+      attempts.forEach(function(a){
+        if (!best[a.module_key]) best[a.module_key] = {};
+        var cur = best[a.module_key][a.drill_idx] || 0;
+        if (a.rating > cur) best[a.module_key][a.drill_idx] = a.rating;
       });
+      el.innerHTML = mods.certs.map(function(m){
+        var mb = best[m.key] || {};
+        var done = Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
+        var pct  = Math.round(done / m.total * 100);
+        var cert = earnedStars >= m.stars
+          ? ' <span style="color:var(--lp-gold);font-weight:800">★</span>' : '';
+        return '<div>' +
+          '<div class="po-mod-row"><span class="po-mod-name">' + esc(m.label) + cert + '</span>' +
+            '<span class="po-mod-stat">' + done + '/' + m.total + '</span></div>' +
+          '<div class="po-bar"><div class="po-bar-fill gold" style="width:' + pct + '%"></div></div>' +
+        '</div>';
+      }).join('');
+    }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
     });
   }
 
@@ -643,11 +655,15 @@
     renderHeroStars(0);                  /* placeholder until renderCerts resolves */
     renderVideoCard($('po-sevens-body'),    profileId, 'sevens');
     renderVideoCard($('po-sterne-body'),    profileId, 'sterne');
-    renderChallengeCards(profileId);
+    renderChallenges($('po-challenges-body'), profileId);
+    renderCerts($('po-certs-body'),       profileId);
 
     window.addEventListener('t7xpupdate', function(){
       var info = window.T7Identity && T7Identity.get();
-      if (info && info.id) renderChallengeCards(info.id);
+      if (info && info.id) {
+        renderChallenges($('po-challenges-body'), info.id);
+        renderCerts($('po-certs-body'), info.id);
+      }
     });
   }
 

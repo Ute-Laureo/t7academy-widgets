@@ -313,7 +313,7 @@ body[data-theme="light"] .lp-hero-image::after {
   margin: 0 auto;
   padding: clamp(40px, 5vw, 68px) clamp(24px, 5vw, 64px);
   display: grid;
-  grid-template-columns: 1fr;   /* single column — right-hand news column removed */
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
   gap: clamp(32px, 4vw, 56px);
   align-items: start;
 }
@@ -528,20 +528,6 @@ body[data-theme="light"] .home-hint {
 .home-prog.p-challenges { --p-c: #1bcb26; }
 body[data-theme="light"] .home-prog.p-challenges { --p-c: #15803D; }
 .home-prog.p-certs      { --p-c: var(--lp-gold); }
-.home-prog.p-build      { --p-c: #A855F7; }
-body[data-theme="light"] .home-prog.p-build   { --p-c: #7C3AED; }
-.home-prog.p-monats     { --p-c: #FF6B35; }
-body[data-theme="light"] .home-prog.p-monats  { --p-c: #C2410C; }
-
-/* Per-card XP figure shown at the top of each challenge card body */
-.po-xp {
-  font-family: 'Antonio', sans-serif;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: .02em;
-  color: var(--p-c, var(--accent));
-  margin-bottom: 10px;
-}
 
 .home-prog-age {
   font-family: 'Antonio', sans-serif;

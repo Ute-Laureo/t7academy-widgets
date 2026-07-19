@@ -9,7 +9,7 @@
 <!-- Base widget stylesheet (lp-* primitives, theme tokens, topnav) -->
 <link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-base.css?v=1">
 <!-- Home-specific overrides + personalization components -->
-<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-home.css?v=4">
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-home.css?v=3">
 
 
 <!-- TOP NAV (subscribed environment: real page links + theme + avatar) -->
@@ -122,8 +122,8 @@
         <a class="home-prog p-challenges" href="https://www.laureo.at/challenges/">
           <div class="home-prog-age">Trainiere &amp; Sammle XP</div>
           <div class="home-prog-icon">⚡</div>
-          <div class="home-prog-h">Technik Challenges</div>
-          <div id="po-technik-body" class="home-prog-body">
+          <div class="home-prog-h">Challenges</div>
+          <div id="po-challenges-body" class="home-prog-body">
             <div class="home-loading">Lade…</div>
           </div>
           <div class="home-prog-link">Zu den Challenges</div>
@@ -137,26 +137,6 @@
             <div class="home-loading">Lade…</div>
           </div>
           <div class="home-prog-link">Zu den Zertifikaten</div>
-        </a>
-
-        <a class="home-prog p-build" href="https://www.laureo.at/challenges/#builder-container">
-          <div class="home-prog-age">Auswählen, los gehts!</div>
-          <div class="home-prog-icon">🔧</div>
-          <div class="home-prog-h">Deine eigene Challenge</div>
-          <div id="po-builder-body" class="home-prog-body">
-            <div class="home-loading">Lade…</div>
-          </div>
-          <div class="home-prog-link">Selbst zusammenstellen</div>
-        </a>
-
-        <a class="home-prog p-monats" href="https://www.laureo.at/challenges/#monats-container">
-          <div class="home-prog-age">Vom T7 Expert kuratiert</div>
-          <div class="home-prog-icon">🔥</div>
-          <div class="home-prog-h">Challenge des Monats</div>
-          <div id="po-monats-body" class="home-prog-body">
-            <div class="home-loading">Lade…</div>
-          </div>
-          <div class="home-prog-link">Zur Monats-Challenge</div>
         </a>
       </div>
     </section>
@@ -214,10 +194,19 @@
   </main>
 
 
-  <!-- Right-hand news column removed. News will return as a floating
-       "New to the platform" pulldown by the hero avatar, sourced from
-       Supabase (managed via a News tab in expert-admin). The news code in
-       t7-home.js stays dormant (loadNews no-ops when #news-feed is absent). -->
+  <aside class="home-side">
+
+    <!-- NEWS -->
+    <section class="home-block home-block-side">
+      <div class="lp-eye">Was ist neu</div>
+      <h2 class="lp-title home-block-title-sm">Aus der <em class="gold">Academy</em>.</h2>
+
+      <div class="news-feed" id="news-feed">
+        <div class="news-loading">Lade Neuigkeiten…</div>
+      </div>
+    </section>
+
+  </aside>
 </div>
 
 
@@ -427,4 +416,4 @@
 ============================================================ -->
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-widget-engine.js"></script>
 <script src="https://ute-laureo.github.io/t7academy-widgets/t7-vimeo-tracker.js"></script>
-<script src="https://ute-laureo.github.io/t7academy-widgets/t7-home.js?v=5"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-home.js?v=3"></script>
