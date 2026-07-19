@@ -507,12 +507,28 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 
 /* === Minis mobile fixes (moved out of Minis.html inline <style>) === */
-/* Let the station/stadium title shrink & wrap inside the flex header instead of clipping */
 .station-info{min-width:0;flex:1 1 auto}
 .station-title{overflow-wrap:break-word;word-break:normal}
 @media(max-width:600px){
   .station-title{font-size:22px;line-height:1.12}
   .station-hero{gap:10px}
 }
-/* Trick-path node mascot */
 .tp-node-av{display:none!important}
+
+/* === Top-gap fix — beat the WordPress reset ===
+   A Custom-HTML block drops this markup straight into .entry-content, so the reset
+   rule `.is-layout-constrained>*{padding:0.5px!important;margin:0!important}` matches
+   .ch-layout directly and flattens its padding-top to ~0 (that is why the gap above
+   the yip card / kh-wrap was never visible). These higher-specificity !important
+   rules restore a 16px gap — the same as the yip-card <-> stickers gap. */
+.entry-content > .ch-layout,
+.is-layout-flow > .ch-layout,
+.is-layout-constrained > .ch-layout,
+.ch-layout{padding-top:16px!important}
+
+/* Mobile: the yip card is moved above the hero as a direct child of the content
+   wrapper, so the same reset zeroes its margin. Re-assert a 16px surround. */
+.entry-content > .yip-card.is-mobile-top,
+.is-layout-flow > .yip-card.is-mobile-top,
+.is-layout-constrained > .yip-card.is-mobile-top,
+.yip-card.is-mobile-top{margin:16px!important;border-radius:14px}
