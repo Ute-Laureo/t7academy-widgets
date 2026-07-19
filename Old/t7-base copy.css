@@ -703,7 +703,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .t7w .ph{padding:18px 18px 14px;position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.06);background:linear-gradient(135deg,rgba(0,229,255,.04),transparent 70%)}
 .t7w .ph-title{font-weight:800;font-size:20px;letter-spacing:-.02em;color:#fff;margin-bottom:5px;line-height:1.1;position:relative;z-index:1}
 .t7w .ph-body{font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;max-width:380px;position:relative;z-index:1}
-.t7w .plist{padding:12px 14px 12px;display:flex;flex-direction:column;gap:7px}
+.t7w .plist{padding:12px 14px 4px;display:flex;flex-direction:column;gap:7px}
 .t7w .plabel{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(var(--wa-rgb),.5);margin-bottom:2px;display:flex;align-items:center;gap:8px}
 .t7w .plabel::after{content:'';flex:1;height:1px;background:rgba(var(--wa-rgb),.1)}
 .t7w .prow{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:11px 13px;cursor:pointer;transition:background .15s,border-color .15s,transform .12s,box-shadow .15s;position:relative;overflow:hidden}
