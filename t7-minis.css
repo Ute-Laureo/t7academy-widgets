@@ -79,7 +79,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .ch-layout{display:grid;grid-template-columns:2fr 1fr;gap:28px;padding:16px clamp(20px,3vw,40px) 80px;background:var(--bg);align-items:start}
 .ch-main{min-width:0;display:flex;flex-direction:column;gap:18px}
 .ch-sidebar{min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:88px;height:fit-content;align-self:start}
-@media(max-width:960px){.ch-layout{grid-template-columns:1fr;padding:16px 16px 100px}.ch-sidebar{position:static}}
+@media(max-width:960px){.ch-layout{grid-template-columns:1fr;padding:16px 8px 100px}.ch-sidebar{position:static}}
 .ch-section{display:flex;flex-direction:column;gap:16px}
 
 /* === BANNER (Keon greeting) === */
@@ -428,7 +428,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .av-opt.selected img{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,229,255,.25);transform:scale(1.06)}
 .av-opt.selected .av-opt-name{color:var(--accent-text);font-weight:700}
 [data-theme="light"] .av-opt.selected img{border-color:var(--accent-text);box-shadow:0 0 0 2px rgba(8,145,178,.20)}
-.yip-card.is-mobile-top{margin:16px 16px 16px;border-radius:14px}
+.yip-card.is-mobile-top{margin:16px 8px;border-radius:14px}
 .yip-card.is-mobile-top .yip-greeting,
 .yip-card.is-mobile-top .yip-sub{display:none}
 
@@ -518,9 +518,9 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 /* === Restore .ch-layout padding — beat the WordPress reset ===
    A Custom-HTML block drops this markup straight into .entry-content, so the reset
    `.is-layout-constrained>*{padding:0.5px!important;margin:0!important}` matches
-   .ch-layout directly and flattens ALL its padding: that killed the top gap AND the
-   left/right padding, which let the sidebar / sticker grid run off the right edge on
-   wide screens. Re-assert the intended padding with higher specificity + !important. */
+   .ch-layout directly and flattens ALL its padding. Re-assert it with higher
+   specificity. Desktop keeps a comfortable side inset; mobile is nearly full-bleed
+   (8px) so the cards are almost as wide as the hero image. */
 .entry-content > .ch-layout,
 .is-layout-flow > .ch-layout,
 .is-layout-constrained > .ch-layout,
@@ -529,15 +529,15 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   .entry-content > .ch-layout,
   .is-layout-flow > .ch-layout,
   .is-layout-constrained > .ch-layout,
-  .ch-layout{padding:16px 16px 100px!important}
+  .ch-layout{padding:16px 8px 100px!important}
 }
 
 /* Mobile: the avatar (yip) card is moved above the hero as a direct child of the
    content wrapper, so the same reset zeroes its margin/padding. Re-assert them so it
-   (a) lines up with the T7 Minis card below the hero — 16px inset, same width — and
-   (b) has even, symmetric inner padding (top = left = bottom = 20px). */
+   (a) matches the T7 Minis card width (8px inset, nearly full-bleed) and
+   (b) has even, symmetric inner padding. */
 .entry-content > .yip-card.is-mobile-top,
 .is-layout-flow > .yip-card.is-mobile-top,
 .is-layout-constrained > .yip-card.is-mobile-top,
-.yip-card.is-mobile-top{margin:16px!important;padding:20px!important;border-radius:14px}
+.yip-card.is-mobile-top{margin:16px 8px!important;padding:20px!important;border-radius:14px}
 .yip-card.is-mobile-top .av-picker{margin-bottom:0}
