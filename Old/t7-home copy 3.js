@@ -6,7 +6,7 @@
    CLOUD (Supabase) — unchanged from before:
      - Identity (T7Identity)
      - Progress: Sevens / Sterne video watch counts
-     - Challenges progress + XP        (player_stats.total_xp)
+     - Challenges progress + XP        (player_stats.xp)
      - Sterne-Zertifikat (star count)  (player_stats.stars)
      - Avatar URL                      (player_profiles.avatar_url)
 
@@ -428,93 +428,19 @@
     }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
   }
 
-  /* ---- Challenge des Monats helpers ----
-     The monthly module_key is always 'monats_<currentYYYY_MM>' (built from
-     today's date on the Challenges page, independent of how the row stores
-     its month). We only read the monthly_challenges row to get the drill
-     TOTAL and its display name. */
-  function currentMonthKey(){
-    var d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }
-  function monatsModuleKey(){
-    return 'monats_' + currentMonthKey().replace('-', '_');
-  }
-  function monthMatchesNow(raw){
-    var mk = currentMonthKey();
-    var rm = String(raw == null ? '' : raw).toLowerCase().trim();
-    if (!rm) return false;
-    if (rm === mk) return true;                 /* 2026-07          */
-    if (rm.indexOf(mk + '-') === 0) return true; /* 2026-07-01 (ISO) */
-    var digits = rm.replace(/[^0-9]/g, '');
-    if (digits) {
-      var d = new Date(), y = String(d.getFullYear()),
-          m = String(d.getMonth() + 1).padStart(2, '0'), yy = y.slice(2);
-      if ([y + m, m + y, m + yy, yy + m].indexOf(digits) >= 0) return true;
-    }
-    return false;
-  }
-  function monatsDrillTotal(row){
-    if (!row) return 0;
-    var raw = row.drills, arr = [];
-    try { arr = (typeof raw === 'string' ? JSON.parse(raw) : (raw || [])); } catch (e) { arr = []; }
-    return Array.isArray(arr) ? arr.length : 0;
-  }
-
-  /* ---- Dynamic module list ----
-     The Challenges page loads its modules straight from Supabase, so a
-     hardcoded list here drifts out of sync (e.g. new modules, renamed keys).
-     We load the same `modules` table and derive each module's total from its
-     `challenges` array. Falls back to the CHALLENGE_MODULES / CERT_MODULES
-     constants if the fetch fails or returns nothing. */
-  var _modCache = null;
-  function countChallenges(raw){
-    var arr = [];
-    try { arr = (typeof raw === 'string' ? JSON.parse(raw) : (raw || [])); } catch (e) { arr = []; }
-    return Array.isArray(arr) ? arr.length : 0;
-  }
-  function loadModules(cb){
-    if (_modCache) { cb(_modCache); return; }
-    sbGet('modules?published=eq.true&order=sort_order.asc&select=key,label,kind,stars,challenges')
-      .then(function(rows){
-        rows = rows || [];
-        var ch = [], ce = [];
-        rows.forEach(function(m){
-          var total = countChallenges(m.challenges);
-          if (!total) return;                                  /* skip empty modules */
-          if (m.kind === 'certificate') ce.push({ key: m.key, label: m.label, stars: Number(m.stars || 0), total: total });
-          else if (m.kind === 'challenge') ch.push({ key: m.key, label: m.label, total: total });
-        });
-        _modCache = { challenges: ch.length ? ch : CHALLENGE_MODULES, certs: ce.length ? ce : CERT_MODULES };
-        cb(_modCache);
-      })
-      .catch(function(){ cb({ challenges: CHALLENGE_MODULES, certs: CERT_MODULES }); });
-  }
-
   function renderChallenges(el, profileId){
     if (!profileId) { renderEmpty(el, 'Anmelden, um Fortschritt zu sehen.'); return; }
-    loadModules(function(mods){
-    Promise.all([
-      sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating'),
-      sbGet('monthly_challenges?select=*&order=month.desc')
-    ]).then(function(res){
-        var rows    = res[0] || [];
-        var monthly = res[1] || [];
-
+    sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating')
+      .then(function(rows){
         var best = {};
-        rows.forEach(function(a){
+        (rows || []).forEach(function(a){
           if (!best[a.module_key]) best[a.module_key] = {};
           var cur = best[a.module_key][a.drill_idx] || 0;
           if (a.rating > cur) best[a.module_key][a.drill_idx] = a.rating;
         });
-        function doneCount(key){
-          var mb = best[key] || {};
-          return Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
-        }
-
-        /* Technik modules (from Supabase) */
-        var html = mods.challenges.map(function(m){
-          var done = doneCount(m.key);
+        el.innerHTML = CHALLENGE_MODULES.map(function(m){
+          var mb = best[m.key] || {};
+          var done = Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
           var pct  = Math.round(done / m.total * 100);
           return '<div>' +
             '<div class="po-mod-row"><span class="po-mod-name">' + esc(m.label) + '</span>' +
@@ -522,59 +448,14 @@
             '<div class="po-bar"><div class="po-bar-fill cyan" style="width:' + pct + '%"></div></div>' +
           '</div>';
         }).join('');
-
-        /* Challenge des Monats — current month's curated challenge */
-        var mRow = null;
-        for (var i = 0; i < monthly.length; i++) {
-          if (String(monthly[i].month).trim() === currentMonthKey()) { mRow = monthly[i]; break; }
-        }
-        if (!mRow) {
-          for (var j = 0; j < monthly.length; j++) {
-            if (monthMatchesNow(monthly[j].month)) { mRow = monthly[j]; break; }
-          }
-        }
-        var mDone  = doneCount(monatsModuleKey());
-        var mTotal = monatsDrillTotal(mRow);
-        if (mTotal || mDone) {
-          var mName = (mRow && (mRow.name || '').trim()) || 'Challenge des Monats';
-          var mPct  = mTotal ? Math.round(mDone / mTotal * 100) : 0;
-          html += '<div>' +
-            '<div class="po-mod-row"><span class="po-mod-name">🔥 ' + esc(mName) + '</span>' +
-              '<span class="po-mod-stat">' + mDone + '/' + (mTotal || '?') + '</span></div>' +
-            '<div class="po-bar"><div class="po-bar-fill cyan" style="width:' + mPct + '%"></div></div>' +
-          '</div>';
-        }
-
-        /* Eigene Challenges — one summary line (built count + drills mastered).
-           Matches both the legacy single 'builder' key and the differentiated
-           'builder_<sig>' keys, so it's correct before and after differentiation. */
-        var builtKeys = {}, builderMastered = 0;
-        Object.keys(best).forEach(function(k){
-          if (k === 'builder' || k.indexOf('builder_') === 0) {
-            builtKeys[k] = true;
-            var db = best[k];
-            Object.keys(db).forEach(function(d){ if (db[d] >= 4) builderMastered++; });
-          }
-        });
-        var builtCount = Object.keys(builtKeys).length;
-        if (builtCount) {
-          html += '<div class="po-mod-row" style="margin-top:6px;padding-top:8px;border-top:1px solid rgba(128,140,160,.14)">' +
-              '<span class="po-mod-name">🔧 Eigene Challenges</span>' +
-              '<span class="po-mod-stat">' + builtCount + ' gebaut · ' + builderMastered + ' ★</span>' +
-            '</div>';
-        }
-
-        el.innerHTML = html;
       }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
-    });
   }
 
   function renderCerts(el, profileId){
     if (!profileId) { renderEmpty(el, 'Anmelden, um Fortschritt zu sehen.'); return; }
-    loadModules(function(mods){
     Promise.all([
       sbGet('drill_attempts?profile_id=eq.' + encodeURIComponent(profileId) + '&select=module_key,drill_idx,rating'),
-      sbGet('player_stats?id=eq.' + encodeURIComponent(profileId) + '&select=stars,total_xp')
+      sbGet('player_stats?id=eq.' + encodeURIComponent(profileId) + '&select=stars,xp')
     ]).then(function(res){
       var attempts = res[0] || [];
       var statsRow = (res[1] || [])[0] || {};
@@ -582,8 +463,8 @@
 
       /* Feed hero — XP and Sterne-Zertifikat both flow from here */
       renderHeroStars(earnedStars);
-      if (typeof statsRow.total_xp === 'number') {
-        cumulativeHeroStats.xp = statsRow.total_xp;
+      if (typeof statsRow.xp === 'number') {
+        cumulativeHeroStats.xp = statsRow.xp;
         flushHeroStats();
       }
 
@@ -593,7 +474,7 @@
         var cur = best[a.module_key][a.drill_idx] || 0;
         if (a.rating > cur) best[a.module_key][a.drill_idx] = a.rating;
       });
-      el.innerHTML = mods.certs.map(function(m){
+      el.innerHTML = CERT_MODULES.map(function(m){
         var mb = best[m.key] || {};
         var done = Object.keys(mb).filter(function(k){ return mb[k] >= 4; }).length;
         var pct  = Math.round(done / m.total * 100);
@@ -606,7 +487,6 @@
         '</div>';
       }).join('');
     }).catch(function(){ renderEmpty(el, 'Fehler beim Laden.'); });
-    });
   }
 
 
