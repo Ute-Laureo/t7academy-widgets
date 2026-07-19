@@ -515,20 +515,29 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 .tp-node-av{display:none!important}
 
-/* === Top-gap fix — beat the WordPress reset ===
+/* === Restore .ch-layout padding — beat the WordPress reset ===
    A Custom-HTML block drops this markup straight into .entry-content, so the reset
-   rule `.is-layout-constrained>*{padding:0.5px!important;margin:0!important}` matches
-   .ch-layout directly and flattens its padding-top to ~0 (that is why the gap above
-   the yip card / kh-wrap was never visible). These higher-specificity !important
-   rules restore a 16px gap — the same as the yip-card <-> stickers gap. */
+   `.is-layout-constrained>*{padding:0.5px!important;margin:0!important}` matches
+   .ch-layout directly and flattens ALL its padding: that killed the top gap AND the
+   left/right padding, which let the sidebar / sticker grid run off the right edge on
+   wide screens. Re-assert the intended padding with higher specificity + !important. */
 .entry-content > .ch-layout,
 .is-layout-flow > .ch-layout,
 .is-layout-constrained > .ch-layout,
-.ch-layout{padding-top:16px!important}
+.ch-layout{padding:16px clamp(20px,3vw,40px) 80px!important}
+@media(max-width:960px){
+  .entry-content > .ch-layout,
+  .is-layout-flow > .ch-layout,
+  .is-layout-constrained > .ch-layout,
+  .ch-layout{padding:16px 16px 100px!important}
+}
 
-/* Mobile: the yip card is moved above the hero as a direct child of the content
-   wrapper, so the same reset zeroes its margin. Re-assert a 16px surround. */
+/* Mobile: the avatar (yip) card is moved above the hero as a direct child of the
+   content wrapper, so the same reset zeroes its margin/padding. Re-assert them so it
+   (a) lines up with the T7 Minis card below the hero — 16px inset, same width — and
+   (b) has even, symmetric inner padding (top = left = bottom = 20px). */
 .entry-content > .yip-card.is-mobile-top,
 .is-layout-flow > .yip-card.is-mobile-top,
 .is-layout-constrained > .yip-card.is-mobile-top,
-.yip-card.is-mobile-top{margin:16px!important;border-radius:14px}
+.yip-card.is-mobile-top{margin:16px!important;padding:20px!important;border-radius:14px}
+.yip-card.is-mobile-top .av-picker{margin-bottom:0}
