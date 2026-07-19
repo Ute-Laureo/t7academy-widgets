@@ -516,9 +516,11 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .tp-node-av{display:none!important}
 
 /* === Restore .ch-layout padding — beat the WordPress reset ===
-   The reset `.is-layout-constrained>*{padding:0.5px!important;margin:0!important}`
-   flattens .ch-layout's padding; re-assert with higher specificity. Desktop keeps a
-   comfortable side inset; mobile is nearly full-bleed (8px) like the hero image. */
+   A Custom-HTML block drops this markup straight into .entry-content, so the reset
+   `.is-layout-constrained>*{padding:0.5px!important;margin:0!important}` matches
+   .ch-layout directly and flattens ALL its padding. Re-assert it with higher
+   specificity. Desktop keeps a comfortable side inset; mobile is nearly full-bleed
+   (8px) so the cards are almost as wide as the hero image. */
 .entry-content > .ch-layout,
 .is-layout-flow > .ch-layout,
 .is-layout-constrained > .ch-layout,
@@ -529,40 +531,13 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   .is-layout-constrained > .ch-layout,
   .ch-layout{padding:16px 8px 100px!important}
 }
+
+/* Mobile: the avatar (yip) card is moved above the hero as a direct child of the
+   content wrapper, so the same reset zeroes its margin/padding. Re-assert them so it
+   (a) matches the T7 Minis card width (8px inset, nearly full-bleed) and
+   (b) has even, symmetric inner padding. */
 .entry-content > .yip-card.is-mobile-top,
 .is-layout-flow > .yip-card.is-mobile-top,
 .is-layout-constrained > .yip-card.is-mobile-top,
 .yip-card.is-mobile-top{margin:16px 8px!important;padding:20px!important;border-radius:14px}
 .yip-card.is-mobile-top .av-picker{margin-bottom:0}
-
-/* ============================================================
-   AVATAR RESTYLE — let avatars float like the hero image:
-   no border rings, no background discs, larger sizes.
-   ============================================================ */
-
-/* Banner (kh-wrap) mascot — larger, floating */
-.kh-mascot{width:96px;height:96px;border:none!important;background:transparent!important;border-radius:0;object-fit:contain;box-shadow:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
-[data-theme="light"] .kh-mascot{border:none!important;background:transparent!important}
-.kh-content{padding-right:116px}
-@media(max-width:520px){
-  .kh-mascot{width:74px;height:74px;right:10px}
-  .kh-content{padding-right:90px}
-}
-
-/* Landing-card mascots (Spielplatz / Trick-Pfad / Stadien) — larger, floating */
-.lc-mascot{width:92px;height:92px;border:none!important;background:transparent!important;border-radius:0;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
-[data-theme="light"] .lc-mascot,
-.landing-card.lc-spielplatz .lc-mascot,
-.landing-card.lc-stadien .lc-mascot{border:none!important;background:transparent!important}
-
-/* Playground: drop the dashed guide ring and the white centre disc */
-.pg-ring{display:none!important}
-.pg-center{background:transparent!important;border:none!important;box-shadow:none!important;overflow:visible!important}
-.pg-center-avatar{width:112%;height:112%;border-radius:0;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
-/* Station-tile avatars — remove the ring around the image */
-.pg-st-avatar{border:none!important;background:transparent!important}
-
-/* Station focused view — show the station owner's avatar (was force-hidden),
-   floating with no ring/disc. JS already sets it to the matching character. */
-.station-avatar{display:block!important;width:104px;height:104px;flex:0 0 auto;object-fit:contain;border:none;background:transparent;box-shadow:none;position:relative;z-index:1;filter:drop-shadow(0 6px 14px rgba(0,0,0,.28))}
-@media(max-width:600px){.station-avatar{width:74px;height:74px}}
