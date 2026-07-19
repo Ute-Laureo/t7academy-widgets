@@ -515,10 +515,7 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 }
 .tp-node-av{display:none!important}
 
-/* === Restore .ch-layout padding — beat the WordPress reset ===
-   The reset `.is-layout-constrained>*{padding:0.5px!important;margin:0!important}`
-   flattens .ch-layout's padding; re-assert with higher specificity. Desktop keeps a
-   comfortable side inset; mobile is nearly full-bleed (8px) like the hero image. */
+/* === Restore .ch-layout padding — beat the WordPress reset === */
 .entry-content > .ch-layout,
 .is-layout-flow > .ch-layout,
 .is-layout-constrained > .ch-layout,
@@ -536,11 +533,8 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .yip-card.is-mobile-top .av-picker{margin-bottom:0}
 
 /* ============================================================
-   AVATAR RESTYLE — let avatars float like the hero image:
-   no border rings, no background discs, larger sizes.
+   AVATAR RESTYLE — avatars float like the hero: no rings, no discs.
    ============================================================ */
-
-/* Banner (kh-wrap) mascot — larger, floating */
 .kh-mascot{width:96px;height:96px;border:none!important;background:transparent!important;border-radius:0;object-fit:contain;box-shadow:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
 [data-theme="light"] .kh-mascot{border:none!important;background:transparent!important}
 .kh-content{padding-right:116px}
@@ -549,20 +543,24 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
   .kh-content{padding-right:90px}
 }
 
-/* Landing-card mascots (Spielplatz / Trick-Pfad / Stadien) — larger, floating */
 .lc-mascot{width:92px;height:92px;border:none!important;background:transparent!important;border-radius:0;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
 [data-theme="light"] .lc-mascot,
 .landing-card.lc-spielplatz .lc-mascot,
 .landing-card.lc-stadien .lc-mascot{border:none!important;background:transparent!important}
 
-/* Playground: drop the dashed guide ring and the white centre disc */
 .pg-ring{display:none!important}
 .pg-center{background:transparent!important;border:none!important;box-shadow:none!important;overflow:visible!important}
 .pg-center-avatar{width:112%;height:112%;border-radius:0;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
-/* Station-tile avatars — remove the ring around the image */
 .pg-st-avatar{border:none!important;background:transparent!important}
 
-/* Station focused view — show the station owner's avatar (was force-hidden),
-   floating with no ring/disc. JS already sets it to the matching character. */
-.station-avatar{display:block!important;width:104px;height:104px;flex:0 0 auto;object-fit:contain;border:none;background:transparent;box-shadow:none;position:relative;z-index:1;filter:drop-shadow(0 6px 14px rgba(0,0,0,.28))}
+/* Station focused view — show the station owner's avatar (was force-hidden).
+   No drop-shadow here: on the coloured station panel a shadow reads as a smudge. */
+.station-avatar{display:block!important;width:104px;height:104px;flex:0 0 auto;object-fit:contain;border:none;background:transparent;box-shadow:none;filter:none;position:relative;z-index:1}
 @media(max-width:600px){.station-avatar{width:74px;height:74px}}
+
+/* === Avatar picker (yip card): drop the ring lines; show selection with a soft
+   tinted chip + a scaled-up avatar + the highlighted name (no ring around avatar). */
+.av-opt img{border:none!important;background:transparent!important;box-shadow:none!important}
+.av-opt.selected img{border:none!important;box-shadow:none!important;transform:scale(1.06)}
+.av-opt.selected{background:rgba(0,229,255,.12)}
+[data-theme="light"] .av-opt.selected{background:rgba(8,145,178,.12)}
