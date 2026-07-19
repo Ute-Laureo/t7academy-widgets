@@ -513,15 +513,21 @@ body[data-theme="light"] .home-hint {
 
 .home-prog {
   background: transparent;
-  padding: 12px 4px 24px;
+  padding: 20px 22px 22px;
+  border: 1.5px solid var(--lp-rule);
+  border-radius: 14px;
   text-decoration: none;
   color: inherit;
   position: relative;
   display: flex;
   flex-direction: column;
-  transition: transform .2s;
+  transition: transform .2s, border-color .18s, background .18s;
 }
-.home-prog:hover { transform: translateY(-2px); }
+.home-prog:hover {
+  transform: translateY(-2px);
+  border-color: var(--p-c, var(--accent));
+  background: rgba(128, 140, 160, .04);
+}
 
 .home-prog.p-sevens     { --p-c: var(--accent); }
 .home-prog.p-sterne     { --p-c: var(--lp-gold); }
