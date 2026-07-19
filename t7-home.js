@@ -395,13 +395,17 @@
       sbGet('video_progress?profile_id=eq.' + encodeURIComponent(profileId) + '&select=vimeo_id,total_seconds')
     ]).then(function(res){
       var videos = res[0] || [], progress = res[1] || [];
+      /* videos.vimeo_code can be "{id}/{hash}" for unlisted videos, but
+         video_progress.vimeo_id is just the bare numeric id — normalise both
+         to the numeric id so watch-time actually matches. */
+      function bareId(x){ return String(x == null ? '' : x).split('/')[0].trim(); }
       var ids = {};
-      videos.forEach(function(v){ if (v.vimeo_code) ids[v.vimeo_code] = true; });
+      videos.forEach(function(v){ var vid = bareId(v.vimeo_code); if (vid) ids[vid] = true; });
       var totalVideos = Object.keys(ids).length;
 
       var seen = 0, seconds = 0;
       progress.forEach(function(p){
-        if (!ids[p.vimeo_id]) return;
+        if (!ids[bareId(p.vimeo_id)]) return;
         var s = Number(p.total_seconds || 0);
         seconds += s;
         if (s >= SEEN_THRESHOLD_SEC) seen++;
@@ -647,7 +651,11 @@
 
     window.addEventListener('t7xpupdate', function(){
       var info = window.T7Identity && T7Identity.get();
-      if (info && info.id) renderChallengeCards(info.id);
+      if (info && info.id) {
+        renderVideoCard($('po-sevens-body'), info.id, 'sevens');
+        renderVideoCard($('po-sterne-body'), info.id, 'sterne');
+        renderChallengeCards(info.id);
+      }
     });
   }
 
