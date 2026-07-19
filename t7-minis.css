@@ -554,12 +554,17 @@ html,body{font-family:'Open Sans',sans-serif;background:var(--bg);color:var(--te
 .pg-st-avatar{border:none!important;background:transparent!important}
 
 /* Station focused view — show the station owner's avatar (was force-hidden).
-   No drop-shadow here: on the coloured station panel a shadow reads as a smudge. */
-.station-avatar{display:block!important;width:104px;height:104px;flex:0 0 auto;object-fit:contain;border:none;background:transparent;box-shadow:none;filter:none;position:relative;z-index:1}
+   No box / border / shadow, even on light "dark-text" panels (e.g. the yellow
+   station), which otherwise re-apply a translucent box + shadow behind it. */
+.station-avatar,
+.station-hero[data-st-text="dark"] .station-avatar{
+  display:block!important;width:104px;height:104px;flex:0 0 auto;object-fit:contain;
+  border:none!important;background:transparent!important;box-shadow:none!important;
+  filter:none!important;position:relative;z-index:1
+}
 @media(max-width:600px){.station-avatar{width:74px;height:74px}}
 
-/* === Avatar picker (yip card): drop the ring lines; show selection with a soft
-   tinted chip + a scaled-up avatar + the highlighted name (no ring around avatar). */
+/* === Avatar picker (yip card): no ring lines; selection = soft chip + scale + name */
 .av-opt img{border:none!important;background:transparent!important;box-shadow:none!important}
 .av-opt.selected img{border:none!important;box-shadow:none!important;transform:scale(1.06)}
 .av-opt.selected{background:rgba(0,229,255,.12)}
