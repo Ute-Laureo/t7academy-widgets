@@ -331,10 +331,10 @@ body[data-theme="light"] .nav-cta-secondary:hover {
 .lp-hero-grid {
     display: grid;
     grid-template-columns: 1.05fr 1fr;
-    min-height: 480px;        /* Freemium uses 480, home-outside uses 520; */
+    min-height: 400px;        /* Freemium uses 480, home-outside uses 520; */
 }                              /* the larger floor still works for both. */
 .lp-hero-text {
-    padding: 72px clamp(24px, 5vw, 64px);
+    padding: 52px clamp(24px, 5vw, 64px);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -363,7 +363,7 @@ body[data-theme="light"] .nav-cta-secondary:hover {
     font-family: 'Garet W05 Bold', 'Open Sans', sans-serif;
     font-weight: 900;
     /* Range covers both pages: Freemium 36-60, home-outside 36-68 */
-    font-size: clamp(36px, 5.6vw, 68px);
+    font-size: clamp(30px, 4.2vw, 50px);
     line-height: 1.0;
     letter-spacing: -0.018em;
     color: var(--text);
@@ -545,6 +545,7 @@ body[data-theme="light"] .lp-closer-secondary:hover {
 .alumni-name:hover { transform: translateY(-4px); }
 .alumni-name .place {
     display: block;
+    font-style: normal;
     font-family: 'Antonio', 'Open Sans', sans-serif;
     font-weight: 400;
     font-size: 0.25em;
@@ -557,9 +558,7 @@ body[data-theme="light"] .lp-closer-secondary:hover {
 .alumni-name.c1 { color: var(--accent); }
 .alumni-name.c2 { color: var(--lp-gold); }
 .alumni-name.c3 {
-    font-family: 'Fraunces', 'Garet W05 Bold', serif;
-    font-style: italic;
-    font-weight: 700;
+    color: var(--text);
 }
 .alumni-name.size-sm,
 .alumni-name.size-md { font-size: 0.95em; }
