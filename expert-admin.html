@@ -562,9 +562,12 @@
     var actions = '';
     if (it.status === 'pending' || it.status === 'expired') actions = '<button class="btn" data-review="' + it.id + '">Video ansehen</button>';
     else if (it.video_path) actions = '<button class="btn ghost" data-review="' + it.id + '">Datei prüfen</button>';
+    var who = esc(it.player_name || it.player_email || '?');
+    var ident = esc(it.profile_id || it.player_email || '');
     return '<div class="card review-card" data-id="' + it.id + '"><div class="card-row"><div class="card-left">'
-      + '<div class="card-title"><span class="card-stars">' + stars + '</span>' + esc(it.player_email) + '</div>'
+      + '<div class="card-title"><span class="card-stars">' + stars + '</span>' + who + '</div>'
       + '<div class="card-meta"><span class="badge ' + it.status + '">' + statusLabel(it.status) + '</span>'
+      + (ident ? '<span style="opacity:.7">' + ident + '</span>' : '')
       + '<span>Eingereicht: <strong>' + date + '</strong></span>' + reviewedLine + notesLine + expiresLine + '</div>'
       + '</div><div class="card-actions">' + actions + '</div></div><div class="review" id="review-' + it.id + '"></div></div>';
   }
@@ -596,24 +599,30 @@
     box.innerHTML = '<div class="video-wrap"><video src="' + esc(url) + '" controls controlsList="nodownload" playsinline></video>'
       + '<div class="watermark">' + wm + '</div><div class="watermark bl">' + wm + '</div></div>'
       + (sub.status === 'pending'
-        ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"><button class="btn green" id="approve-' + sub.id + '">✓ Zertifizieren</button><button class="btn danger" id="reject-open-' + sub.id + '">Ablehnen…</button></div>'
+        ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"><button class="btn green" id="approve-open-' + sub.id + '">✓ Zertifizieren…</button><button class="btn danger" id="reject-open-' + sub.id + '">Ablehnen…</button></div>'
+          + '<div class="reject-box" id="approve-box-' + sub.id + '"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Feedback an den Spieler (optional – auf dem Zertifikat sichtbar)</div>'
+          + '<textarea id="approve-notes-' + sub.id + '" placeholder="z.B. Starke Ballkontrolle! Achte beim nächsten Mal noch auf dein Tempo."></textarea>'
+          + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn green" id="approve-confirm-' + sub.id + '">Zertifikat erteilen</button><button class="btn ghost" id="approve-cancel-' + sub.id + '">Abbrechen</button></div></div>'
           + '<div class="reject-box" id="reject-box-' + sub.id + '"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Grund für Ablehnung (sichtbar für den Spieler)</div>'
           + '<textarea id="reject-notes-' + sub.id + '" placeholder="z.B. Im Hintergrund sind andere Personen sichtbar – bitte erneut ohne weitere Personen drehen."></textarea>'
           + '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn danger" id="reject-confirm-' + sub.id + '">Ablehnung bestätigen</button><button class="btn ghost" id="reject-cancel-' + sub.id + '">Abbrechen</button></div></div>'
         : '');
     if (sub.status === 'pending') {
-      document.getElementById('approve-' + sub.id).onclick = function(){ approveSubmission(sub); };
+      document.getElementById('approve-open-' + sub.id).onclick = function(){ document.getElementById('approve-box-' + sub.id).classList.add('open'); };
+      document.getElementById('approve-cancel-' + sub.id).onclick = function(){ document.getElementById('approve-box-' + sub.id).classList.remove('open'); };
+      document.getElementById('approve-confirm-' + sub.id).onclick = function(){ approveSubmission(sub, document.getElementById('approve-notes-' + sub.id).value.trim()); };
       document.getElementById('reject-open-' + sub.id).onclick = function(){ document.getElementById('reject-box-' + sub.id).classList.add('open'); };
       document.getElementById('reject-cancel-' + sub.id).onclick = function(){ document.getElementById('reject-box-' + sub.id).classList.remove('open'); };
       document.getElementById('reject-confirm-' + sub.id).onclick = function(){ rejectSubmission(sub, document.getElementById('reject-notes-' + sub.id).value.trim()); };
     }
   }
-  function approveSubmission(sub){
+  function approveSubmission(sub, notes){
+    notes = notes || null;
     if (!confirm('Zertifikat erteilen und Video löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
     fetch(SB_URL + '/rest/v1/certifications', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' }),
-      body: JSON.stringify({ player_email: sub.player_email, player_name: sub.player_name, profile_id: sub.profile_id, stars: sub.stars }) })
+      body: JSON.stringify({ player_email: sub.player_email, player_name: sub.player_name, profile_id: sub.profile_id, stars: sub.stars, notes: notes }) })
       .then(handle401).then(function(r){ if (!r.ok && r.status !== 409) console.warn('certifications insert', r.status);
-        return updateSubmission(sub.id, { status:'approved', reviewed_at: new Date().toISOString(), reviewed_by: session.user.email, notes: null }); })
+        return updateSubmission(sub.id, { status:'approved', reviewed_at: new Date().toISOString(), reviewed_by: session.user.email, notes: notes }); })
       .then(function(){ return deleteVideo(sub.video_path); })
       .then(function(){ toast('ok', 'Zertifikat erteilt und Video gelöscht.'); loadStats(); loadSubs(); })
       .catch(function(e){ if (e && e.message === 'session_expired') return; toast('err', 'Fehler: ' + (e.message || e)); });
