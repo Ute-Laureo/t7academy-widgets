@@ -1359,6 +1359,89 @@ function T7LoadMonats(containerId){
 }
 
 /* ===========================================================
+   HOME MESSAGING BAR — self-injecting (no page markup needed).
+   Mounts under the top nav on the HOME page only. One inbox:
+   expert messages + certification feedback, with replies.
+   =========================================================== */
+function T7HomeInbox(){
+  var nav=document.querySelector('.topnav');
+  var hero=document.querySelector('.lp-hero');
+  if(!nav||!hero)return;                              // home page only
+  if(document.getElementById('homeMsgbar'))return;    // manual WP markup present — let that handle it
+  if(document.getElementById('t7hi-bar'))return;      // already mounted
+  if(!window.T7SB)return;
+
+  if(!document.getElementById('t7hi-style')){
+    var st=document.createElement('style');st.id='t7hi-style';
+    st.textContent=
+      '.t7hi-bar{max-width:1200px;margin:14px auto 0;padding:0 clamp(16px,4vw,40px)}'
+      +'.t7hi-btn{width:100%;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;cursor:pointer;color:var(--text);font-family:inherit;font-size:14px;font-weight:700}'
+      +'.t7hi-btn:hover{border-color:var(--accent)}'
+      +'.t7hi-ico{font-size:16px;line-height:1}.t7hi-label{flex:1;text-align:left}'
+      +'.t7hi-dot{width:9px;height:9px;border-radius:50%;background:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,.18);flex:0 0 auto}'
+      +'.t7hi-chev{opacity:.6;transition:transform .2s}.t7hi-bar.open .t7hi-chev{transform:rotate(180deg)}'
+      +'.t7hi-panel{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;margin:-1px 0 0;padding:14px 16px}'
+      +'.t7hi-bar.open .t7hi-panel{display:block}'
+      +'.t7hi-thread{max-height:340px;overflow:auto;margin-bottom:12px}'
+      +'.t7hi-row{margin-bottom:10px;display:flex}.t7hi-row.me{justify-content:flex-end}'
+      +'.t7hi-bub{max-width:80%;padding:9px 12px;border-radius:12px;background:rgba(0,229,255,.10)}'
+      +'.t7hi-row.me .t7hi-bub{background:var(--surface2)}'
+      +'.t7hi-bub.cert{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.35)}'
+      +'.t7hi-text{font-size:13px;color:var(--text);line-height:1.45;white-space:pre-wrap;word-break:break-word}'
+      +'.t7hi-meta{font-size:10.5px;color:var(--muted);margin-top:4px}'
+      +'.t7hi-empty{color:var(--muted);font-size:13px;padding:8px 0}'
+      +'.t7hi-compose{display:flex;gap:8px}'
+      +'.t7hi-compose input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:13px;font-family:inherit}'
+      +'.t7hi-compose button{background:var(--accent);color:#001018;border:none;border-radius:10px;padding:0 16px;font-weight:800;cursor:pointer;font-family:inherit}';
+    document.head.appendChild(st);
+  }
+
+  var bar=document.createElement('div');bar.className='t7hi-bar';bar.id='t7hi-bar';bar.style.display='none';
+  bar.innerHTML=
+    '<button class="t7hi-btn" id="t7hi-toggle" type="button" aria-expanded="false">'
+    +'<span class="t7hi-ico">💬</span><span class="t7hi-label">Nachrichten vom Experten</span>'
+    +'<span class="t7hi-dot" id="t7hi-dot" style="display:none"></span><span class="t7hi-chev">▾</span></button>'
+    +'<div class="t7hi-panel">'
+    +'<div class="t7hi-thread" id="t7hi-thread"><div class="t7hi-empty">Lade…</div></div>'
+    +'<div class="t7hi-compose"><input id="t7hi-input" type="text" placeholder="Antwort an den Experten…" autocomplete="off">'
+    +'<button id="t7hi-send" type="button">Senden</button></div></div>';
+  nav.insertAdjacentElement('afterend',bar);
+
+  function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var pid=null,pname='Spieler';
+  function refreshDot(){if(!pid)return;T7SB.getUnreadCount(pid,function(n){var d=document.getElementById('t7hi-dot');if(d)d.style.display=n>0?'inline-block':'none';});}
+  function renderThread(){
+    if(!pid)return;
+    T7SB.getInbox(pid,function(list){
+      var el=document.getElementById('t7hi-thread');if(!el)return;
+      if(!list||!list.length){el.innerHTML='<div class="t7hi-empty">Noch keine Nachrichten.</div>';return;}
+      el.innerHTML=list.map(function(m){
+        var mine=m.sender==='player';var when=m.ts?new Date(m.ts).toLocaleString('de-AT'):'';
+        var who=mine?'Du':(m.sender_name||'Experte');var tag=m.kind==='cert'?'⭐ Zertifikat · ':'';
+        return '<div class="t7hi-row'+(mine?' me':'')+'"><div class="t7hi-bub'+(m.kind==='cert'?' cert':'')+'">'
+          +'<div class="t7hi-text">'+esc(m.body)+'</div><div class="t7hi-meta">'+tag+esc(who)+(when?' · '+when:'')+'</div></div></div>';
+      }).join('');
+      el.scrollTop=el.scrollHeight;
+    });
+  }
+  document.getElementById('t7hi-toggle').onclick=function(){
+    if(bar.classList.contains('open')){bar.classList.remove('open');this.setAttribute('aria-expanded','false');}
+    else{bar.classList.add('open');this.setAttribute('aria-expanded','true');renderThread();T7SB.markMessagesRead(pid,refreshDot);}
+  };
+  function send(){var inp=document.getElementById('t7hi-input');var v=(inp.value||'').trim();if(!v||!pid)return;var b=document.getElementById('t7hi-send');b.disabled=true;T7SB.sendMessage(pid,pname,v,function(ok){b.disabled=false;if(ok){inp.value='';renderThread();}});}
+  document.getElementById('t7hi-send').onclick=send;
+  document.getElementById('t7hi-input').addEventListener('keydown',function(e){if(e.key==='Enter')send();});
+
+  function bind(id,name){pid=id;pname=name||'Spieler';if(!pid)return;bar.style.display='block';refreshDot();}
+  T7Identity.resolve(function(id){var info=T7Identity.get();bind(id,info&&info.name);});
+  window.addEventListener('t7xpupdate',function(){var info=T7Identity.get();if(info&&info.id)bind(info.id,info.name);});
+}
+(function(){
+  function m(){try{T7HomeInbox();}catch(e){}}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',m);else m();
+})();
+
+/* ===========================================================
    T7 PUBLIC NAMESPACE  (RESTORED)
    ------------------------------------------------------------
    Challenges.html (and the dynamic loaders above) call the
