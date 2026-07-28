@@ -211,7 +211,6 @@
     <div class="tabbar" id="tabbar" style="display:none">
       <button class="tab" data-tab="review"  style="display:none">⭐ Zertifikate</button>
       <button class="tab" data-tab="monats"  style="display:none">🔥 Challenge des Monats</button>
-      <button class="tab" data-tab="msgs"    style="display:none">💬 Nachrichten</button>
       <button class="tab" data-tab="team"    style="display:none">👥 Mitarbeiter</button>
     </div>
 
@@ -226,26 +225,6 @@
         <button class="pill" data-filter="all">Alle</button>
       </div>
       <div id="sub-list"><div class="loading">Lade…</div></div>
-    </div>
-
-    <!-- ===== TAB: NACHRICHTEN ===== -->
-    <div id="tab-msgs" style="display:none">
-      <div class="form-card">
-        <h2>Rundnachricht an alle Spieler</h2>
-        <p style="color:var(--muted);font-size:13px;margin:0 0 10px">Für allgemeine Updates, z.B. neue Videos oder Challenges. Nachrichten werden 7 Tage nach dem Lesen automatisch gelöscht.</p>
-        <textarea id="bc-body" placeholder="z.B. Neues Challenge online – schau vorbei! 🔥" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-family:inherit;font-size:13px;min-height:70px;resize:vertical"></textarea>
-        <div style="margin-top:10px"><button class="btn green" id="bc-send">An alle senden</button></div>
-      </div>
-      <div class="form-card" style="margin-top:16px">
-        <h2>Einzelner Spieler</h2>
-        <div id="msg-players"><div class="loading">Lade…</div></div>
-        <div id="msg-thread-wrap" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
-          <div id="msg-thread-title" style="font-weight:800;margin-bottom:10px"></div>
-          <div id="msg-thread" style="max-height:320px;overflow:auto;margin-bottom:10px"></div>
-          <textarea id="msg-body" placeholder="Nachricht an den Spieler…" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-family:inherit;font-size:13px;min-height:60px;resize:vertical"></textarea>
-          <div style="margin-top:8px"><button class="btn" id="msg-send">Senden</button></div>
-        </div>
-      </div>
     </div>
 
     <!-- ===== TAB: MONATS ===== -->
@@ -417,7 +396,6 @@
 
     var allowed = [];
     if (can('certifications'))   allowed.push('review');
-    if (can('certifications'))   allowed.push('msgs');
     if (can('challenges'))       allowed.push('monats');
     if (can('manage_employees')) allowed.push('team');
 
@@ -430,7 +408,7 @@
 
     noAccess.style.display = 'none';
     tabbar.style.display = 'flex';
-    ['review','msgs','monats','team'].forEach(function(name){
+    ['review','monats','team'].forEach(function(name){
       document.querySelector('.tab[data-tab="' + name + '"]').style.display = allowed.indexOf(name) >= 0 ? 'inline-block' : 'none';
     });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(b){
@@ -454,11 +432,9 @@
       b.classList.toggle('active', b.getAttribute('data-tab') === name);
     });
     document.getElementById('tab-review').style.display = name === 'review' ? 'block' : 'none';
-    document.getElementById('tab-msgs').style.display   = name === 'msgs'   ? 'block' : 'none';
     document.getElementById('tab-monats').style.display = name === 'monats' ? 'block' : 'none';
     document.getElementById('tab-team').style.display   = name === 'team'   ? 'block' : 'none';
     if (name === 'review' && !inited.review) { inited.review = true; initReview(); }
-    if (name === 'msgs'   && !inited.msgs)   { inited.msgs   = true; initMsgs(); }
     if (name === 'monats' && !inited.monats) { inited.monats = true; initMonats(); }
     if (name === 'team'   && !inited.team)   { inited.team   = true; initTeam(); }
   }
@@ -605,12 +581,8 @@
     fetch(SB_URL + '/rest/v1/certification_submissions?id=eq.' + id + '&select=*', { headers: authHeaders() })
       .then(handle401).then(function(r){ return r.json(); })
       .then(function(rows){ if (!rows.length) throw new Error('not found'); var sub = rows[0];
-        // Video may be deleted (after approve/reject) — still open the panel
-        // so the message thread stays reachable.
-        return getSignedUrl(sub.video_path).then(
-          function(url){ logView(sub.id); renderReviewPanel(box, sub, url); },
-          function(){ renderReviewPanel(box, sub, null); }); })
-      .catch(function(e){ if (e && e.message === 'session_expired') return; box.innerHTML = '<div class="empty">Konnte nicht geladen werden.</div>'; });
+        return getSignedUrl(sub.video_path).then(function(url){ logView(sub.id); renderReviewPanel(box, sub, url); }); })
+      .catch(function(e){ if (e && e.message === 'session_expired') return; box.innerHTML = '<div class="empty">Video konnte nicht geladen werden.</div>'; });
   }
   function getSignedUrl(path){
     return fetch(SB_URL + '/storage/v1/object/sign/' + BUCKET + '/' + path, {
@@ -624,10 +596,8 @@
   }
   function renderReviewPanel(box, sub, url){
     var wm = esc(session.user.email) + ' · ' + new Date().toLocaleString('de-AT');
-    box.innerHTML = (url
-        ? '<div class="video-wrap"><video src="' + esc(url) + '" controls controlsList="nodownload" playsinline></video>'
-          + '<div class="watermark">' + wm + '</div><div class="watermark bl">' + wm + '</div></div>'
-        : '<div class="empty" style="padding:14px">Video nicht mehr verfügbar (nach Prüfung gelöscht).</div>')
+    box.innerHTML = '<div class="video-wrap"><video src="' + esc(url) + '" controls controlsList="nodownload" playsinline></video>'
+      + '<div class="watermark">' + wm + '</div><div class="watermark bl">' + wm + '</div></div>'
       + (sub.status === 'pending'
         ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"><button class="btn green" id="approve-open-' + sub.id + '">✓ Zertifizieren…</button><button class="btn danger" id="reject-open-' + sub.id + '">Ablehnen…</button></div>'
           + '<div class="reject-box" id="approve-box-' + sub.id + '"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">Feedback an den Spieler (optional – auf dem Zertifikat sichtbar)</div>'
@@ -646,108 +616,6 @@
       document.getElementById('reject-confirm-' + sub.id).onclick = function(){ rejectSubmission(sub, document.getElementById('reject-notes-' + sub.id).value.trim()); };
     }
   }
-  // ── Messaging (expert side) ────────────────────────────────
-  function expertName(){ return (me && me.full_name && me.full_name.trim()) ? me.full_name.trim() : 'T7 Academy Expert'; }
-  function subProfileId(sub){
-    if (sub.profile_id) return sub.profile_id;
-    if (sub.player_email && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(sub.player_email)) return sub.player_email;
-    return null;
-  }
-  function postMessage(profileId, body){
-    if (!profileId || !body) return Promise.resolve();
-    return fetch(SB_URL + '/rest/v1/messages', { method: 'POST',
-      headers: authHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
-      body: JSON.stringify({ profile_id: profileId, sender: 'expert', sender_name: expertName(), body: body, read_by_expert: true, read_by_player: false }) })
-      .then(handle401).then(function(r){ if (!r.ok) console.warn('message insert', r.status); });
-  }
-  function markExpertRead(profileId){
-    if (!profileId) return;
-    fetch(SB_URL + '/rest/v1/messages?profile_id=eq.' + encodeURIComponent(profileId) + '&sender=eq.player&read_by_expert=eq.false',
-      { method: 'PATCH', headers: authHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }), body: JSON.stringify({ read_by_expert: true }) }).catch(function(){});
-  }
-  function loadThread(profileId, elId){
-    var el = document.getElementById(elId); if (!el) return;
-    if (!profileId) { el.innerHTML = '<div style="color:var(--muted);font-size:12px">Kein Profil verknüpft.</div>'; return; }
-    fetch(SB_URL + '/rest/v1/messages?profile_id=eq.' + encodeURIComponent(profileId) + '&select=sender,sender_name,body,created_at&order=created_at.asc', { headers: authHeaders() })
-      .then(handle401).then(function(r){ return r.json(); })
-      .then(function(rows){
-        if (!Array.isArray(rows) || !rows.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px">Noch keine Nachrichten.</div>'; return; }
-        el.innerHTML = rows.map(function(m){
-          var mine = m.sender === 'expert';
-          var when = new Date(m.created_at).toLocaleString('de-AT');
-          return '<div style="margin-bottom:8px;text-align:' + (mine ? 'right' : 'left') + '">'
-            + '<div style="display:inline-block;max-width:85%;padding:8px 10px;border-radius:10px;text-align:left;background:' + (mine ? 'rgba(0,229,255,.12)' : 'var(--surface2)') + '">'
-            + '<div style="font-size:12.5px;color:var(--text);line-height:1.4">' + esc(m.body) + '</div>'
-            + '<div style="font-size:10px;color:var(--muted);margin-top:3px">' + esc(m.sender_name || (mine ? 'Experte' : 'Spieler')) + ' · ' + when + '</div>'
-            + '</div></div>';
-        }).join('');
-        el.scrollTop = el.scrollHeight;
-        markExpertRead(profileId);
-      }).catch(function(){ el.innerHTML = '<div style="color:var(--muted);font-size:12px">Fehler beim Laden.</div>'; });
-  }
-
-  // ── Nachrichten tab (broadcast + per-player) ───────────────
-  var msgCurrentPid = null;
-  function initMsgs(){
-    // Broadcast to all players
-    document.getElementById('bc-send').onclick = function(){
-      var body = document.getElementById('bc-body').value.trim();
-      if (!body) { toast('err', 'Bitte eine Nachricht eingeben.'); return; }
-      if (!confirm('Diese Nachricht an ALLE Spieler senden?')) return;
-      var btn = this; btn.disabled = true;
-      fetch(SB_URL + '/rest/v1/player_profiles?select=id', { headers: authHeaders() })
-        .then(handle401).then(function(r){ return r.json(); })
-        .then(function(players){
-          var rows = (players || []).filter(function(p){ return p.id; }).map(function(p){
-            return { profile_id: p.id, sender: 'expert', sender_name: expertName(), body: body, read_by_expert: true, read_by_player: false };
-          });
-          if (!rows.length) throw new Error('Keine Spieler gefunden.');
-          return fetch(SB_URL + '/rest/v1/messages', { method: 'POST',
-            headers: authHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }), body: JSON.stringify(rows) })
-            .then(handle401).then(function(r){ if (!r.ok) throw new Error('Senden fehlgeschlagen (' + r.status + ')'); return rows.length; });
-        })
-        .then(function(n){ document.getElementById('bc-body').value = ''; btn.disabled = false; toast('ok', 'An ' + n + ' Spieler gesendet.'); })
-        .catch(function(e){ btn.disabled = false; if (e && e.message === 'session_expired') return; toast('err', 'Fehler: ' + (e.message || e)); });
-    };
-    // Send to the currently open player
-    document.getElementById('msg-send').onclick = function(){
-      var ta = document.getElementById('msg-body'); var body = ta.value.trim();
-      if (!body || !msgCurrentPid) return;
-      var btn = this; btn.disabled = true;
-      postMessage(msgCurrentPid, body).then(function(){ ta.value = ''; btn.disabled = false; loadThread(msgCurrentPid, 'msg-thread'); toast('ok', 'Nachricht gesendet.'); })
-        .catch(function(){ btn.disabled = false; });
-    };
-    loadMsgPlayers();
-  }
-  function loadMsgPlayers(){
-    var el = document.getElementById('msg-players');
-    // Players + which of them have unread replies (sender=player, unread by expert)
-    Promise.all([
-      fetch(SB_URL + '/rest/v1/player_profiles?select=id,first_name,last_name&order=first_name.asc', { headers: authHeaders() }).then(handle401).then(function(r){ return r.json(); }),
-      fetch(SB_URL + '/rest/v1/messages?sender=eq.player&read_by_expert=eq.false&select=profile_id', { headers: authHeaders() }).then(handle401).then(function(r){ return r.json(); })
-    ]).then(function(out){
-      var players = out[0] || [], unread = {};
-      (out[1] || []).forEach(function(m){ if (m.profile_id) unread[m.profile_id] = true; });
-      if (!players.length) { el.innerHTML = '<div class="empty">Keine Spieler.</div>'; return; }
-      el.innerHTML = players.map(function(p){
-        var nm = ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || p.id;
-        var dot = unread[p.id] ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#DC2626;margin-left:8px"></span>' : '';
-        return '<button class="btn ghost" data-pid="' + esc(p.id) + '" style="display:block;width:100%;text-align:left;margin-bottom:6px">' + esc(nm) + dot + '</button>';
-      }).join('');
-      Array.prototype.forEach.call(el.querySelectorAll('[data-pid]'), function(b){
-        b.onclick = function(){ openMsgPlayer(b.getAttribute('data-pid'), b.textContent.trim()); };
-      });
-    }).catch(function(e){ if (e && e.message === 'session_expired') return; el.innerHTML = '<div class="empty">Fehler beim Laden.</div>'; });
-  }
-  function openMsgPlayer(pid, name){
-    msgCurrentPid = pid;
-    document.getElementById('msg-thread-wrap').style.display = 'block';
-    document.getElementById('msg-thread-title').textContent = 'Unterhaltung mit ' + name;
-    loadThread(pid, 'msg-thread');
-    // refresh the unread dots after opening (markExpertRead runs inside loadThread)
-    setTimeout(loadMsgPlayers, 600);
-  }
-
   function approveSubmission(sub, notes){
     notes = notes || null;
     if (!confirm('Zertifikat erteilen und Video löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;

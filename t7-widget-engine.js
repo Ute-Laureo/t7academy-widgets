@@ -95,11 +95,29 @@ var T7SB={
     fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&select=status,notes,stars,reviewed_at,submitted_at&order=submitted_at.desc&limit=1',{headers:this._hdr()})
     .then(function(r){return r.json();}).then(function(rows){cb(rows&&rows.length?rows[0]:null);}).catch(function(){cb(null);});
   },
-  /* All expert messages for this profile over time (approved feedback +
-     rejection reasons), newest first — for the messaging box. */
-  getExpertMessages:function(id,cb){
-    fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&notes=not.is.null&select=notes,status,stars,reviewed_at&order=reviewed_at.desc&limit=20',{headers:this._hdr()})
-    .then(function(r){return r.json();}).then(function(rows){cb(Array.isArray(rows)?rows.filter(function(x){return x.notes&&String(x.notes).trim();}):[]);}).catch(function(){cb([]);});
+  /* === Messaging (general expert<->player inbox, `messages` table) === */
+  /* Full thread for this profile, oldest first. */
+  getMessages:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&select=id,sender,sender_name,body,created_at,read_by_player&order=created_at.asc',{headers:this._hdr()})
+    .then(function(r){return r.json();}).then(function(rows){cb(Array.isArray(rows)?rows:[]);}).catch(function(){cb([]);});
+  },
+  /* Count of expert messages the player hasn't read yet (envelope badge). */
+  getUnreadCount:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&sender=eq.expert&read_by_player=eq.false&select=id',{headers:this._hdr({'Prefer':'count=exact'})})
+    .then(function(r){var cr=r.headers.get('content-range');var n=cr&&cr.indexOf('/')>=0?parseInt(cr.split('/')[1],10):0;cb(isNaN(n)?0:n);}).catch(function(){cb(0);});
+  },
+  /* Mark all expert messages as read (starts the 7-day retention clock). */
+  markMessagesRead:function(id,cb){
+    fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&sender=eq.expert&read_by_player=eq.false',
+      {method:'PATCH',headers:this._hdr({'Prefer':'return=minimal'}),body:JSON.stringify({read_by_player:true,read_at:new Date().toISOString()})})
+    .then(function(){if(cb)cb();}).catch(function(){if(cb)cb();});
+  },
+  /* Player sends a reply. */
+  sendMessage:function(id,name,body,cb){
+    if(!id||!body){if(cb)cb(false);return;}
+    fetch(T7_SB_URL+'/rest/v1/messages',{method:'POST',headers:this._hdr({'Prefer':'return=minimal'}),
+      body:JSON.stringify({profile_id:id,sender:'player',sender_name:name||'Spieler',body:body,read_by_player:true,read_by_expert:false})})
+    .then(function(r){if(cb)cb(r.ok);}).catch(function(){if(cb)cb(false);});
   },
   getStars:function(id,cb){
     fetch(T7_SB_URL+'/rest/v1/player_stats?id=eq.'+encodeURIComponent(id)+'&select=stars,stars_awarded_at',{headers:this._hdr()})
@@ -747,7 +765,9 @@ function T7Badge(containerId){
   function starsHtml(){return '\u2b50';}
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
   function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function showBadge(n,nm){
+  var badgeName='Spieler';
+  // note = the permanent CERTIFICATION feedback (stars_note), shown on the cert.
+  function showBadge(n,nm,note){
     cont.innerHTML='<div class="t7-cert">'+
       '<div class="t7-cert-top"></div>'+
       '<div class="t7-cert-bottom"></div>'+
@@ -760,6 +780,7 @@ function T7Badge(containerId){
       '<div class="t7-cert-line"></div>'+
       (nm?'<div class="t7-cert-name">'+nm+'</div>':'')+
       '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong></div>'+
+      (note?'<div class="t7-cert-feedback" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;font-style:italic;color:var(--muted);line-height:1.45">💬 '+esc(note)+'</div>':'')+
     '</div>';
   }
   function showStatus(kind,title,msg){
@@ -768,31 +789,47 @@ function T7Badge(containerId){
       '<div class="t7f-status-title" style="font-weight:800;font-size:14px;color:'+accent+';margin-bottom:6px">'+esc(title)+'</div>'+
       (msg?'<div class="t7f-status-msg" style="font-size:13px;color:var(--text);line-height:1.45">'+esc(msg)+'</div>':'')+'</div>';
   }
-  // Small messaging box below the certificate: the expert's short messages
-  // over time (approval feedback + rejection reasons), newest first.
-  function renderMessages(id){
-    cont.insertAdjacentHTML('beforeend','<div id="t7-msgbox"></div>');
-    T7SB.getExpertMessages(id,function(msgs){
-      var box=document.getElementById('t7-msgbox');if(!box)return;
-      if(!msgs||!msgs.length){box.innerHTML='';return;}
-      var items=msgs.map(function(m){
-        var color=m.status==='rejected'?'#DC2626':'var(--accent)';
-        var icon=m.status==='approved'?'\u2705':m.status==='rejected'?'\u21bb':'\ud83d\udcac';
-        var date=m.reviewed_at?fmtDate(m.reviewed_at):'';
-        return '<div style="padding:8px 0;border-top:1px solid var(--border)">'+
-          '<div style="font-size:12.5px;color:var(--text);line-height:1.4">'+esc(m.notes)+'</div>'+
-          '<div style="font-size:10.5px;color:'+color+';margin-top:3px;opacity:.9">'+icon+(date?' \u00b7 '+date:'')+'</div>'+
+  // General two-way inbox (messages table): expert updates + player replies.
+  // Separate from the certification note above.
+  function renderInbox(id){
+    if(!document.getElementById('t7-msgbox')) cont.insertAdjacentHTML('beforeend','<div id="t7-msgbox"></div>');
+    function load(){
+      T7SB.getMessages(id,function(msgs){
+        var b=document.getElementById('t7-msgbox');if(!b)return;
+        var items=(msgs&&msgs.length)?msgs.map(function(m){
+          var mine=m.sender==='player';
+          var when=new Date(m.created_at).toLocaleString('de-AT');
+          return '<div style="margin-bottom:8px;text-align:'+(mine?'right':'left')+'">'+
+            '<div style="display:inline-block;max-width:88%;padding:8px 10px;border-radius:10px;text-align:left;background:'+(mine?'var(--surface2)':'rgba(0,229,255,.10)')+'">'+
+              '<div style="font-size:12.5px;color:var(--text);line-height:1.4">'+esc(m.body)+'</div>'+
+              '<div style="font-size:10px;color:var(--muted);margin-top:3px">'+esc(m.sender_name||(mine?'Du':'Experte'))+' \u00b7 '+when+'</div>'+
+            '</div></div>';
+        }).join(''):'<div style="font-size:12px;color:var(--muted);padding:4px 0">Noch keine Nachrichten.</div>';
+        b.innerHTML='<div style="margin-top:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)">'+
+          '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">\ud83d\udcac Nachrichten</div>'+
+          '<div style="max-height:220px;overflow:auto;margin-bottom:8px">'+items+'</div>'+
+          '<div style="display:flex;gap:6px">'+
+            '<input id="t7-msg-input" type="text" placeholder="Antworten\u2026" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px">'+
+            '<button id="t7-msg-send" type="button" style="background:var(--accent);color:#001018;border:none;border-radius:8px;padding:0 14px;font-weight:800;cursor:pointer">Senden</button>'+
+          '</div>'+
         '</div>';
-      }).join('');
-      box.innerHTML='<div style="margin-top:12px;padding:10px 14px 4px;border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:220px;overflow:auto">'+
-        '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">\ud83d\udcac Nachrichten vom Experten</div>'+
-        items+
-      '</div>';
-    });
+        var send=function(){
+          var inp=document.getElementById('t7-msg-input');var v=(inp.value||'').trim();if(!v)return;
+          var btn=document.getElementById('t7-msg-send');btn.disabled=true;
+          T7SB.sendMessage(id,badgeName,v,function(ok){btn.disabled=false;if(ok){inp.value='';load();}});
+        };
+        document.getElementById('t7-msg-send').onclick=send;
+        document.getElementById('t7-msg-input').addEventListener('keydown',function(e){if(e.key==='Enter')send();});
+        T7SB.markMessagesRead(id);
+        window.dispatchEvent(new CustomEvent('t7msg-read'));
+      });
+    }
+    load();
   }
   function fetchBadge(id){
     T7SB.getStats(id,function(s){
-      if(s&&s.stars){showBadge(s.stars,s.first_name);renderMessages(id);return;}
+      if(s&&s.first_name)badgeName=s.first_name;
+      if(s&&s.stars){showBadge(s.stars,s.first_name,s.stars_note);renderInbox(id);return;}
       // No star yet \u2014 surface the player's latest submission status.
       T7SB.getLatestSubmission(id,function(sub){
         if(sub&&sub.status==='pending'){
@@ -802,7 +839,7 @@ function T7Badge(containerId){
         }else{
           cont.innerHTML='<div class="t7f-empty">Noch kein Zertifikat.</div>';
         }
-        renderMessages(id);
+        renderInbox(id);
       });
     });
   }
@@ -877,7 +914,6 @@ function T7MobileSheet(){
       // If not certified yet, pull the latest submission so the cert tab
       // can show the player their pending / rejected status + feedback.
       if(!st.stars){T7SB.getLatestSubmission(st.id,function(sub){st.sub=sub||null;if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();});}
-      T7SB.getExpertMessages(st.id,function(msgs){st.msgs=msgs||[];if(st.open&&st.tab==='cert')$('t7-sheet-content').innerHTML=renderCert();});
     });
   }
   function loadRang(){
@@ -915,16 +951,11 @@ function T7MobileSheet(){
     return '<div>'+rows+'</div>';
   }
   function mEsc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  // Permanent CERTIFICATION note under the mobile certificate (stars_note).
+  // The general messages inbox lives on the Fortschritt tab (see FAB step).
   function mMsgBox(){
-    if(!st.msgs||!st.msgs.length)return '';
-    function fmt(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:Date.parse(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
-    var items=st.msgs.map(function(m){
-      var color=m.status==='rejected'?'#DC2626':'var(--accent)';
-      var icon=m.status==='approved'?'✅':m.status==='rejected'?'↻':'💬';
-      var date=m.reviewed_at?fmt(m.reviewed_at):'';
-      return '<div style="padding:8px 0;border-top:1px solid var(--border)"><div style="font-size:12.5px;color:var(--text);line-height:1.4">'+mEsc(m.notes)+'</div><div style="font-size:10.5px;color:'+color+';margin-top:3px;opacity:.9">'+icon+(date?' · '+date:'')+'</div></div>';
-    }).join('');
-    return '<div style="margin-top:12px;padding:10px 14px 4px;border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:220px;overflow:auto"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">💬 Nachrichten vom Experten</div>'+items+'</div>';
+    if(!st.starsNote)return '';
+    return '<div style="margin-top:12px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)"><div style="font-size:12.5px;font-style:italic;color:var(--muted);line-height:1.45">💬 '+mEsc(st.starsNote)+'</div></div>';
   }
   function renderCert(){
     if(!st.certLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
