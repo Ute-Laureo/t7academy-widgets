@@ -40,6 +40,17 @@ var T7Identity=(function(){
     for(var i=0;i<ws.length;i++){
       try{if(ws[i].T7_PROFILE_ID)return String(ws[i].T7_PROFILE_ID);}catch(e){}
     }
+    // Sandbox-only test hook: on non-production hosts, allow ?pid=<uuid> in
+    // the URL to impersonate a player. Ignored on t7academy.com so the live
+    // site can never be driven by a URL parameter.
+    try{
+      var host=(location.hostname||'').toLowerCase();
+      var isProd=/(^|\.)t7academy\.com$/.test(host);
+      if(!isProd){
+        var qp=new URLSearchParams(location.search).get('pid');
+        if(qp&&/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(qp))return qp;
+      }
+    }catch(e){}
     return null;
   }
   function _fetchName(id,cb){
@@ -63,7 +74,18 @@ var T7Identity=(function(){
       _q.push(cb);if(!_going){_going=true;_go();}
     },
     fire:function(id,nm){_fire(id,nm);},
-    get:function(){return _done?{id:_id,name:_name}:null;}
+    get:function(){return _done?{id:_id,name:_name}:null;},
+    /* Testing helper: clear cached identity, re-read T7_PROFILE_ID and
+       re-render the widgets. Use from the console after setting the id:
+         window.T7_PROFILE_ID = '…'; T7Identity.reset();
+       (No effect on production behaviour — it just re-runs resolution.) */
+    reset:function(cb){
+      _id=null;_name=null;_done=false;_going=false;_q=[];
+      this.resolve(function(id,nm){
+        try{window.dispatchEvent(new CustomEvent('t7xpupdate'));}catch(e){}
+        if(cb)cb(id,nm);
+      });
+    }
   };
 })();
 
