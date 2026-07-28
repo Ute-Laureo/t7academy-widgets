@@ -30,6 +30,24 @@
   </div>
 </nav>
 
+<!-- MESSAGING BAR — under the top nav, above the hero. One inbox: expert
+     messages + certification feedback, with replies. -->
+<div class="home-msgbar" id="homeMsgbar" style="display:none">
+  <button class="home-msgbar-btn" id="homeMsgToggle" type="button" aria-expanded="false">
+    <span class="home-msgbar-ico">💬</span>
+    <span class="home-msgbar-label">Nachrichten vom Experten</span>
+    <span class="home-msgbar-dot" id="homeMsgDot" style="display:none"></span>
+    <span class="home-msgbar-chev" id="homeMsgChev">▾</span>
+  </button>
+  <div class="home-msgpanel" id="homeMsgPanel">
+    <div class="home-msg-thread" id="homeMsgThread"><div class="home-msg-empty">Lade…</div></div>
+    <div class="home-msg-compose">
+      <input type="text" id="homeMsgInput" placeholder="Antwort an den Experten…" autocomplete="off">
+      <button type="button" id="homeMsgSend">Senden</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ============================================================
      HERO — identity + at-a-glance stats on the LEFT.

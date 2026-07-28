@@ -123,6 +123,25 @@ var T7SB={
     fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&select=id,sender,sender_name,body,created_at,read_by_player&order=created_at.asc',{headers:this._hdr()})
     .then(function(r){return r.json();}).then(function(rows){cb(Array.isArray(rows)?rows:[]);}).catch(function(){cb([]);});
   },
+  /* Unified inbox: general messages + permanent certification feedback,
+     merged into one chronological list (oldest first). Each item:
+       {kind:'message'|'cert', sender, sender_name, body, ts, status} */
+  getInbox:function(id,cb){
+    var self=this;
+    Promise.all([
+      new Promise(function(res){ self.getMessages(id,res); }),
+      new Promise(function(res){
+        fetch(T7_SB_URL+'/rest/v1/certification_submissions?profile_id=eq.'+encodeURIComponent(id)+'&notes=not.is.null&select=notes,status,reviewed_at&order=reviewed_at.asc',{headers:self._hdr()})
+        .then(function(r){return r.json();}).then(function(rows){res(Array.isArray(rows)?rows:[]);}).catch(function(){res([]);});
+      })
+    ]).then(function(out){
+      var list=[];
+      (out[0]||[]).forEach(function(m){ list.push({kind:'message',sender:m.sender,sender_name:m.sender_name,body:m.body,ts:new Date(m.created_at).getTime()||0,status:null}); });
+      (out[1]||[]).forEach(function(c){ if(c.notes&&String(c.notes).trim()) list.push({kind:'cert',sender:'expert',sender_name:'T7 Academy Expert',body:c.notes,ts:c.reviewed_at?(new Date(c.reviewed_at).getTime()||0):0,status:c.status}); });
+      list.sort(function(a,b){return a.ts-b.ts;});
+      cb(list);
+    }).catch(function(){cb([]);});
+  },
   /* Count of expert messages the player hasn't read yet (envelope badge). */
   getUnreadCount:function(id,cb){
     fetch(T7_SB_URL+'/rest/v1/messages?profile_id=eq.'+encodeURIComponent(id)+'&sender=eq.expert&read_by_player=eq.false&select=id',{headers:this._hdr({'Prefer':'count=exact'})})
@@ -788,8 +807,8 @@ function T7Badge(containerId){
   function fmtDate(ts){if(!ts)return'';var d=new Date(typeof ts==='number'?ts:parseInt(ts));return d.toLocaleDateString('de-AT',{day:'2-digit',month:'long',year:'numeric'});}
   function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   var badgeName='Spieler';
-  // note = the permanent CERTIFICATION feedback (stars_note), shown on the cert.
-  function showBadge(n,nm,note){
+  // Challenges: certificate visual only. Notes + messages live on Home.
+  function showBadge(n,nm){
     cont.innerHTML='<div class="t7-cert">'+
       '<div class="t7-cert-top"></div>'+
       '<div class="t7-cert-bottom"></div>'+
@@ -802,7 +821,6 @@ function T7Badge(containerId){
       '<div class="t7-cert-line"></div>'+
       (nm?'<div class="t7-cert-name">'+nm+'</div>':'')+
       '<div class="t7-cert-official">Zertifiziert von <strong>T7 Academy Expert</strong></div>'+
-      (note?'<div class="t7-cert-feedback" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;font-style:italic;color:var(--muted);line-height:1.45">💬 '+esc(note)+'</div>':'')+
     '</div>';
   }
   function showStatus(kind,title,msg){
@@ -850,8 +868,7 @@ function T7Badge(containerId){
   }
   function fetchBadge(id){
     T7SB.getStats(id,function(s){
-      if(s&&s.first_name)badgeName=s.first_name;
-      if(s&&s.stars){showBadge(s.stars,s.first_name,s.stars_note);renderInbox(id);return;}
+      if(s&&s.stars){showBadge(s.stars,s.first_name);return;}
       // No star yet \u2014 surface the player's latest submission status.
       T7SB.getLatestSubmission(id,function(sub){
         if(sub&&sub.status==='pending'){
@@ -861,7 +878,6 @@ function T7Badge(containerId){
         }else{
           cont.innerHTML='<div class="t7f-empty">Noch kein Zertifikat.</div>';
         }
-        renderInbox(id);
       });
     });
   }
