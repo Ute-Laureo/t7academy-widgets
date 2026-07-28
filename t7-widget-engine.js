@@ -1374,7 +1374,7 @@ function T7HomeInbox(){
   if(!document.getElementById('t7hi-style')){
     var st=document.createElement('style');st.id='t7hi-style';
     st.textContent=
-      '.t7hi-bar{max-width:1200px;margin:14px auto 0;padding:0 clamp(16px,4vw,40px)}'
+      '.t7hi-bar{width:100%;margin:0 0 14px}'
       +'.t7hi-btn{width:100%;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;cursor:pointer;color:var(--text);font-family:inherit;font-size:14px;font-weight:700}'
       +'.t7hi-btn:hover{border-color:var(--accent)}'
       +'.t7hi-ico{font-size:16px;line-height:1}.t7hi-label{flex:1;text-align:left}'
@@ -1405,7 +1405,10 @@ function T7HomeInbox(){
     +'<div class="t7hi-thread" id="t7hi-thread"><div class="t7hi-empty">Lade…</div></div>'
     +'<div class="t7hi-compose"><input id="t7hi-input" type="text" placeholder="Antwort an den Experten…" autocomplete="off">'
     +'<button id="t7hi-send" type="button">Senden</button></div></div>';
-  nav.insertAdjacentElement('afterend',bar);
+  // Mount above the profile picture (right column), aligned to its width.
+  var col=document.querySelector('.home-hero-avatar');
+  if(col){col.insertBefore(bar,col.firstChild);}
+  else{nav.insertAdjacentElement('afterend',bar);}
 
   function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   var pid=null,pname='Spieler';
