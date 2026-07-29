@@ -8,11 +8,11 @@
 
 <!-- Outside-environment stylesheet (shared with home-outside & Freemium).
      v=2 → picks up the new subscription rules (section 22). -->
-<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-outside.css?v=3">
+<link rel="stylesheet" href="https://ute-laureo.github.io/t7academy-widgets/t7-outside.css?v=4">
 
 <!-- Outside-environment script. Here its theme-toggle block runs and its
      club-enquiry block wires up #clubEnquiryForm; other blocks stay dormant. -->
-<script src="https://ute-laureo.github.io/t7academy-widgets/t7-outside.js?v=3"></script>
+<script src="https://ute-laureo.github.io/t7academy-widgets/t7-outside.js?v=4"></script>
 
 <!-- Cloudflare Turnstile (captcha) — protects the club enquiry form. -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -97,7 +97,9 @@
                     </ul>
                 </div>
 
-                <div class="sub-form" id="clubFormCard">
+                <button type="button" class="sub-club-cta" id="clubFormToggle" aria-expanded="false" aria-controls="clubFormCard">Angebot für den Verein anfragen →</button>
+
+                <div class="sub-form" id="clubFormCard" hidden>
                     <form id="clubEnquiryForm" novalidate>
                         <!-- Honeypot — hidden from users; bots that fill it are dropped. -->
                         <div class="sub-hp" aria-hidden="true">
@@ -139,9 +141,9 @@
                                 <textarea id="cf-msg" name="message" placeholder="Erzähl uns kurz von deinem Verein und was ihr euch wünscht."></textarea>
                             </div>
                         </div>
-                        <!-- Cloudflare Turnstile widget. Replace the data-sitekey below
-                             with your real Turnstile SITE key (see DEPLOY-club-enquiry.md). -->
-                        <div class="sub-turnstile cf-turnstile" data-sitekey="0x4AAAAAAEBEHlIvFqZjvw_m" data-theme="auto"></div>
+                        <!-- Turnstile mounts here (rendered by JS when the form opens,
+                             so it doesn't run while the form is hidden). -->
+                        <div class="sub-turnstile" id="clubTurnstile" data-sitekey="0x4AAAAAAEBEHlIvFqZjvw_m"></div>
                         <div class="sub-form-actions">
                             <button type="submit" class="sub-submit" id="clubSubmit">Anfrage senden</button>
                             <div class="sub-form-msg" id="clubFormMsg" role="status" aria-live="polite"></div>

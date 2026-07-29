@@ -710,24 +710,41 @@
 /* ==========================================================================
    4. SUBSCRIPTION — CLUB ENQUIRY FORM (outside)
    --------------------------------------------------------------------------
-   Self-contained + feature-detected: only runs on the subscription page,
-   which contains #clubEnquiryForm. Posts a new row to the Supabase
-   `club_enquiries` table via the public anon key (insert-only RLS). Staff
-   read the submissions in the Expert-Admin "Club-Anfragen" tab.
+   Feature-detected: runs only on the subscription page (#clubEnquiryForm).
+   The form is hidden behind a button — most visitors want the single/annual
+   plans, not the club form. Opening it renders the Turnstile captcha and
+   reveals the fields; submit posts to the club-enquiry Edge Function, which
+   verifies the captcha + rate-limits server-side.
    ========================================================================== */
 (function () {
     'use strict';
 
-    /* Same project + anon key used across the T7 outside/admin surfaces. */
     var SUPABASE_URL      = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
     var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
 
+    var tsRendered = false;
+
     function boot() {
         var form = document.getElementById('clubEnquiryForm');
-        if (!form) return;   /* not the subscription page — no-op */
+        if (!form) return;   /* not the subscription page */
 
         var msg    = document.getElementById('clubFormMsg');
         var submit = document.getElementById('clubSubmit');
+        var toggle = document.getElementById('clubFormToggle');
+        var wrap   = document.getElementById('clubFormCard');
+
+        /* Reveal the form on demand + render the captcha the first time. */
+        if (toggle && wrap) {
+            toggle.addEventListener('click', function () {
+                wrap.hidden = false;
+                toggle.setAttribute('aria-expanded', 'true');
+                toggle.style.display = 'none';
+                renderTurnstile();
+                var first = form.elements['club_name'];
+                if (first) { try { first.focus(); } catch (e) {} }
+                try { wrap.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+            });
+        }
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -788,15 +805,19 @@
             });
         });
 
-        function val(name) {
-            var el = form.elements[name];
-            return el ? String(el.value || '').trim() : '';
-        }
-        function intOrNull(name) {
-            var v = val(name);
-            if (!v) return null;
-            var n = parseInt(v, 10);
-            return isNaN(n) ? null : n;
+        function renderTurnstile(tries) {
+            tries = tries || 0;
+            if (tsRendered) return;
+            var el = document.getElementById('clubTurnstile');
+            if (el && window.turnstile && window.turnstile.render) {
+                try {
+                    window.turnstile.render(el, { sitekey: el.getAttribute('data-sitekey'), theme: 'auto' });
+                    tsRendered = true;
+                } catch (e) { /* already rendered / ignore */ }
+                return;
+            }
+            if (tries > 40) return;                         /* give up after ~10s */
+            setTimeout(function () { renderTurnstile(tries + 1); }, 250);
         }
         function turnstileToken() {
             var el = form.elements['cf-turnstile-response'];
@@ -813,6 +834,16 @@
             if (code === 'bad_email') return 'Bitte eine gültige E-Mail-Adresse eingeben.';
             if (code === 'missing_fields') return 'Bitte Verein, Ansprechperson und E-Mail ausfüllen.';
             return 'Senden fehlgeschlagen. Bitte später erneut versuchen.';
+        }
+        function val(name) {
+            var el = form.elements[name];
+            return el ? String(el.value || '').trim() : '';
+        }
+        function intOrNull(name) {
+            var v = val(name);
+            if (!v) return null;
+            var n = parseInt(v, 10);
+            return isNaN(n) ? null : n;
         }
         function showErr(text) {
             if (!msg) return;
