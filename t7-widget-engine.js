@@ -895,17 +895,18 @@ function T7MobileSheet(){
       '<span>\u26a1</span>'+
       '<span id="t7-fab-xp">0 XP</span>'+
       '<span style="opacity:.5"> | </span>'+
-      '<span id="t7-fab-streak">0 Wochen</span>'+
+      '<span id="t7-fab-msg" style="position:relative;display:inline-block">✉<span id="t7-fab-msgdot" style="display:none;position:absolute;top:-5px;right:-6px;width:8px;height:8px;border-radius:50%;background:#DC2626"></span></span>'+
     '</button>'+
     '<div id="t7-sheet-overlay"></div>'+
     '<div id="t7-sheet">'+
       '<div class="t7-sheet-handle"></div>'+
       '<div class="t7-sheet-header">'+
-        '<div class="t7-sheet-title" id="t7-sheet-title">Mein Fortschritt</div>'+
+        '<div class="t7-sheet-title" id="t7-sheet-title">Deine Nachrichten</div>'+
         '<button class="t7-sheet-close" id="t7-sheet-close" type="button">\u2715</button>'+
       '</div>'+
       '<div class="t7-sheet-tabs">'+
-        '<button class="t7-sheet-tab active" id="t7-tab-fort" type="button">\ud83d\udcca Fortschritt</button>'+
+        '<button class="t7-sheet-tab active" id="t7-tab-msg" type="button">\u2709 Nachrichten</button>'+
+        '<button class="t7-sheet-tab" id="t7-tab-fort" type="button">\ud83d\udcca Fortschritt</button>'+
         '<button class="t7-sheet-tab" id="t7-tab-rang" type="button">\ud83c\udfc6 Rangliste</button>'+
         '<button class="t7-sheet-tab" id="t7-tab-cert" type="button">\u2b50 Zertifikat</button>'+
       '</div>'+
@@ -914,7 +915,7 @@ function T7MobileSheet(){
   var wrap=document.createElement('div');wrap.innerHTML=sheetHTML;
   while(wrap.firstChild)document.body.appendChild(wrap.firstChild);
 
-  var st={open:false,tab:'fort',id:null,name:'Spieler',totalXP:0,weekXP:0,streak:0,stars:0,starsAt:null,players:[],fortLoaded:false,rangLoaded:false,certLoaded:false};
+  var st={open:false,tab:'msg',id:null,name:'Spieler',totalXP:0,weekXP:0,streak:0,stars:0,starsAt:null,players:[],msgs:[],unread:0,fortLoaded:false,rangLoaded:false,certLoaded:false,msgLoaded:false};
   function $(id){return document.getElementById(id);}
   function ini(n){if(!n)return'?';return n.split(/\s+/).map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
   function getWeekKey(d){var x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);var ys=new Date(Date.UTC(x.getUTCFullYear(),0,1));return x.getUTCFullYear()+'-W'+Math.ceil((((x-ys)/86400000)+1)/7);}
@@ -962,9 +963,38 @@ function T7MobileSheet(){
   }
   function updateFAB(){
     $('t7-fab-xp').textContent=st.totalXP.toLocaleString('de-AT')+' XP';
-    $('t7-fab-streak').textContent=st.streak+' Woche'+(st.streak===1?'':'n');
+    var md=$('t7-fab-msgdot');if(md)md.style.display=st.unread>0?'block':'none';
     if(st.stars){$('t7-fab-stars-num').textContent=st.stars;$('t7-fab-stars').style.display='inline';$('t7-fab-stars-sep').style.display='inline';}
     else{$('t7-fab-stars').style.display='none';$('t7-fab-stars-sep').style.display='none';}
+  }
+  function loadUnread(){ if(st.id)T7SB.getUnreadCount(st.id,function(n){st.unread=n;updateFAB();}); }
+  function loadMsg(){
+    if(!st.id)return;
+    T7SB.getInbox(st.id,function(list){
+      st.msgs=list||[];st.msgLoaded=true;
+      if(st.open&&st.tab==='msg'){$('t7-sheet-content').innerHTML=renderMsg();wireMsg();}
+      T7SB.markMessagesRead(st.id,function(){st.unread=0;updateFAB();});
+    });
+  }
+  function msgComposeHTML(){
+    return '<div style="display:flex;gap:8px;margin-top:4px"><input id="t7m-msg-input" type="text" placeholder="Antwort an den Experten…" autocomplete="off" style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:14px"><button id="t7m-msg-send" type="button" style="background:var(--accent);color:#001018;border:none;border-radius:10px;padding:0 16px;font-weight:800">Senden</button></div>';
+  }
+  function renderMsg(){
+    if(!st.msgLoaded)return '<div class="t7m-loading">Lade…</div>';
+    if(!st.msgs.length)return '<div class="t7m-empty" style="text-align:left;margin-bottom:10px">Noch keine Nachrichten. Hier meldet sich dein Experte.</div>'+msgComposeHTML();
+    var items=st.msgs.map(function(m){
+      var mine=m.sender==='player';var when=m.ts?new Date(m.ts).toLocaleString('de-AT'):'';
+      var who=mine?'Du':(m.sender_name||'Experte');var tag=m.kind==='cert'?'⭐ Zertifikat · ':'';
+      var bg=mine?'var(--surface2)':(m.kind==='cert'?'rgba(255,215,0,.12)':'rgba(0,229,255,.10)');
+      var bd=m.kind==='cert'?'border:1px solid rgba(255,215,0,.35);':'';
+      return '<div style="margin-bottom:10px;display:flex;justify-content:'+(mine?'flex-end':'flex-start')+'"><div style="max-width:82%;padding:9px 12px;border-radius:12px;background:'+bg+';'+bd+'"><div style="font-size:13px;color:var(--text);line-height:1.45;white-space:pre-wrap;word-break:break-word">'+mEsc(m.body)+'</div><div style="font-size:10.5px;color:var(--muted);margin-top:4px">'+tag+mEsc(who)+(when?' · '+when:'')+'</div></div></div>';
+    }).join('');
+    return '<div style="max-height:46vh;overflow:auto;margin-bottom:10px">'+items+'</div>'+msgComposeHTML();
+  }
+  function wireMsg(){
+    var inp=$('t7m-msg-input'),btn=$('t7m-msg-send');if(!inp||!btn)return;
+    function send(){var v=(inp.value||'').trim();if(!v)return;btn.disabled=true;T7SB.sendMessage(st.id,st.name,v,function(ok){btn.disabled=false;if(ok){inp.value='';loadMsg();}});}
+    btn.onclick=send;inp.addEventListener('keydown',function(e){if(e.key==='Enter')send();});
   }
   function renderFort(){
     if(!st.fortLoaded)return '<div class="t7m-loading">Lade\u2026</div>';
@@ -1024,14 +1054,16 @@ function T7MobileSheet(){
   function closeSheet(){st.open=false;$('t7-sheet').classList.remove('open');$('t7-sheet-overlay').classList.remove('open');}
   function switchTab(t){
     st.tab=t;
+    $('t7-tab-msg').className='t7-sheet-tab'+(t==='msg'?' active':'');
     $('t7-tab-fort').className='t7-sheet-tab'+(t==='fort'?' active':'');
     $('t7-tab-rang').className='t7-sheet-tab'+(t==='rang'?' active':'');
     $('t7-tab-cert').className='t7-sheet-tab'+(t==='cert'?' active':'');
-    $('t7-sheet-title').textContent=t==='fort'?'Mein Fortschritt':t==='rang'?'Rangliste':'Mein Zertifikat';
+    $('t7-sheet-title').textContent=t==='msg'?'Deine Nachrichten':t==='fort'?'Mein Fortschritt':t==='rang'?'Rangliste':'Mein Zertifikat';
     renderActive();
   }
   function renderActive(){
-    if(st.tab==='fort'){if(!st.fortLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderFort();}
+    if(st.tab==='msg'){if(!st.msgLoaded&&st.id)loadMsg();$('t7-sheet-content').innerHTML=renderMsg();wireMsg();}
+    else if(st.tab==='fort'){if(!st.fortLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderFort();}
     else if(st.tab==='rang'){if(!st.rangLoaded)loadRang();$('t7-sheet-content').innerHTML=renderRang();}
     else{if(!st.certLoaded&&st.id)loadFort();$('t7-sheet-content').innerHTML=renderCert();}
   }
@@ -1039,6 +1071,7 @@ function T7MobileSheet(){
   $('t7-fab').onclick=openSheet;
   $('t7-sheet-close').onclick=closeSheet;
   $('t7-sheet-overlay').onclick=closeSheet;
+  $('t7-tab-msg').onclick=function(){switchTab('msg');};
   $('t7-tab-fort').onclick=function(){switchTab('fort');};
   $('t7-tab-rang').onclick=function(){switchTab('rang');};
   $('t7-tab-cert').onclick=function(){switchTab('cert');};
@@ -1050,8 +1083,9 @@ function T7MobileSheet(){
     if(!id)return;
     st.id=id;st.name=name||'Spieler';
     loadFort();
+    loadUnread();
   });
-  window.addEventListener('t7xpupdate',function(){if(st.id){st.fortLoaded=false;st.certLoaded=false;loadFort();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
+  window.addEventListener('t7xpupdate',function(){if(st.id){st.fortLoaded=false;st.certLoaded=false;st.msgLoaded=false;loadFort();loadUnread();if(st.rangLoaded){st.rangLoaded=false;loadRang();}}});
 }
 
 
@@ -1399,7 +1433,7 @@ function T7HomeInbox(){
   var bar=document.createElement('div');bar.className='t7hi-bar';bar.id='t7hi-bar';bar.style.display='none';
   bar.innerHTML=
     '<button class="t7hi-btn" id="t7hi-toggle" type="button" aria-expanded="false">'
-    +'<span class="t7hi-ico">💬</span><span class="t7hi-label">Nachrichten vom Experten</span>'
+    +'<span class="t7hi-ico">💬</span><span class="t7hi-label">Deine Nachrichten</span>'
     +'<span class="t7hi-dot" id="t7hi-dot" style="display:none"></span><span class="t7hi-chev">▾</span></button>'
     +'<div class="t7hi-panel">'
     +'<div class="t7hi-thread" id="t7hi-thread"><div class="t7hi-empty">Lade…</div></div>'
@@ -1440,7 +1474,7 @@ function T7HomeInbox(){
   window.addEventListener('t7xpupdate',function(){var info=T7Identity.get();if(info&&info.id)bind(info.id,info.name);});
 }
 (function(){
-  function m(){try{T7HomeInbox();}catch(e){}}
+  function m(){try{T7HomeInbox();}catch(e){}try{T7MobileSheet();}catch(e){}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',m);else m();
 })();
 
