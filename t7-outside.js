@@ -705,3 +705,141 @@
         boot();
     }
 })();
+
+
+/* ==========================================================================
+   4. SUBSCRIPTION — CLUB ENQUIRY FORM (outside)
+   --------------------------------------------------------------------------
+   Self-contained + feature-detected: only runs on the subscription page,
+   which contains #clubEnquiryForm. Posts a new row to the Supabase
+   `club_enquiries` table via the public anon key (insert-only RLS). Staff
+   read the submissions in the Expert-Admin "Club-Anfragen" tab.
+   ========================================================================== */
+(function () {
+    'use strict';
+
+    /* Same project + anon key used across the T7 outside/admin surfaces. */
+    var SUPABASE_URL      = 'https://qajjuhjmrtuomwrbxmpz.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhamp1aGptcnR1b213cmJ4bXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTMzNTksImV4cCI6MjA5MDAyOTM1OX0.4tyFG-e2IIh0Iwze7TQorfRF7DqUQkGBpeRgCcMkFC4';
+
+    function boot() {
+        var form = document.getElementById('clubEnquiryForm');
+        if (!form) return;   /* not the subscription page — no-op */
+
+        var msg    = document.getElementById('clubFormMsg');
+        var submit = document.getElementById('clubSubmit');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (msg) { msg.className = 'sub-form-msg'; msg.textContent = ''; }
+
+            var data = {
+                club_name:    val('club_name'),
+                contact_name: val('contact_name'),
+                email:        val('email'),
+                phone:        val('phone') || null,
+                num_teams:    intOrNull('num_teams'),
+                num_kids:     intOrNull('num_kids'),
+                age_groups:   val('age_groups') || null,
+                message:      val('message') || null,
+                company_website: val('company_website'),        /* honeypot — must stay empty */
+                'cf-turnstile-response': turnstileToken()        /* Cloudflare Turnstile token */
+            };
+
+            if (!data.club_name || !data.contact_name || !data.email) {
+                showErr('Bitte Verein, Ansprechperson und E-Mail ausfüllen.');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                showErr('Bitte eine gültige E-Mail-Adresse eingeben.');
+                return;
+            }
+            if (!data['cf-turnstile-response']) {
+                showErr('Bitte bestätige kurz, dass du kein Roboter bist.');
+                return;
+            }
+
+            if (submit) { submit.disabled = true; submit.textContent = 'Wird gesendet…'; }
+
+            /* Insert goes through the club-enquiry Edge Function, which verifies
+               the captcha + rate-limits server-side. Direct table inserts are off. */
+            fetch(SUPABASE_URL + '/functions/v1/club-enquiry', {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(function (r) {
+                return r.json().catch(function () { return {}; }).then(function (b) {
+                    return { status: r.status, ok: r.ok, body: b };
+                });
+            }).then(function (res) {
+                if (submit) { submit.disabled = false; submit.textContent = 'Anfrage senden'; }
+                resetTurnstile();
+                if (res.ok && res.body && res.body.ok) { showSuccess(data.contact_name); return; }
+                showErr(errorMessage(res.status, res.body && res.body.error));
+            }).catch(function (err) {
+                if (submit) { submit.disabled = false; submit.textContent = 'Anfrage senden'; }
+                resetTurnstile();
+                console.error('[club-enquiry] submit failed', err);
+                showErr('Senden fehlgeschlagen. Bitte später erneut versuchen oder schreib uns direkt an office@t7academy.com.');
+            });
+        });
+
+        function val(name) {
+            var el = form.elements[name];
+            return el ? String(el.value || '').trim() : '';
+        }
+        function intOrNull(name) {
+            var v = val(name);
+            if (!v) return null;
+            var n = parseInt(v, 10);
+            return isNaN(n) ? null : n;
+        }
+        function turnstileToken() {
+            var el = form.elements['cf-turnstile-response'];
+            if (el && el.value) return el.value;
+            try { return (window.turnstile && window.turnstile.getResponse()) || ''; }
+            catch (e) { return ''; }
+        }
+        function resetTurnstile() {
+            try { if (window.turnstile) window.turnstile.reset(); } catch (e) { /* ignore */ }
+        }
+        function errorMessage(status, code) {
+            if (status === 429 || code === 'rate_limited') return 'Zu viele Anfragen in kurzer Zeit. Bitte versuch es in einer Stunde noch einmal.';
+            if (code === 'captcha_missing' || code === 'captcha_failed') return 'Die Roboter-Prüfung ist fehlgeschlagen. Bitte lade die Seite neu und versuch es erneut.';
+            if (code === 'bad_email') return 'Bitte eine gültige E-Mail-Adresse eingeben.';
+            if (code === 'missing_fields') return 'Bitte Verein, Ansprechperson und E-Mail ausfüllen.';
+            return 'Senden fehlgeschlagen. Bitte später erneut versuchen.';
+        }
+        function showErr(text) {
+            if (!msg) return;
+            msg.className = 'sub-form-msg err';
+            msg.textContent = text;
+        }
+        function showSuccess(name) {
+            var card = document.getElementById('clubFormCard');
+            if (!card) return;
+            var first = (name && name.split(' ')[0]) ? (', ' + name.split(' ')[0]) : '';
+            card.innerHTML =
+                '<div class="sub-form-success">' +
+                    '<div class="sfx-icon">✅</div>' +
+                    '<h3>Danke' + escapeHTML(first) + '!</h3>' +
+                    '<p>Deine Anfrage ist bei uns eingegangen. Wir melden uns in der Regel innerhalb von 2 Werktagen mit einem passenden Angebot für deinen Verein.</p>' +
+                '</div>';
+        }
+        function escapeHTML(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+})();

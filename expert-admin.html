@@ -212,6 +212,7 @@
       <button class="tab" data-tab="review"  style="display:none">⭐ Zertifikate</button>
       <button class="tab" data-tab="monats"  style="display:none">🔥 Challenge des Monats</button>
       <button class="tab" data-tab="msgs"    style="display:none">💬 Nachrichten <span id="msgs-tab-dot" style="display:none;width:8px;height:8px;border-radius:50%;background:#DC2626;margin-left:2px"></span></button>
+      <button class="tab" data-tab="enquiries" style="display:none">💼 Club-Anfragen <span id="enq-tab-dot" style="display:none;width:8px;height:8px;border-radius:50%;background:#DC2626;margin-left:2px"></span></button>
       <button class="tab" data-tab="team"    style="display:none">👥 Mitarbeiter</button>
     </div>
 
@@ -321,6 +322,18 @@
       <div id="team-list"><div class="loading">Lade…</div></div>
     </div>
 
+    <!-- ===== TAB: CLUB-ANFRAGEN ===== -->
+    <div id="tab-enquiries" style="display:none">
+      <div class="stats" id="enq-stats"></div>
+      <div class="filter-bar">
+        <button class="pill active" data-enq-filter="new">Neu</button>
+        <button class="pill" data-enq-filter="contacted">Kontaktiert</button>
+        <button class="pill" data-enq-filter="closed">Geschlossen</button>
+        <button class="pill" data-enq-filter="all">Alle</button>
+      </div>
+      <div id="enq-list"><div class="loading">Lade…</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -339,6 +352,7 @@
   var PERMS = [
     { key:'certifications',   label:'Zertifikate' },
     { key:'challenges',       label:'Challenges' },
+    { key:'club_enquiries',   label:'Club-Anfragen' },
     { key:'it_admin',         label:'IT' },
     { key:'manage_employees', label:'Mitarbeiter verwalten' }
   ];
@@ -349,7 +363,7 @@
   var me = null;                   // caller's employees row
   var currentFilter = 'pending';   // review
   var modules = [];                // monats dropdown cache
-  var inited = { review:false, monats:false, team:false };
+  var inited = { review:false, monats:false, team:false, enquiries:false };
 
   // ── BOOT ───────────────────────────────────────────────
   function boot(){
@@ -413,6 +427,7 @@
     if (can('certifications'))   allowed.push('review');
     if (can('certifications'))   allowed.push('msgs');
     if (can('challenges'))       allowed.push('monats');
+    if (can('club_enquiries'))   allowed.push('enquiries');
     if (can('manage_employees')) allowed.push('team');
 
     if (!allowed.length) {
@@ -424,7 +439,7 @@
 
     noAccess.style.display = 'none';
     tabbar.style.display = 'flex';
-    ['review','msgs','monats','team'].forEach(function(name){
+    ['review','msgs','monats','enquiries','team'].forEach(function(name){
       document.querySelector('.tab[data-tab="' + name + '"]').style.display = allowed.indexOf(name) >= 0 ? 'inline-block' : 'none';
     });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(b){
@@ -442,6 +457,7 @@
     }
     switchTab(allowed[0]);
     if (can('certifications')) refreshMsgTabDot();
+    if (can('club_enquiries')) refreshEnqDot();
   }
 
   function switchTab(name){
@@ -452,10 +468,12 @@
     document.getElementById('tab-msgs').style.display   = name === 'msgs'   ? 'block' : 'none';
     document.getElementById('tab-monats').style.display = name === 'monats' ? 'block' : 'none';
     document.getElementById('tab-team').style.display   = name === 'team'   ? 'block' : 'none';
+    document.getElementById('tab-enquiries').style.display = name === 'enquiries' ? 'block' : 'none';
     if (name === 'review' && !inited.review) { inited.review = true; initReview(); }
     if (name === 'msgs'   && !inited.msgs)   { inited.msgs   = true; initMsgs(); }
     if (name === 'monats' && !inited.monats) { inited.monats = true; initMonats(); }
     if (name === 'team'   && !inited.team)   { inited.team   = true; initTeam(); }
+    if (name === 'enquiries' && !inited.enquiries) { inited.enquiries = true; initEnquiries(); }
   }
 
   // ── AUTH ───────────────────────────────────────────────
@@ -482,7 +500,7 @@
 
   function logout(){
     session = null; me = null;
-    inited = { review:false, monats:false, team:false };
+    inited = { review:false, monats:false, team:false, enquiries:false };
     localStorage.removeItem(LS_KEY);
     showLogin();
   }
@@ -1194,6 +1212,121 @@
       if (!r.ok) return r.text().then(function(t){ throw new Error(t || ('HTTP ' + r.status)); });
       toast('ok', okMsg); if (!quiet) loadTeam();
     }).catch(function(e){ if (e && e.message === 'session_expired') return; toast('err', 'Fehler: ' + (e.message || e)); loadTeam(); });
+  }
+
+  /* ==========================================================
+     TAB — CLUB-ANFRAGEN  (permission: club_enquiries)
+     Reads rows from the public `club_enquiries` table (written by the
+     subscription page's enquiry form) and lets staff mark them
+     contacted / closed. Mirrors the certification-review pattern.
+     ========================================================== */
+  var enqFilter = 'new';
+
+  function initEnquiries(){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-enq-filter]'), function(b){
+      b.onclick = function(){
+        Array.prototype.forEach.call(document.querySelectorAll('[data-enq-filter]'), function(x){ x.classList.remove('active'); });
+        b.classList.add('active');
+        enqFilter = b.getAttribute('data-enq-filter');
+        loadEnquiries();
+      };
+    });
+    loadEnqStats();
+    loadEnquiries();
+  }
+
+  function loadEnqStats(){
+    fetch(SB_URL + '/rest/v1/club_enquiries?select=status', { headers: authHeaders() })
+      .then(handle401).then(function(r){ return r.json(); })
+      .then(function(rows){
+        rows = Array.isArray(rows) ? rows : [];
+        var c = { new:0, contacted:0, closed:0 };
+        rows.forEach(function(r){ if (c[r.status] != null) c[r.status]++; });
+        document.getElementById('enq-stats').innerHTML =
+          statTile(c.new,'Neu','accent') + statTile(c.contacted,'Kontaktiert','') +
+          statTile(c.closed,'Geschlossen','') + statTile(rows.length,'Gesamt','');
+      }).catch(function(){});
+  }
+
+  function loadEnquiries(){
+    var el = document.getElementById('enq-list');
+    el.innerHTML = '<div class="loading">Lade…</div>';
+    var q = '?select=*&order=created_at.desc';
+    if (enqFilter !== 'all') q += '&status=eq.' + enqFilter;
+    fetch(SB_URL + '/rest/v1/club_enquiries' + q, { headers: authHeaders() })
+      .then(handle401).then(function(r){ if (!r.ok) throw r; return r.json(); })
+      .then(function(rows){
+        rows = Array.isArray(rows) ? rows : [];
+        if (!rows.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Keine Anfragen.</div>'; return; }
+        el.innerHTML = rows.map(renderEnquiry).join('');
+        bindEnquiries();
+      }).catch(function(e){ if (e && e.message === 'session_expired') return; el.innerHTML = '<div class="empty">Fehler beim Laden.</div>'; });
+  }
+
+  function enqStatusLabel(s){ return { new:'Neu', contacted:'Kontaktiert', closed:'Geschlossen' }[s] || s; }
+  function enqBadgeClass(s){ return { new:'pending', contacted:'approved', closed:'expired' }[s] || 'pending'; }
+
+  function renderEnquiry(it){
+    var date = new Date(it.created_at).toLocaleString('de-AT', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    var size = [];
+    if (it.num_teams != null) size.push(esc(it.num_teams) + ' Teams');
+    if (it.num_kids  != null) size.push(esc(it.num_kids) + ' Kinder');
+    if (it.age_groups) size.push(esc(it.age_groups));
+    var contactBits = [];
+    if (it.email) contactBits.push('<a href="mailto:' + esc(it.email) + '" style="color:var(--accent);text-decoration:none">' + esc(it.email) + '</a>');
+    if (it.phone) contactBits.push('<a href="tel:' + esc(it.phone) + '" style="color:var(--accent);text-decoration:none">' + esc(it.phone) + '</a>');
+    var handledLine = it.handled_at
+      ? ('<div>Bearbeitet: <strong>' + new Date(it.handled_at).toLocaleString('de-AT') + '</strong>' + (it.handled_by ? ' von ' + esc(it.handled_by) : '') + '</div>')
+      : '';
+    var actions = '';
+    if (it.status !== 'contacted') actions += '<button class="btn sm" data-enq-contacted="' + esc(it.id) + '">Als kontaktiert markieren</button>';
+    if (it.status !== 'closed')    actions += '<button class="btn ghost sm" data-enq-closed="' + esc(it.id) + '">Schließen</button>';
+    if (it.status !== 'new')       actions += '<button class="btn ghost sm" data-enq-new="' + esc(it.id) + '">Wieder öffnen</button>';
+
+    return '<div class="card"><div class="card-row"><div class="card-left">'
+      + '<div class="card-title">' + esc(it.club_name || '—') + '</div>'
+      + '<div class="card-meta">'
+        + '<span class="badge ' + enqBadgeClass(it.status) + '">' + enqStatusLabel(it.status) + '</span> '
+        + '<span>Eingegangen: <strong>' + date + '</strong></span>'
+        + '<div>Ansprechperson: <strong>' + esc(it.contact_name || '—') + '</strong></div>'
+        + (contactBits.length ? '<div>' + contactBits.join(' · ') + '</div>' : '')
+        + (size.length ? '<div>Größe: <strong>' + size.join(' · ') + '</strong></div>' : '')
+        + (it.message ? '<div style="margin-top:6px">„' + esc(it.message) + '“</div>' : '')
+        + handledLine
+      + '</div></div>'
+      + '<div class="card-actions">' + actions + '</div></div></div>';
+  }
+
+  function bindEnquiries(){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-enq-contacted]'), function(b){
+      b.onclick = function(){ setEnqStatus(b.getAttribute('data-enq-contacted'), 'contacted'); };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-enq-closed]'), function(b){
+      b.onclick = function(){ setEnqStatus(b.getAttribute('data-enq-closed'), 'closed'); };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-enq-new]'), function(b){
+      b.onclick = function(){ setEnqStatus(b.getAttribute('data-enq-new'), 'new'); };
+    });
+  }
+
+  function setEnqStatus(id, status){
+    var patch = { status: status };
+    if (status === 'new') { patch.handled_at = null; patch.handled_by = null; }
+    else { patch.handled_at = new Date().toISOString(); patch.handled_by = session.user.email; }
+    fetch(SB_URL + '/rest/v1/club_enquiries?id=eq.' + encodeURIComponent(id), {
+      method: 'PATCH', headers: authHeaders({ 'Content-Type':'application/json', 'Prefer':'return=minimal' }), body: JSON.stringify(patch)
+    }).then(handle401).then(function(r){
+      if (!r.ok) return r.text().then(function(t){ throw new Error(t || ('HTTP ' + r.status)); });
+      toast('ok', 'Status: ' + enqStatusLabel(status) + '.');
+      loadEnqStats(); loadEnquiries(); refreshEnqDot();
+    }).catch(function(e){ if (e && e.message === 'session_expired') return; toast('err', 'Fehler: ' + (e.message || e)); });
+  }
+
+  function refreshEnqDot(){
+    fetch(SB_URL + '/rest/v1/club_enquiries?status=eq.new&select=id', { headers: authHeaders() })
+      .then(handle401).then(function(r){ return r.json(); })
+      .then(function(rows){ var d = document.getElementById('enq-tab-dot'); if (d) d.style.display = (rows && rows.length) ? 'inline-block' : 'none'; })
+      .catch(function(){});
   }
 
   // ── SHARED UTILS ───────────────────────────────────────
