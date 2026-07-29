@@ -211,7 +211,7 @@
     <div class="tabbar" id="tabbar" style="display:none">
       <button class="tab" data-tab="review"  style="display:none">⭐ Zertifikate</button>
       <button class="tab" data-tab="monats"  style="display:none">🔥 Challenge des Monats</button>
-      <button class="tab" data-tab="msgs"    style="display:none">💬 Nachrichten</button>
+      <button class="tab" data-tab="msgs"    style="display:none">💬 Nachrichten <span id="msgs-tab-dot" style="display:none;width:8px;height:8px;border-radius:50%;background:#DC2626;margin-left:2px"></span></button>
       <button class="tab" data-tab="team"    style="display:none">👥 Mitarbeiter</button>
     </div>
 
@@ -239,12 +239,6 @@
       <div class="form-card" style="margin-top:16px">
         <h2>Einzelner Spieler</h2>
         <div id="msg-players"><div class="loading">Lade…</div></div>
-        <div id="msg-thread-wrap" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
-          <div id="msg-thread-title" style="font-weight:800;margin-bottom:10px"></div>
-          <div id="msg-thread" style="max-height:320px;overflow:auto;margin-bottom:10px"></div>
-          <textarea id="msg-body" placeholder="Nachricht an den Spieler…" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-family:inherit;font-size:13px;min-height:60px;resize:vertical"></textarea>
-          <div style="margin-top:8px"><button class="btn" id="msg-send">Senden</button></div>
-        </div>
       </div>
     </div>
 
@@ -447,6 +441,7 @@
       });
     }
     switchTab(allowed[0]);
+    if (can('certifications')) refreshMsgTabDot();
   }
 
   function switchTab(name){
@@ -709,43 +704,67 @@
         .then(function(n){ document.getElementById('bc-body').value = ''; btn.disabled = false; toast('ok', 'An ' + n + ' Spieler gesendet.'); })
         .catch(function(e){ btn.disabled = false; if (e && e.message === 'session_expired') return; toast('err', 'Fehler: ' + (e.message || e)); });
     };
-    // Send to the currently open player
-    document.getElementById('msg-send').onclick = function(){
-      var ta = document.getElementById('msg-body'); var body = ta.value.trim();
-      if (!body || !msgCurrentPid) return;
-      var btn = this; btn.disabled = true;
-      postMessage(msgCurrentPid, body).then(function(){ ta.value = ''; btn.disabled = false; loadThread(msgCurrentPid, 'msg-thread'); toast('ok', 'Nachricht gesendet.'); })
-        .catch(function(){ btn.disabled = false; });
-    };
     loadMsgPlayers();
+  }
+  // Red dot on the "Nachrichten" tab when any player has unread replies.
+  function refreshMsgTabDot(){
+    fetch(SB_URL + '/rest/v1/messages?sender=eq.player&read_by_expert=eq.false&select=profile_id', { headers: authHeaders() })
+      .then(handle401).then(function(r){ return r.json(); })
+      .then(function(rows){ var d = document.getElementById('msgs-tab-dot'); if (d) d.style.display = (rows && rows.length) ? 'inline-block' : 'none'; })
+      .catch(function(){});
   }
   function loadMsgPlayers(){
     var el = document.getElementById('msg-players');
-    // Players + which of them have unread replies (sender=player, unread by expert)
     Promise.all([
-      fetch(SB_URL + '/rest/v1/player_profiles?select=id,first_name,last_name&order=first_name.asc', { headers: authHeaders() }).then(handle401).then(function(r){ return r.json(); }),
+      fetch(SB_URL + '/rest/v1/player_profiles?select=id,first_name,last_name', { headers: authHeaders() }).then(handle401).then(function(r){ return r.json(); }),
       fetch(SB_URL + '/rest/v1/messages?sender=eq.player&read_by_expert=eq.false&select=profile_id', { headers: authHeaders() }).then(handle401).then(function(r){ return r.json(); })
     ]).then(function(out){
       var players = out[0] || [], unread = {};
-      (out[1] || []).forEach(function(m){ if (m.profile_id) unread[m.profile_id] = true; });
+      (out[1] || []).forEach(function(m){ if (m.profile_id) unread[m.profile_id] = (unread[m.profile_id] || 0) + 1; });
+      var d = document.getElementById('msgs-tab-dot'); if (d) d.style.display = Object.keys(unread).length ? 'inline-block' : 'none';
       if (!players.length) { el.innerHTML = '<div class="empty">Keine Spieler.</div>'; return; }
+      // Unread players first, then alphabetical.
+      players.sort(function(a, b){
+        var ua = unread[a.id] ? 1 : 0, ub = unread[b.id] ? 1 : 0;
+        if (ua !== ub) return ub - ua;
+        var na = ((a.first_name || '') + ' ' + (a.last_name || '')).trim().toLowerCase();
+        var nb = ((b.first_name || '') + ' ' + (b.last_name || '')).trim().toLowerCase();
+        return na < nb ? -1 : na > nb ? 1 : 0;
+      });
       el.innerHTML = players.map(function(p){
         var nm = ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || p.id;
-        var dot = unread[p.id] ? '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#DC2626;margin-left:8px"></span>' : '';
-        return '<button class="btn ghost" data-pid="' + esc(p.id) + '" style="display:block;width:100%;text-align:left;margin-bottom:6px">' + esc(nm) + dot + '</button>';
+        var dot = unread[p.id] ? '<span class="msg-udot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#DC2626;margin-left:8px"></span>' : '';
+        return '<div class="msg-prow" style="border-bottom:1px solid var(--border)">'
+          + '<button class="btn ghost" data-pid="' + esc(p.id) + '" style="display:block;width:100%;text-align:left">' + esc(nm) + dot + '</button>'
+          + '<div class="msg-pthread" id="pthread-' + esc(p.id) + '" style="display:none;padding:6px 2px 14px">'
+            + '<div id="thread-' + esc(p.id) + '" style="max-height:300px;overflow:auto;margin-bottom:10px">Lade…</div>'
+            + '<textarea id="pbody-' + esc(p.id) + '" placeholder="Nachricht an den Spieler…" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-family:inherit;font-size:13px;min-height:60px;resize:vertical"></textarea>'
+            + '<div style="margin-top:8px"><button class="btn" data-send="' + esc(p.id) + '">Senden</button></div>'
+          + '</div></div>';
       }).join('');
-      Array.prototype.forEach.call(el.querySelectorAll('[data-pid]'), function(b){
-        b.onclick = function(){ openMsgPlayer(b.getAttribute('data-pid'), b.textContent.trim()); };
+      Array.prototype.forEach.call(el.querySelectorAll('button[data-pid]'), function(b){
+        b.onclick = function(){ toggleMsgPlayer(b.getAttribute('data-pid')); };
+      });
+      Array.prototype.forEach.call(el.querySelectorAll('button[data-send]'), function(b){
+        b.onclick = function(){
+          var pid = b.getAttribute('data-send'), ta = document.getElementById('pbody-' + pid), body = (ta.value || '').trim();
+          if (!body) return; b.disabled = true;
+          postMessage(pid, body).then(function(){ ta.value = ''; b.disabled = false; loadThread(pid, 'thread-' + pid); toast('ok', 'Nachricht gesendet.'); })
+            .catch(function(){ b.disabled = false; });
+        };
       });
     }).catch(function(e){ if (e && e.message === 'session_expired') return; el.innerHTML = '<div class="empty">Fehler beim Laden.</div>'; });
   }
-  function openMsgPlayer(pid, name){
-    msgCurrentPid = pid;
-    document.getElementById('msg-thread-wrap').style.display = 'block';
-    document.getElementById('msg-thread-title').textContent = 'Unterhaltung mit ' + name;
-    loadThread(pid, 'msg-thread');
-    // refresh the unread dots after opening (markExpertRead runs inside loadThread)
-    setTimeout(loadMsgPlayers, 600);
+  // Expand/collapse a player's thread in place (no scrolling to a bottom panel).
+  function toggleMsgPlayer(pid){
+    var wrap = document.getElementById('pthread-' + pid); if (!wrap) return;
+    if (wrap.style.display !== 'none') { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    loadThread(pid, 'thread-' + pid);   // marks the player's messages read
+    setTimeout(function(){
+      refreshMsgTabDot();
+      var udot = document.querySelector('button[data-pid="' + pid + '"] .msg-udot'); if (udot) udot.remove();
+    }, 700);
   }
 
   function approveSubmission(sub, notes){
