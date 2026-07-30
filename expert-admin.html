@@ -599,8 +599,8 @@
     var actions = '';
     if (it.status === 'pending' || it.status === 'expired') actions = '<button class="btn" data-review="' + it.id + '">Video ansehen</button>';
     else if (it.video_path) actions = '<button class="btn ghost" data-review="' + it.id + '">Datei prüfen</button>';
-    var who = esc(it.player_name || it.player_email || '?');
-    var ident = esc(it.profile_id || it.player_email || '');
+    var who = esc(it.player_name || it.profile_id || '?');
+    var ident = esc(it.profile_id || '');
     return '<div class="card review-card" data-id="' + it.id + '"><div class="card-row"><div class="card-left">'
       + '<div class="card-title"><span class="card-stars">' + stars + '</span>' + who + '</div>'
       + '<div class="card-meta"><span class="badge ' + it.status + '">' + statusLabel(it.status) + '</span>'
@@ -662,9 +662,9 @@
   // ── Messaging (expert side) ────────────────────────────────
   function expertName(){ return (me && me.full_name && me.full_name.trim()) ? me.full_name.trim() : 'T7 Academy Expert'; }
   function subProfileId(sub){
-    if (sub.profile_id) return sub.profile_id;
-    if (sub.player_email && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(sub.player_email)) return sub.player_email;
-    return null;
+    // profile_id is the single source of truth for the player link
+    // (→ player_profiles.id → player_stats.id). player_email is retired.
+    return sub.profile_id || null;
   }
   function postMessage(profileId, body){
     if (!profileId || !body) return Promise.resolve();
@@ -787,14 +787,46 @@
 
   function approveSubmission(sub, notes){
     notes = notes || null;
+    // The player's identity is the profile UUID (certification_submissions.profile_id
+    // → player_stats.id). There is NO separate `certifications` table: the approved
+    // submission row plus player_stats.stars together are the certification record.
+    var pid = subProfileId(sub);
+    if (!pid) { toast('err', 'Kein Profil verknüpft — Zertifikat kann nicht erteilt werden.'); return; }
     if (!confirm('Zertifikat erteilen und Video löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
-    fetch(SB_URL + '/rest/v1/certifications', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' }),
-      body: JSON.stringify({ player_email: sub.player_email, player_name: sub.player_name, profile_id: sub.profile_id, stars: sub.stars, notes: notes }) })
-      .then(handle401).then(function(r){ if (!r.ok && r.status !== 409) console.warn('certifications insert', r.status);
-        return updateSubmission(sub.id, { status:'approved', reviewed_at: new Date().toISOString(), reviewed_by: session.user.email, notes: notes }); })
+    // Grant the star by writing player_stats directly. If this fails (e.g. RLS),
+    // it throws — so the submission is NOT marked approved and the video is NOT
+    // deleted, and the expert sees an error instead of a silent loss.
+    awardStars(pid, sub.stars, notes)
+      .then(function(){ return updateSubmission(sub.id, { status:'approved', reviewed_at: new Date().toISOString(), reviewed_by: session.user.email, notes: notes }); })
       .then(function(){ return deleteVideo(sub.video_path); })
       .then(function(){ toast('ok', 'Zertifikat erteilt und Video gelöscht.'); loadStats(); loadSubs(); })
       .catch(function(e){ if (e && e.message === 'session_expired') return; toast('err', 'Fehler: ' + (e.message || e)); });
+  }
+  // Write the star into player_stats. player_stats is a 1:1 table whose primary
+  // key `id` IS the player's profile id (FK → player_profiles.id), so we key on
+  // `id`. Only raises the value — never lowers a player who already has a higher star.
+  //
+  // IMPORTANT: these calls use the public ANON key, not the expert's login token.
+  // Under RLS the authenticated staff role is not granted write access to
+  // player_stats (that returns 403), whereas the anon key is — it's how the player
+  // XP widgets write this same table. Using it here keeps approval working without
+  // needing a new policy.
+  function anonStatsHeaders(extra){
+    return Object.assign({ 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }, extra || {});
+  }
+  function awardStars(profileId, stars, notes){
+    if (!profileId || !stars) return Promise.resolve();
+    return fetch(SB_URL + '/rest/v1/player_stats?id=eq.' + encodeURIComponent(profileId) + '&select=stars', { headers: anonStatsHeaders() })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(rows){
+        var cur = (rows && rows.length && rows[0].stars) ? parseInt(rows[0].stars, 10) : 0;
+        if (cur >= parseInt(stars, 10)) return;   // already has an equal/higher star
+        return fetch(SB_URL + '/rest/v1/player_stats', {
+          method: 'POST',
+          headers: anonStatsHeaders({ 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' }),
+          body: JSON.stringify({ id: profileId, stars: stars, stars_awarded_at: new Date().toISOString(), stars_note: notes || null, updated_at: new Date().toISOString() })
+        }).then(function(r){ if (!r.ok) throw new Error('player_stats update fehlgeschlagen (' + r.status + ')'); });
+      });
   }
   function rejectSubmission(sub, notes){
     if (!notes) { alert('Bitte einen Grund eintragen.'); return; }
