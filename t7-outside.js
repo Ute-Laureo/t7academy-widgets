@@ -711,10 +711,9 @@
    4. SUBSCRIPTION — CLUB ENQUIRY FORM (outside)
    --------------------------------------------------------------------------
    Feature-detected: runs only on the subscription page (#clubEnquiryForm).
-   The form is hidden behind a button — most visitors want the single/annual
-   plans, not the club form. Opening it renders the Turnstile captcha and
-   reveals the fields; submit posts to the club-enquiry Edge Function, which
-   verifies the captcha + rate-limits server-side.
+   The form is hidden behind a button; opening it renders the Turnstile
+   captcha and reveals the fields. Submit posts to the club-enquiry Edge
+   Function, which verifies the captcha + rate-limits server-side.
    ========================================================================== */
 (function () {
     'use strict';
@@ -778,8 +777,6 @@
 
             if (submit) { submit.disabled = true; submit.textContent = 'Wird gesendet…'; }
 
-            /* Insert goes through the club-enquiry Edge Function, which verifies
-               the captcha + rate-limits server-side. Direct table inserts are off. */
             fetch(SUPABASE_URL + '/functions/v1/club-enquiry', {
                 method: 'POST',
                 headers: {
