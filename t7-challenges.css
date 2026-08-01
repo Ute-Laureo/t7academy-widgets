@@ -901,10 +901,15 @@
    Home uses for every section eyebrow.
 ============================================================ */
 .ch-sidebar .sb-card {
-  background: transparent;
-  border: none;
+  /* !important: on the live WP site t7-challenges.css is enqueued BEFORE
+     t7-base.css, so base's [data-theme="light"] .sb-card{background:#fff}
+     would otherwise win the equal-specificity tie and repaint the card
+     white. Force transparent in both themes. */
+  background: transparent !important;
+  border: none !important;
   border-radius: 0;
   padding: 0;
+  box-shadow: none !important;
 }
 .ch-sidebar .sb-card + .sb-card {
   margin-top: 28px;
