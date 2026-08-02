@@ -78,7 +78,6 @@
   margin-top: 4px;
   border-bottom: 1px solid var(--lp-rule);
 }
-.t7h-wrap { --cat-c: #1bcb26; }   /* Technik = green, matching Home's .p-challenges hairline */
 .shz-wrap { --cat-c: var(--lp-gold); }
 .shb-wrap { --cat-c: #A855F7; }
 .shm-wrap { --cat-c: #FF6B35; }
@@ -95,7 +94,7 @@
    dark-mode counterparts (#0E7490 vs cyan #00E5FF, #9A6708 vs
    gold #FFD700) — the bright versions drop under 3:1 contrast
    against white cards. See §7 for the full contrast rationale. */
-[data-theme="light"] .t7h-wrap { --cat-c: #15803D; }   /* Technik = green (light), matching Home */
+[data-theme="light"] .t7h-wrap { --cat-c: #0E7490; }
 [data-theme="light"] .shz-wrap { --cat-c: #9A6708; }
 [data-theme="light"] .shb-wrap { --cat-c: #7C3AED; }
 [data-theme="light"] .shm-wrap { --cat-c: #C2410C; }
@@ -325,12 +324,12 @@
 }
 .ch-cat-count::after { content: ' →'; }
 
-.ch-cat-tech    { --cat-color: #1bcb26;         --cat-rgb: 27, 203, 38; }
+.ch-cat-tech    { --cat-color: var(--accent);  --cat-rgb: 0, 229, 255; }
 .ch-cat-cert    { --cat-color: var(--lp-gold); --cat-rgb: 255, 215, 0; }
 .ch-cat-build   { --cat-color: #A855F7;        --cat-rgb: 168, 85, 247; }
 .ch-cat-monats  { --cat-color: #FF6B35;        --cat-rgb: 255, 107, 53; }
 
-[data-theme="light"] .ch-cat-tech   { --cat-color: #15803D; --cat-rgb: 21, 128, 61; }
+[data-theme="light"] .ch-cat-tech   { --cat-color: #0E7490; --cat-rgb: 14, 116, 144; }
 [data-theme="light"] .ch-cat-cert   { --cat-color: #9A6708; --cat-rgb: 154, 103, 8; }
 [data-theme="light"] .ch-cat-build  { --cat-color: #7C3AED; --cat-rgb: 124, 58, 237; }
 [data-theme="light"] .ch-cat-monats { --cat-color: #C2410C; --cat-rgb: 194, 65, 12; }

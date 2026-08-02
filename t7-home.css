@@ -531,8 +531,8 @@ body[data-theme="light"] .home-hint {
 
 .home-prog.p-sevens     { --p-c: var(--accent); }
 .home-prog.p-sterne     { --p-c: var(--lp-gold); }
-.home-prog.p-challenges { --p-c: #1bcb26; }
-body[data-theme="light"] .home-prog.p-challenges { --p-c: #15803D; }
+.home-prog.p-challenges { --p-c: var(--accent); }
+body[data-theme="light"] .home-prog.p-challenges { --p-c: #0E7490; }
 .home-prog.p-certs      { --p-c: var(--lp-gold); }
 .home-prog.p-build      { --p-c: #A855F7; }
 body[data-theme="light"] .home-prog.p-build   { --p-c: #7C3AED; }
